@@ -73,6 +73,38 @@ export async function createAuthor(formData: FormData) {
   redirect(`/workspace/authors/${slug}`);
 }
 
+/** Edit the author's identity. The slug is deliberately not editable: it is
+ *  the record's permanent address, set when the record is opened. */
+export async function updateAuthor(formData: FormData) {
+  const slug = String(formData.get("slug") ?? "");
+  const fullName = String(formData.get("full_name") ?? "").trim();
+  const penName = String(formData.get("pen_name") ?? "").trim();
+  const bio = String(formData.get("bio") ?? "").trim();
+  const editPath = `/workspace/authors/${slug}/edit`;
+
+  if (!fullName) {
+    fail(editPath, "The author's full name is required.");
+  }
+
+  const supabase = await requireUser();
+  const { data, error } = await supabase
+    .from("authors")
+    .update({
+      full_name: fullName,
+      pen_name: penName || null,
+      bio: bio || null,
+    })
+    .eq("slug", slug)
+    .select("id");
+
+  if (error || !data?.length) {
+    console.error("[memory] updateAuthor failed", error);
+    fail(editPath, "The record could not be saved.");
+  }
+
+  redirect(`/workspace/authors/${slug}`);
+}
+
 export async function createVersion(formData: FormData) {
   const documentId = String(formData.get("document_id") ?? "");
   const roomPath = String(formData.get("room_path") ?? "/workspace");

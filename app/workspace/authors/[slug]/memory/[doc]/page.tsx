@@ -1,6 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import ReactMarkdown from "react-markdown";
+import {
+  ActionLink,
+  Field,
+  PrimaryButton,
+  QuietButton,
+  SelectField,
+  TextButton,
+  TextareaField,
+} from "@/components/editorial";
 import { SetupNotice } from "@/components/setup-notice";
 import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
 import {
@@ -19,9 +29,21 @@ import {
 } from "@/lib/memory/types";
 import { createClient } from "@/lib/supabase/server";
 
-const fieldClasses =
-  "w-full border-b border-rule bg-transparent py-2 font-serif text-lg text-ink " +
-  "placeholder:text-ink-faint focus:border-oxblood focus:outline-none";
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string; doc: string }>;
+}): Promise<Metadata> {
+  const { slug, doc } = await params;
+  const meta = docTypeBySlug(doc);
+  if (!meta) return {};
+  const room = await getDocumentRoom(slug, meta.type).catch(() => null);
+  return {
+    title: room
+      ? `${meta.label} — ${room.author.full_name}`
+      : meta.label,
+  };
+}
 
 export default async function DocumentRoomPage({
   params,
@@ -63,7 +85,7 @@ export default async function DocumentRoomPage({
   if (!room) notFound();
 
   const query = await searchParams;
-  const roomPath = `/workspace/authors/${slug}/${docSlug}`;
+  const roomPath = `/workspace/authors/${slug}/memory/${docSlug}`;
 
   const draft = room.versions.find((v) => v.status === "draft") ?? null;
   const active = room.versions.find((v) => v.id === room.activeVersionId) ?? null;
@@ -181,12 +203,7 @@ export default async function DocumentRoomPage({
 
           {draft === null && room.versions.length > 0 ? (
             <div className="rule mt-1 pt-4">
-              <Link
-                href={`${roomPath}?new=1`}
-                className="font-sans text-xs text-oxblood underline-offset-4 hover:underline"
-              >
-                New version
-              </Link>
+              <ActionLink href={`${roomPath}?new=1`}>New version</ActionLink>
             </div>
           ) : null}
         </aside>
@@ -218,7 +235,7 @@ function ReadingPane({
         Version {version.version_number}
         {isActive ? " · active" : " · superseded"}
         {version.finalized_at
-          ? ` · established ${formatDate(version.finalized_at)}`
+          ? ` · finalized ${formatDate(version.finalized_at)}`
           : ""}
         {sourceLabel ? ` · ${sourceLabel.toLowerCase()}` : ""}
         {version.source_note ? ` — ${version.source_note}` : ""}
@@ -235,12 +252,7 @@ function ReadingPane({
           <form action={activateVersion} className="mt-2">
             <input type="hidden" name="version_id" value={version.id} />
             <input type="hidden" name="room_path" value={roomPath} />
-            <button
-              type="submit"
-              className="font-sans text-xs text-oxblood underline-offset-4 hover:underline"
-            >
-              Restore as the active version
-            </button>
+            <TextButton>Restore as the active version</TextButton>
           </form>
         </div>
       ) : draftOpen ? (
@@ -316,65 +328,37 @@ function VersionFields({
 }) {
   return (
     <>
-      <div>
-        <label htmlFor="content" className="eyebrow block">
-          Content <span className="normal-case">(Markdown)</span>
-        </label>
-        <textarea
-          id="content"
-          name="content"
-          rows={22}
-          required
-          defaultValue={content}
-          className="mt-2 w-full border border-rule bg-transparent p-4 font-serif text-lg leading-relaxed text-ink focus:border-oxblood focus:outline-none"
-        />
-      </div>
+      <TextareaField
+        id="content"
+        label="Content"
+        hint="Markdown"
+        rows={22}
+        required
+        defaultValue={content}
+      />
 
-      <div>
-        <label htmlFor="change_summary" className="eyebrow block">
-          Change summary
-        </label>
-        <input
-          id="change_summary"
-          name="change_summary"
-          type="text"
-          defaultValue={changeSummary}
-          placeholder="what this version establishes or changes"
-          className={fieldClasses}
-        />
-      </div>
+      <Field
+        id="change_summary"
+        label="Change summary"
+        type="text"
+        defaultValue={changeSummary}
+        placeholder="what this version changes"
+      />
 
       <div className="grid gap-8 sm:grid-cols-2">
-        <div>
-          <label htmlFor="import_source" className="eyebrow block">
-            Source
-          </label>
-          <select
-            id="import_source"
-            name="import_source"
-            defaultValue={importSource}
-            className="w-full border-b border-rule bg-transparent py-2 font-serif text-lg text-ink focus:border-oxblood focus:outline-none"
-          >
-            {IMPORT_SOURCES.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="source_note" className="eyebrow block">
-            Source note
-          </label>
-          <input
-            id="source_note"
-            name="source_note"
-            type="text"
-            defaultValue={sourceNote}
-            placeholder="e.g. distilled from a voice conversation, July 2026"
-            className={fieldClasses}
-          />
-        </div>
+        <SelectField
+          id="import_source"
+          label="Source"
+          defaultValue={importSource}
+          options={IMPORT_SOURCES}
+        />
+        <Field
+          id="source_note"
+          label="Source note"
+          type="text"
+          defaultValue={sourceNote}
+          placeholder="e.g. distilled from a voice conversation, July 2026"
+        />
       </div>
     </>
   );
@@ -408,12 +392,7 @@ function NewVersionForm({
           sourceNote=""
         />
         <div className="flex items-baseline gap-8">
-          <button
-            type="submit"
-            className="bg-oxblood px-6 py-2.5 font-sans text-sm tracking-wide text-paper hover:bg-oxblood-deep"
-          >
-            Save as draft
-          </button>
+          <PrimaryButton>Save draft</PrimaryButton>
           <Link
             href={roomPath}
             className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
@@ -454,19 +433,10 @@ function DraftEditor({
           sourceNote={draft.source_note ?? ""}
         />
         <div className="flex flex-wrap items-baseline gap-8">
-          <button
-            type="submit"
-            className="border border-rule px-6 py-2.5 font-sans text-sm tracking-wide text-ink hover:border-oxblood hover:text-oxblood"
-          >
-            Save draft
-          </button>
-          <button
-            type="submit"
-            formAction={saveAndActivateDraft}
-            className="bg-oxblood px-6 py-2.5 font-sans text-sm tracking-wide text-paper hover:bg-oxblood-deep"
-          >
+          <QuietButton>Save draft</QuietButton>
+          <PrimaryButton formAction={saveAndActivateDraft}>
             Make this the active version
-          </button>
+          </PrimaryButton>
         </div>
       </form>
 

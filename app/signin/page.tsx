@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Field, PrimaryButton } from "@/components/editorial";
 import { signIn } from "@/lib/auth/actions";
 
 export const metadata: Metadata = {
   title: "Sign in",
 };
-
-const inputClasses =
-  "w-full border-b border-rule bg-transparent py-2 font-serif text-lg text-ink " +
-  "placeholder:text-ink-faint focus:border-oxblood focus:outline-none";
 
 export default async function SignInPage({
   searchParams,
@@ -33,33 +30,21 @@ export default async function SignInPage({
         </p>
 
         <form action={signIn} className="mt-12 space-y-8">
-          <div>
-            <label htmlFor="email" className="eyebrow block">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              className={inputClasses}
-            />
-          </div>
+          <Field
+            id="email"
+            label="Email"
+            type="email"
+            autoComplete="email"
+            required
+          />
 
-          <div>
-            <label htmlFor="password" className="eyebrow block">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              className={inputClasses}
-            />
-          </div>
+          <Field
+            id="password"
+            label="Password"
+            type="password"
+            autoComplete="current-password"
+            required
+          />
 
           {error ? (
             <p className="font-sans text-sm text-oxblood" role="alert">
@@ -67,12 +52,7 @@ export default async function SignInPage({
             </p>
           ) : null}
 
-          <button
-            type="submit"
-            className="bg-oxblood px-6 py-2.5 font-sans text-sm tracking-wide text-paper hover:bg-oxblood-deep"
-          >
-            Sign in
-          </button>
+          <PrimaryButton>Sign in</PrimaryButton>
         </form>
       </main>
 

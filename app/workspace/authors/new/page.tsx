@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { Field, PrimaryButton, TextareaField } from "@/components/editorial";
 import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
 import { createAuthor } from "@/lib/memory/actions";
 import { createClient } from "@/lib/supabase/server";
@@ -7,10 +8,6 @@ import { createClient } from "@/lib/supabase/server";
 export const metadata: Metadata = {
   title: "Add an author",
 };
-
-const inputClasses =
-  "w-full border-b border-rule bg-transparent py-2 font-serif text-lg text-ink " +
-  "placeholder:text-ink-faint focus:border-oxblood focus:outline-none";
 
 export default async function NewAuthorPage({
   searchParams,
@@ -38,64 +35,23 @@ export default async function NewAuthorPage({
       </p>
 
       <form action={createAuthor} className="mt-12 max-w-md space-y-8">
-        <div>
-          <label htmlFor="full_name" className="eyebrow block">
-            Full name
-          </label>
-          <input
-            id="full_name"
-            name="full_name"
-            type="text"
-            required
-            className={inputClasses}
-          />
-        </div>
+        <Field id="full_name" label="Full name" type="text" required />
 
-        <div>
-          <label htmlFor="pen_name" className="eyebrow block">
-            Pen name <span className="normal-case">(optional)</span>
-          </label>
-          <input
-            id="pen_name"
-            name="pen_name"
-            type="text"
-            className={inputClasses}
-          />
-        </div>
+        <Field id="pen_name" label="Pen name" optional type="text" />
 
-        <div>
-          <label htmlFor="slug" className="eyebrow block">
-            Slug <span className="normal-case">(optional)</span>
-          </label>
-          <input
-            id="slug"
-            name="slug"
-            type="text"
-            placeholder="derived from the name if left blank"
-            className={inputClasses}
-          />
-        </div>
+        <Field
+          id="slug"
+          label="Slug"
+          optional
+          type="text"
+          placeholder="derived from the name if left blank"
+        />
 
-        <div>
-          <label htmlFor="bio" className="eyebrow block">
-            Short bio <span className="normal-case">(optional)</span>
-          </label>
-          <textarea
-            id="bio"
-            name="bio"
-            rows={4}
-            className="mt-2 w-full border border-rule bg-transparent p-3 font-serif text-lg leading-relaxed text-ink focus:border-oxblood focus:outline-none"
-          />
-        </div>
+        <TextareaField id="bio" label="Short bio" optional rows={4} />
 
         <ErrorNote message={error} />
 
-        <button
-          type="submit"
-          className="bg-oxblood px-6 py-2.5 font-sans text-sm tracking-wide text-paper hover:bg-oxblood-deep"
-        >
-          Open the record
-        </button>
+        <PrimaryButton>Open the record</PrimaryButton>
       </form>
     </WorkspaceFrame>
   );

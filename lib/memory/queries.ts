@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import {
   DOC_TYPES,
@@ -42,7 +43,7 @@ export interface AuthorStudy {
   documents: StudyDocument[];
 }
 
-export async function getAuthorStudy(
+export const getAuthorStudy = cache(async function getAuthorStudy(
   slug: string,
 ): Promise<AuthorStudy | null> {
   const supabase = await createClient();
@@ -111,7 +112,7 @@ export async function getAuthorStudy(
     },
     documents,
   };
-}
+});
 
 export interface DocumentRoom {
   author: AuthorRecord;
@@ -121,7 +122,7 @@ export interface DocumentRoom {
   versions: VersionRecord[];
 }
 
-export async function getDocumentRoom(
+export const getDocumentRoom = cache(async function getDocumentRoom(
   authorSlug: string,
   docType: DocType,
 ): Promise<DocumentRoom | null> {
@@ -164,4 +165,4 @@ export async function getDocumentRoom(
     activeVersionId: doc.active_version_id,
     versions: versions ?? [],
   };
-}
+});

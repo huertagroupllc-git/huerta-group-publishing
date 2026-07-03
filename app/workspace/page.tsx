@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ActionLink } from "@/components/editorial";
 import { SetupNotice } from "@/components/setup-notice";
 import { WorkspaceFrame } from "@/components/workspace-frame";
 import { listAuthors, type RosterEntry } from "@/lib/memory/queries";
@@ -44,12 +45,7 @@ export default async function WorkspacePage() {
       <section className="mt-14">
         <div className="rule flex items-baseline justify-between pt-5">
           <h2 className="eyebrow">The Author Roster</h2>
-          <Link
-            href="/workspace/authors/new"
-            className="font-sans text-xs text-oxblood underline-offset-4 hover:underline"
-          >
-            Add an author
-          </Link>
+          <ActionLink href="/workspace/authors/new">Add an author</ActionLink>
         </div>
 
         {authors.length === 0 ? (

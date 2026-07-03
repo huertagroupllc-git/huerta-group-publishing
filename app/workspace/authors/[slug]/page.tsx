@@ -1,11 +1,23 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { ActionLink } from "@/components/editorial";
 import { SetupNotice } from "@/components/setup-notice";
 import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
 import { assembleAuthorContext, serializeContext } from "@/lib/memory/assemble";
 import { getAuthorStudy, type AuthorStudy } from "@/lib/memory/queries";
 import { docTypeMeta, formatDate } from "@/lib/memory/types";
 import { createClient } from "@/lib/supabase/server";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const study = await getAuthorStudy(slug).catch(() => null);
+  return { title: study?.author.full_name ?? "Author" };
+}
 
 export default async function AuthorStudyPage({
   params,
@@ -70,6 +82,11 @@ export default async function AuthorStudyPage({
             {author.bio}
           </p>
         ) : null}
+        <div className="mt-5">
+          <ActionLink href={`/workspace/authors/${author.slug}/edit`}>
+            Edit the record
+          </ActionLink>
+        </div>
       </header>
 
       <div className="mt-4">
@@ -91,7 +108,7 @@ export default async function AuthorStudyPage({
               >
                 <div className="max-w-xl">
                   <Link
-                    href={`/workspace/authors/${author.slug}/${meta.slug}`}
+                    href={`/workspace/authors/${author.slug}/memory/${meta.slug}`}
                     className="font-display text-2xl tracking-tight hover:text-oxblood"
                   >
                     {meta.label}
@@ -105,7 +122,7 @@ export default async function AuthorStudyPage({
                     <span className="text-ink-soft">
                       Version {doc.activeVersion.versionNumber}
                       {doc.activeVersion.finalizedAt
-                        ? ` · established ${formatDate(doc.activeVersion.finalizedAt)}`
+                        ? ` · finalized ${formatDate(doc.activeVersion.finalizedAt)}`
                         : ""}
                     </span>
                   ) : (
@@ -114,7 +131,12 @@ export default async function AuthorStudyPage({
                     </span>
                   )}
                   {doc.hasDraft ? (
-                    <span className="ml-3 text-oxblood">Draft open</span>
+                    <Link
+                      href={`/workspace/authors/${author.slug}/memory/${meta.slug}?draft=1`}
+                      className="ml-3 text-oxblood underline-offset-4 hover:underline"
+                    >
+                      Draft open
+                    </Link>
                   ) : null}
                 </div>
               </li>
@@ -125,13 +147,19 @@ export default async function AuthorStudyPage({
 
       <section className="mt-14">
         <details className="group">
-          <summary className="rule cursor-pointer list-none pt-5">
-            <span className="eyebrow group-open:text-oxblood">
-              Assembled Memory
+          <summary className="rule flex cursor-pointer list-none items-baseline justify-between pt-5">
+            <span>
+              <span className="eyebrow group-open:text-oxblood">
+                Assembled Memory
+              </span>
+              <span className="ml-3 font-sans text-xs text-ink-faint">
+                the exact record future AI assistance will receive — active,
+                finalized versions only
+              </span>
             </span>
-            <span className="ml-3 font-sans text-xs text-ink-faint">
-              the exact record future AI assistance will receive — active,
-              finalized versions only
+            <span className="font-sans text-xs text-oxblood">
+              <span className="group-open:hidden">Show</span>
+              <span className="hidden group-open:inline">Hide</span>
             </span>
           </summary>
           <pre className="mt-6 max-w-prose whitespace-pre-wrap border-l border-rule pl-6 font-serif text-sm leading-relaxed text-ink">
