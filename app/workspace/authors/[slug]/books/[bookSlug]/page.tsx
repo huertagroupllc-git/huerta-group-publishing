@@ -77,17 +77,17 @@ export default async function BookStudyPage({
 
         {/* The colophon: the record's metadata, set like the front matter
             of a manuscript folder — stacked labels, never sentences. */}
-        <dl className="rule mt-12 max-w-md space-y-9 pt-9">
+        <dl className="rule mt-8 max-w-md space-y-6 pt-6">
           <div>
             <dt className="eyebrow">Status</dt>
-            <dd className="mt-2 font-serif text-xl leading-snug">
+            <dd className="mt-1.5 font-serif text-xl leading-snug">
               {bookStatusLabel(book.status)}
             </dd>
           </div>
 
           <div>
             <dt className="eyebrow">Begun</dt>
-            <dd className="mt-2 font-serif text-xl leading-snug">
+            <dd className="mt-1.5 font-serif text-xl leading-snug">
               {formatDate(book.created_at)}
             </dd>
           </div>
@@ -95,7 +95,7 @@ export default async function BookStudyPage({
           {book.working_title ? (
             <div>
               <dt className="eyebrow">Working Title</dt>
-              <dd className="mt-2 font-serif text-xl italic leading-snug">
+              <dd className="mt-1.5 font-serif text-xl italic leading-snug">
                 {book.working_title}
               </dd>
             </div>
@@ -103,7 +103,7 @@ export default async function BookStudyPage({
 
           <div>
             <dt className="eyebrow">Inherited From</dt>
-            <dd className="mt-2 font-serif text-xl leading-snug">
+            <dd className="mt-1.5 font-serif text-xl leading-snug">
               {origins.length ? (
                 <ul className="space-y-1">
                   {origins.map((o) => (
@@ -124,7 +124,7 @@ export default async function BookStudyPage({
           </div>
         </dl>
 
-        <div className="mt-9">
+        <div className="mt-6">
           <ActionLink
             href={`/workspace/authors/${author.slug}/books/${book.slug}/edit`}
           >
@@ -137,8 +137,8 @@ export default async function BookStudyPage({
         <ErrorNote message={error} />
       </div>
 
-      <section className="mt-20">
-        <div className="rule pt-6">
+      <section className="mt-14">
+        <div className="rule pt-5">
           <h2 className="eyebrow">The Book&rsquo;s Memory</h2>
         </div>
 
@@ -153,21 +153,21 @@ export default async function BookStudyPage({
             return (
               <li
                 key={doc.type}
-                className="rule grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-6 py-8 first:border-t-0"
+                className="rule grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-5 py-6 first:border-t-0"
               >
-                <DocGlyph className="mt-1.5 text-ink-faint" />
-                <div className="max-w-xl">
+                <DocGlyph className="mt-1 text-ink-soft/75" />
+                <div className="max-w-lg">
                   <span className="font-display text-2xl tracking-tight">
                     {doc.label}
                   </span>
-                  <p className="mt-2.5 leading-relaxed text-ink-soft">
+                  <p className="mt-2 leading-relaxed text-ink-soft">
                     {doc.description}
                   </p>
-                  <p className="mt-4 font-sans text-xs italic text-ink-faint">
+                  <p className="mt-3 font-sans text-xs italic text-ink-faint">
                     Not yet established
                   </p>
                 </div>
-                <OpensGlyph className="mt-2 h-5 w-5 self-center text-ink-faint" />
+                <OpensGlyph className="mr-2 h-5 w-5 self-center text-ink-faint" />
               </li>
             );
           })}
