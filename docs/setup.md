@@ -23,9 +23,16 @@ project and must never be added to the client environment.
 The public holding page at `/` does not touch Supabase and works even if
 these are unset; `/signin` and `/workspace` require them.
 
-## 2. Apply the database migration
+## 2. Apply the database migrations
 
-The schema lives in `supabase/migrations/20260702000000_author_memory_system.sql`.
+Two migrations, applied in order:
+
+1. `supabase/migrations/20260702000000_author_memory_system.sql` — the
+   Milestone 1 schema (applied during Phase A).
+2. `supabase/migrations/20260703000000_author_memory_workflow.sql` — Phase B
+   workflow functions: atomic author creation with document shells, draft
+   version creation with locked numbering, activation/restore, and the
+   active-version-must-be-final integrity trigger.
 
 Preferred (keeps migration history tracked by the CLI):
 
