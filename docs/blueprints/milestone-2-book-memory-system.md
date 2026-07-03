@@ -1,9 +1,9 @@
 # Milestone 2 Blueprint — The Book Memory System
 
 Huerta Group Publishing · Author Operating System · Capability 2
-Status: approved, amended July 2026 (Amendments 1–3 below are
-incorporated). Blueprint only — no code, no schema changes, no UI have
-been implemented. Implementation awaits the Phase A prompt.
+Status: **complete** — implemented and accepted July 2026 (v0.2.0).
+Amendments 1–3 are incorporated below; a retrospective closes the
+document.
 
 Governing canon: the Product Constitution, Design Constitution, Terminology
 document, the Milestone 1 blueprint, and the July 2026 refinement review.
@@ -453,3 +453,54 @@ working title, lifecycle status, slug, timestamps — nothing else):
 2. **Document order confirmed** — Constitution, Outline, Dictionary as
    both display and assembly order (assumed here, by analogy with the
    author hierarchy).
+
+
+---
+
+## Retrospective (July 2026, at v0.2.0)
+
+**What was built.** Everything in scope, in four slices: book records
+with lifecycle status and immutable origins; the three book memory
+documents with the full establish → draft → activate → restore → discard
+workflow; the composed Book Assembled Memory with its verbatim preview;
+the Book Study with its colophon (record metadata as stacked labels,
+provenance set apart). Nothing out of scope was built.
+
+**Architectural decisions that proved correct.**
+- *Option A (parallel tables)* paid off immediately and concretely: real
+  foreign keys made `book_origins` possible with actual referential
+  integrity, and identical column names let the author-level
+  immutability trigger function attach to the book tables unchanged.
+- *Inheritance by reference* — activating a new author document version
+  reaches every book's assembled memory instantly, while origins stay
+  fixed; the Amendment 3 distinction (living context vs. birth
+  certificate) is visible on one page and cost nothing to maintain.
+- *The rule of two* — the Document Room was duplicated conceptually but
+  extracted only when the second consumer existed. The shared component
+  took the book rooms from blank file to working in minutes, with
+  queries and actions still plainly per-level.
+- *Identity vs. editorial truth (Amendment 1)* kept the Book record
+  honest: when premise language wanted a home, the Constitution was
+  already the only place it could go.
+
+**Lessons learned.**
+- PostgREST cannot embed across tables related by two foreign keys (the
+  child FK and the composite active-pointer). Convention established:
+  memory-level queries use explicit separate queries, never nested
+  embeds.
+- Vercel very occasionally misses a push webhook; an empty retrigger
+  commit resolves it. Deployment verification is part of every slice.
+- Reading-pane refinements (colophon, glyphs, rhythm) landed best as
+  small named passes after real use — not as part of feature slices.
+
+**Conventions established for future milestones.**
+- Each hierarchy level mirrors the last: same column names, same
+  constraint shapes, same verbs, own tables, own thin modules.
+- Every level's assembly reads a `security_invoker` view that can only
+  see active finalized versions; composed payloads are computed, never
+  stored; ordering expresses governance (higher levels first).
+- Records identify; memory documents explain. Lifecycle status is a
+  stated fact on the record, never a workflow engine.
+- Blueprint → approval → amendments → vertical slices → acceptance +
+  terminology ratification + tag. This document's lifecycle is the
+  template.

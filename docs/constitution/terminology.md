@@ -30,6 +30,30 @@ UI, code, schema, and docs. Deviating copy is a bug.
 | **The Author Roster** | Keep | The list of authors. Publishing-house term, already in place. |
 | **Import** | Keep | Bringing distilled outside material in as a new version. The Source field ("Distilled from Claude…") is its provenance. |
 
+## Capability 2 terms (ratified July 2026)
+
+| Term | Verdict | Canon |
+| --- | --- | --- |
+| **Book Record** | Keep | The whole per-book holding — identity metadata only (title, subtitle, working title, status, slug). *Which* book, never *why*: premise, purpose, promise, audience, and boundaries live exclusively in the Book Constitution. |
+| **Book Memory** | Keep | The system name: the three book-level documents plus their history. Mirrors Author Memory one level down. |
+| **The Book's Memory** | Keep | The Book Study's section heading — possessive, matching "The Author's Memory". |
+| **Book Assembled Memory** | Keep | The composed payload future AI assistance receives: the author's active finalized memory first (it governs), then the book's (it specializes). Computed at read time, never stored. |
+| **Book Constitution** | Keep | Why this book exists and what it is not. Changes rarely; new versions read like amendments. Always listed first. |
+| **Master Outline** | Keep | The shape the book takes. Versioned prose about structure — not structured chapter data. |
+| **Concept Dictionary** | Keep | What the book's words mean. Grows mostly by accretion. |
+| **Developing** | Keep | Lifecycle: the book is being made. Every book begins here. |
+| **Editorial Review** | Keep | Lifecycle: under the imprint's editorial consideration. |
+| **Ready for Publication** | Keep | Lifecycle: editorially complete, awaiting release. |
+| **Published** | Keep | Lifecycle: released. |
+| **Archived** | Keep | Lifecycle: set aside. A stated fact, not a deletion. |
+| **Begun** | Keep | Colophon label: the date the record was opened. |
+| **Inherited From** | Keep | Colophon label: the Author Memory versions active at the book's creation (its origins) — provenance, never assembly input. Empty state: "Author Memory not yet established". |
+
+Lifecycle statuses are stated facts edited on the record — never workflow
+gates, approvals, or progress indicators. Book documents use the same
+verbs as author documents: established, draft, finalized, activated,
+superseded, restored, discarded.
+
 ## Button and action canon
 
 - Add an author → form → **Open the record**
@@ -61,5 +85,5 @@ shows the labels, not the word.
 
 - Buttons are acts an editor would say aloud; no "Submit", "OK", "Confirm", "Delete".
 - Status lines state facts without alarm: "Version 3 · active · finalized 2 July 2026".
-- Dates are written in full ("Thursday, July 3, 2026"), never numeric, abbreviated, or relative.
+- Dates are written as "July 3, 2026" — never numeric, abbreviated, or relative.
 - The platform refers to itself as "the platform" or by name — never "the app".

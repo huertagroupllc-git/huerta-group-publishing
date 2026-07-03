@@ -22,10 +22,10 @@ AI here is a servant of the author's voice, never a source of it. The
 platform will never generate an author's identity documents, silently
 rewrite their words, or flatten their tone.
 
-## What exists today — Milestone 1, complete
+## What exists today — Milestones 1 and 2, complete
 
-The **Author Memory System**: the root of the author-first hierarchy,
-live in production.
+The **Author Memory System** and the **Book Memory System**: the first
+two levels of the author-first hierarchy, live in production.
 
 - **The Author Roster** (`/workspace`) — the imprint's authors, each with a
   count of established memory documents.
@@ -47,6 +47,21 @@ live in production.
 - **Assembled Memory** — the exact, deterministic payload any future AI
   tool will receive: active finalized versions only, in hierarchy order,
   version-stamped, inspectable verbatim on the Author Study page.
+- **Book Records** — books belong to authors, never exist without one:
+  identity metadata only (title, subtitle, working title, lifecycle
+  status, permanent slug). Why a book exists lives in its Constitution,
+  never in a column.
+- **Three book-level memory documents per book** — **Book
+  Constitution**, **Master Outline**, **Concept Dictionary** — with the
+  full versioning workflow: append-only immutable versions, one draft
+  per document, activation, restore, import provenance.
+- **Origins** — every book permanently records which active Author
+  Memory versions existed when it was begun ("Inherited From" on the
+  Book Study): immutable provenance, never assembly input.
+- **Book Assembled Memory** — the composed payload future AI tools will
+  receive: the author's active finalized memory first (it governs), then
+  the book's (it specializes) — version-stamped, computed at read time,
+  inspectable verbatim on the Book Study.
 - **Auth** — Supabase email/password; the workspace is staff-only (JWT
   `app_metadata.role = 'staff'`) plus each author's own linked record,
   enforced by Row Level Security.
@@ -54,8 +69,9 @@ live in production.
 
 ## Current non-goals
 
-Deliberate exclusions, not omissions: books and manuscripts (next), AI
-features of any kind (the assembly function exists; nothing calls a model),
+Deliberate exclusions, not omissions: research vaults and chapters
+(next), AI features of any kind (the assembly functions exist; nothing
+calls a model),
 rich text editing (Markdown in, typeset prose out), version diff views,
 teams/invitations, dashboards or metrics, file uploads, and any public
 website beyond the holding page.
@@ -78,7 +94,8 @@ against them:
   documents are *established*, versions are *finalized* and *activated*,
   superseded versions are *restored*, drafts are *discarded*
 - [Milestone 1 blueprint](docs/blueprints/milestone-1-author-memory-system.md)
-  — the architecture as designed
+  and [Milestone 2 blueprint](docs/blueprints/milestone-2-book-memory-system.md)
+  — the architecture as designed, with retrospectives
 - [July 2026 refinement review](docs/reviews/2026-07-refinement-review.md) —
   what was deliberately deferred, and why
 
@@ -87,23 +104,28 @@ against them:
 Next.js (App Router, TypeScript, Tailwind) on Vercel; hosted Supabase as
 the permanent data layer; GitHub as the only path to production.
 
-- **Schema** (three tables, deliberately not a generic objects system):
-  `authors` → `author_documents` (one row per author × document type, with
-  an `active_version_id` pointer) → `document_versions` (immutable rows;
-  a partial unique index enforces one draft per document; triggers enforce
-  final-version immutability and that the active pointer references a
-  finalized version).
+- **Schema** (parallel domain models, deliberately not a generic objects
+  system): `authors` → `author_documents` → `document_versions`, echoed
+  one level down as `books` → `book_documents` →
+  `book_document_versions` (same column names, same constraint shapes),
+  plus immutable `book_origins`. Partial unique indexes enforce one
+  draft per document; triggers enforce final-version immutability and
+  that active pointers reference finalized versions.
 - **Atomicity** lives in the database: SECURITY INVOKER functions
   (`create_author_with_documents`, `create_document_version`,
   `activate_document_version`) wrap multi-step writes; RLS applies to the
   calling user throughout. The app never uses `service_role`.
-- **Modules**: `lib/memory/` (types, queries, server actions, context
-  assembly), `lib/supabase/` (SSR clients + session proxy), `lib/auth/`
-  (sign-in/out), `components/editorial.tsx` (the house UI patterns),
-  `app/workspace/…` (roster, study, memory documents, record editing).
-- **Context assembly** (`lib/memory/assemble.ts`) reads only the
-  `active_author_memory` view — drafts and superseded versions can never
-  reach an AI context, by construction.
+- **Modules**: `lib/memory/` and `lib/books/` (types, queries, server
+  actions, context assembly — parallel, per level), `lib/supabase/` (SSR
+  clients + session proxy), `lib/auth/` (sign-in/out),
+  `components/editorial.tsx` and `components/document-room.tsx` (the
+  house UI patterns and the shared Document Room),
+  `app/workspace/…` (rosters, studies, memory documents, record editing).
+- **Context assembly** (`lib/memory/assemble.ts`, `lib/books/assemble.ts`)
+  reads only the `active_author_memory` and `active_book_memory` views —
+  drafts and superseded versions can never reach an AI context, by
+  construction. Book context composes with author context by reference;
+  nothing is copied or stored.
 
 ## Production-first workflow
 
@@ -123,10 +145,10 @@ treat migrations accordingly — append new ones, never edit applied ones.
 Two environment variables (Vercel and `.env.example`):
 `NEXT_PUBLIC_SUPABASE_URL` (bare project origin) and
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (the anon-key name is honored as a
-fallback). Apply the three migrations in order — schema, workflow
-functions, authenticated-role grants — then create a staff user. Exact
-steps, including the staff-role SQL and a verification checklist, are in
-[docs/setup.md](docs/setup.md).
+fallback). Apply the five migrations in order (author memory schema,
+workflow functions, grants, book records, book memory documents), then
+create a staff user. Exact steps, including the staff-role SQL and a
+verification checklist, are in [docs/setup.md](docs/setup.md).
 
 ```sh
 pnpm install
@@ -150,7 +172,6 @@ pnpm build      # must pass before pushing
 
 ## What's next
 
-**Capability 2: Books and the Book Constitution** — the first book-level
-objects (constitution, master outline, concept dictionary), echoing the
-author-level pattern as parallel structures. It begins with a blueprint for
-review, not code, exactly as Milestone 1 did.
+**Capability 3: the Research Vault and Chapters** — the next layer of the
+hierarchy beneath the Concept Dictionary. It begins with a blueprint for
+review, not code, exactly as the first two milestones did.

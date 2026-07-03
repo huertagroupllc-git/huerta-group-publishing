@@ -90,12 +90,11 @@ export interface VersionRecord {
   finalized_at: string | null;
 }
 
-/** House date style: "Thursday, July 3, 2026" — never numeric, never
- *  relative (Design Constitution §8). */
+/** House date style: "July 3, 2026" — never numeric, never relative
+ *  (Design Constitution §8). */
 export function formatDate(iso: string | null | undefined): string {
   if (!iso) return "";
   return new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
     month: "long",
     day: "numeric",
     year: "numeric",

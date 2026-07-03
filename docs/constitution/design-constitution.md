@@ -79,10 +79,9 @@ toolbars, floating labels, or input adornments.
 ## 8. Metadata lives in the margins
 
 Version numbers, dates, sources, and status are set small in Inter,
-adjacent to — never inside — the prose. Dates are written in full, like a
-line of front matter: "Thursday, July 3, 2026" — never numeric
-("07/03/26"), never abbreviated, never relative ("2 days ago" decays; the
-record does not).
+adjacent to — never inside — the prose. Dates are written like a line of
+front matter: "July 3, 2026" — never numeric ("07/03/26"), never
+abbreviated, never relative ("2 days ago" decays; the record does not).
 
 **Record metadata is a colophon, not a sentence.** A record's standing
 facts (Status, Begun, Working Title, Inherited From) are presented as
