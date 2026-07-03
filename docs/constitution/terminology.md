@@ -40,6 +40,23 @@ UI, code, schema, and docs. Deviating copy is a bug.
 - Draft removal → **Discard this draft**
 - Next version → **New version**
 
+## Colophon labels
+
+A record's standing facts are presented as a colophon — stacked
+small-caps labels over serif values, never sentences (Design
+Constitution §8). Canonical labels:
+
+- **Status** — the record's lifecycle position (for books: Developing,
+  Editorial Review, Ready for Publication, Published, Archived).
+- **Begun** — the date the record was opened.
+- **Working Title** — the internal working title, when one exists.
+- **Inherited From** — the Author Memory versions active when a book was
+  created (its origins), listed in hierarchy order; reads "Author Memory
+  not yet established" when the book predates any established document.
+
+"Colophon" itself is an internal term (code and docs); the interface
+shows the labels, not the word.
+
 ## Voice rules
 
 - Buttons are acts an editor would say aloud; no "Submit", "OK", "Confirm", "Delete".

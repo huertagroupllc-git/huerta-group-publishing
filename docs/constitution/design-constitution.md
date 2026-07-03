@@ -76,6 +76,13 @@ adjacent to — never inside — the prose. Dates are written like a colophon:
 "12 June 2026", never "06/12/26" or relative timestamps ("2 days ago"
 decays; the record does not).
 
+**Record metadata is a colophon, not a sentence.** A record's standing
+facts (Status, Begun, Working Title, Inherited From) are presented as
+stacked entries — a small-caps label over a serif value — like the front
+matter of a manuscript folder. Conversational metadata sentences
+("Developing · begun 3 July 2026 under…") are forbidden: sentences are
+for prose that teaches; labels are for facts that stand.
+
 ## 9. Stillness
 
 No animation beyond instant state change. No skeleton shimmer, spinners
@@ -88,6 +95,13 @@ An empty state is a short serif paragraph teaching what belongs there,
 plus the single next act. An error is one quiet oxblood sans line in
 place, in plain language, saying what to do next. Neither uses boxes,
 banners, toasts, or exclamation marks.
+
+**The platform is always complete in the present.** If a sentence exists
+only because the software is unfinished, it does not belong in the
+product. No roadmap language, no "coming soon", no references to slices,
+capabilities, or releases. An unbuilt surface communicates through its
+empty state's timeless language ("Not yet established") or through
+silence — never through a promise.
 
 ## 11. Floors, not aspirations
 

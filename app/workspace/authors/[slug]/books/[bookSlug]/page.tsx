@@ -52,10 +52,6 @@ export default async function BookStudyPage({
 
   const { author, book, origins } = study;
 
-  const originsPhrase = origins.length
-    ? origins.map((o) => `${o.label} v${o.versionNumber}`).join(", ")
-    : null;
-
   return (
     <WorkspaceFrame
       email={user.email ?? ""}
@@ -73,17 +69,53 @@ export default async function BookStudyPage({
           <p className="mt-3 text-lg italic text-ink-soft">{book.subtitle}</p>
         ) : null}
 
-        <p className="mt-5 font-sans text-xs text-ink-soft">
-          {bookStatusLabel(book.status)} · begun {formatDate(book.created_at)}
-          {originsPhrase
-            ? ` under ${originsPhrase}`
-            : ", before the author's memory was established"}
-          {book.working_title
-            ? ` · working title “${book.working_title}”`
-            : ""}
-        </p>
+        {/* The colophon: the record's metadata, set like the front matter
+            of a manuscript folder — stacked labels, never sentences. */}
+        <dl className="mt-10 flex flex-wrap gap-x-14 gap-y-7">
+          <div>
+            <dt className="eyebrow">Status</dt>
+            <dd className="mt-1.5 font-serif text-base">
+              {bookStatusLabel(book.status)}
+            </dd>
+          </div>
 
-        <div className="mt-5">
+          <div>
+            <dt className="eyebrow">Begun</dt>
+            <dd className="mt-1.5 font-serif text-base">
+              {formatDate(book.created_at)}
+            </dd>
+          </div>
+
+          {book.working_title ? (
+            <div>
+              <dt className="eyebrow">Working Title</dt>
+              <dd className="mt-1.5 font-serif text-base italic">
+                {book.working_title}
+              </dd>
+            </div>
+          ) : null}
+
+          <div>
+            <dt className="eyebrow">Inherited From</dt>
+            <dd className="mt-1.5 font-serif text-base">
+              {origins.length ? (
+                <ul>
+                  {origins.map((o) => (
+                    <li key={o.docType}>
+                      {o.label} v{o.versionNumber}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <span className="italic text-ink-soft">
+                  Author Memory not yet established
+                </span>
+              )}
+            </dd>
+          </div>
+        </dl>
+
+        <div className="mt-7">
           <ActionLink
             href={`/workspace/authors/${author.slug}/books/${book.slug}/edit`}
           >
@@ -121,10 +153,6 @@ export default async function BookStudyPage({
             </li>
           ))}
         </ul>
-        <p className="mt-6 font-sans text-xs text-ink-faint">
-          The book&rsquo;s memory documents arrive with the next slice of
-          this capability.
-        </p>
       </section>
     </WorkspaceFrame>
   );
