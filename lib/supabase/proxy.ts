@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { supabaseEnv } from "@/lib/supabase/env";
 
 /**
  * Refreshes the Supabase session cookie and guards the workspace.
@@ -8,8 +9,7 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const { url: supabaseUrl, key: supabaseKey } = supabaseEnv();
 
   // Until Supabase is configured, no one can be signed in: send workspace
   // traffic to the sign-in page instead of failing with a server error.

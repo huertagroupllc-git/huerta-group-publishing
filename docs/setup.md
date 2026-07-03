@@ -11,11 +11,14 @@ environments) and in `.env.local` for any local run:
 | Variable | Where to find it |
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API → Project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Project Settings → API → anon / publishable key |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase → Project Settings → API → publishable key (`sb_publishable_...`) |
 
-The anon key is browser-safe by design; Row Level Security governs all data
-access. The `service_role` key is not used anywhere in this project and must
-never be added to the client environment.
+Older Supabase projects issue an anon key instead; the code also honors
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` as a fallback name for the same variable.
+
+The publishable/anon key is browser-safe by design; Row Level Security
+governs all data access. The `service_role` key is not used anywhere in this
+project and must never be added to the client environment.
 
 The public holding page at `/` does not touch Supabase and works even if
 these are unset; `/signin` and `/workspace` require them.
