@@ -70,6 +70,10 @@ against them:
 - [Design Constitution](docs/constitution/design-constitution.md) — the
   editorial desk: three typefaces with fixed jobs, one accent with one
   meaning, hairline rules instead of cards, words instead of icons
+- [Engineering Constitution](docs/constitution/engineering-constitution.md)
+  — how it is built: production-first, vertical slices, append-only
+  history, RLS as the security boundary, database integrity before
+  framework cleverness, parallel domain models over polymorphic systems
 - [Terminology](docs/constitution/terminology.md) — one concept, one word:
   documents are *established*, versions are *finalized* and *activated*,
   superseded versions are *restored*, drafts are *discarded*

@@ -95,3 +95,16 @@ Supabase, Next.js, and current AI vendors are implementations, not
 identity. Data models favor plain, durable shapes (text, Markdown,
 versions, pointers) that could be exported and understood in twenty years
 without this codebase.
+
+## XIII. Each level of memory preserves a different kind of truth
+
+Capability 1 preserves **who the author is**. Capability 2 preserves
+**why a particular book exists**. These are fundamentally different
+responsibilities: identity endures across every work an author will ever
+make; intent is scoped to one work and answers to that identity. Neither
+may absorb the other — a book must never redefine its author, and an
+author's general identity must never quietly substitute for a book's
+specific reasons. Records identify (*which* author, *which* book);
+memory documents explain (*who*, *why*); and each future level of the
+hierarchy — research, chapters, publication — must likewise name the one
+kind of truth it preserves before it is built.

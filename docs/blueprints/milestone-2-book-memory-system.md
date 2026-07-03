@@ -1,8 +1,9 @@
 # Milestone 2 Blueprint — The Book Memory System
 
 Huerta Group Publishing · Author Operating System · Capability 2
-Status: proposed, awaiting approval. Blueprint only — no code, no schema
-changes, no UI have been implemented.
+Status: approved, amended July 2026 (Amendments 1–3 below are
+incorporated). Blueprint only — no code, no schema changes, no UI have
+been implemented. Implementation awaits the Phase A prompt.
 
 Governing canon: the Product Constitution, Design Constitution, Terminology
 document, the Milestone 1 blueprint, and the July 2026 refinement review.
@@ -43,30 +44,46 @@ restore verbs, the same rooms, the same rails, the same calm.
 list in this capability; every path to a book runs through its author's
 record, and every assembled book context begins with the author's memory.
 
+**The record identifies; the Constitution explains.** A Book record
+answers *which book is this* — identity metadata only. The Book
+Constitution answers *why does this book exist*. This distinction is
+permanent architecture (Amendment 1): philosophical and editorial truth
+is always a versioned memory document, never a column.
+
 ## 2. Capability Scope
 
 ### Build
 
-1. **Book records** — a book belongs to exactly one author: title,
-   optional subtitle, optional premise line, a permanent slug (the book's
-   address within its author), status (active/archived, archiving UI
-   deferred as at author level).
+1. **Book records — identity metadata only** (Amendment 1): title
+   (required), optional subtitle, optional internal working title, book
+   status (the publishing lifecycle, Amendment 2), a permanent slug (the
+   book's address within its author), and timestamps. Nothing
+   philosophical or editorial lives on the record: premise, purpose,
+   promise to the reader, audience, and boundaries belong exclusively to
+   the Book Constitution. The record defines *which* book; the
+   Constitution defines *why* it exists.
 2. **Three book-level memory documents per book**, created as shells when
    the book's record is opened:
    - **Book Constitution**
    - **Master Outline**
    - **Concept Dictionary**
-3. **The full Author Memory versioning mechanics, at book level** —
+3. **Author Memory inheritance references** (Amendment 3): opening a
+   book's record permanently captures which active Author Memory versions
+   existed at that moment — e.g. *begun under Writing Philosophy v4,
+   Author Bible v7, Voice Profile v2, Editorial Decisions v9* — as
+   immutable references. Historical context only; never used for
+   assembly (§6).
+4. **The full Author Memory versioning mechanics, at book level** —
    append-only immutable versions, one draft per document, activation as a
    pointer move, restore without renumbering, import with provenance
    (source + source note + change summary), discard-draft as the only
    deletion.
-4. **Books on the Author Study** — a Books section listing the author's
+5. **Books on the Author Study** — a Books section listing the author's
    books with establishment counts ("2 of 3 documents established").
-5. **The Book Study** — the book's page: masthead under the author's name,
+6. **The Book Study** — the book's page: masthead under the author's name,
    the three memory documents as a table of contents, and the Book
    Assembled Memory preview.
-6. **Book context assembly** — Author Memory + Book Memory composed into
+7. **Book context assembly** — Author Memory + Book Memory composed into
    the Book Assembled Memory, deterministic and inspectable verbatim. No
    AI calls.
 
@@ -93,8 +110,11 @@ different speeds. That is why they are separate objects rather than
 sections of one document.
 
 **The Book Constitution — *why this book, and what it is not*.**
-The governing document: premise, the promise made to the reader, intended
-audience, what the book refuses to be, non-negotiable boundaries. It is
+The governing document: premise, purpose, the promise made to the reader,
+intended audience, what the book refuses to be, non-negotiable
+boundaries. These live *only* here — never as fields on the Book record —
+because they are editorial truth, and editorial truth is versioned,
+finalized, and activated like all truth in this platform. It is
 the book-level analogue of the Writing Philosophy: everything below it
 must comply. It should change **rarely**, and a new version should feel
 like an amendment — the change summary matters most here.
@@ -127,14 +147,21 @@ Constitution's history.
 Every flow below is the Author Memory flow, one level down. No new verbs.
 
 **Create a book.** From the Author Study's Books section → "Add a book"
-→ title, optional subtitle, optional premise, auto-suggested slug. Saving
-opens the book's record **and creates all three document shells** —
-atomic, exactly like opening an author's record. Redirect to the Book
-Study, where each document reads "Not yet established."
+→ title, optional subtitle, optional internal working title,
+auto-suggested slug. Saving opens the book's record with status
+**Developing**, creates all three document shells, **and captures the
+inheritance references** — the active Author Memory versions at that
+moment — in one atomic act. Redirect to the Book Study, where each
+document reads "Not yet established." (There is no premise field: the
+premise is the Book Constitution's first duty.)
 
 **The Book Study.** Masthead: the author's name as the eyebrow (the
-hierarchy made visible), the book's title set large, subtitle and premise
-beneath, "Edit the record" for identity fields. Then "The Book's Memory"
+hierarchy made visible), the book's title set large, subtitle beneath,
+and a colophon line in the margin register: status and inception —
+"Developing · begun 5 July 2026 under Writing Philosophy v4, Author
+Bible v7, Voice Profile v2, Editorial Decisions v9." "Edit the record"
+covers identity fields (title, subtitle, working title, status). Then
+"The Book's Memory"
 — the three documents as a ruled table of contents with the exact status
 language from the Author Study ("Version 2 · finalized 4 July 2026",
 "Not yet established", "Draft open" linking into the draft). Below,
@@ -173,14 +200,34 @@ written in the Phase A implementation, not here.)*
 ### Option A — parallel tables
 
 A `books` table (child of `authors`, cascade on delete, slug unique **per
-author**), a `book_documents` table (one row per book × book document
-type, with the active-version pointer), and a `book_document_versions`
-table with the same column names and mechanics as `document_versions`:
+author**) holding identity metadata only — title, optional subtitle,
+optional working title, lifecycle status, timestamps (Amendment 1); a
+`book_documents` table (one row per book × book document type, with the
+active-version pointer); a `book_document_versions` table with the same
+column names and mechanics as `document_versions`:
 immutable finals, one-draft partial index, composite pointer integrity,
 locked version numbering, provenance columns. Three book-scoped atomic
 functions mirror the author-level ones (create book with shells; create
 version; activate version), and an `active_book_memory` view mirrors
 `active_author_memory`.
+
+**Inheritance references (Amendment 3):** a small `book_origins`
+structure — one row per (book, author-level document version), written
+only by the atomic book-creation function and immutable thereafter (no
+update or delete path through the API; rows leave only by book cascade).
+Real foreign keys to both `books` and the author-level
+`document_versions`, which is possible precisely because Option A keeps
+everything concretely typed. Origins are provenance, never assembly
+input.
+
+**Book status (Amendment 2):** a lifecycle enum on the record —
+*developing, editorial_review, ready_for_publication, published,
+archived* — because a book's position in the publishing lifecycle is
+identity-adjacent fact ("which book is this? the one we published in
+May"), stated by the publisher, not derived. Editorial philosophy stays
+in the Constitution because it is authored truth that deserves versions;
+status is operational fact that deserves a column. Status changes are
+plain record edits — no gates, no workflow engine, no kanban.
 
 *For:* real foreign keys with real cascades; RLS policies that read as
 plainly as Milestone 1's; enums that stay scoped (`book_document_type`
@@ -254,6 +301,17 @@ every entry carries its version id, any future AI output can record the
 exact author-level *and* book-level versions it was built from — the
 provenance hook for Authenticity Reviews, still just a hook.
 
+**Historical inheritance vs. current assembly (Amendment 3).** These
+are two different questions with two different answers. *Assembly* always
+uses the author's **current active** memory — a book must always be
+served by who its author is now, so activating a new Voice Profile
+version reaches every book's assembled memory immediately. *Origins*
+answer the historical question — "this book began under Voice Profile
+v2" — and are never fed to assembly. One is the living context; the
+other is the book's birth certificate. Confusing them would either
+freeze books in their author's past (assembling from origins) or destroy
+provenance (overwriting origins).
+
 **Why drafts never appear:** both levels read only their active-memory
 views, which join through active pointers, which — by database trigger —
 may only reference finalized versions. Work-in-progress and superseded
@@ -301,24 +359,27 @@ and actions stay per level (author memory and book memory modules), only
 presentation is shared.
 
 **Terminology to ratify** (additions to `terminology.md`, same verdicts
-discipline): *Book Record* (the whole per-book holding), *Book Memory*
-(the three documents plus history), *The Book's Memory* (the Study
-section heading), *Book Assembled Memory* (the composed payload), *Book
-Constitution*, *Master Outline*, *Concept Dictionary*, and "Add a book" /
-"Open the record" for the creation flow. All existing verbs (establish,
-finalize, activate, restore, discard, draft, version, superseded) carry
-over with unchanged meanings.
+discipline): *Book Record* (the whole per-book holding; identity only),
+*Book Memory* (the three documents plus history), *The Book's Memory*
+(the Study section heading), *Book Assembled Memory* (the composed
+payload), *Book Constitution*, *Master Outline*, *Concept Dictionary*,
+the lifecycle statuses (*Developing, Editorial Review, Ready for
+Publication, Published, Archived*), "begun under" (the origins colophon
+phrase), and "Add a book" / "Open the record" for the creation flow. All
+existing verbs (establish, finalize, activate, restore, discard, draft,
+version, superseded) carry over with unchanged meanings.
 
 ## 8. Implementation Order
 
 Vertical, production-first, each slice independently shippable:
 
-**Slice 1 — Books exist.** Migration (books, book_documents,
-book_document_versions, functions, view, RLS, grants — applied to the
-hosted project), Books section on the Author Study, Add-a-book flow
-creating the three shells atomically, Book Study with unestablished
-shells, edit-the-record. *Deploy: a real book record exists in
-production.*
+**Slice 1 — Books exist.** Migration (books with lifecycle status,
+book_documents, book_document_versions, book_origins, functions, view,
+RLS, grants — applied to the hosted project), Books section on the
+Author Study, Add-a-book flow creating the three shells and capturing
+the inheritance references atomically, Book Study with unestablished
+shells and the status/origins colophon, edit-the-record. *Deploy: a real
+book record exists in production, and its origins are on record.*
 
 **Slice 2 — Book memory is versioned.** The three document rooms with
 the full establish → draft → activate → restore → discard workflow,
@@ -340,6 +401,11 @@ content reveals; ratify the terminology additions; tag `v0.2.0`.
   forbid dashboard furniture; the only number is "N of 3 documents
   established." A book's *progress* is legible by reading its memory,
   which is the editorial way.
+- **Status becoming a workflow engine.** The lifecycle enum invites
+  transition rules, approvals, and gates. Correction: status is a stated
+  fact, edited on the record like a name; the publishing-pipeline
+  capability may add ceremony later if real practice demands it, never
+  before.
 - **Premature abstraction (the Option B temptation in TypeScript).** A
   generic "MemoryLevel" framework parameterizing everything would make
   level three expensive to think about. Correction: share presentation
@@ -378,12 +444,12 @@ with unestablished shells and record editing — ending with a verified
 production deploy and the migration handed over for application to the
 hosted project.
 
-That prompt should settle three decisions this blueprint assumes:
+That prompt should settle two remaining decisions (book identity fields
+were settled by Amendments 1–2: title, optional subtitle, optional
+working title, lifecycle status, slug, timestamps — nothing else):
 
-1. **Option A confirmed** (parallel tables, §5).
-2. **Book identity fields** — title + optional subtitle + optional
-   premise line (assumed here); anything else (genre? working title
-   language?) should be named now or deliberately excluded.
-3. **Document order confirmed** — Constitution, Outline, Dictionary as
+1. **Option A confirmed** (parallel tables, §5), including the
+   `book_origins` inheritance references.
+2. **Document order confirmed** — Constitution, Outline, Dictionary as
    both display and assembly order (assumed here, by analogy with the
    author hierarchy).
