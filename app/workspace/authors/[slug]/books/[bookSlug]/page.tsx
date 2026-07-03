@@ -68,7 +68,7 @@ export default async function BookStudyPage({
     >
       <header>
         <p className="eyebrow">{author.full_name}</p>
-        <h1 className="mt-2 font-display text-5xl tracking-tight">
+        <h1 className="mt-2 font-display text-[2.6rem] leading-[1.1] tracking-tight">
           {book.title}
         </h1>
         {book.subtitle ? (
@@ -77,7 +77,7 @@ export default async function BookStudyPage({
 
         {/* The colophon: the record's metadata, set like the front matter
             of a manuscript folder — stacked labels, never sentences. */}
-        <dl className="rule mt-8 max-w-md space-y-6 pt-6">
+        <dl className="rule mt-8 flex max-w-3xl flex-wrap gap-x-16 gap-y-6 pt-6">
           <div>
             <dt className="eyebrow">Status</dt>
             <dd className="mt-1.5 font-serif text-xl leading-snug">
@@ -156,7 +156,7 @@ export default async function BookStudyPage({
                 className="rule grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-5 py-6 first:border-t-0"
               >
                 <DocGlyph className="mt-1 text-ink-soft/75" />
-                <div className="max-w-lg">
+                <div className="max-w-xl">
                   <span className="font-display text-2xl tracking-tight">
                     {doc.label}
                   </span>
