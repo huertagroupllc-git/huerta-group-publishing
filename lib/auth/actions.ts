@@ -47,6 +47,8 @@ export async function signIn(formData: FormData) {
       // TEMPORARY: exposed to diagnose the production auth failure;
       // remove once resolved.
       code: error.code ?? "unknown",
+      status: String(error.status ?? ""),
+      msg: error.message.slice(0, 120),
       ref: host.split(".")[0],
     });
     redirect(`/signin?${params.toString()}`);
