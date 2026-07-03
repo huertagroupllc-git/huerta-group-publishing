@@ -59,6 +59,18 @@ docs/blueprints/book-lifecycle-stages.md. Book documents use the same
 verbs as author documents: established, draft, finalized, activated,
 superseded, restored, discarded.
 
+## Capability 3 terms (Reading Copy ratified July 2026; the rest proposed with the Capability 3 blueprint)
+
+| Term | Verdict | Canon |
+| --- | --- | --- |
+| **Manuscript** | Keep | The first-class object that assembles chapters into the reader's experience (Reading Copy, organization, future front/back matter and exports). It preserves *how the reader experiences the work*; it never replaces chapters (Principle XV). |
+| **Chapter** | Keep | The atomic unit of manuscript — *what the author says*. A record identifies it (title, purpose, summary, kind, position, outline link); versions carry its words. Chapters are "written", never "established". |
+| **Part** | Keep | Optional grouping of chapters within a manuscript. Structure, not memory: no versions. |
+| **Reading Copy** | **Ratified** | The manuscript assembled read-only from active chapter versions, typeset for continuous reading. Never "preview", "combined manuscript", "compiled document", or "full manuscript". |
+| **Unwritten** | Keep | A chapter with no versions yet — the manuscript-level counterpart of "Not yet established". |
+| **Purpose** | Keep | Chapter identity: *why this chapter exists*. Record field, unversioned; the authoritative intent remains the Master Outline. |
+| **Summary** | Keep | Chapter identity: *what happens in this chapter*. Record field, unversioned; shown beneath the title in the Chapter Library. |
+
 ## Button and action canon
 
 - Add an author → form → **Open the record**

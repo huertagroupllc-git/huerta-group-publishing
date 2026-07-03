@@ -122,3 +122,15 @@ This is a governing architectural principle — every future capability
 names its stage before it is built. Yet the lifecycle guides; it never
 gates: the stage is a fact the author states, not a lock the platform
 enforces (see docs/blueprints/book-lifecycle-stages.md).
+
+## XV. Writing happens one chapter at a time
+
+Great books are rarely created as one uninterrupted document. The
+platform therefore treats **chapters as the primary unit of
+authorship**: each chapter is a first-class, versioned object with its
+own purpose and history, and the manuscript exists to assemble chapters
+into the reader's experience — it never replaces them. Every future
+capability that touches manuscript text — AI assistance, editorial
+tooling, review, publishing workflows, export — operates on chapters
+first and assembles upward. No surface of the platform may ever edit
+the manuscript as one giant document.
