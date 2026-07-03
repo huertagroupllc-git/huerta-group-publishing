@@ -53,11 +53,12 @@ export const getBookStudy = cache(async function getBookStudy(
     throw new Error(`Could not load the book: ${bookError.message}`);
   if (!book) return null;
 
+  // Explicit queries instead of embedding: document_versions and
+  // author_documents are related by TWO foreign keys (document_id and the
+  // composite active-pointer), so PostgREST cannot infer a join path.
   const { data: originRows, error: originError } = await supabase
     .from("book_origins")
-    .select(
-      "document_version_id, document_versions(version_number, author_documents(doc_type))",
-    )
+    .select("document_version_id")
     .eq("book_id", book.id);
 
   if (originError)
@@ -65,24 +66,46 @@ export const getBookStudy = cache(async function getBookStudy(
 
   // Hierarchy order: the same order the author's memory is always shown in.
   const order = new Map(DOC_TYPES.map((d, i) => [d.type as string, i]));
-  // PostgREST returns objects for many-to-one embeds, but without
-  // generated DB types the client infers arrays — normalize both shapes.
-  const one = <T,>(rel: T | T[] | null | undefined): T | undefined =>
-    Array.isArray(rel) ? rel[0] : (rel ?? undefined);
+  const versionIds = (originRows ?? []).map((r) => r.document_version_id);
 
-  const origins: BookOrigin[] = (originRows ?? [])
-    .map((row) => {
-      const version = one(row.document_versions);
-      const docType = one(version?.author_documents)?.doc_type ?? "";
-      const meta = DOC_TYPES.find((d) => d.type === docType);
-      return {
-        docType,
-        label: meta?.label ?? docType,
-        versionNumber: version?.version_number ?? 0,
-      };
-    })
-    .filter((o) => o.docType)
-    .sort((a, b) => (order.get(a.docType) ?? 99) - (order.get(b.docType) ?? 99));
+  let origins: BookOrigin[] = [];
+  if (versionIds.length) {
+    const { data: versions, error: versionError } = await supabase
+      .from("document_versions")
+      .select("id, version_number, document_id")
+      .in("id", versionIds);
+
+    if (versionError)
+      throw new Error(`Could not load the origins: ${versionError.message}`);
+
+    const { data: docs, error: docsError } = await supabase
+      .from("author_documents")
+      .select("id, doc_type")
+      .in(
+        "id",
+        (versions ?? []).map((v) => v.document_id),
+      );
+
+    if (docsError)
+      throw new Error(`Could not load the origins: ${docsError.message}`);
+
+    origins = (versions ?? [])
+      .map((version) => {
+        const docType =
+          (docs ?? []).find((d) => d.id === version.document_id)?.doc_type ??
+          "";
+        const meta = DOC_TYPES.find((d) => d.type === docType);
+        return {
+          docType,
+          label: meta?.label ?? docType,
+          versionNumber: version.version_number ?? 0,
+        };
+      })
+      .filter((o) => o.docType)
+      .sort(
+        (a, b) => (order.get(a.docType) ?? 99) - (order.get(b.docType) ?? 99),
+      );
+  }
 
   return { author, book, origins };
 });
