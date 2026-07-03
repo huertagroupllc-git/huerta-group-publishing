@@ -5,11 +5,12 @@ import { createClient } from "@/lib/supabase/server";
 import {
   countWords,
   type ChapterListEntry,
+  type ChapterRecord,
   type ManuscriptRecord,
   type PartRecord,
 } from "@/lib/manuscript/types";
 import type { BookRecord } from "@/lib/books/types";
-import type { AuthorRecord } from "@/lib/memory/types";
+import type { AuthorRecord, VersionRecord } from "@/lib/memory/types";
 
 export interface ManuscriptLibrary {
   author: AuthorRecord;
@@ -186,3 +187,120 @@ export async function getManuscriptSummary(
     draftCount,
   };
 }
+
+export interface ChapterRoom {
+  author: AuthorRecord;
+  book: BookRecord;
+  chapter: ChapterRecord;
+  versions: VersionRecord[];
+  /** "shaped under Master Outline vN", when the link exists. */
+  outlineVersionNumber: number | null;
+  /** The active Concept Dictionary, for the read-only margin reference. */
+  conceptDictionary: { versionNumber: number; content: string } | null;
+}
+
+export const getChapterRoom = cache(async function getChapterRoom(
+  authorSlug: string,
+  bookSlug: string,
+  chapterSlug: string,
+): Promise<ChapterRoom | null> {
+  const supabase = await createClient();
+
+  const { data: author, error } = await supabase
+    .from("authors")
+    .select("id, slug, full_name, pen_name, bio, status")
+    .eq("slug", authorSlug)
+    .maybeSingle();
+
+  if (error) throw new Error(`Could not load the author: ${error.message}`);
+  if (!author) return null;
+
+  const { data: book, error: bookError } = await supabase
+    .from("books")
+    .select(
+      "id, author_id, slug, title, subtitle, working_title, status, created_at",
+    )
+    .eq("author_id", author.id)
+    .eq("slug", bookSlug)
+    .maybeSingle();
+
+  if (bookError)
+    throw new Error(`Could not load the book: ${bookError.message}`);
+  if (!book) return null;
+
+  const { data: manuscript, error: msError } = await supabase
+    .from("manuscripts")
+    .select("id")
+    .eq("book_id", book.id)
+    .maybeSingle();
+
+  if (msError)
+    throw new Error(`Could not load the manuscript: ${msError.message}`);
+  if (!manuscript) return null;
+
+  const { data: chapter, error: chapterError } = await supabase
+    .from("chapters")
+    .select(
+      "id, manuscript_id, part_id, slug, title, kind, purpose, summary, outline_section, outline_version_id, position, active_version_id, created_at",
+    )
+    .eq("manuscript_id", manuscript.id)
+    .eq("slug", chapterSlug)
+    .maybeSingle();
+
+  if (chapterError)
+    throw new Error(`Could not load the chapter: ${chapterError.message}`);
+  if (!chapter) return null;
+
+  const [versionsResult, outlineResult, dictionaryResult] =
+    await Promise.all([
+      supabase
+        .from("chapter_versions")
+        .select(
+          "id, chapter_id, version_number, status, content, change_summary, import_source, source_note, created_at, finalized_at",
+        )
+        .eq("chapter_id", chapter.id)
+        .order("version_number", { ascending: false }),
+      chapter.outline_version_id
+        ? supabase
+            .from("book_document_versions")
+            .select("version_number")
+            .eq("id", chapter.outline_version_id)
+            .maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
+      supabase
+        .from("active_book_memory")
+        .select("version_number, content")
+        .eq("book_id", book.id)
+        .eq("doc_type", "concept_dictionary")
+        .maybeSingle(),
+    ]);
+
+  if (versionsResult.error)
+    throw new Error(
+      `Could not load versions: ${versionsResult.error.message}`,
+    );
+
+  // Version rows for the shared rail: document_id is unused there, but
+  // the shape matches VersionRecord.
+  const versions: VersionRecord[] = (versionsResult.data ?? []).map((v) => ({
+    ...v,
+    document_id: v.chapter_id,
+  }));
+
+  const dictionary = dictionaryResult.data;
+
+  return {
+    author,
+    book,
+    chapter,
+    versions,
+    outlineVersionNumber: outlineResult.data?.version_number ?? null,
+    conceptDictionary:
+      dictionary && dictionary.version_number !== null
+        ? {
+            versionNumber: dictionary.version_number,
+            content: dictionary.content ?? "",
+          }
+        : null,
+  };
+});

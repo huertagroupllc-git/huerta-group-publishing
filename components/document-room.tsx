@@ -119,63 +119,86 @@ export function DocumentRoomView({
 
       {/* Version rail */}
       <aside>
-        <div className="rule pt-5">
-          <h2 className="eyebrow">Versions</h2>
-        </div>
-
-        {versions.length === 0 ? (
-          <p className="mt-4 font-sans text-xs italic text-ink-faint">
-            None yet.
-          </p>
-        ) : (
-          <ul className="mt-1">
-            {versions.map((v) => {
-              const isActive = v.id === activeVersionId;
-              const href =
-                v.status === "draft"
-                  ? `${roomPath}?draft=1`
-                  : `${roomPath}?v=${v.version_number}`;
-              return (
-                <li key={v.id} className="rule py-3 first:border-t-0">
-                  <Link href={href} className="group block">
-                    <span className="font-sans text-xs">
-                      <span
-                        className={
-                          isActive
-                            ? "text-oxblood"
-                            : "text-ink group-hover:text-oxblood"
-                        }
-                      >
-                        Version {v.version_number}
-                      </span>
-                      {isActive ? (
-                        <span className="text-oxblood"> · active</span>
-                      ) : v.status === "draft" ? (
-                        <span className="italic text-ink-soft"> · draft</span>
-                      ) : null}
-                    </span>
-                    <span className="mt-1 block font-sans text-[0.6875rem] text-ink-faint">
-                      {formatDate(v.finalized_at ?? v.created_at)}
-                    </span>
-                    {v.change_summary ? (
-                      <span className="mt-1 block text-xs leading-snug text-ink-soft">
-                        {v.change_summary}
-                      </span>
-                    ) : null}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-
-        {draft === null && versions.length > 0 ? (
-          <div className="rule mt-1 pt-4">
-            <ActionLink href={`${roomPath}?new=1`}>New version</ActionLink>
-          </div>
-        ) : null}
+        <VersionRail
+          versions={versions}
+          activeVersionId={activeVersionId}
+          roomPath={roomPath}
+        />
       </aside>
     </div>
+  );
+}
+
+/** The margin version rail, shared by document rooms and the chapter
+ *  writing room. */
+export function VersionRail({
+  versions,
+  activeVersionId,
+  roomPath,
+}: {
+  versions: VersionRecord[];
+  activeVersionId: string | null;
+  roomPath: string;
+}) {
+  const draft = versions.find((v) => v.status === "draft") ?? null;
+  return (
+    <>
+      <div className="rule pt-5">
+        <h2 className="eyebrow">Versions</h2>
+      </div>
+
+      {versions.length === 0 ? (
+        <p className="mt-4 font-sans text-xs italic text-ink-faint">
+          None yet.
+        </p>
+      ) : (
+        <ul className="mt-1">
+          {versions.map((v) => {
+            const isActive = v.id === activeVersionId;
+            const href =
+              v.status === "draft"
+                ? `${roomPath}?draft=1`
+                : `${roomPath}?v=${v.version_number}`;
+            return (
+              <li key={v.id} className="rule py-3 first:border-t-0">
+                <Link href={href} className="group block">
+                  <span className="font-sans text-xs">
+                    <span
+                      className={
+                        isActive
+                          ? "text-oxblood"
+                          : "text-ink group-hover:text-oxblood"
+                      }
+                    >
+                      Version {v.version_number}
+                    </span>
+                    {isActive ? (
+                      <span className="text-oxblood"> · active</span>
+                    ) : v.status === "draft" ? (
+                      <span className="italic text-ink-soft"> · draft</span>
+                    ) : null}
+                  </span>
+                  <span className="mt-1 block font-sans text-[0.6875rem] text-ink-faint">
+                    {formatDate(v.finalized_at ?? v.created_at)}
+                  </span>
+                  {v.change_summary ? (
+                    <span className="mt-1 block text-xs leading-snug text-ink-soft">
+                      {v.change_summary}
+                    </span>
+                  ) : null}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {draft === null && versions.length > 0 ? (
+        <div className="rule mt-1 pt-4">
+          <ActionLink href={`${roomPath}?new=1`}>New version</ActionLink>
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -284,16 +307,18 @@ function EmptyState({
   );
 }
 
-function VersionFields({
+export function VersionFields({
   content,
   changeSummary,
   importSource,
   sourceNote,
+  contentRows = 22,
 }: {
   content: string;
   changeSummary: string;
   importSource: string;
   sourceNote: string;
+  contentRows?: number;
 }) {
   return (
     <>
@@ -301,7 +326,7 @@ function VersionFields({
         id="content"
         label="Content"
         hint="Markdown"
-        rows={22}
+        rows={contentRows}
         required
         defaultValue={content}
       />

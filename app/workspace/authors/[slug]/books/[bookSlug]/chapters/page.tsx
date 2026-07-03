@@ -133,7 +133,7 @@ export default async function ChapterLibraryPage({
                           {numberLabel}
                         </p>
                         <Link
-                          href={`${libraryPath}/${chapter.slug}/edit`}
+                          href={`${libraryPath}/${chapter.slug}`}
                           className="mt-1 inline-block font-display text-2xl tracking-tight hover:text-oxblood"
                         >
                           {chapter.title}
@@ -155,9 +155,12 @@ export default async function ChapterLibraryPage({
                             <span className="italic">Unwritten</span>
                           )}
                           {chapter.hasDraft ? (
-                            <span className="ml-3 text-oxblood">
+                            <Link
+                              href={`${libraryPath}/${chapter.slug}?draft=1`}
+                              className="ml-3 not-italic text-oxblood underline-offset-4 hover:underline"
+                            >
                               Draft open
-                            </span>
+                            </Link>
                           ) : null}
                         </p>
                       </div>

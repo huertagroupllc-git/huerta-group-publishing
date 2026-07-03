@@ -175,3 +175,165 @@ export async function moveChapter(formData: FormData) {
 
   redirect(libraryPath);
 }
+
+// --- Chapter version workflow — the proven mechanics at manuscript
+// --- level; kept chapter-specific per the Engineering Constitution §7.
+
+export async function createChapterVersion(formData: FormData) {
+  const chapterId = String(formData.get("document_id") ?? "");
+  const roomPath = String(formData.get("room_path") ?? "/workspace");
+  const content = String(formData.get("content") ?? "");
+  const changeSummary = String(formData.get("change_summary") ?? "").trim();
+  const importSource = String(formData.get("import_source") ?? "manual");
+  const sourceNote = String(formData.get("source_note") ?? "").trim();
+
+  if (!content.trim()) {
+    fail(roomPath, "A version needs content before it can be saved.");
+  }
+
+  const supabase = await requireUser();
+  const { error } = await supabase.rpc("create_chapter_version", {
+    p_chapter_id: chapterId,
+    p_content: content,
+    p_change_summary: changeSummary || null,
+    p_import_source: importSource,
+    p_source_note: sourceNote || null,
+  });
+
+  if (error) {
+    console.error("[manuscript] createChapterVersion failed", error);
+    fail(
+      roomPath,
+      error.code === "23505"
+        ? "A draft is already open for this chapter; continue writing it instead."
+        : isMissingFunction(error)
+          ? MIGRATION_MESSAGE
+          : "The draft could not be created.",
+    );
+  }
+
+  redirect(`${roomPath}?draft=1`);
+}
+
+export async function updateChapterDraft(formData: FormData) {
+  const versionId = String(formData.get("version_id") ?? "");
+  const roomPath = String(formData.get("room_path") ?? "/workspace");
+  const content = String(formData.get("content") ?? "");
+  const changeSummary = String(formData.get("change_summary") ?? "").trim();
+  const importSource = String(formData.get("import_source") ?? "manual");
+  const sourceNote = String(formData.get("source_note") ?? "").trim();
+
+  const supabase = await requireUser();
+  const { data, error } = await supabase
+    .from("chapter_versions")
+    .update({
+      content,
+      change_summary: changeSummary || null,
+      import_source: importSource,
+      source_note: sourceNote || null,
+    })
+    .eq("id", versionId)
+    .eq("status", "draft")
+    .select("id");
+
+  if (error || !data?.length) {
+    console.error("[manuscript] updateChapterDraft failed", error);
+    fail(`${roomPath}?draft=1`, "The draft could not be saved.");
+  }
+
+  redirect(`${roomPath}?draft=1&saved=1`);
+}
+
+/** Persist the draft's current form fields, then activate — one submit,
+ *  so a writing session is never lost by activating. */
+export async function saveAndActivateChapterDraft(formData: FormData) {
+  const versionId = String(formData.get("version_id") ?? "");
+  const roomPath = String(formData.get("room_path") ?? "/workspace");
+  const content = String(formData.get("content") ?? "");
+  const changeSummary = String(formData.get("change_summary") ?? "").trim();
+  const importSource = String(formData.get("import_source") ?? "manual");
+  const sourceNote = String(formData.get("source_note") ?? "").trim();
+
+  if (!content.trim()) {
+    fail(`${roomPath}?draft=1`, "A version needs content to be activated.");
+  }
+
+  const supabase = await requireUser();
+  const { data, error } = await supabase
+    .from("chapter_versions")
+    .update({
+      content,
+      change_summary: changeSummary || null,
+      import_source: importSource,
+      source_note: sourceNote || null,
+    })
+    .eq("id", versionId)
+    .eq("status", "draft")
+    .select("id");
+
+  if (error || !data?.length) {
+    console.error("[manuscript] saveAndActivateChapterDraft save failed", error);
+    fail(`${roomPath}?draft=1`, "The draft could not be saved.");
+  }
+
+  const { error: activateError } = await supabase.rpc(
+    "activate_chapter_version",
+    { p_version_id: versionId },
+  );
+
+  if (activateError) {
+    console.error(
+      "[manuscript] saveAndActivateChapterDraft activate failed",
+      activateError,
+    );
+    fail(
+      `${roomPath}?draft=1`,
+      isMissingFunction(activateError)
+        ? MIGRATION_MESSAGE
+        : "The version could not be activated.",
+    );
+  }
+
+  redirect(roomPath);
+}
+
+export async function activateChapterVersion(formData: FormData) {
+  const versionId = String(formData.get("version_id") ?? "");
+  const roomPath = String(formData.get("room_path") ?? "/workspace");
+
+  const supabase = await requireUser();
+  const { error } = await supabase.rpc("activate_chapter_version", {
+    p_version_id: versionId,
+  });
+
+  if (error) {
+    console.error("[manuscript] activateChapterVersion failed", error);
+    fail(
+      roomPath,
+      isMissingFunction(error)
+        ? MIGRATION_MESSAGE
+        : "The version could not be activated.",
+    );
+  }
+
+  redirect(roomPath);
+}
+
+export async function discardChapterDraft(formData: FormData) {
+  const versionId = String(formData.get("version_id") ?? "");
+  const roomPath = String(formData.get("room_path") ?? "/workspace");
+
+  const supabase = await requireUser();
+  const { error } = await supabase
+    .from("chapter_versions")
+    .delete()
+    .eq("id", versionId)
+    .eq("status", "draft");
+
+  if (error) {
+    console.error("[manuscript] discardChapterDraft failed", error);
+    fail(roomPath, "The draft could not be discarded.");
+  }
+
+  redirect(roomPath);
+}
