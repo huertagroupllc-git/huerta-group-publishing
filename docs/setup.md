@@ -33,6 +33,10 @@ Two migrations, applied in order:
    workflow functions: atomic author creation with document shells, draft
    version creation with locked numbering, activation/restore, and the
    active-version-must-be-final integrity trigger.
+3. `supabase/migrations/20260703010000_authenticated_grants.sql` — explicit
+   table/function grants for the `authenticated` role. Without these the
+   workspace fails with "permission denied for table authors" before RLS is
+   even evaluated.
 
 Preferred (keeps migration history tracked by the CLI):
 
