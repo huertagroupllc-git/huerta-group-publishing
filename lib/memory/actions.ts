@@ -20,6 +20,18 @@ function fail(path: string, message: string): never {
   redirect(`${path}?error=${encodeURIComponent(message)}`);
 }
 
+/** Missing Phase B RPCs surface as PGRST202/42883 — say so plainly. */
+function isMissingFunction(error: { code?: string; message?: string }) {
+  return (
+    error.code === "PGRST202" ||
+    error.code === "42883" ||
+    /function .+ does not exist|schema cache/i.test(error.message ?? "")
+  );
+}
+
+const MIGRATION_MESSAGE =
+  "The database is missing the Phase B workflow functions — apply supabase/migrations/20260703000000_author_memory_workflow.sql (docs/setup.md §2).";
+
 export async function createAuthor(formData: FormData) {
   const fullName = String(formData.get("full_name") ?? "").trim();
   const penName = String(formData.get("pen_name") ?? "").trim();
@@ -52,7 +64,9 @@ export async function createAuthor(formData: FormData) {
       "/workspace/authors/new",
       error.code === "23505"
         ? `The slug “${slug}” is already in use.`
-        : "The author could not be created.",
+        : isMissingFunction(error)
+          ? MIGRATION_MESSAGE
+          : "The author could not be created.",
     );
   }
 
@@ -88,7 +102,9 @@ export async function createVersion(formData: FormData) {
       roomPath,
       error.code === "23505"
         ? "A draft is already open for this document; continue editing it instead."
-        : "The draft could not be created.",
+        : isMissingFunction(error)
+          ? MIGRATION_MESSAGE
+          : "The draft could not be created.",
     );
   }
 
@@ -167,7 +183,12 @@ export async function saveAndActivateDraft(formData: FormData) {
 
   if (activateError) {
     console.error("[memory] saveAndActivateDraft activate failed", activateError);
-    fail(`${roomPath}?draft=1`, "The version could not be activated.");
+    fail(
+      `${roomPath}?draft=1`,
+      isMissingFunction(activateError)
+        ? MIGRATION_MESSAGE
+        : "The version could not be activated.",
+    );
   }
 
   redirect(roomPath);
@@ -184,7 +205,12 @@ export async function activateVersion(formData: FormData) {
 
   if (error) {
     console.error("[memory] activateVersion failed", error);
-    fail(roomPath, "The version could not be activated.");
+    fail(
+      roomPath,
+      isMissingFunction(error)
+        ? MIGRATION_MESSAGE
+        : "The version could not be activated.",
+    );
   }
 
   redirect(roomPath);

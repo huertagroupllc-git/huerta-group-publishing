@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { SetupNotice } from "@/components/setup-notice";
 import { WorkspaceFrame } from "@/components/workspace-frame";
-import { listAuthors } from "@/lib/memory/queries";
+import { listAuthors, type RosterEntry } from "@/lib/memory/queries";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -19,7 +20,17 @@ export default async function WorkspacePage() {
     redirect("/signin");
   }
 
-  const authors = await listAuthors();
+  let authors: RosterEntry[];
+  try {
+    authors = await listAuthors();
+  } catch (error) {
+    console.error("[memory] roster failed to load", error);
+    return (
+      <WorkspaceFrame email={user.email ?? ""}>
+        <SetupNotice error={error} />
+      </WorkspaceFrame>
+    );
+  }
 
   return (
     <WorkspaceFrame email={user.email ?? ""}>

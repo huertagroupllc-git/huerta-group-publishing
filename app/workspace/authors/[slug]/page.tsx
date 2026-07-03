@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { SetupNotice } from "@/components/setup-notice";
 import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
 import { assembleAuthorContext, serializeContext } from "@/lib/memory/assemble";
-import { getAuthorStudy } from "@/lib/memory/queries";
+import { getAuthorStudy, type AuthorStudy } from "@/lib/memory/queries";
 import { docTypeMeta, formatDate } from "@/lib/memory/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -22,12 +23,33 @@ export default async function AuthorStudyPage({
   const { slug } = await params;
   const { error } = await searchParams;
 
-  const study = await getAuthorStudy(slug);
+  let study: AuthorStudy | null;
+  let memory: string;
+  try {
+    study = await getAuthorStudy(slug);
+    if (study) {
+      const context = await assembleAuthorContext(study.author.id);
+      memory = serializeContext(
+        context,
+        study.author.pen_name ?? study.author.full_name,
+      );
+    } else {
+      memory = "";
+    }
+  } catch (error) {
+    console.error("[memory] author study failed to load", error);
+    return (
+      <WorkspaceFrame
+        email={user.email ?? ""}
+        breadcrumbs={[{ href: "/workspace", label: "Workspace" }]}
+      >
+        <SetupNotice error={error} />
+      </WorkspaceFrame>
+    );
+  }
   if (!study) notFound();
 
   const { author, documents } = study;
-  const context = await assembleAuthorContext(author.id);
-  const memory = serializeContext(context, author.pen_name ?? author.full_name);
 
   return (
     <WorkspaceFrame

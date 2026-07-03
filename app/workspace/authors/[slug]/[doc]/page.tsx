@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import ReactMarkdown from "react-markdown";
+import { SetupNotice } from "@/components/setup-notice";
 import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
 import {
   activateVersion,
@@ -9,7 +10,7 @@ import {
   saveAndActivateDraft,
   updateDraft,
 } from "@/lib/memory/actions";
-import { getDocumentRoom } from "@/lib/memory/queries";
+import { getDocumentRoom, type DocumentRoom } from "@/lib/memory/queries";
 import {
   IMPORT_SOURCES,
   docTypeBySlug,
@@ -45,7 +46,20 @@ export default async function DocumentRoomPage({
   const meta = docTypeBySlug(docSlug);
   if (!meta) notFound();
 
-  const room = await getDocumentRoom(slug, meta.type);
+  let room: DocumentRoom | null;
+  try {
+    room = await getDocumentRoom(slug, meta.type);
+  } catch (error) {
+    console.error("[memory] document room failed to load", error);
+    return (
+      <WorkspaceFrame
+        email={user.email ?? ""}
+        breadcrumbs={[{ href: "/workspace", label: "Workspace" }]}
+      >
+        <SetupNotice error={error} />
+      </WorkspaceFrame>
+    );
+  }
   if (!room) notFound();
 
   const query = await searchParams;
