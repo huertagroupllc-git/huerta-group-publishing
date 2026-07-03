@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/*
+ * Huerta Group Publishing — editorial design tokens.
+ *
+ * The visual system is typography-first and publishing-house inspired:
+ * warm paper, near-black ink, a single oxblood accent, hairline taupe rules.
+ * No cards, no shadows, no gradients, no dashboard furniture.
+ */
+@theme inline {
+  /* Surfaces */
+  --color-paper: #f7f2e9;
+  --color-parchment: #efe8d9;
+
+  /* Ink */
+  --color-ink: #221d16;
+  --color-ink-soft: #6b6153;
+  --color-ink-faint: #968b7a;
+
+  /* Accent — used sparingly: active markers, primary actions, links */
+  --color-oxblood: #6e2a2e;
+  --color-oxblood-deep: #571f23;
+
+  /* Hairline rules */
+  --color-rule: #ddd2bf;
+
+  /* Type */
+  --font-display: var(--font-fraunces);
+  --font-serif: var(--font-newsreader);
+  --font-sans: var(--font-inter);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-serif);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-oxblood);
+    color: var(--color-paper);
+  }
+}
+
+@layer components {
+  /* Letterspaced small-caps label — the only sanctioned use of the sans face */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+  }
+
+  /* Hairline rule, the structural device of the whole interface */
+  .rule {
+    border-top: 1px solid var(--color-rule);
+  }
+}

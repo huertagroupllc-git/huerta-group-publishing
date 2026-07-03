@@ -1,0 +1,6 @@
+# Identifier for the Supabase CLI. This project is production-first and uses
+# only the hosted Supabase project — no local containers. Link it with:
+#   supabase link --project-ref <project-ref>
+# then apply committed migrations with:
+#   supabase db push
+project_id = "huerta-group-publishing"
