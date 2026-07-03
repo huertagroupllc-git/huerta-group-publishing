@@ -100,28 +100,30 @@ export default async function BookStudyPage({
               </dd>
             </div>
           ) : null}
+        </dl>
 
-          <div>
-            <dt className="eyebrow">Inherited From</dt>
-            <dd className="mt-1.5 font-serif text-xl leading-snug">
-              {origins.length ? (
-                <ul className="space-y-1">
-                  {origins.map((o) => (
-                    <li key={o.docType}>
-                      {o.label}{" "}
-                      <span className="font-sans text-sm text-ink-faint">
-                        v{o.versionNumber}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <span className="italic text-ink-soft">
-                  Author Memory not yet established
-                </span>
-              )}
-            </dd>
-          </div>
+        {/* The book's creative lineage — provenance, set apart from the
+            record's metadata like a colophon's rights line. */}
+        <dl className="mt-7 max-w-3xl">
+          <dt className="eyebrow">Inherited From</dt>
+          <dd className="mt-2.5 font-serif text-xl leading-snug">
+            {origins.length ? (
+              <ul className="space-y-1.5">
+                {origins.map((o) => (
+                  <li key={o.docType}>
+                    {o.label}{" "}
+                    <span className="font-sans text-sm text-ink-faint">
+                      v{o.versionNumber}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <span className="italic text-ink-soft">
+                Author Memory not yet established
+              </span>
+            )}
+          </dd>
         </dl>
 
         <div className="mt-6">
