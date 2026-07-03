@@ -60,6 +60,179 @@ export async function createBook(formData: FormData) {
   redirect(`/workspace/authors/${authorSlug}/books/${slug}`);
 }
 
+// --- Book Memory version workflow — mirrors lib/memory/actions.ts one
+// --- level down; kept book-specific per the Engineering Constitution §7.
+
+const BOOK_MIGRATION_MESSAGE =
+  "The database is missing the Book Memory migration — apply supabase/migrations/20260706000000_book_memory_documents.sql (docs/setup.md §2).";
+
+function isMissingFunction(error: { code?: string; message?: string }) {
+  return (
+    error.code === "PGRST202" ||
+    error.code === "42883" ||
+    /function .+ does not exist|schema cache/i.test(error.message ?? "")
+  );
+}
+
+export async function createBookVersion(formData: FormData) {
+  const documentId = String(formData.get("document_id") ?? "");
+  const roomPath = String(formData.get("room_path") ?? "/workspace");
+  const content = String(formData.get("content") ?? "");
+  const changeSummary = String(formData.get("change_summary") ?? "").trim();
+  const importSource = String(formData.get("import_source") ?? "manual");
+  const sourceNote = String(formData.get("source_note") ?? "").trim();
+
+  if (!content.trim()) {
+    fail(roomPath, "A version needs content before it can be saved.");
+  }
+
+  const supabase = await requireUser();
+  const { error } = await supabase.rpc("create_book_document_version", {
+    p_document_id: documentId,
+    p_content: content,
+    p_change_summary: changeSummary || null,
+    p_import_source: importSource,
+    p_source_note: sourceNote || null,
+  });
+
+  if (error) {
+    console.error("[books] createBookVersion failed", error);
+    fail(
+      roomPath,
+      error.code === "23505"
+        ? "A draft is already open for this document; continue editing it instead."
+        : isMissingFunction(error)
+          ? BOOK_MIGRATION_MESSAGE
+          : "The draft could not be created.",
+    );
+  }
+
+  redirect(`${roomPath}?draft=1`);
+}
+
+export async function updateBookDraft(formData: FormData) {
+  const versionId = String(formData.get("version_id") ?? "");
+  const roomPath = String(formData.get("room_path") ?? "/workspace");
+  const content = String(formData.get("content") ?? "");
+  const changeSummary = String(formData.get("change_summary") ?? "").trim();
+  const importSource = String(formData.get("import_source") ?? "manual");
+  const sourceNote = String(formData.get("source_note") ?? "").trim();
+
+  const supabase = await requireUser();
+  const { data, error } = await supabase
+    .from("book_document_versions")
+    .update({
+      content,
+      change_summary: changeSummary || null,
+      import_source: importSource,
+      source_note: sourceNote || null,
+    })
+    .eq("id", versionId)
+    .eq("status", "draft")
+    .select("id");
+
+  if (error || !data?.length) {
+    console.error("[books] updateBookDraft failed", error);
+    fail(`${roomPath}?draft=1`, "The draft could not be saved.");
+  }
+
+  redirect(`${roomPath}?draft=1&saved=1`);
+}
+
+/** Persist the draft's current form fields, then activate it — one submit,
+ *  so unsaved edits are never lost by activating. */
+export async function saveAndActivateBookDraft(formData: FormData) {
+  const versionId = String(formData.get("version_id") ?? "");
+  const roomPath = String(formData.get("room_path") ?? "/workspace");
+  const content = String(formData.get("content") ?? "");
+  const changeSummary = String(formData.get("change_summary") ?? "").trim();
+  const importSource = String(formData.get("import_source") ?? "manual");
+  const sourceNote = String(formData.get("source_note") ?? "").trim();
+
+  if (!content.trim()) {
+    fail(`${roomPath}?draft=1`, "A version needs content to be activated.");
+  }
+
+  const supabase = await requireUser();
+  const { data, error } = await supabase
+    .from("book_document_versions")
+    .update({
+      content,
+      change_summary: changeSummary || null,
+      import_source: importSource,
+      source_note: sourceNote || null,
+    })
+    .eq("id", versionId)
+    .eq("status", "draft")
+    .select("id");
+
+  if (error || !data?.length) {
+    console.error("[books] saveAndActivateBookDraft save failed", error);
+    fail(`${roomPath}?draft=1`, "The draft could not be saved.");
+  }
+
+  const { error: activateError } = await supabase.rpc(
+    "activate_book_document_version",
+    { p_version_id: versionId },
+  );
+
+  if (activateError) {
+    console.error(
+      "[books] saveAndActivateBookDraft activate failed",
+      activateError,
+    );
+    fail(
+      `${roomPath}?draft=1`,
+      isMissingFunction(activateError)
+        ? BOOK_MIGRATION_MESSAGE
+        : "The version could not be activated.",
+    );
+  }
+
+  redirect(roomPath);
+}
+
+export async function activateBookVersion(formData: FormData) {
+  const versionId = String(formData.get("version_id") ?? "");
+  const roomPath = String(formData.get("room_path") ?? "/workspace");
+
+  const supabase = await requireUser();
+  const { error } = await supabase.rpc("activate_book_document_version", {
+    p_version_id: versionId,
+  });
+
+  if (error) {
+    console.error("[books] activateBookVersion failed", error);
+    fail(
+      roomPath,
+      isMissingFunction(error)
+        ? BOOK_MIGRATION_MESSAGE
+        : "The version could not be activated.",
+    );
+  }
+
+  redirect(roomPath);
+}
+
+export async function discardBookDraft(formData: FormData) {
+  const versionId = String(formData.get("version_id") ?? "");
+  const roomPath = String(formData.get("room_path") ?? "/workspace");
+
+  const supabase = await requireUser();
+  const { error } = await supabase
+    .from("book_document_versions")
+    .delete()
+    .eq("id", versionId)
+    .eq("status", "draft");
+
+  if (error) {
+    console.error("[books] discardBookDraft failed", error);
+    fail(roomPath, "The draft could not be discarded.");
+  }
+
+  redirect(roomPath);
+}
+
 /** Edit the book's identity. The slug is the record's permanent address
  *  within its author and stays fixed, as at author level. */
 export async function updateBook(formData: FormData) {

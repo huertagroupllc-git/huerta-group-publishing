@@ -5,8 +5,8 @@ import { ActionLink } from "@/components/editorial";
 import { SetupNotice } from "@/components/setup-notice";
 import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
 import { assembleAuthorContext, serializeContext } from "@/lib/memory/assemble";
-import { listBooks } from "@/lib/books/queries";
-import { bookStatusLabel, type BookRecord } from "@/lib/books/types";
+import { listBooks, type BookRosterEntry } from "@/lib/books/queries";
+import { bookStatusLabel } from "@/lib/books/types";
 import { getAuthorStudy, type AuthorStudy } from "@/lib/memory/queries";
 import { docTypeMeta, formatDate } from "@/lib/memory/types";
 import { createClient } from "@/lib/supabase/server";
@@ -39,7 +39,7 @@ export default async function AuthorStudyPage({
 
   let study: AuthorStudy | null;
   let memory: string;
-  let books: BookRecord[];
+  let books: BookRosterEntry[];
   try {
     study = await getAuthorStudy(slug);
     if (study) {
@@ -184,7 +184,8 @@ export default async function AuthorStudyPage({
                   ) : null}
                 </div>
                 <span className="font-sans text-xs text-ink-faint">
-                  {bookStatusLabel(book.status)}
+                  {bookStatusLabel(book.status)} · {book.establishedCount} of
+                  3 documents established
                 </span>
               </li>
             ))}

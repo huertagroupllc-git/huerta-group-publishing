@@ -41,6 +41,10 @@ Two migrations, applied in order:
    Slice 1: book lifecycle enum, books table (identity metadata only, slug
    unique per author), immutable book_origins references, atomic creation
    function, RLS, and grants.
+5. `supabase/migrations/20260706000000_book_memory_documents.sql` —
+   Capability 2 Slice 2: book_documents and book_document_versions
+   (mirroring the author-level mechanics), active_book_memory view,
+   workflow RPCs, shell backfill for existing books, RLS, and grants.
 
 Preferred (keeps migration history tracked by the CLI):
 

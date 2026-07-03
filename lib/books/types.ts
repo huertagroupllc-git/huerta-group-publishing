@@ -30,12 +30,23 @@ export interface BookRecord {
   created_at: string;
 }
 
-/**
- * The three book-level memory documents, in confirmed display and
- * assembly order. Slice 1 renders these as a non-interactive table of
- * contents; the rooms and their tables arrive in Slice 2.
- */
-export const BOOK_DOC_TYPES = [
+export type BookDocType =
+  | "book_constitution"
+  | "master_outline"
+  | "concept_dictionary";
+
+export interface BookDocTypeMeta {
+  type: BookDocType;
+  /** URL segment under /books/[book-slug]/memory/ */
+  slug: string;
+  label: string;
+  description: string;
+}
+
+/** The three book-level memory documents, in confirmed display and
+ *  assembly order: Constitution governs, Outline shapes, Dictionary
+ *  defines. */
+export const BOOK_DOC_TYPES: BookDocTypeMeta[] = [
   {
     type: "book_constitution",
     slug: "book-constitution",
@@ -57,7 +68,17 @@ export const BOOK_DOC_TYPES = [
     description:
       "What the book's words mean: named ideas, canonical definitions, and distinctions the book depends on.",
   },
-] as const;
+];
+
+export function bookDocTypeBySlug(slug: string): BookDocTypeMeta | undefined {
+  return BOOK_DOC_TYPES.find((d) => d.slug === slug);
+}
+
+export function bookDocTypeMeta(type: BookDocType): BookDocTypeMeta {
+  const meta = BOOK_DOC_TYPES.find((d) => d.type === type);
+  if (!meta) throw new Error(`Unknown book document type: ${type}`);
+  return meta;
+}
 
 /** An origin reference: an Author Memory version active when the book
  *  was created (Amendment 3). Provenance, never assembly input. */

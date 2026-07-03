@@ -9,6 +9,7 @@ import {
 } from "@/components/glyphs";
 import { SetupNotice } from "@/components/setup-notice";
 import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
+import Link from "next/link";
 import { getBookStudy, type BookStudy } from "@/lib/books/queries";
 import { BOOK_DOC_TYPES, bookStatusLabel } from "@/lib/books/types";
 import { formatDate } from "@/lib/memory/types";
@@ -56,7 +57,8 @@ export default async function BookStudyPage({
   }
   if (!study) notFound();
 
-  const { author, book, origins } = study;
+  const { author, book, origins, documents } = study;
+  const memoryPath = `/workspace/authors/${author.slug}/books/${book.slug}/memory`;
 
   return (
     <WorkspaceFrame
@@ -145,28 +147,49 @@ export default async function BookStudyPage({
         </div>
 
         <ul>
-          {BOOK_DOC_TYPES.map((doc) => {
+          {BOOK_DOC_TYPES.map((meta) => {
             const DocGlyph =
-              doc.type === "book_constitution"
+              meta.type === "book_constitution"
                 ? ConstitutionGlyph
-                : doc.type === "master_outline"
+                : meta.type === "master_outline"
                   ? OutlineGlyph
                   : DictionaryGlyph;
+            const doc = documents.find((d) => d.docType === meta.type);
             return (
               <li
-                key={doc.type}
+                key={meta.type}
                 className="rule grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-5 py-6 first:border-t-0"
               >
                 <DocGlyph className="mt-1 text-ink-soft/75" />
                 <div className="max-w-xl">
-                  <span className="font-display text-2xl tracking-tight">
-                    {doc.label}
-                  </span>
+                  <Link
+                    href={`${memoryPath}/${meta.slug}`}
+                    className="font-display text-2xl tracking-tight hover:text-oxblood"
+                  >
+                    {meta.label}
+                  </Link>
                   <p className="mt-2 leading-relaxed text-ink-soft">
-                    {doc.description}
+                    {meta.description}
                   </p>
-                  <p className="mt-3 font-sans text-xs italic text-ink-faint">
-                    Not yet established
+                  <p className="mt-3 font-sans text-xs text-ink-faint">
+                    {doc?.activeVersion ? (
+                      <span className="text-ink-soft">
+                        Version {doc.activeVersion.versionNumber}
+                        {doc.activeVersion.finalizedAt
+                          ? ` · finalized ${formatDate(doc.activeVersion.finalizedAt)}`
+                          : ""}
+                      </span>
+                    ) : (
+                      <span className="italic">Not yet established</span>
+                    )}
+                    {doc?.hasDraft ? (
+                      <Link
+                        href={`${memoryPath}/${meta.slug}?draft=1`}
+                        className="ml-3 not-italic text-oxblood underline-offset-4 hover:underline"
+                      >
+                        Draft open
+                      </Link>
+                    ) : null}
                   </p>
                 </div>
                 <OpensGlyph className="mr-2 h-5 w-5 self-center text-ink-faint" />
