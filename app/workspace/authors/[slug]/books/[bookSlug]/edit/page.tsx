@@ -103,15 +103,21 @@ export default async function EditBookPage({
           defaultValue={book.working_title ?? ""}
         />
 
-        <SelectField
-          id="status"
-          label="Status"
-          defaultValue={book.status}
-          options={BOOK_STATUSES.map((s) => ({
-            value: s.value,
-            label: s.label,
-          }))}
-        />
+        <div>
+          <SelectField
+            id="status"
+            label="Status"
+            defaultValue={book.status}
+            options={BOOK_STATUSES.map((s) => ({
+              value: s.value,
+              label: s.label,
+            }))}
+          />
+          <p className="mt-2 font-sans text-xs text-ink-faint">
+            Where the book stands in its life, from Discovery to Archived —
+            a stated fact, not a gate.
+          </p>
+        </div>
 
         <ErrorNote message={error} />
 

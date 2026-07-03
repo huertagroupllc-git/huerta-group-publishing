@@ -1,18 +1,65 @@
 export type BookStatus =
-  | "developing"
+  | "discovery"
+  | "writing"
   | "editorial_review"
+  | "revision"
+  | "final_manuscript"
   | "ready_for_publication"
   | "published"
   | "archived";
 
-/** The publishing lifecycle (Amendment 2): stated fact on the record,
- *  never task progress. */
-export const BOOK_STATUSES: { value: BookStatus; label: string }[] = [
-  { value: "developing", label: "Developing" },
-  { value: "editorial_review", label: "Editorial Review" },
-  { value: "ready_for_publication", label: "Ready for Publication" },
-  { value: "published", label: "Published" },
-  { value: "archived", label: "Archived" },
+/**
+ * The Book Lifecycle — one of the platform's organizing principles
+ * (Product Constitution XIV; docs/blueprints/book-lifecycle-stages.md).
+ * Each stage preserves a different kind of work and carries its own
+ * question. Status is a stated fact on the record, never a workflow
+ * engine; future capabilities appear as the manuscript matures.
+ */
+export const BOOK_STATUSES: {
+  value: BookStatus;
+  label: string;
+  question: string;
+}[] = [
+  {
+    value: "discovery",
+    label: "Discovery",
+    question: "What am I trying to say?",
+  },
+  {
+    value: "writing",
+    label: "Writing",
+    question: "How do I say it?",
+  },
+  {
+    value: "editorial_review",
+    label: "Editorial Review",
+    question: "Does this accomplish its purpose?",
+  },
+  {
+    value: "revision",
+    label: "Revision",
+    question: "How can it become better?",
+  },
+  {
+    value: "final_manuscript",
+    label: "Final Manuscript",
+    question: "Is this the book I intended to write?",
+  },
+  {
+    value: "ready_for_publication",
+    label: "Ready for Publication",
+    question: "Is it ready for readers?",
+  },
+  {
+    value: "published",
+    label: "Published",
+    question: "How does it live in the world?",
+  },
+  {
+    value: "archived",
+    label: "Archived",
+    question: "What should history preserve?",
+  },
 ];
 
 export function bookStatusLabel(status: BookStatus): string {

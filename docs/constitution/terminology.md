@@ -41,16 +41,21 @@ UI, code, schema, and docs. Deviating copy is a bug.
 | **Book Constitution** | Keep | Why this book exists and what it is not. Changes rarely; new versions read like amendments. Always listed first. |
 | **Master Outline** | Keep | The shape the book takes. Versioned prose about structure — not structured chapter data. |
 | **Concept Dictionary** | Keep | What the book's words mean. Grows mostly by accretion. |
-| **Developing** | Keep | Lifecycle: the book is being made. Every book begins here. |
-| **Editorial Review** | Keep | Lifecycle: under the imprint's editorial consideration. |
-| **Ready for Publication** | Keep | Lifecycle: editorially complete, awaiting release. |
-| **Published** | Keep | Lifecycle: released. |
-| **Archived** | Keep | Lifecycle: set aside. A stated fact, not a deletion. |
+| **Discovery** | Keep (renamed from Developing, July 2026) | Lifecycle: the book is still being discovered — "What am I trying to say?". Every book begins here. |
+| **Writing** | Keep | Lifecycle: the manuscript is actively being written — "How do I say it?". |
+| **Editorial Review** | Keep | Lifecycle: complete enough for systematic review — "Does this accomplish its purpose?". |
+| **Revision** | Keep | Lifecycle: editorial findings being incorporated — "How can it become better?". |
+| **Final Manuscript** | Keep | Lifecycle: editorially complete; only publication preparation remains — "Is this the book I intended to write?". |
+| **Ready for Publication** | Keep | Lifecycle: publishing assets completed — "Is it ready for readers?". |
+| **Published** | Keep | Lifecycle: released — "How does it live in the world?". |
+| **Archived** | Keep | Lifecycle: no longer active; the permanent record remains — "What should history preserve?". |
 | **Begun** | Keep | Colophon label: the date the record was opened. |
 | **Inherited From** | Keep | Colophon label: the Author Memory versions active at the book's creation (its origins) — provenance, never assembly input. Empty state: "Author Memory not yet established". |
 
 Lifecycle statuses are stated facts edited on the record — never workflow
-gates, approvals, or progress indicators. Book documents use the same
+gates, approvals, or progress indicators. The full lifecycle and its
+future-capability alignment live in
+docs/blueprints/book-lifecycle-stages.md. Book documents use the same
 verbs as author documents: established, draft, finalized, activated,
 superseded, restored, discarded.
 
@@ -70,8 +75,9 @@ A record's standing facts are presented as a colophon — stacked
 small-caps labels over serif values, never sentences (Design
 Constitution §8). Canonical labels:
 
-- **Status** — the record's lifecycle position (for books: Developing,
-  Editorial Review, Ready for Publication, Published, Archived).
+- **Status** — the record's lifecycle position (for books, the eight
+  stages from Discovery to Archived; see
+  docs/blueprints/book-lifecycle-stages.md).
 - **Begun** — the date the record was opened.
 - **Working Title** — the internal working title, when one exists.
 - **Inherited From** — the Author Memory versions active when a book was

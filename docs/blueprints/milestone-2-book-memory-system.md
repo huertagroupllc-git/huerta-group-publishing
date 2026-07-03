@@ -504,3 +504,13 @@ provenance set apart). Nothing out of scope was built.
 - Blueprint → approval → amendments → vertical slices → acceptance +
   terminology ratification + tag. This document's lifecycle is the
   template.
+
+**Post-acceptance refinement (July 2026).** The five-status publishing
+lifecycle from Amendment 2 was expanded to the eight-stage Book
+Lifecycle (Discovery, Writing, Editorial Review, Revision, Final
+Manuscript, Ready for Publication, Published, Archived) and elevated to
+an organizing principle — Product Constitution XIV and
+docs/blueprints/book-lifecycle-stages.md. Existing books mapped
+Developing → Discovery via an in-place enum rename; no data changed.
+Amendment 2's core holding stands: status is a stated fact on the
+record, never a workflow engine.

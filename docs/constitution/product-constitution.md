@@ -108,3 +108,17 @@ specific reasons. Records identify (*which* author, *which* book);
 memory documents explain (*who*, *why*); and each future level of the
 hierarchy — research, chapters, publication — must likewise name the one
 kind of truth it preserves before it is built.
+
+## XIV. Each stage preserves a different kind of work
+
+A book's life runs from Discovery to Archived, and each stage of
+authorship has a distinct purpose with its own question — "What am I
+trying to say?" is not "How do I say it?", and neither is "Is it ready
+for readers?". The platform reveals the tools appropriate to the
+author's current stage rather than presenting every capability at once:
+the interface guides authors naturally through the lifecycle of creating
+a book, and capabilities progressively appear as the manuscript matures.
+This is a governing architectural principle — every future capability
+names its stage before it is built. Yet the lifecycle guides; it never
+gates: the stage is a fact the author states, not a lock the platform
+enforces (see docs/blueprints/book-lifecycle-stages.md).

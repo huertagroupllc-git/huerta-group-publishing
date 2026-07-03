@@ -242,7 +242,7 @@ export async function updateBook(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   const subtitle = String(formData.get("subtitle") ?? "").trim();
   const workingTitle = String(formData.get("working_title") ?? "").trim();
-  const statusInput = String(formData.get("status") ?? "developing");
+  const statusInput = String(formData.get("status") ?? "discovery");
   const studyPath = `/workspace/authors/${authorSlug}/books/${bookSlug}`;
   const editPath = `${studyPath}/edit`;
 
@@ -252,7 +252,7 @@ export async function updateBook(formData: FormData) {
 
   const status: BookStatus = BOOK_STATUSES.some((s) => s.value === statusInput)
     ? (statusInput as BookStatus)
-    : "developing";
+    : "discovery";
 
   const supabase = await requireUser();
   const { data, error } = await supabase

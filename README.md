@@ -49,8 +49,12 @@ two levels of the author-first hierarchy, live in production.
   version-stamped, inspectable verbatim on the Author Study page.
 - **Book Records** — books belong to authors, never exist without one:
   identity metadata only (title, subtitle, working title, lifecycle
-  status, permanent slug). Why a book exists lives in its Constitution,
-  never in a column.
+  stage, permanent slug). Why a book exists lives in its Constitution,
+  never in a column. The **Book Lifecycle** runs Discovery → Writing →
+  Editorial Review → Revision → Final Manuscript → Ready for
+  Publication → Published (and Archived) — a stated fact on the record,
+  never a workflow gate, and the organizing principle future
+  capabilities plug into.
 - **Three book-level memory documents per book** — **Book
   Constitution**, **Master Outline**, **Concept Dictionary** — with the
   full versioning workflow: append-only immutable versions, one draft
@@ -96,6 +100,9 @@ against them:
 - [Milestone 1 blueprint](docs/blueprints/milestone-1-author-memory-system.md)
   and [Milestone 2 blueprint](docs/blueprints/milestone-2-book-memory-system.md)
   — the architecture as designed, with retrospectives
+- [The Book Lifecycle](docs/blueprints/book-lifecycle-stages.md) — the
+  eight stages from Discovery to Archived, each with its question, and
+  where future capabilities will live
 - [July 2026 refinement review](docs/reviews/2026-07-refinement-review.md) —
   what was deliberately deferred, and why
 
