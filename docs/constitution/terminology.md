@@ -61,5 +61,5 @@ shows the labels, not the word.
 
 - Buttons are acts an editor would say aloud; no "Submit", "OK", "Confirm", "Delete".
 - Status lines state facts without alarm: "Version 3 · active · finalized 2 July 2026".
-- Dates are colophon-style ("2 July 2026"), never numeric or relative.
+- Dates are written in full ("Thursday, July 3, 2026"), never numeric, abbreviated, or relative.
 - The platform refers to itself as "the platform" or by name — never "the app".

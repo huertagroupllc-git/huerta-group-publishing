@@ -48,12 +48,19 @@ shadows, gradients, rounded panels, or background tints to group content.
 Lists are ruled lists. Two-zone layouts (reading pane + narrow margin
 rail) are the standard for any object with history or metadata.
 
-## 5. Words, not icons
+## 5. Words first; glyphs as ornament only
 
-The interface currently contains zero icons; keep it that way. Actions are
-named in words ("New version", "Restore as the active version"). No
-hamburgers, gears, pencils, trash cans, or chevron glyphs. Where an
-affordance needs signaling, use a word ("Show", "Hide", "Edit").
+Actions are named in words ("New version", "Restore as the active
+version"). No hamburgers, gears, pencils, trash cans, icon buttons, or
+icon-only actions — where an *action* needs signaling, use a word
+("Show", "Hide", "Edit").
+
+Hairline **editorial glyphs** are permitted as secondary ornament beside
+typography (amended July 2026): thin monochrome line drawings, stroke
+~1.25, set in faint ink, always accompanied by the words that carry the
+meaning. Never colorful icon sets, filled icons, SaaS illustration
+styles, or emoji. If removing a glyph would remove meaning, the glyph is
+doing a word's job and must be replaced by one.
 
 ## 6. One primary act per view
 
@@ -72,9 +79,10 @@ toolbars, floating labels, or input adornments.
 ## 8. Metadata lives in the margins
 
 Version numbers, dates, sources, and status are set small in Inter,
-adjacent to — never inside — the prose. Dates are written like a colophon:
-"12 June 2026", never "06/12/26" or relative timestamps ("2 days ago"
-decays; the record does not).
+adjacent to — never inside — the prose. Dates are written in full, like a
+line of front matter: "Thursday, July 3, 2026" — never numeric
+("07/03/26"), never abbreviated, never relative ("2 days ago" decays; the
+record does not).
 
 **Record metadata is a colophon, not a sentence.** A record's standing
 facts (Status, Begun, Working Title, Inherited From) are presented as
