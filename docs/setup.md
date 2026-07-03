@@ -25,7 +25,7 @@ these are unset; `/signin` and `/workspace` require them.
 
 ## 2. Apply the database migrations
 
-Two migrations, applied in order:
+Applied in order:
 
 1. `supabase/migrations/20260702000000_author_memory_system.sql` — the
    Milestone 1 schema (applied during Phase A).
@@ -45,6 +45,13 @@ Two migrations, applied in order:
    Capability 2 Slice 2: book_documents and book_document_versions
    (mirroring the author-level mechanics), active_book_memory view,
    workflow RPCs, shell backfill for existing books, RLS, and grants.
+6. `supabase/migrations/20260707000000_book_lifecycle.sql` — the
+   eight-stage Book Lifecycle (renames developing → discovery in place;
+   adds writing, revision, final_manuscript).
+7. `supabase/migrations/20260708000000_manuscript_foundation.sql` —
+   Capability 3 Slice 1: manuscripts (backfilled for existing books),
+   manuscript_parts, chapters, chapter_versions, active_manuscript view,
+   workflow RPCs, RLS, and grants.
 
 Preferred (keeps migration history tracked by the CLI):
 

@@ -11,6 +11,7 @@ import { SetupNotice } from "@/components/setup-notice";
 import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
 import Link from "next/link";
 import { assembleBookContext, serializeBookContext } from "@/lib/books/assemble";
+import { getManuscriptSummary, type ManuscriptSummary } from "@/lib/manuscript/queries";
 import { getBookStudy, type BookStudy } from "@/lib/books/queries";
 import { BOOK_DOC_TYPES, bookStatusLabel } from "@/lib/books/types";
 import { assembleAuthorContext } from "@/lib/memory/assemble";
@@ -45,6 +46,8 @@ export default async function BookStudyPage({
 
   let study: BookStudy | null;
   let memory: string;
+  let manuscriptSummary: ManuscriptSummary | null = null;
+  let manuscriptNote: string | null = null;
   try {
     study = await getBookStudy(slug, bookSlug);
     if (study) {
@@ -58,6 +61,15 @@ export default async function BookStudyPage({
         study.author.pen_name ?? study.author.full_name,
         study.book.title,
       );
+      try {
+        manuscriptSummary = await getManuscriptSummary(study.book.id);
+      } catch (manuscriptError) {
+        console.error("[manuscript] summary failed", manuscriptError);
+        manuscriptNote =
+          manuscriptError instanceof Error
+            ? manuscriptError.message
+            : String(manuscriptError);
+      }
     } else {
       memory = "";
     }
@@ -214,6 +226,41 @@ export default async function BookStudyPage({
             );
           })}
         </ul>
+      </section>
+
+      <section className="mt-14">
+        <div className="rule flex items-baseline justify-between pt-5">
+          <h2 className="eyebrow">The Manuscript</h2>
+          <ActionLink
+            href={`/workspace/authors/${author.slug}/books/${book.slug}/chapters`}
+          >
+            Open the chapters
+          </ActionLink>
+        </div>
+        {manuscriptNote ? (
+          <p className="mt-5 max-w-prose font-sans text-sm text-ink-soft">
+            {manuscriptNote}
+          </p>
+        ) : manuscriptSummary && manuscriptSummary.chapterCount > 0 ? (
+          <p className="mt-5 font-sans text-xs text-ink-soft">
+            {manuscriptSummary.chapterCount}{" "}
+            {manuscriptSummary.chapterCount === 1 ? "chapter" : "chapters"}
+            {manuscriptSummary.partCount > 0
+              ? ` in ${manuscriptSummary.partCount} ${
+                  manuscriptSummary.partCount === 1 ? "part" : "parts"
+                }`
+              : ""}
+            {manuscriptSummary.draftCount > 0
+              ? ` · ${manuscriptSummary.draftCount} ${
+                  manuscriptSummary.draftCount === 1 ? "draft" : "drafts"
+                } open`
+              : ""}
+          </p>
+        ) : (
+          <p className="mt-5 max-w-prose italic text-ink-soft">
+            The manuscript begins with its first chapter.
+          </p>
+        )}
       </section>
 
       <section className="mt-14">
