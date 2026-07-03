@@ -10,8 +10,10 @@ import {
 import { SetupNotice } from "@/components/setup-notice";
 import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
 import Link from "next/link";
+import { assembleBookContext, serializeBookContext } from "@/lib/books/assemble";
 import { getBookStudy, type BookStudy } from "@/lib/books/queries";
 import { BOOK_DOC_TYPES, bookStatusLabel } from "@/lib/books/types";
+import { assembleAuthorContext } from "@/lib/memory/assemble";
 import { formatDate } from "@/lib/memory/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -42,8 +44,23 @@ export default async function BookStudyPage({
   const { error } = await searchParams;
 
   let study: BookStudy | null;
+  let memory: string;
   try {
     study = await getBookStudy(slug, bookSlug);
+    if (study) {
+      const [authorCtx, bookCtx] = await Promise.all([
+        assembleAuthorContext(study.author.id),
+        assembleBookContext(study.book.id),
+      ]);
+      memory = serializeBookContext(
+        authorCtx,
+        bookCtx,
+        study.author.pen_name ?? study.author.full_name,
+        study.book.title,
+      );
+    } else {
+      memory = "";
+    }
   } catch (loadError) {
     console.error("[books] book study failed to load", loadError);
     return (
@@ -197,6 +214,30 @@ export default async function BookStudyPage({
             );
           })}
         </ul>
+      </section>
+
+      <section className="mt-14">
+        <details className="group">
+          <summary className="rule flex cursor-pointer list-none items-baseline justify-between pt-5">
+            <span>
+              <span className="eyebrow group-open:text-oxblood">
+                Assembled Memory
+              </span>
+              <span className="ml-3 font-sans text-xs text-ink-faint">
+                the exact record future AI assistance will receive — the
+                author&rsquo;s memory first, then the book&rsquo;s; active,
+                finalized versions only
+              </span>
+            </span>
+            <span className="font-sans text-xs text-oxblood">
+              <span className="group-open:hidden">Show</span>
+              <span className="hidden group-open:inline">Hide</span>
+            </span>
+          </summary>
+          <pre className="mt-6 max-w-prose whitespace-pre-wrap border-l border-rule pl-6 font-serif text-sm leading-relaxed text-ink">
+            {memory}
+          </pre>
+        </details>
       </section>
     </WorkspaceFrame>
   );
