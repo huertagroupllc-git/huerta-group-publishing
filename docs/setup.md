@@ -37,6 +37,10 @@ Two migrations, applied in order:
    table/function grants for the `authenticated` role. Without these the
    workspace fails with "permission denied for table authors" before RLS is
    even evaluated.
+4. `supabase/migrations/20260705000000_book_records.sql` — Capability 2
+   Slice 1: book lifecycle enum, books table (identity metadata only, slug
+   unique per author), immutable book_origins references, atomic creation
+   function, RLS, and grants.
 
 Preferred (keeps migration history tracked by the CLI):
 

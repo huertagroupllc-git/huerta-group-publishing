@@ -5,6 +5,8 @@ import { ActionLink } from "@/components/editorial";
 import { SetupNotice } from "@/components/setup-notice";
 import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
 import { assembleAuthorContext, serializeContext } from "@/lib/memory/assemble";
+import { listBooks } from "@/lib/books/queries";
+import { bookStatusLabel, type BookRecord } from "@/lib/books/types";
 import { getAuthorStudy, type AuthorStudy } from "@/lib/memory/queries";
 import { docTypeMeta, formatDate } from "@/lib/memory/types";
 import { createClient } from "@/lib/supabase/server";
@@ -37,6 +39,7 @@ export default async function AuthorStudyPage({
 
   let study: AuthorStudy | null;
   let memory: string;
+  let books: BookRecord[];
   try {
     study = await getAuthorStudy(slug);
     if (study) {
@@ -45,8 +48,10 @@ export default async function AuthorStudyPage({
         context,
         study.author.pen_name ?? study.author.full_name,
       );
+      books = await listBooks(study.author.id);
     } else {
       memory = "";
+      books = [];
     }
   } catch (error) {
     console.error("[memory] author study failed to load", error);
@@ -143,6 +148,48 @@ export default async function AuthorStudyPage({
             );
           })}
         </ul>
+      </section>
+
+      <section className="mt-14">
+        <div className="rule flex items-baseline justify-between pt-5">
+          <h2 className="eyebrow">Books</h2>
+          <ActionLink href={`/workspace/authors/${author.slug}/books/new`}>
+            Add a book
+          </ActionLink>
+        </div>
+
+        {books.length === 0 ? (
+          <p className="mt-6 max-w-prose italic text-ink-soft">
+            No books yet. Every book opened here begins under this
+            author&rsquo;s established memory.
+          </p>
+        ) : (
+          <ul>
+            {books.map((book) => (
+              <li
+                key={book.id}
+                className="rule flex flex-wrap items-baseline justify-between gap-x-8 gap-y-1 py-5 first:border-t-0"
+              >
+                <div className="flex items-baseline gap-4">
+                  <Link
+                    href={`/workspace/authors/${author.slug}/books/${book.slug}`}
+                    className="font-display text-2xl tracking-tight hover:text-oxblood"
+                  >
+                    {book.title}
+                  </Link>
+                  {book.subtitle ? (
+                    <span className="italic text-ink-soft">
+                      {book.subtitle}
+                    </span>
+                  ) : null}
+                </div>
+                <span className="font-sans text-xs text-ink-faint">
+                  {bookStatusLabel(book.status)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="mt-14">
