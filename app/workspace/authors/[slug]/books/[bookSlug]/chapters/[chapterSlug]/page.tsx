@@ -173,7 +173,7 @@ export default async function ChapterRoomPage({
             ) : null}
             {chapter.outline_section ? (
               <p>
-                <span className="text-ink-faint">Outline — </span>
+                <span className="text-ink-faint">Master Outline Location — </span>
                 {chapter.outline_section}
               </p>
             ) : null}

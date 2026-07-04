@@ -103,7 +103,7 @@ export default async function NewChapterPage({
 
         <Field
           id="outline_section"
-          label="Outline section"
+          label="Master Outline Location"
           optional
           type="text"
           placeholder="the part of the Master Outline this chapter serves"

@@ -70,6 +70,7 @@ superseded, restored, discarded.
 | **Unwritten** | Keep | A chapter with no versions yet — the manuscript-level counterpart of "Not yet established". |
 | **Purpose** | Keep | Chapter identity: *why this chapter exists*. Record field, unversioned; the authoritative intent remains the Master Outline. |
 | **Summary** | Keep | Chapter identity: *what happens in this chapter*. Record field, unversioned; shown beneath the title in the Chapter Library. |
+| **Master Outline Location** | Keep (renamed from "Outline section", July 2026) | The field naming where in the Master Outline a chapter belongs — always this full label in UI (the underlying column remains `outline_section`). Paired with the version stamp "Shaped under Master Outline vN". |
 
 ## Button and action canon
 

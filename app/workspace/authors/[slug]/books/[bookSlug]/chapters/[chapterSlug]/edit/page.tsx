@@ -126,7 +126,7 @@ export default async function EditChapterPage({
 
         <Field
           id="outline_section"
-          label="Outline section"
+          label="Master Outline Location"
           optional
           type="text"
           defaultValue={chapter.outline_section ?? ""}

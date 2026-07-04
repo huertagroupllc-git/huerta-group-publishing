@@ -70,6 +70,12 @@ The guiding principle, answered concretely: *"Where do I actually write
 my book?"* — in a chapter's writing room, one chapter at a time, with
 the book's memory quietly in reach and everything else out of sight.
 
+**Huerta Group Publishing does not begin with a blank page. It begins
+with purpose.** A chapter arrives in the world already knowing why it
+exists (purpose), what happens in it (summary), and where it stands in
+the book's shape (its Master Outline Location) — writing begins with
+understanding, not typing.
+
 ## 2. Capability Scope
 
 ### Build (across slices, §9)
@@ -373,6 +379,21 @@ One source of assembled truth, owned by the Manuscript object.
   citations — as their own parallel structure under the book, attaching
   to chapters by reference (`chapter_research_refs`, additive). The
   writing room's margin gains a "Research" reference beside "Concepts".
+- **Chapter Memory** (recorded July 2026; stage to be named in its own
+  blueprint): chapters should eventually become **knowledge objects,
+  not merely text containers** — the same move that made authors and
+  books more than records. A future Chapter Memory would carry, beyond
+  today's identity fields: the **Core Question** the chapter answers,
+  the **Reader Takeaway** it must leave behind, its **Core Concepts**
+  (real references into the Concept Dictionary), **Dependencies** (what
+  the reader must already have) and **Introduces** (what this chapter
+  gives the rest of the book), **Editorial Notes**, and a **Chapter
+  Status** within the writing process. Today's `purpose`, `summary`,
+  and Master Outline Location are the seeds of this; whether Chapter
+  Memory becomes versioned documents, structured record fields, or a
+  mixture is precisely the question its blueprint must answer against
+  Principle XIII (which one kind of truth does each piece preserve?).
+  Nothing of this is implemented in Capability 3.
 - **Discovery Log** (Discovery stage): the import workflow made ambient
   — dated captures of conversations and ideas, each with provenance,
   distillable into memory documents or chapter drafts. The front porch
