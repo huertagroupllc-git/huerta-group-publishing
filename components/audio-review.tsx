@@ -51,6 +51,9 @@ export function AudioReview({
 
   // A session token ruling out stale playback callbacks.
   const session = useRef(0);
+  // The current speed, read at play time by every engine call — chained
+  // advances must never capture a stale rate in a closure.
+  const rateRef = useRef(1);
   const restored = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const engineRef = useRef<Engine>("hosted");
@@ -87,6 +90,7 @@ export function AudioReview({
             : rate;
         setIndex(i);
         setRate(r);
+        rateRef.current = r;
         return { i, r };
       }
     } catch {
@@ -138,34 +142,34 @@ export function AudioReview({
     }
   };
 
-  const advance = (from: number, r: number) => {
+  const advance = (from: number) => {
     if (from + 1 < playable.length) {
       setIndex(from + 1);
-      remember(from + 1, r);
-      speakFrom(from + 1, r);
+      remember(from + 1, rateRef.current);
+      speakFrom(from + 1);
     } else {
       setStatus("idle");
       setIndex(0);
-      remember(0, r);
+      remember(0, rateRef.current);
     }
   };
 
-  const browserSpeak = (i: number, r: number) => {
+  const browserSpeak = (i: number) => {
     const token = ++session.current;
     window.speechSynthesis.cancel();
     const entry = playable[i];
     if (!entry?.speech) return;
     const utterance = new SpeechSynthesisUtterance(entry.speech);
-    utterance.rate = r;
+    utterance.rate = rateRef.current;
     utterance.onend = () => {
       if (session.current !== token) return;
-      advance(i, r);
+      advance(i);
     };
     window.speechSynthesis.speak(utterance);
     setStatus("playing");
   };
 
-  const hostedSpeak = async (i: number, r: number) => {
+  const hostedSpeak = async (i: number) => {
     const token = ++session.current;
     audioRef.current?.pause();
     const url = await clipUrl(i);
@@ -177,7 +181,7 @@ export function AudioReview({
       if ("speechSynthesis" in window) {
         engineRef.current = "browser";
         setEngine("browser");
-        browserSpeak(i, r);
+        browserSpeak(i);
       } else {
         setUnavailable(true);
         setStatus("idle");
@@ -187,13 +191,16 @@ export function AudioReview({
 
     const audio = audioElement();
     audio.src = url;
-    audio.playbackRate = r;
+    // Assigning src resets the element's playbackRate — apply the
+    // current speed after src, and again once playback starts.
+    audio.playbackRate = rateRef.current;
     audio.onended = () => {
       if (session.current !== token) return;
-      advance(i, r);
+      advance(i);
     };
     try {
       await audio.play();
+      audio.playbackRate = rateRef.current;
       setStatus("playing");
       // Preload the next paragraph so flow stays near-gapless.
       if (i + 1 < playable.length) void clipUrl(i + 1);
@@ -202,17 +209,17 @@ export function AudioReview({
     }
   };
 
-  const speakFrom = (i: number, r: number) => {
+  const speakFrom = (i: number) => {
     if (engineRef.current === "hosted") {
-      void hostedSpeak(i, r);
+      void hostedSpeak(i);
     } else {
-      browserSpeak(i, r);
+      browserSpeak(i);
     }
   };
 
   const listen = () => {
-    const { i, r } = restore();
-    speakFrom(i, r);
+    const { i } = restore();
+    speakFrom(i);
   };
 
   const pause = () => {
@@ -222,7 +229,7 @@ export function AudioReview({
       window.speechSynthesis.pause();
     }
     setStatus("paused");
-    remember(index, rate);
+    remember(index, rateRef.current);
   };
 
   const resume = () => {
@@ -237,26 +244,27 @@ export function AudioReview({
   const stop = () => {
     stopEverything();
     setStatus("idle");
-    remember(index, rate);
+    remember(index, rateRef.current);
   };
 
   const jump = (i: number) => {
     const clamped = Math.min(Math.max(i, 0), playable.length - 1);
     setIndex(clamped);
-    remember(clamped, rate);
+    remember(clamped, rateRef.current);
     if (status !== "idle") {
-      speakFrom(clamped, rate);
+      speakFrom(clamped);
     }
   };
 
   const changeRate = (r: number) => {
+    rateRef.current = r;
     setRate(r);
     remember(index, r);
     if (engineRef.current === "hosted") {
       // Speed is a playback property: applies live, no restart.
       if (audioRef.current) audioRef.current.playbackRate = r;
     } else if (status === "playing") {
-      browserSpeak(index, r); // browser engine restarts the paragraph
+      browserSpeak(index); // browser engine restarts the paragraph
     }
   };
 
