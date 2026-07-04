@@ -101,7 +101,17 @@ house style, precise server-side logs (never secrets, never passwords).
 A generic error page is a bug. Degraded states must never endanger the
 record — reads fail soft; writes fail closed.
 
-## 12. Nothing important lives only in conversation
+## 12. Outbound data flows are deliberate
+
+The platform's default is that manuscript and memory text never leaves
+it. Any capability that sends author text to an external service (the
+first: Audio Review's hosted TTS synthesis) must be named in its
+blueprint, isolated behind one server route, gated by the same RLS
+entitlement as reading, bounded by explicit cost controls, and noted
+with the vendor's data-use terms. Identity documents are never sent
+wholesale; only the working text the feature needs.
+
+## 13. Nothing important lives only in conversation
 
 Durable decisions — blueprints, constitutions, terminology, reviews,
 setup steps — are committed files in this repository, written before or

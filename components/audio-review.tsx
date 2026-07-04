@@ -48,6 +48,7 @@ export function AudioReview({
   const [rate, setRate] = useState<number>(1);
   const [engine, setEngine] = useState<Engine>("hosted");
   const [unavailable, setUnavailable] = useState(false);
+  const [budgetSpent, setBudgetSpent] = useState(false);
 
   // A session token ruling out stale playback callbacks.
   const session = useRef(0);
@@ -58,7 +59,7 @@ export function AudioReview({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const engineRef = useRef<Engine>("hosted");
   const clipUrls = useRef<Map<number, string>>(new Map());
-  const clipFetches = useRef<Map<number, Promise<string | null>>>(new Map());
+  const clipFetches = useRef<Map<number, Promise<string | "budget" | null>>>(new Map());
 
   const storage = `audio-review:${versionId}`;
 
@@ -100,8 +101,9 @@ export function AudioReview({
   };
 
   /** Fetch (or reuse) a paragraph's audio as an object URL. Returns
-   *  null when the route is unconfigured or failing → fallback. */
-  const clipUrl = (i: number): Promise<string | null> => {
+   *  null when the route is unconfigured or failing → fallback, or
+   *  "budget" when the day's generation budget is spent. */
+  const clipUrl = (i: number): Promise<string | "budget" | null> => {
     const existing = clipUrls.current.get(i);
     if (existing) return Promise.resolve(existing);
     const inFlight = clipFetches.current.get(i);
@@ -110,7 +112,8 @@ export function AudioReview({
     const promise = fetch(
       `/api/audio-review?version=${encodeURIComponent(versionId)}&paragraph=${i}`,
     )
-      .then(async (res) => {
+      .then(async (res): Promise<string | "budget" | null> => {
+        if (res.status === 429) return "budget";
         if (!res.ok || !res.headers.get("content-type")?.includes("audio")) {
           return null;
         }
@@ -172,12 +175,18 @@ export function AudioReview({
   const hostedSpeak = async (i: number) => {
     const token = ++session.current;
     audioRef.current?.pause();
-    const url = await clipUrl(i);
+    // Fetch this paragraph and preload the next in parallel — the
+    // preload starts as the current paragraph starts, not after it,
+    // which is what keeps transitions near-gapless.
+    const current = clipUrl(i);
+    if (i + 1 < playable.length) void clipUrl(i + 1);
+    const url = await current;
     if (session.current !== token) return;
 
-    if (!url) {
-      // Route unconfigured or failing: degrade to the browser voice
-      // for the rest of this visit, with a quiet note.
+    if (url === "budget" || !url) {
+      // Budget spent, route unconfigured, or failing: degrade to the
+      // browser voice for the rest of this visit, with a quiet note.
+      if (url === "budget") setBudgetSpent(true);
       if ("speechSynthesis" in window) {
         engineRef.current = "browser";
         setEngine("browser");
@@ -202,8 +211,6 @@ export function AudioReview({
       await audio.play();
       audio.playbackRate = rateRef.current;
       setStatus("playing");
-      // Preload the next paragraph so flow stays near-gapless.
-      if (i + 1 < playable.length) void clipUrl(i + 1);
     } catch {
       setStatus("idle");
     }
@@ -359,7 +366,9 @@ export function AudioReview({
               </span>
               {engine === "browser" ? (
                 <span className="italic text-ink-faint">
-                  Natural voice unavailable — using the browser voice.
+                  {budgetSpent
+                    ? "Today's listening budget is spent — using the browser voice."
+                    : "Natural voice unavailable — using the browser voice."}
                 </span>
               ) : null}
             </>

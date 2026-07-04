@@ -1,21 +1,34 @@
+import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { speechBlocks } from "@/lib/manuscript/speech";
 
 /**
- * Audio Review — paragraph-level hosted TTS.
+ * Audio Review — paragraph-level hosted TTS with a content-addressed
+ * cache and a daily character budget.
  *
  * The client sends only a chapter version id and a paragraph index;
  * the paragraph text is recomputed server-side from the version loaded
  * THROUGH RLS with the caller's session — entitlement and content
- * integrity in one step. This route can never be used as an open TTS
- * proxy. OPENAI_API_KEY is server-only.
+ * integrity in one step. OPENAI_API_KEY is server-only.
  *
- * No caching in this slice: audio is generated per request and
- * streamed back (docs/blueprints/audio-review-hosted-tts.md, Slice 1).
+ * Cache: sha256(speechText + voice + model) in the private
+ * 'audio-review' bucket. Identical text yields identical audio, so
+ * staleness is impossible — finals cache forever, unchanged draft
+ * paragraphs reuse audio by the same rule. Only real OpenAI
+ * generations count against the daily budget; cache hits are free.
  */
 
 const MAX_PARAGRAPH_CHARS = 4000;
+const DEFAULT_DAILY_CHAR_LIMIT = 300_000;
+const BUCKET = "audio-review";
+
+const audioHeaders = {
+  "Content-Type": "audio/mpeg",
+  // The URL maps to mutable draft content, so the response itself is
+  // never browser-cached; persistence lives in the storage cache.
+  "Cache-Control": "private, no-store",
+};
 
 export async function GET(request: NextRequest) {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -75,6 +88,45 @@ export async function GET(request: NextRequest) {
   const model = process.env.AUDIO_REVIEW_MODEL ?? "tts-1";
   const voice = process.env.AUDIO_REVIEW_VOICE ?? "nova";
 
+  // Content-addressed cache lookup — a hit costs nothing and counts
+  // nothing.
+  const key = createHash("sha256")
+    .update(`${entry.speech}|${voice}|${model}`)
+    .digest("hex");
+  const objectPath = `${key}.mp3`;
+
+  const { data: cached } = await supabase.storage
+    .from(BUCKET)
+    .download(objectPath);
+
+  if (cached) {
+    return new Response(cached.stream(), {
+      status: 200,
+      headers: audioHeaders,
+    });
+  }
+
+  // Cache miss: enforce the daily budget before generating.
+  const limit = Number(
+    process.env.AUDIO_REVIEW_DAILY_CHAR_LIMIT ?? DEFAULT_DAILY_CHAR_LIMIT,
+  );
+  const today = new Date().toISOString().slice(0, 10);
+
+  const { data: usage } = await supabase
+    .from("tts_usage")
+    .select("characters")
+    .eq("user_id", user.id)
+    .eq("day", today)
+    .maybeSingle();
+
+  const spent = usage?.characters ?? 0;
+  if (spent + entry.speech.length > limit) {
+    return NextResponse.json(
+      { error: "budget_exhausted" },
+      { status: 429, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
   const ttsResponse = await fetch("https://api.openai.com/v1/audio/speech", {
     method: "POST",
     headers: {
@@ -89,7 +141,7 @@ export async function GET(request: NextRequest) {
     }),
   });
 
-  if (!ttsResponse.ok || !ttsResponse.body) {
+  if (!ttsResponse.ok) {
     const detail = await ttsResponse.text().catch(() => "");
     console.error(
       "[audio-review] TTS request failed",
@@ -99,15 +151,32 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "tts_failed" }, { status: 502 });
   }
 
+  const audio = Buffer.from(await ttsResponse.arrayBuffer());
+
+  // Persist to the cache and record the spend. Neither failure should
+  // cost the author their audio — log and stream regardless.
+  const { error: uploadError } = await supabase.storage
+    .from(BUCKET)
+    .upload(objectPath, audio, { contentType: "audio/mpeg", upsert: true });
+  if (uploadError) {
+    console.error("[audio-review] cache upload failed", uploadError);
+  }
+
+  const { error: usageError } = await supabase.from("tts_usage").upsert(
+    {
+      user_id: user.id,
+      day: today,
+      characters: spent + entry.speech.length,
+    },
+    { onConflict: "user_id,day" },
+  );
+  if (usageError) {
+    console.error("[audio-review] usage record failed", usageError);
+  }
+
   console.log(
-    `[audio-review] generated ${entry.speech.length} chars (version ${versionId}, paragraph ${paragraph})`,
+    `[audio-review] generated ${entry.speech.length} chars (version ${versionId}, paragraph ${paragraph}); ${spent + entry.speech.length}/${limit} today`,
   );
 
-  return new Response(ttsResponse.body, {
-    status: 200,
-    headers: {
-      "Content-Type": "audio/mpeg",
-      "Cache-Control": "private, no-store",
-    },
-  });
+  return new Response(audio, { status: 200, headers: audioHeaders });
 }

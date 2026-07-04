@@ -55,6 +55,10 @@ Applied in order:
 8. `supabase/migrations/20260709000000_chapter_core_question.sql` — the
    Core Question chapter field (nullable; required for new chapters at
    the application level) and the updated create_chapter function.
+9. `supabase/migrations/20260710000000_audio_review_cache.sql` — Audio
+   Review cost controls: the private audio-review storage bucket with
+   policies (content-addressed cache) and the tts_usage table with RLS
+   (daily character budget).
 
 Preferred (keeps migration history tracked by the CLI):
 
