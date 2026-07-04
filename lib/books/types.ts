@@ -66,6 +66,16 @@ export function bookStatusLabel(status: BookStatus): string {
   return BOOK_STATUSES.find((s) => s.value === status)?.label ?? status;
 }
 
+/**
+ * The home transition (Capability 3, Amendment 3 / Principle XIV): from
+ * the Writing stage onward the Writing Workspace is the author's home
+ * and the Book Study becomes the book's reference page. Emphasis only —
+ * nothing is hidden. Discovery and Archived books lead with the Study.
+ */
+export function isWritingStage(status: BookStatus): boolean {
+  return status !== "discovery" && status !== "archived";
+}
+
 export interface BookRecord {
   id: string;
   author_id: string;

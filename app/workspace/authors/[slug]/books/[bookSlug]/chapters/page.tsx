@@ -99,16 +99,29 @@ export default async function ChapterLibraryPage({
       </div>
 
       <section className="mt-10">
-        <div className="rule flex items-baseline justify-between pt-5">
+        <div className="rule flex items-baseline justify-between gap-x-6 pt-5">
           <h2 className="eyebrow">Chapters</h2>
-          <ActionLink href={`${libraryPath}/new`}>Add a chapter</ActionLink>
+          <span className="flex items-baseline gap-6">
+            <ActionLink href={`${libraryPath}/new`}>Add a chapter</ActionLink>
+            <ActionLink
+              href={`/workspace/authors/${author.slug}/books/${book.slug}/manuscript`}
+            >
+              Reading Copy
+            </ActionLink>
+          </span>
         </div>
 
         {chapters.length === 0 ? (
           <p className="mt-6 max-w-prose italic text-ink-soft">
-            The manuscript begins with its first chapter. Your Master
-            Outline already holds the shape — open it beside you and add
-            the first chapter here.
+            The manuscript begins with its first chapter. Your{" "}
+            <Link
+              href={`/workspace/authors/${author.slug}/books/${book.slug}/memory/master-outline`}
+              className="text-oxblood underline-offset-4 hover:underline"
+            >
+              Master Outline
+            </Link>{" "}
+            already holds the shape — open it beside you and add the first
+            chapter here.
           </p>
         ) : (
           groups.map((group) => (

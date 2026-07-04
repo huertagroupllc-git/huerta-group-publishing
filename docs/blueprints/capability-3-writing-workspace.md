@@ -1,9 +1,9 @@
 # Capability 3 Blueprint — The Writing Workspace
 
 Huerta Group Publishing · Author Operating System
-Status: approved with amendments, July 2026 (Amendments 1–7 are
-incorporated and marked below). Blueprint only — no code, no migrations,
-no application changes. Implementation awaits the Slice 1 prompt.
+Status: **complete** — implemented and accepted July 2026 (v0.3.0).
+Amendments 1–7 are incorporated and marked below; a retrospective
+closes the document.
 
 Governing canon: all four constitutions (including Principles XIV and
 XV), the terminology document, both milestone blueprints and their
@@ -506,3 +506,56 @@ with backfill, manuscript_parts, chapters, chapter_versions, five RPCs,
 hosted project), `lib/manuscript/` types and queries, the Chapter
 Library with Part grouping and record editing, and The Manuscript
 section on the Book Study — ending with a verified production deploy.
+
+
+---
+
+## Retrospective (July 2026, at v0.3.0)
+
+**What was built.** All four slices, in order: the Manuscript
+Foundation (manuscripts backfilled, Parts from day one, chapters with
+identity and the living outline link); the writing room (the quiet
+room, explicit save, The Brief and the Concepts reference in the
+margin); the Reader Experience (the Reading Copy, Chapter Context
+inspectable verbatim, reading navigation); and Author Ready (the home
+transition, the Principle XIV section reordering, a friction pass).
+Nothing out of scope was built; the AI seat remains reserved and
+invisible.
+
+**Decisions that proved correct.**
+- *The Manuscript as a first-class object* (Amendment 1) gave the
+  Reading Copy and word totals a natural owner and cost one thin table.
+- *Chapters as records + versions* made "Unwritten / Draft open /
+  Version N" derivable state — no chapter status machinery needed.
+- *Fresh chapter trigger functions with honest column names* over
+  function reuse: the two small functions cost minutes; `chapter_id`
+  reads truthfully forever.
+- *The home transition as two emphasis changes* (link target, section
+  order) delivered Principle XIV's first UI expression with no routes
+  moved and nothing hidden.
+- *Composing shared organs* (VersionRail, VersionFields) instead of
+  growing DocumentRoomView modes kept both room kinds simple.
+
+**Lessons.**
+- TypeScript's narrowing does not survive closures over `let` — the
+  capture-a-const pattern is now house style in page loaders.
+- Reading order lives in exactly one convention (ungrouped first, then
+  parts by position) — it must be computed identically in the Library,
+  the room's neighbors, and manuscript assembly; a shared helper is
+  worth extracting the next time a fourth consumer appears (rule of
+  two, applied to conventions).
+
+**Open verdicts carried forward (for real-use acceptance).**
+- **Autosave** (Amendment 6): explicit save shipped; judge against real
+  multi-hour sessions.
+- **Markdown preview while drafting**: the typeset read-back may
+  suffice; a real chapter will tell.
+- **Chapter deletion**: unwritten chapters currently cannot be removed
+  by authors; decide when it first matters.
+
+**Conventions established.** Manuscript is not memory (`/chapters`
+beside `/memory`; written, never established); every level's assembly
+reads a security_invoker view and composes by reference; stage-aware
+emphasis is implemented as data-driven ordering, never as hiding;
+records carry working identity (purpose, summary) while versioned
+objects carry truth.

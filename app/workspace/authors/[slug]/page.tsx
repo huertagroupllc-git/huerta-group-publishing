@@ -6,7 +6,7 @@ import { SetupNotice } from "@/components/setup-notice";
 import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
 import { assembleAuthorContext, serializeContext } from "@/lib/memory/assemble";
 import { listBooks, type BookRosterEntry } from "@/lib/books/queries";
-import { bookStatusLabel } from "@/lib/books/types";
+import { bookStatusLabel, isWritingStage } from "@/lib/books/types";
 import { getAuthorStudy, type AuthorStudy } from "@/lib/memory/queries";
 import { docTypeMeta, formatDate } from "@/lib/memory/types";
 import { createClient } from "@/lib/supabase/server";
@@ -165,14 +165,17 @@ export default async function AuthorStudyPage({
           </p>
         ) : (
           <ul>
-            {books.map((book) => (
+            {books.map((book) => {
+              const bookPath = `/workspace/authors/${author.slug}/books/${book.slug}`;
+              const writing = isWritingStage(book.status);
+              return (
               <li
                 key={book.id}
                 className="rule flex flex-wrap items-baseline justify-between gap-x-8 gap-y-1 py-5 first:border-t-0"
               >
                 <div className="flex items-baseline gap-4">
                   <Link
-                    href={`/workspace/authors/${author.slug}/books/${book.slug}`}
+                    href={writing ? `${bookPath}/chapters` : bookPath}
                     className="font-display text-2xl tracking-tight hover:text-oxblood"
                   >
                     {book.title}
@@ -182,13 +185,22 @@ export default async function AuthorStudyPage({
                       {book.subtitle}
                     </span>
                   ) : null}
+                  {writing ? (
+                    <Link
+                      href={bookPath}
+                      className="font-sans text-xs text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
+                    >
+                      the record
+                    </Link>
+                  ) : null}
                 </div>
                 <span className="font-sans text-xs text-ink-faint">
                   {bookStatusLabel(book.status)} · {book.establishedCount} of
                   3 documents established
                 </span>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </section>

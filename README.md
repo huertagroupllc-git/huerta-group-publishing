@@ -22,10 +22,11 @@ AI here is a servant of the author's voice, never a source of it. The
 platform will never generate an author's identity documents, silently
 rewrite their words, or flatten their tone.
 
-## What exists today — Milestones 1 and 2, complete
+## What exists today — Milestones 1, 2, and 3, complete
 
-The **Author Memory System** and the **Book Memory System**: the first
-two levels of the author-first hierarchy, live in production.
+The **Author Memory System**, the **Book Memory System**, and the
+**Writing Workspace**: memory, intent, and the manuscript itself, live
+in production.
 
 - **The Author Roster** (`/workspace`) — the imprint's authors, each with a
   count of established memory documents.
@@ -66,6 +67,24 @@ two levels of the author-first hierarchy, live in production.
   receive: the author's active finalized memory first (it governs), then
   the book's (it specializes) — version-stamped, computed at read time,
   inspectable verbatim on the Book Study.
+- **The Manuscript** — a first-class object per book (Author → Book →
+  Manuscript → Part → Chapter): chapters as the primary unit of
+  authorship (Principle XV), each with identity (title, purpose,
+  summary, Master Outline Location with a version-precise link) and the
+  full append-only version workflow.
+- **The Chapter Library** — chapters in reading order, grouped under
+  Parts, with word counts, states, and word-button arrangement.
+- **The writing room** — one chapter at a time: a quiet full-measure
+  Markdown surface, explicit Save draft (no autosave by design), The
+  Brief and the version rail in the margin, the active Concept
+  Dictionary in reach, and the verbatim Chapter Context preview.
+- **The Reading Copy** — the manuscript assembled read-only from active
+  chapter versions: title page, Parts as section breaks, chapters in
+  sequence, computed at read time, never stored.
+- **The home transition** — Principle XIV visible: from the Writing
+  stage onward, book titles open the Chapter Library and the manuscript
+  leads the Book Study; in Discovery, memory leads. Emphasis only;
+  nothing is hidden.
 - **Auth** — Supabase email/password; the workspace is staff-only (JWT
   `app_metadata.role = 'staff'`) plus each author's own linked record,
   enforced by Row Level Security.
@@ -73,9 +92,9 @@ two levels of the author-first hierarchy, live in production.
 
 ## Current non-goals
 
-Deliberate exclusions, not omissions: research vaults and chapters
-(next), AI features of any kind (the assembly functions exist; nothing
-calls a model),
+Deliberate exclusions, not omissions: the Research Vault and Discovery
+Log (next), AI features of any kind (the assembly functions exist —
+Chapter Context is inspectable verbatim — but nothing calls a model),
 rich text editing (Markdown in, typeset prose out), version diff views,
 teams/invitations, dashboards or metrics, file uploads, and any public
 website beyond the holding page.
@@ -122,16 +141,18 @@ the permanent data layer; GitHub as the only path to production.
   (`create_author_with_documents`, `create_document_version`,
   `activate_document_version`) wrap multi-step writes; RLS applies to the
   calling user throughout. The app never uses `service_role`.
-- **Modules**: `lib/memory/` and `lib/books/` (types, queries, server
-  actions, context assembly — parallel, per level), `lib/supabase/` (SSR
+- **Modules**: `lib/memory/`, `lib/books/`, and `lib/manuscript/`
+  (types, queries, server actions, context assembly — parallel, per
+  level), `lib/supabase/` (SSR
   clients + session proxy), `lib/auth/` (sign-in/out),
   `components/editorial.tsx` and `components/document-room.tsx` (the
   house UI patterns and the shared Document Room),
   `app/workspace/…` (rosters, studies, memory documents, record editing).
-- **Context assembly** (`lib/memory/assemble.ts`, `lib/books/assemble.ts`)
-  reads only the `active_author_memory` and `active_book_memory` views —
-  drafts and superseded versions can never reach an AI context, by
-  construction. Book context composes with author context by reference;
+- **Context assembly** (`lib/memory/assemble.ts`, `lib/books/assemble.ts`,
+  `lib/manuscript/assemble.ts`) reads only the `active_author_memory`,
+  `active_book_memory`, and `active_manuscript` views — drafts and
+  superseded versions can never reach an AI context or a reader, by
+  construction. Each level composes with the one above by reference;
   nothing is copied or stored.
 
 ## Production-first workflow
@@ -179,6 +200,7 @@ pnpm build      # must pass before pushing
 
 ## What's next
 
-**Capability 3: the Research Vault and Chapters** — the next layer of the
-hierarchy beneath the Concept Dictionary. It begins with a blueprint for
-review, not code, exactly as the first two milestones did.
+**Capability 4** — either the Discovery capability (Research Vault and
+Discovery Log) or the first AI capability (a Draft Assistant consuming
+Chapter Context). It begins with a blueprint for review, not code,
+exactly as every capability before it did.

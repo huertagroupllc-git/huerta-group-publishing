@@ -59,7 +59,7 @@ docs/blueprints/book-lifecycle-stages.md. Book documents use the same
 verbs as author documents: established, draft, finalized, activated,
 superseded, restored, discarded.
 
-## Capability 3 terms (Reading Copy ratified July 2026; the rest proposed with the Capability 3 blueprint)
+## Capability 3 terms (ratified July 2026)
 
 | Term | Verdict | Canon |
 | --- | --- | --- |
@@ -71,6 +71,9 @@ superseded, restored, discarded.
 | **Purpose** | Keep | Chapter identity: *why this chapter exists*. Record field, unversioned; the authoritative intent remains the Master Outline. |
 | **Summary** | Keep | Chapter identity: *what happens in this chapter*. Record field, unversioned; shown beneath the title in the Chapter Library. |
 | **Master Outline Location** | Keep (renamed from "Outline section", July 2026) | The field naming where in the Master Outline a chapter belongs — always this full label in UI (the underlying column remains `outline_section`). Paired with the version stamp "Shaped under Master Outline vN". |
+| **The Brief** | Keep | The writing room's margin block: purpose, summary, Master Outline Location, word count. Working orientation, never louder than the manuscript. |
+| **Chapter Context** | Keep | The verbatim payload future AI assistance would receive for one chapter: Book Assembled Memory, then the chapter frame, then the chapter's active text. Inspectable in the writing room's margin. |
+| **The Manuscript** | Keep | Both the Book Study section and the Chapter Library's page title — the book's chapters as a working whole. |
 
 ## Button and action canon
 
@@ -81,6 +84,7 @@ superseded, restored, discarded.
 - Superseded version → **Restore as the active version**
 - Draft removal → **Discard this draft**
 - Next version → **New version**
+- Unwritten chapter → **Begin the chapter**
 
 ## Colophon labels
 

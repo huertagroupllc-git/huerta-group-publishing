@@ -13,7 +13,7 @@ import Link from "next/link";
 import { assembleBookContext, serializeBookContext } from "@/lib/books/assemble";
 import { getManuscriptSummary, type ManuscriptSummary } from "@/lib/manuscript/queries";
 import { getBookStudy, type BookStudy } from "@/lib/books/queries";
-import { BOOK_DOC_TYPES, bookStatusLabel } from "@/lib/books/types";
+import { BOOK_DOC_TYPES, bookStatusLabel, isWritingStage } from "@/lib/books/types";
 import { assembleAuthorContext } from "@/lib/memory/assemble";
 import { formatDate } from "@/lib/memory/types";
 import { createClient } from "@/lib/supabase/server";
@@ -88,6 +88,117 @@ export default async function BookStudyPage({
 
   const { author, book, origins, documents } = study;
   const memoryPath = `/workspace/authors/${author.slug}/books/${book.slug}/memory`;
+
+  const writingStage = isWritingStage(book.status);
+
+  // Principle XIV made visible: from the Writing stage onward the
+  // manuscript leads and memory becomes reference. Emphasis only.
+  const memorySection = (
+      <section className="mt-14">
+        <div className="rule pt-5">
+          <h2 className="eyebrow">The Book&rsquo;s Memory</h2>
+        </div>
+
+        <ul>
+          {BOOK_DOC_TYPES.map((meta) => {
+            const DocGlyph =
+              meta.type === "book_constitution"
+                ? ConstitutionGlyph
+                : meta.type === "master_outline"
+                  ? OutlineGlyph
+                  : DictionaryGlyph;
+            const doc = documents.find((d) => d.docType === meta.type);
+            return (
+              <li
+                key={meta.type}
+                className="rule grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-5 py-6 first:border-t-0"
+              >
+                <DocGlyph className="mt-1 text-ink-soft/75" />
+                <div className="max-w-xl">
+                  <Link
+                    href={`${memoryPath}/${meta.slug}`}
+                    className="font-display text-2xl tracking-tight hover:text-oxblood"
+                  >
+                    {meta.label}
+                  </Link>
+                  <p className="mt-2 leading-relaxed text-ink-soft">
+                    {meta.description}
+                  </p>
+                  <p className="mt-3 font-sans text-xs text-ink-faint">
+                    {doc?.activeVersion ? (
+                      <span className="text-ink-soft">
+                        Version {doc.activeVersion.versionNumber}
+                        {doc.activeVersion.finalizedAt
+                          ? ` · finalized ${formatDate(doc.activeVersion.finalizedAt)}`
+                          : ""}
+                      </span>
+                    ) : (
+                      <span className="italic">Not yet established</span>
+                    )}
+                    {doc?.hasDraft ? (
+                      <Link
+                        href={`${memoryPath}/${meta.slug}?draft=1`}
+                        className="ml-3 not-italic text-oxblood underline-offset-4 hover:underline"
+                      >
+                        Draft open
+                      </Link>
+                    ) : null}
+                  </p>
+                </div>
+                <OpensGlyph className="mr-2 h-5 w-5 self-center text-ink-faint" />
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+  );
+
+  const manuscriptSection = (
+      <section className="mt-14">
+        <div className="rule flex items-baseline justify-between gap-x-6 pt-5">
+          <h2 className="eyebrow">The Manuscript</h2>
+          <span className="flex items-baseline gap-6">
+            <ActionLink
+              href={`/workspace/authors/${author.slug}/books/${book.slug}/chapters`}
+            >
+              Chapters
+            </ActionLink>
+            <ActionLink
+              href={`/workspace/authors/${author.slug}/books/${book.slug}/manuscript`}
+            >
+              Reading Copy
+            </ActionLink>
+          </span>
+        </div>
+        {manuscriptNote ? (
+          <p className="mt-5 max-w-prose font-sans text-sm text-ink-soft">
+            {manuscriptNote}
+          </p>
+        ) : manuscriptSummary && manuscriptSummary.chapterCount > 0 ? (
+          <p className="mt-5 font-sans text-xs text-ink-soft">
+            {manuscriptSummary.chapterCount}{" "}
+            {manuscriptSummary.chapterCount === 1 ? "chapter" : "chapters"}
+            {manuscriptSummary.partCount > 0
+              ? ` in ${manuscriptSummary.partCount} ${
+                  manuscriptSummary.partCount === 1 ? "part" : "parts"
+                }`
+              : ""}
+            {manuscriptSummary.totalWords > 0
+              ? ` · ${new Intl.NumberFormat("en-US").format(manuscriptSummary.totalWords)} words`
+              : ""}
+            {manuscriptSummary.draftCount > 0
+              ? ` · ${manuscriptSummary.draftCount} ${
+                  manuscriptSummary.draftCount === 1 ? "draft" : "drafts"
+                } open`
+              : ""}
+          </p>
+        ) : (
+          <p className="mt-5 max-w-prose italic text-ink-soft">
+            The manuscript begins with its first chapter.
+          </p>
+        )}
+      </section>
+  );
 
   return (
     <WorkspaceFrame
@@ -170,108 +281,17 @@ export default async function BookStudyPage({
         <ErrorNote message={error} />
       </div>
 
-      <section className="mt-14">
-        <div className="rule pt-5">
-          <h2 className="eyebrow">The Book&rsquo;s Memory</h2>
-        </div>
-
-        <ul>
-          {BOOK_DOC_TYPES.map((meta) => {
-            const DocGlyph =
-              meta.type === "book_constitution"
-                ? ConstitutionGlyph
-                : meta.type === "master_outline"
-                  ? OutlineGlyph
-                  : DictionaryGlyph;
-            const doc = documents.find((d) => d.docType === meta.type);
-            return (
-              <li
-                key={meta.type}
-                className="rule grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-5 py-6 first:border-t-0"
-              >
-                <DocGlyph className="mt-1 text-ink-soft/75" />
-                <div className="max-w-xl">
-                  <Link
-                    href={`${memoryPath}/${meta.slug}`}
-                    className="font-display text-2xl tracking-tight hover:text-oxblood"
-                  >
-                    {meta.label}
-                  </Link>
-                  <p className="mt-2 leading-relaxed text-ink-soft">
-                    {meta.description}
-                  </p>
-                  <p className="mt-3 font-sans text-xs text-ink-faint">
-                    {doc?.activeVersion ? (
-                      <span className="text-ink-soft">
-                        Version {doc.activeVersion.versionNumber}
-                        {doc.activeVersion.finalizedAt
-                          ? ` · finalized ${formatDate(doc.activeVersion.finalizedAt)}`
-                          : ""}
-                      </span>
-                    ) : (
-                      <span className="italic">Not yet established</span>
-                    )}
-                    {doc?.hasDraft ? (
-                      <Link
-                        href={`${memoryPath}/${meta.slug}?draft=1`}
-                        className="ml-3 not-italic text-oxblood underline-offset-4 hover:underline"
-                      >
-                        Draft open
-                      </Link>
-                    ) : null}
-                  </p>
-                </div>
-                <OpensGlyph className="mr-2 h-5 w-5 self-center text-ink-faint" />
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
-      <section className="mt-14">
-        <div className="rule flex items-baseline justify-between gap-x-6 pt-5">
-          <h2 className="eyebrow">The Manuscript</h2>
-          <span className="flex items-baseline gap-6">
-            <ActionLink
-              href={`/workspace/authors/${author.slug}/books/${book.slug}/chapters`}
-            >
-              Open the chapters
-            </ActionLink>
-            <ActionLink
-              href={`/workspace/authors/${author.slug}/books/${book.slug}/manuscript`}
-            >
-              Reading Copy
-            </ActionLink>
-          </span>
-        </div>
-        {manuscriptNote ? (
-          <p className="mt-5 max-w-prose font-sans text-sm text-ink-soft">
-            {manuscriptNote}
-          </p>
-        ) : manuscriptSummary && manuscriptSummary.chapterCount > 0 ? (
-          <p className="mt-5 font-sans text-xs text-ink-soft">
-            {manuscriptSummary.chapterCount}{" "}
-            {manuscriptSummary.chapterCount === 1 ? "chapter" : "chapters"}
-            {manuscriptSummary.partCount > 0
-              ? ` in ${manuscriptSummary.partCount} ${
-                  manuscriptSummary.partCount === 1 ? "part" : "parts"
-                }`
-              : ""}
-            {manuscriptSummary.totalWords > 0
-              ? ` · ${new Intl.NumberFormat("en-US").format(manuscriptSummary.totalWords)} words`
-              : ""}
-            {manuscriptSummary.draftCount > 0
-              ? ` · ${manuscriptSummary.draftCount} ${
-                  manuscriptSummary.draftCount === 1 ? "draft" : "drafts"
-                } open`
-              : ""}
-          </p>
-        ) : (
-          <p className="mt-5 max-w-prose italic text-ink-soft">
-            The manuscript begins with its first chapter.
-          </p>
-        )}
-      </section>
+      {writingStage ? (
+        <>
+          {manuscriptSection}
+          {memorySection}
+        </>
+      ) : (
+        <>
+          {memorySection}
+          {manuscriptSection}
+        </>
+      )}
 
       <section className="mt-14">
         <details className="group">
