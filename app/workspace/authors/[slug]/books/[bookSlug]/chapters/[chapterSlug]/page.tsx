@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import ReactMarkdown from "react-markdown";
+import { AudioReview } from "@/components/audio-review";
 import {
   VersionFields,
   VersionRail,
@@ -402,9 +403,11 @@ function ChapterReadingPane({
         </p>
       ) : null}
 
-      <div className="doc-prose mt-10 max-w-prose">
-        <ReactMarkdown>{version.content}</ReactMarkdown>
-      </div>
+      <AudioReview
+        markdown={version.content}
+        storageKey={version.id}
+        renderProse
+      />
     </article>
   );
 }
@@ -491,6 +494,13 @@ function ChapterDraftEditor({
         Draft · Version {draft.version_number} · begun{" "}
         {formatDate(draft.created_at)}
       </p>
+
+      <AudioReview
+        markdown={draft.content}
+        storageKey={draft.id}
+        renderProse={false}
+        note="Reads the draft as last saved."
+      />
 
       <form action={updateChapterDraft} className="mt-6 space-y-8">
         <input type="hidden" name="version_id" value={draft.id} />
