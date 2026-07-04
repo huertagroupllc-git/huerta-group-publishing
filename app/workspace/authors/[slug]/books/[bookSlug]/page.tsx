@@ -229,13 +229,20 @@ export default async function BookStudyPage({
       </section>
 
       <section className="mt-14">
-        <div className="rule flex items-baseline justify-between pt-5">
+        <div className="rule flex items-baseline justify-between gap-x-6 pt-5">
           <h2 className="eyebrow">The Manuscript</h2>
-          <ActionLink
-            href={`/workspace/authors/${author.slug}/books/${book.slug}/chapters`}
-          >
-            Open the chapters
-          </ActionLink>
+          <span className="flex items-baseline gap-6">
+            <ActionLink
+              href={`/workspace/authors/${author.slug}/books/${book.slug}/chapters`}
+            >
+              Open the chapters
+            </ActionLink>
+            <ActionLink
+              href={`/workspace/authors/${author.slug}/books/${book.slug}/manuscript`}
+            >
+              Reading Copy
+            </ActionLink>
+          </span>
         </div>
         {manuscriptNote ? (
           <p className="mt-5 max-w-prose font-sans text-sm text-ink-soft">
@@ -249,6 +256,9 @@ export default async function BookStudyPage({
               ? ` in ${manuscriptSummary.partCount} ${
                   manuscriptSummary.partCount === 1 ? "part" : "parts"
                 }`
+              : ""}
+            {manuscriptSummary.totalWords > 0
+              ? ` · ${new Intl.NumberFormat("en-US").format(manuscriptSummary.totalWords)} words`
               : ""}
             {manuscriptSummary.draftCount > 0
               ? ` · ${manuscriptSummary.draftCount} ${

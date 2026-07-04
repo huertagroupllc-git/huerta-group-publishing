@@ -148,6 +148,7 @@ export interface ManuscriptSummary {
   chapterCount: number;
   partCount: number;
   draftCount: number;
+  totalWords: number;
 }
 
 /** Light summary for the Book Study's Manuscript section. */
@@ -168,24 +169,44 @@ export async function getManuscriptSummary(
 
   const chapterIds = (manuscript.chapters ?? []).map((c) => c.id);
   let draftCount = 0;
+  let totalWords = 0;
   if (chapterIds.length) {
-    const { count, error: draftError } = await supabase
-      .from("chapter_versions")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "draft")
-      .in("chapter_id", chapterIds);
-    if (draftError)
+    const [draftsResult, activesResult] = await Promise.all([
+      supabase
+        .from("chapter_versions")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "draft")
+        .in("chapter_id", chapterIds),
+      supabase
+        .from("active_manuscript")
+        .select("content, version_id")
+        .eq("book_id", bookId),
+    ]);
+    if (draftsResult.error)
       throw new Error(
-        `Could not load chapter drafts: ${draftError.message}`,
+        `Could not load chapter drafts: ${draftsResult.error.message}`,
       );
-    draftCount = count ?? 0;
+    if (activesResult.error)
+      throw new Error(
+        `Could not load the manuscript: ${activesResult.error.message}`,
+      );
+    draftCount = draftsResult.count ?? 0;
+    totalWords = (activesResult.data ?? [])
+      .filter((r) => r.version_id !== null)
+      .reduce((sum, r) => sum + countWords(r.content ?? ""), 0);
   }
 
   return {
     chapterCount: chapterIds.length,
     partCount: (manuscript.manuscript_parts ?? []).length,
     draftCount,
+    totalWords,
   };
+}
+
+export interface ChapterNeighbor {
+  slug: string;
+  title: string;
 }
 
 export interface ChapterRoom {
@@ -197,6 +218,10 @@ export interface ChapterRoom {
   outlineVersionNumber: number | null;
   /** The active Concept Dictionary, for the read-only margin reference. */
   conceptDictionary: { versionNumber: number; content: string } | null;
+  /** Reading-order position, e.g. "Chapter 4 of 12" or "Appendix". */
+  positionLabel: string;
+  previousChapter: ChapterNeighbor | null;
+  nextChapter: ChapterNeighbor | null;
 }
 
 export const getChapterRoom = cache(async function getChapterRoom(
@@ -251,7 +276,7 @@ export const getChapterRoom = cache(async function getChapterRoom(
     throw new Error(`Could not load the chapter: ${chapterError.message}`);
   if (!chapter) return null;
 
-  const [versionsResult, outlineResult, dictionaryResult] =
+  const [versionsResult, outlineResult, dictionaryResult, siblingsResult, partsResult] =
     await Promise.all([
       supabase
         .from("chapter_versions")
@@ -273,6 +298,16 @@ export const getChapterRoom = cache(async function getChapterRoom(
         .eq("book_id", book.id)
         .eq("doc_type", "concept_dictionary")
         .maybeSingle(),
+      supabase
+        .from("chapters")
+        .select("id, slug, title, kind, position, part_id")
+        .eq("manuscript_id", manuscript.id)
+        .order("position"),
+      supabase
+        .from("manuscript_parts")
+        .select("id, position")
+        .eq("manuscript_id", manuscript.id)
+        .order("position"),
     ]);
 
   if (versionsResult.error)
@@ -289,6 +324,29 @@ export const getChapterRoom = cache(async function getChapterRoom(
 
   const dictionary = dictionaryResult.data;
 
+  // Reading order: ungrouped chapters first, then parts by position.
+  const siblings = siblingsResult.data ?? [];
+  const partOrder = new Map(
+    (partsResult.data ?? []).map((p) => [p.id, p.position]),
+  );
+  const ordered = [
+    ...siblings.filter((c) => !c.part_id),
+    ...[...siblings.filter((c) => c.part_id)].sort(
+      (a, b) =>
+        (partOrder.get(a.part_id) ?? 0) - (partOrder.get(b.part_id) ?? 0) ||
+        a.position - b.position,
+    ),
+  ];
+  const index = ordered.findIndex((c) => c.id === chapter.id);
+  const numbered = ordered.filter((c) => c.kind === "chapter");
+  const positionLabel =
+    chapter.kind === "appendix"
+      ? "Appendix"
+      : `Chapter ${numbered.findIndex((c) => c.id === chapter.id) + 1} of ${numbered.length}`;
+  const previous = index > 0 ? ordered[index - 1] : null;
+  const next =
+    index >= 0 && index < ordered.length - 1 ? ordered[index + 1] : null;
+
   return {
     author,
     book,
@@ -302,5 +360,10 @@ export const getChapterRoom = cache(async function getChapterRoom(
             content: dictionary.content ?? "",
           }
         : null,
+    positionLabel,
+    previousChapter: previous
+      ? { slug: previous.slug, title: previous.title }
+      : null,
+    nextChapter: next ? { slug: next.slug, title: next.title } : null,
   };
 });

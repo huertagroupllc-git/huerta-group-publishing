@@ -22,7 +22,10 @@ import {
   saveAndActivateChapterDraft,
   updateChapterDraft,
 } from "@/lib/manuscript/actions";
+import { assembleBookContext } from "@/lib/books/assemble";
+import { serializeChapterContext } from "@/lib/manuscript/assemble";
 import { getChapterRoom, type ChapterRoom } from "@/lib/manuscript/queries";
+import { assembleAuthorContext } from "@/lib/memory/assemble";
 import { countWords, formatWordCount } from "@/lib/manuscript/types";
 import {
   IMPORT_SOURCES,
@@ -61,8 +64,38 @@ export default async function ChapterRoomPage({
   const { slug, bookSlug, chapterSlug } = await params;
 
   let room: ChapterRoom | null;
+  let chapterContext: string;
   try {
     room = await getChapterRoom(slug, bookSlug, chapterSlug);
+    if (room) {
+      const r = room;
+      const [authorCtx, bookCtx] = await Promise.all([
+        assembleAuthorContext(r.author.id),
+        assembleBookContext(r.book.id),
+      ]);
+      const activeVersion =
+        r.versions.find((v) => v.id === r.chapter.active_version_id) ?? null;
+      chapterContext = serializeChapterContext(
+        authorCtx,
+        bookCtx,
+        r.author.pen_name ?? r.author.full_name,
+        r.book.title,
+        {
+          title: r.chapter.title,
+          positionLabel: r.positionLabel,
+          purpose: r.chapter.purpose,
+          summary: r.chapter.summary,
+          outlineSection: r.chapter.outline_section,
+          outlineVersionNumber: r.outlineVersionNumber,
+          previousChapterTitle: r.previousChapter?.title ?? null,
+          nextChapterTitle: r.nextChapter?.title ?? null,
+          activeVersionNumber: activeVersion?.version_number ?? null,
+          activeContent: activeVersion?.content ?? null,
+        },
+      );
+    } else {
+      chapterContext = "";
+    }
   } catch (error) {
     console.error("[manuscript] chapter room failed to load", error);
     return (
@@ -121,6 +154,9 @@ export default async function ChapterRoomPage({
           <h1 className="mt-2 font-display text-4xl tracking-tight">
             {chapter.title}
           </h1>
+          <p className="mt-2 font-sans text-[0.6875rem] text-ink-faint">
+            {room.positionLabel}
+          </p>
 
           <div className="mt-4">
             <ErrorNote message={query.error} />
@@ -236,8 +272,67 @@ export default async function ChapterRoomPage({
               </p>
             )}
           </details>
+
+          <details className="group mt-8">
+            <summary className="rule flex cursor-pointer list-none items-baseline justify-between pt-5">
+              <span className="eyebrow group-open:text-oxblood">
+                Chapter Context
+              </span>
+              <span className="font-sans text-xs text-oxblood">
+                <span className="group-open:hidden">Show</span>
+                <span className="hidden group-open:inline">Hide</span>
+              </span>
+            </summary>
+            <p className="mt-3 font-sans text-[0.6875rem] text-ink-faint">
+              the exact record future AI assistance would receive for this
+              chapter — active, finalized versions only
+            </p>
+            <pre className="mt-4 whitespace-pre-wrap border-l border-rule pl-4 font-serif text-xs leading-relaxed text-ink">
+              {chapterContext}
+            </pre>
+          </details>
         </aside>
       </div>
+
+      {/* Reading navigation */}
+      <nav className="rule mt-16 pt-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
+          <div className="font-sans text-xs">
+            {room.previousChapter ? (
+              <Link
+                href={`${libraryPath}/${room.previousChapter.slug}`}
+                className="text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
+              >
+                Previous: {room.previousChapter.title}
+              </Link>
+            ) : null}
+          </div>
+          <div className="font-sans text-xs">
+            {room.nextChapter ? (
+              <Link
+                href={`${libraryPath}/${room.nextChapter.slug}`}
+                className="text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
+              >
+                Next: {room.nextChapter.title}
+              </Link>
+            ) : null}
+          </div>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-x-8 font-sans text-xs">
+          <Link
+            href={libraryPath}
+            className="text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
+          >
+            The Manuscript
+          </Link>
+          <Link
+            href={`/workspace/authors/${author.slug}/books/${book.slug}`}
+            className="text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
+          >
+            The Record
+          </Link>
+        </div>
+      </nav>
     </WorkspaceFrame>
   );
 }
