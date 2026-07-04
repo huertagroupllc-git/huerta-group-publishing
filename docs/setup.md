@@ -52,6 +52,9 @@ Applied in order:
    Capability 3 Slice 1: manuscripts (backfilled for existing books),
    manuscript_parts, chapters, chapter_versions, active_manuscript view,
    workflow RPCs, RLS, and grants.
+8. `supabase/migrations/20260709000000_chapter_core_question.sql` — the
+   Core Question chapter field (nullable; required for new chapters at
+   the application level) and the updated create_chapter function.
 
 Preferred (keeps migration history tracked by the CLI):
 

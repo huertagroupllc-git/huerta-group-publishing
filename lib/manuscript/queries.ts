@@ -70,7 +70,7 @@ export const getManuscriptLibrary = cache(async function getManuscriptLibrary(
     supabase
       .from("chapters")
       .select(
-        "id, manuscript_id, part_id, slug, title, kind, purpose, summary, outline_section, outline_version_id, position, active_version_id, created_at",
+        "id, manuscript_id, part_id, slug, title, kind, core_question, purpose, summary, outline_section, outline_version_id, position, active_version_id, created_at",
       )
       .eq("manuscript_id", manuscript.id)
       .order("position"),
@@ -266,7 +266,7 @@ export const getChapterRoom = cache(async function getChapterRoom(
   const { data: chapter, error: chapterError } = await supabase
     .from("chapters")
     .select(
-      "id, manuscript_id, part_id, slug, title, kind, purpose, summary, outline_section, outline_version_id, position, active_version_id, created_at",
+      "id, manuscript_id, part_id, slug, title, kind, core_question, purpose, summary, outline_section, outline_version_id, position, active_version_id, created_at",
     )
     .eq("manuscript_id", manuscript.id)
     .eq("slug", chapterSlug)

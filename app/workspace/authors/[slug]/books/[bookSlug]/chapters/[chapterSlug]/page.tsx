@@ -83,6 +83,7 @@ export default async function ChapterRoomPage({
         {
           title: r.chapter.title,
           positionLabel: r.positionLabel,
+          coreQuestion: r.chapter.core_question,
           purpose: r.chapter.purpose,
           summary: r.chapter.summary,
           outlineSection: r.chapter.outline_section,
@@ -195,6 +196,12 @@ export default async function ChapterRoomPage({
             <h2 className="eyebrow">The Brief</h2>
           </div>
           <div className="mt-4 space-y-4 font-sans text-xs leading-relaxed text-ink-soft">
+            {chapter.core_question ? (
+              <p>
+                <span className="text-ink-faint">Core Question — </span>
+                {chapter.core_question}
+              </p>
+            ) : null}
             {chapter.purpose ? (
               <p>
                 <span className="text-ink-faint">Purpose — </span>
@@ -218,7 +225,8 @@ export default async function ChapterRoomPage({
                 Shaped under Master Outline v{room.outlineVersionNumber}
               </p>
             ) : null}
-            {!chapter.purpose &&
+            {!chapter.core_question &&
+            !chapter.purpose &&
             !chapter.summary &&
             !chapter.outline_section &&
             !room.outlineVersionNumber ? (

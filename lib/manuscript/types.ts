@@ -24,6 +24,7 @@ export interface ChapterRecord {
   slug: string;
   title: string;
   kind: ChapterKind;
+  core_question: string | null;
   purpose: string | null;
   summary: string | null;
   outline_section: string | null;

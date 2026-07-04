@@ -148,6 +148,13 @@ its words.
 - `kind` — `chapter` or `appendix`. Other front/back matter belongs to
   the Manuscript in a future capability, not to chapter kinds.
 - `position` — an integer managed only by atomic RPCs.
+- `core_question` (added from real writing observations, July 2026) —
+  **the single question this chapter exists to answer**. Required for
+  new chapters; existing chapters simply carry an empty Core Question
+  until the author supplies one (no artificial defaults). The author's
+  editorial compass: a paragraph that does not help answer the Core
+  Question likely belongs elsewhere. Identity, unversioned, never part
+  of the manuscript or the Reading Copy.
 - `purpose` — one or two sentences: **why this chapter exists** — what
   it must accomplish. A record field, not versioned: the working brief
   at the desk; the authoritative statement of intent remains the Master

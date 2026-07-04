@@ -107,12 +107,11 @@ export default async function EditChapterPage({
         />
 
         <TextareaField
-          id="summary"
-          label="Summary"
-          optional
-          hint="what happens in this chapter"
-          rows={3}
-          defaultValue={chapter.summary ?? ""}
+          id="core_question"
+          label="Core Question"
+          hint="the single question this chapter exists to answer"
+          rows={2}
+          defaultValue={chapter.core_question ?? ""}
         />
 
         <TextareaField
@@ -122,6 +121,15 @@ export default async function EditChapterPage({
           hint="why this chapter exists"
           rows={3}
           defaultValue={chapter.purpose ?? ""}
+        />
+
+        <TextareaField
+          id="summary"
+          label="Summary"
+          optional
+          hint="what happens in this chapter"
+          rows={3}
+          defaultValue={chapter.summary ?? ""}
         />
 
         <Field

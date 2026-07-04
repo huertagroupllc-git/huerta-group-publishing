@@ -118,6 +118,7 @@ export async function assembleManuscript(
 export interface ChapterFrame {
   title: string;
   positionLabel: string;
+  coreQuestion: string | null;
   purpose: string | null;
   summary: string | null;
   outlineSection: string | null;
@@ -145,6 +146,7 @@ export function serializeChapterContext(
   const frameLines = [
     `Title: ${frame.title}`,
     `Position: ${frame.positionLabel}`,
+    frame.coreQuestion ? `Core Question: ${frame.coreQuestion}` : null,
     frame.purpose ? `Purpose: ${frame.purpose}` : null,
     frame.summary ? `Summary: ${frame.summary}` : null,
     frame.outlineSection

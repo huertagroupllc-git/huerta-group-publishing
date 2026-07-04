@@ -37,6 +37,7 @@ export async function createChapter(formData: FormData) {
   const manuscriptId = String(formData.get("manuscript_id") ?? "");
   const libraryPath = String(formData.get("library_path") ?? "/workspace");
   const title = String(formData.get("title") ?? "").trim();
+  const coreQuestion = String(formData.get("core_question") ?? "").trim();
   const summary = String(formData.get("summary") ?? "").trim();
   const purpose = String(formData.get("purpose") ?? "").trim();
   const outlineSection = String(
@@ -50,6 +51,13 @@ export async function createChapter(formData: FormData) {
     fail(newPath, "The chapter's title is required.");
   }
 
+  if (!coreQuestion) {
+    fail(
+      newPath,
+      "The chapter's Core Question is required — the single question it exists to answer.",
+    );
+  }
+
   const slug = slugify(title);
   if (!slug) {
     fail(newPath, "A usable slug could not be derived from the title.");
@@ -60,6 +68,7 @@ export async function createChapter(formData: FormData) {
     p_manuscript_id: manuscriptId,
     p_slug: slug,
     p_title: title,
+    p_core_question: coreQuestion,
     p_kind: kind,
     p_purpose: purpose || null,
     p_summary: summary || null,
@@ -89,6 +98,7 @@ export async function updateChapter(formData: FormData) {
   const libraryPath = String(formData.get("library_path") ?? "/workspace");
   const editPath = String(formData.get("edit_path") ?? libraryPath);
   const title = String(formData.get("title") ?? "").trim();
+  const coreQuestion = String(formData.get("core_question") ?? "").trim();
   const summary = String(formData.get("summary") ?? "").trim();
   const purpose = String(formData.get("purpose") ?? "").trim();
   const outlineSection = String(
@@ -106,6 +116,7 @@ export async function updateChapter(formData: FormData) {
     .from("chapters")
     .update({
       title,
+      core_question: coreQuestion || null,
       summary: summary || null,
       purpose: purpose || null,
       outline_section: outlineSection || null,

@@ -69,9 +69,9 @@ in production.
   inspectable verbatim on the Book Study.
 - **The Manuscript** — a first-class object per book (Author → Book →
   Manuscript → Part → Chapter): chapters as the primary unit of
-  authorship (Principle XV), each with identity (title, purpose,
-  summary, Master Outline Location with a version-precise link) and the
-  full append-only version workflow.
+  authorship (Principle XV), each with identity (title, Core Question,
+  purpose, summary, Master Outline Location with a version-precise
+  link) and the full append-only version workflow.
 - **The Chapter Library** — chapters in reading order, grouped under
   Parts, with word counts, states, and word-button arrangement.
 - **The writing room** — one chapter at a time: a quiet full-measure

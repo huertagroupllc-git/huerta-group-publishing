@@ -86,11 +86,11 @@ export default async function NewChapterPage({
         <Field id="title" label="Title" type="text" required />
 
         <TextareaField
-          id="summary"
-          label="Summary"
-          optional
-          hint="what happens in this chapter"
-          rows={3}
+          id="core_question"
+          label="Core Question"
+          hint="the single question this chapter exists to answer"
+          rows={2}
+          required
         />
 
         <TextareaField
@@ -98,6 +98,14 @@ export default async function NewChapterPage({
           label="Purpose"
           optional
           hint="why this chapter exists"
+          rows={3}
+        />
+
+        <TextareaField
+          id="summary"
+          label="Summary"
+          optional
+          hint="what happens in this chapter"
           rows={3}
         />
 
