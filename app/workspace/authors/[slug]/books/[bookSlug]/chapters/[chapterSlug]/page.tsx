@@ -405,7 +405,7 @@ function ChapterReadingPane({
 
       <AudioReview
         markdown={version.content}
-        storageKey={version.id}
+        versionId={version.id}
         renderProse
       />
     </article>
@@ -497,7 +497,7 @@ function ChapterDraftEditor({
 
       <AudioReview
         markdown={draft.content}
-        storageKey={draft.id}
+        versionId={draft.id}
         renderProse={false}
         note="Reads the draft as last saved."
       />
