@@ -90,3 +90,17 @@ export interface FindingListEntry extends FindingRecord {
   currentVersionNumber: number | null;
   reviewType: string;
 }
+
+/** Display names for review sources; future reviewers register theirs
+ *  here alongside their enum migration. Unknown types are humanized
+ *  rather than hidden. */
+export const REVIEW_TYPE_LABELS: Record<string, string> = {
+  manual: "manual review",
+};
+
+export function reviewTypeLabel(type: string): string {
+  return (
+    REVIEW_TYPE_LABELS[type] ??
+    type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+  );
+}

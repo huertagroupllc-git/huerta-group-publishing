@@ -18,6 +18,7 @@ import { getFindingsRoom, type FindingsRoom } from "@/lib/findings/queries";
 import {
   FINDING_STATUSES,
   categoryLabel,
+  reviewTypeLabel,
   severityLabel,
   statusLabel,
   type FindingListEntry,
@@ -199,7 +200,8 @@ export default async function FindingsPage({
                         {" · "}
                       </>
                     ) : null}
-                    manual review · raised {formatDate(finding.created_at)}
+                    {reviewTypeLabel(finding.reviewType)} · raised{" "}
+                    {formatDate(finding.created_at)}
                   </p>
 
                   {finding.status === "open" ? (
