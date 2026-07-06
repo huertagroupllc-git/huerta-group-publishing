@@ -271,3 +271,26 @@ writing-room Findings margin block, and the Book Study's quiet 'N open
 findings' line. No AI, no reviewers, no diffing, no issue-tracker
 furniture. Production-first; deploy; report files, migration, test
 checklist, and the Slice 2 acceptance prompt."*
+
+
+---
+
+## Amendment (July 2026) — Findings are revision prompts
+
+Recorded after the first real Constitution Review: **findings are not
+merely problems; findings are revision prompts.** The lifecycle's
+purpose is the movement from finding to revision, and a resolved
+finding preserves the editorial reasoning that led from manuscript
+version N to version N+1 — the observation (immutable, anchored to
+version N), the revision (a new chapter version, made through the same
+deliberate workflow as all writing), and the resolution (the note and
+`resolved_in_version_id`, the forward provenance to version N+1).
+
+The Finding Resolution Workflow implements this: **Revise the chapter**
+carries a finding into the writing room as a revision brief (visible
+through the draft cycle: new version → save → activate), and the brief
+offers **Mark resolved** once the revision is active — recording the
+answering version automatically. The Findings page displays the full
+chain: raised against Version N · resolved in Version M, with the
+author's note between them. Editorial reasoning is preserved, not just
+manuscript text.

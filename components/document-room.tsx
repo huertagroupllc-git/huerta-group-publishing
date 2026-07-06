@@ -36,6 +36,7 @@ export interface RoomQuery {
   new?: string;
   error?: string;
   saved?: string;
+  finding?: string;
 }
 
 export function DocumentRoomView({

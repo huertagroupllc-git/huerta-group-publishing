@@ -223,7 +223,8 @@ export async function createChapterVersion(formData: FormData) {
     );
   }
 
-  redirect(`${roomPath}?draft=1`);
+  const finding = String(formData.get("finding_id") ?? "");
+  redirect(`${roomPath}?draft=1${finding ? `&finding=${finding}` : ""}`);
 }
 
 export async function updateChapterDraft(formData: FormData) {
@@ -252,7 +253,10 @@ export async function updateChapterDraft(formData: FormData) {
     fail(`${roomPath}?draft=1`, "The draft could not be saved.");
   }
 
-  redirect(`${roomPath}?draft=1&saved=1`);
+  const finding = String(formData.get("finding_id") ?? "");
+  redirect(
+    `${roomPath}?draft=1&saved=1${finding ? `&finding=${finding}` : ""}`,
+  );
 }
 
 /** Persist the draft's current form fields, then activate — one submit,
@@ -305,7 +309,8 @@ export async function saveAndActivateChapterDraft(formData: FormData) {
     );
   }
 
-  redirect(roomPath);
+  const finding = String(formData.get("finding_id") ?? "");
+  redirect(`${roomPath}${finding ? `?finding=${finding}` : ""}`);
 }
 
 export async function activateChapterVersion(formData: FormData) {

@@ -75,7 +75,11 @@ export const getFindingsRoom = cache(async function getFindingsRoom(
     ...new Set(rows.map((f) => f.chapter_id).filter(Boolean)),
   ] as string[];
   const versionIds = [
-    ...new Set(rows.map((f) => f.chapter_version_id).filter(Boolean)),
+    ...new Set(
+      rows
+        .flatMap((f) => [f.chapter_version_id, f.resolved_in_version_id])
+        .filter(Boolean),
+    ),
   ] as string[];
   const runIds = [
     ...new Set(rows.map((f) => f.review_run_id).filter(Boolean)),
@@ -136,6 +140,7 @@ export const getFindingsRoom = cache(async function getFindingsRoom(
       chapterSlug: chapter?.slug ?? null,
       anchoredVersionNumber: versionNumber(f.chapter_version_id),
       currentVersionNumber: versionNumber(chapter?.active_version_id ?? null),
+      resolvedInVersionNumber: versionNumber(f.resolved_in_version_id),
       reviewType:
         (runsResult.data ?? []).find((r) => r.id === f.review_run_id)
           ?.review_type ?? "manual",
@@ -178,6 +183,7 @@ export interface ChapterFindingLine {
   id: string;
   severity: FindingSeverity;
   title: string;
+  anchoredVersionNumber: number | null;
 }
 
 /** Open findings for the writing room's margin block. */
@@ -187,14 +193,87 @@ export async function openFindingsForChapter(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("editorial_findings")
-    .select("id, severity, title")
+    .select("id, severity, title, chapter_version_id")
     .eq("chapter_id", chapterId)
     .eq("status", "open")
     .order("created_at", { ascending: false });
 
   if (error)
     throw new Error(`Could not load the findings: ${error.message}`);
-  return (data ?? []) as ChapterFindingLine[];
+
+  const rows = data ?? [];
+  const versionIds = [
+    ...new Set(rows.map((f) => f.chapter_version_id).filter(Boolean)),
+  ] as string[];
+  const { data: versions } = versionIds.length
+    ? await supabase
+        .from("chapter_versions")
+        .select("id, version_number")
+        .in("id", versionIds)
+    : { data: [] };
+
+  return rows.map((f) => ({
+    id: f.id,
+    severity: f.severity as FindingSeverity,
+    title: f.title,
+    anchoredVersionNumber:
+      (versions ?? []).find((v) => v.id === f.chapter_version_id)
+        ?.version_number ?? null,
+  }));
+}
+
+/** The revision brief: one finding, loaded for the writing room. */
+export interface RevisionBrief {
+  id: string;
+  severity: FindingSeverity;
+  title: string;
+  explanation: string;
+  excerpt: string | null;
+  status: string;
+  anchoredVersionNumber: number | null;
+  resolvedInVersionNumber: number | null;
+}
+
+export async function getRevisionBrief(
+  findingId: string,
+  chapterId: string,
+): Promise<RevisionBrief | null> {
+  const supabase = await createClient();
+  const { data: finding, error } = await supabase
+    .from("editorial_findings")
+    .select(
+      "id, chapter_id, chapter_version_id, severity, title, explanation, excerpt, status, resolved_in_version_id",
+    )
+    .eq("id", findingId)
+    .maybeSingle();
+
+  if (error)
+    throw new Error(`Could not load the finding: ${error.message}`);
+  if (!finding || finding.chapter_id !== chapterId) return null;
+
+  const versionIds = [
+    finding.chapter_version_id,
+    finding.resolved_in_version_id,
+  ].filter(Boolean) as string[];
+  const { data: versions } = versionIds.length
+    ? await supabase
+        .from("chapter_versions")
+        .select("id, version_number")
+        .in("id", versionIds)
+    : { data: [] };
+  const number = (id: string | null) =>
+    (versions ?? []).find((v) => v.id === id)?.version_number ?? null;
+
+  return {
+    id: finding.id,
+    severity: finding.severity as FindingSeverity,
+    title: finding.title,
+    explanation: finding.explanation,
+    excerpt: finding.excerpt,
+    status: finding.status,
+    anchoredVersionNumber: number(finding.chapter_version_id),
+    resolvedInVersionNumber: number(finding.resolved_in_version_id),
+  };
 }
 
 /** The Book Study's one quiet number. */

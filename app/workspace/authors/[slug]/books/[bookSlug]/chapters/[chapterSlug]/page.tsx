@@ -25,7 +25,13 @@ import {
 } from "@/lib/manuscript/actions";
 import { assembleBookContext } from "@/lib/books/assemble";
 import { serializeChapterContext } from "@/lib/manuscript/assemble";
-import { openFindingsForChapter, type ChapterFindingLine } from "@/lib/findings/queries";
+import { resolveFinding } from "@/lib/findings/actions";
+import {
+  getRevisionBrief,
+  openFindingsForChapter,
+  type ChapterFindingLine,
+  type RevisionBrief,
+} from "@/lib/findings/queries";
 import { severityLabel } from "@/lib/findings/types";
 import { getChapterRoom, type ChapterRoom } from "@/lib/manuscript/queries";
 import { assembleAuthorContext } from "@/lib/memory/assemble";
@@ -66,15 +72,23 @@ export default async function ChapterRoomPage({
 
   const { slug, bookSlug, chapterSlug } = await params;
 
+  const queryEarly = await searchParams;
   let room: ChapterRoom | null;
   let chapterContext: string;
   let chapterFindings: ChapterFindingLine[] = [];
+  let revisionBrief: RevisionBrief | null = null;
   try {
     room = await getChapterRoom(slug, bookSlug, chapterSlug);
     if (room) {
       const r = room;
       try {
         chapterFindings = await openFindingsForChapter(r.chapter.id);
+        if (queryEarly.finding) {
+          revisionBrief = await getRevisionBrief(
+            queryEarly.finding,
+            r.chapter.id,
+          );
+        }
       } catch (findingsError) {
         // The findings migration may not be applied yet; the room
         // still works without its margin block.
@@ -121,7 +135,7 @@ export default async function ChapterRoomPage({
   }
   if (!room) notFound();
 
-  const query = await searchParams;
+  const query = queryEarly;
   const { author, book, chapter, versions } = room;
   const libraryPath = `/workspace/authors/${author.slug}/books/${book.slug}/chapters`;
   const roomPath = `${libraryPath}/${chapter.slug}`;
@@ -177,14 +191,91 @@ export default async function ChapterRoomPage({
             ) : null}
           </div>
 
+          {revisionBrief ? (
+            <aside className="mt-6 max-w-prose border-l-2 border-oxblood pl-4">
+              <p className="font-sans text-[0.6875rem] uppercase tracking-[0.18em] text-ink-faint">
+                Revising from a finding ·{" "}
+                {severityLabel(revisionBrief.severity)}
+              </p>
+              <p className="mt-1.5 font-serif text-lg leading-snug">
+                {revisionBrief.title}
+              </p>
+              {revisionBrief.excerpt ? (
+                <p className="mt-2 text-sm italic leading-relaxed text-ink-soft">
+                  “{revisionBrief.excerpt}”
+                </p>
+              ) : null}
+              <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+                {revisionBrief.explanation}
+              </p>
+              <p className="mt-2 font-sans text-xs text-ink-faint">
+                Raised against Version{" "}
+                {revisionBrief.anchoredVersionNumber ?? "—"}
+                {active
+                  ? ` · the chapter is now at Version ${active.version_number}`
+                  : ""}
+                {revisionBrief.status === "resolved"
+                  ? ` · resolved${
+                      revisionBrief.resolvedInVersionNumber
+                        ? ` in Version ${revisionBrief.resolvedInVersionNumber}`
+                        : ""
+                    }`
+                  : revisionBrief.status === "dismissed"
+                    ? " · set aside"
+                    : ""}
+              </p>
+              {revisionBrief.status === "open" &&
+              !viewingDraft &&
+              !creating ? (
+                <form
+                  action={resolveFinding}
+                  className="mt-3 flex max-w-md flex-wrap items-end gap-x-5 gap-y-2"
+                >
+                  <input
+                    type="hidden"
+                    name="finding_id"
+                    value={revisionBrief.id}
+                  />
+                  <input type="hidden" name="chapter_id" value={chapter.id} />
+                  <input
+                    type="hidden"
+                    name="findings_path"
+                    value={roomPath}
+                  />
+                  <div className="min-w-48 flex-1">
+                    <label
+                      htmlFor="resolution-note"
+                      className="eyebrow block"
+                    >
+                      Note <span className="normal-case">(optional)</span>
+                    </label>
+                    <input
+                      id="resolution-note"
+                      name="note"
+                      type="text"
+                      placeholder="what the revision did"
+                      className="w-full border-b border-rule bg-transparent py-1.5 font-serif text-base text-ink placeholder:text-ink-faint focus:border-oxblood focus:outline-none"
+                    />
+                  </div>
+                  <TextButton>Mark resolved</TextButton>
+                </form>
+              ) : null}
+            </aside>
+          ) : null}
+
           {viewingDraft && draft ? (
-            <ChapterDraftEditor draft={draft} roomPath={roomPath} />
+            <ChapterDraftEditor
+              draft={draft}
+              roomPath={roomPath}
+              findingId={revisionBrief?.id ?? null}
+            />
           ) : creating ? (
             <NewChapterVersionForm
               chapterId={chapter.id}
               roomPath={roomPath}
               prefill={active?.content ?? ""}
               isFirst={versions.length === 0}
+              findingId={revisionBrief?.id ?? null}
             />
           ) : reading ? (
             <ChapterReadingPane
@@ -265,7 +356,7 @@ export default async function ChapterRoomPage({
                 {chapterFindings.map((finding) => (
                   <li key={finding.id} className="font-sans text-xs">
                     <Link
-                      href={`/workspace/authors/${author.slug}/books/${book.slug}/findings`}
+                      href={`${roomPath}?finding=${finding.id}`}
                       className="group"
                     >
                       <span className="text-ink-faint">
@@ -274,6 +365,12 @@ export default async function ChapterRoomPage({
                       <span className="text-ink-soft underline-offset-4 group-hover:text-oxblood group-hover:underline">
                         {finding.title}
                       </span>
+                      {finding.anchoredVersionNumber ? (
+                        <span className="text-ink-faint">
+                          {" "}
+                          · v{finding.anchoredVersionNumber}
+                        </span>
+                      ) : null}
                     </Link>
                   </li>
                 ))}
@@ -489,11 +586,13 @@ function NewChapterVersionForm({
   roomPath,
   prefill,
   isFirst,
+  findingId,
 }: {
   chapterId: string;
   roomPath: string;
   prefill: string;
   isFirst: boolean;
+  findingId: string | null;
 }) {
   return (
     <div className="mt-8">
@@ -505,6 +604,9 @@ function NewChapterVersionForm({
       <form action={createChapterVersion} className="mt-8 space-y-8">
         <input type="hidden" name="document_id" value={chapterId} />
         <input type="hidden" name="room_path" value={roomPath} />
+        {findingId ? (
+          <input type="hidden" name="finding_id" value={findingId} />
+        ) : null}
         <VersionFields
           content={prefill}
           changeSummary=""
@@ -529,9 +631,11 @@ function NewChapterVersionForm({
 function ChapterDraftEditor({
   draft,
   roomPath,
+  findingId,
 }: {
   draft: VersionRecord;
   roomPath: string;
+  findingId: string | null;
 }) {
   return (
     <div className="mt-8">
@@ -550,6 +654,9 @@ function ChapterDraftEditor({
       <form action={updateChapterDraft} className="mt-6 space-y-8">
         <input type="hidden" name="version_id" value={draft.id} />
         <input type="hidden" name="room_path" value={roomPath} />
+        {findingId ? (
+          <input type="hidden" name="finding_id" value={findingId} />
+        ) : null}
         <VersionFields
           content={draft.content}
           changeSummary={draft.change_summary ?? ""}

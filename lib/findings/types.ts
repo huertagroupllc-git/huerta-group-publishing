@@ -88,6 +88,8 @@ export interface FindingListEntry extends FindingRecord {
   chapterSlug: string | null;
   anchoredVersionNumber: number | null;
   currentVersionNumber: number | null;
+  /** Forward provenance: the version that answered this finding. */
+  resolvedInVersionNumber: number | null;
   reviewType: string;
 }
 

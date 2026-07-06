@@ -281,26 +281,30 @@ export default async function FindingsPage({
                         >
                           Set aside
                         </QuietButton>
+                        {finding.chapterSlug ? (
+                          <ActionLink
+                            href={`${bookPath}/chapters/${finding.chapterSlug}?finding=${finding.id}`}
+                          >
+                            Revise the chapter
+                          </ActionLink>
+                        ) : null}
                       </span>
                     </form>
                   ) : (
                     <div className="mt-4">
-                      {finding.resolution_note ? (
-                        <p className="max-w-prose font-sans text-xs text-ink-soft">
-                          {statusLabel(finding.status)}
-                          {finding.resolved_at
-                            ? ` ${formatDate(finding.resolved_at)}`
-                            : ""}{" "}
-                          — {finding.resolution_note}
-                        </p>
-                      ) : (
-                        <p className="font-sans text-xs text-ink-soft">
-                          {statusLabel(finding.status)}
-                          {finding.resolved_at
-                            ? ` ${formatDate(finding.resolved_at)}`
-                            : ""}
-                        </p>
-                      )}
+                      <p className="max-w-prose font-sans text-xs text-ink-soft">
+                        {statusLabel(finding.status)}
+                        {finding.resolved_at
+                          ? ` ${formatDate(finding.resolved_at)}`
+                          : ""}
+                        {finding.status === "resolved" &&
+                        finding.resolvedInVersionNumber
+                          ? ` in Version ${finding.resolvedInVersionNumber}`
+                          : ""}
+                        {finding.resolution_note
+                          ? ` — ${finding.resolution_note}`
+                          : ""}
+                      </p>
                       <form action={reopenFinding} className="mt-2">
                         <input
                           type="hidden"
