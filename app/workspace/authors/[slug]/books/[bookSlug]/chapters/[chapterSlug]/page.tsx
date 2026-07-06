@@ -25,6 +25,8 @@ import {
 } from "@/lib/manuscript/actions";
 import { assembleBookContext } from "@/lib/books/assemble";
 import { serializeChapterContext } from "@/lib/manuscript/assemble";
+import { openFindingsForChapter, type ChapterFindingLine } from "@/lib/findings/queries";
+import { severityLabel } from "@/lib/findings/types";
 import { getChapterRoom, type ChapterRoom } from "@/lib/manuscript/queries";
 import { assembleAuthorContext } from "@/lib/memory/assemble";
 import { countWords, formatWordCount } from "@/lib/manuscript/types";
@@ -66,10 +68,18 @@ export default async function ChapterRoomPage({
 
   let room: ChapterRoom | null;
   let chapterContext: string;
+  let chapterFindings: ChapterFindingLine[] = [];
   try {
     room = await getChapterRoom(slug, bookSlug, chapterSlug);
     if (room) {
       const r = room;
+      try {
+        chapterFindings = await openFindingsForChapter(r.chapter.id);
+      } catch (findingsError) {
+        // The findings migration may not be applied yet; the room
+        // still works without its margin block.
+        console.error("[findings] margin block failed", findingsError);
+      }
       const [authorCtx, bookCtx] = await Promise.all([
         assembleAuthorContext(r.author.id),
         assembleBookContext(r.book.id),
@@ -183,6 +193,7 @@ export default async function ChapterRoomPage({
               activeNumber={active?.version_number ?? null}
               roomPath={roomPath}
               draftOpen={draft !== null}
+              raiseFindingHref={`/workspace/authors/${author.slug}/books/${book.slug}/findings/new?chapter=${chapter.slug}&version=${reading.id}&return=chapter`}
             />
           ) : (
             <UnwrittenState purpose={chapter.purpose} roomPath={roomPath} />
@@ -244,6 +255,31 @@ export default async function ChapterRoomPage({
               </ActionLink>
             </p>
           </div>
+
+          {chapterFindings.length > 0 ? (
+            <div className="mt-8">
+              <div className="rule pt-5">
+                <h2 className="eyebrow">Findings</h2>
+              </div>
+              <ul className="mt-3 space-y-2.5">
+                {chapterFindings.map((finding) => (
+                  <li key={finding.id} className="font-sans text-xs">
+                    <Link
+                      href={`/workspace/authors/${author.slug}/books/${book.slug}/findings`}
+                      className="group"
+                    >
+                      <span className="text-ink-faint">
+                        {severityLabel(finding.severity)} —{" "}
+                      </span>
+                      <span className="text-ink-soft underline-offset-4 group-hover:text-oxblood group-hover:underline">
+                        {finding.title}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           <div className="mt-8">
             <VersionRail
@@ -352,12 +388,14 @@ function ChapterReadingPane({
   activeNumber,
   roomPath,
   draftOpen,
+  raiseFindingHref,
 }: {
   version: VersionRecord;
   isActive: boolean;
   activeNumber: number | null;
   roomPath: string;
   draftOpen: boolean;
+  raiseFindingHref: string;
 }) {
   const sourceLabel = IMPORT_SOURCES.find(
     (s) => s.value === version.import_source,
@@ -374,6 +412,13 @@ function ChapterReadingPane({
         {sourceLabel && version.import_source !== "manual"
           ? ` · ${sourceLabel.toLowerCase()}`
           : ""}
+        {" · "}
+        <Link
+          href={raiseFindingHref}
+          className="text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
+        >
+          Raise a finding
+        </Link>
       </p>
 
       {!isActive ? (

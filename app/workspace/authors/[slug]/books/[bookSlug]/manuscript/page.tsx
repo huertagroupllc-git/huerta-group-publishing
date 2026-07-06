@@ -133,6 +133,14 @@ export default async function ReadingCopyPage({
                     <div className="doc-prose mx-auto mt-12 max-w-prose">
                       <ReactMarkdown>{chapter.content}</ReactMarkdown>
                     </div>
+                    <p className="mt-8 text-center">
+                      <Link
+                        href={`${bookPath}/findings/new?chapter=${chapter.slug}&version=${chapter.versionId}`}
+                        className="font-sans text-[0.6875rem] text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
+                      >
+                        Raise a finding
+                      </Link>
+                    </p>
                   </article>
                 );
               })}

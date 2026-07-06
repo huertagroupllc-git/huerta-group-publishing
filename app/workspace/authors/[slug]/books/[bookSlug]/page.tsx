@@ -11,6 +11,7 @@ import { SetupNotice } from "@/components/setup-notice";
 import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
 import Link from "next/link";
 import { assembleBookContext, serializeBookContext } from "@/lib/books/assemble";
+import { openFindingsCount } from "@/lib/findings/queries";
 import { getManuscriptSummary, type ManuscriptSummary } from "@/lib/manuscript/queries";
 import { getBookStudy, type BookStudy } from "@/lib/books/queries";
 import { BOOK_DOC_TYPES, bookStatusLabel, isWritingStage } from "@/lib/books/types";
@@ -48,6 +49,7 @@ export default async function BookStudyPage({
   let memory: string;
   let manuscriptSummary: ManuscriptSummary | null = null;
   let manuscriptNote: string | null = null;
+  let findingsCount = 0;
   try {
     study = await getBookStudy(slug, bookSlug);
     if (study) {
@@ -63,6 +65,12 @@ export default async function BookStudyPage({
       );
       try {
         manuscriptSummary = await getManuscriptSummary(study.book.id);
+        try {
+          findingsCount = await openFindingsCount(study.book.id);
+        } catch (findingsError) {
+          // The findings migration may not be applied yet.
+          console.error("[findings] count failed", findingsError);
+        }
       } catch (manuscriptError) {
         console.error("[manuscript] summary failed", manuscriptError);
         manuscriptNote =
@@ -168,6 +176,11 @@ export default async function BookStudyPage({
             >
               Reading Copy
             </ActionLink>
+            <ActionLink
+              href={`/workspace/authors/${author.slug}/books/${book.slug}/findings`}
+            >
+              Findings
+            </ActionLink>
           </span>
         </div>
         {manuscriptNote ? (
@@ -191,6 +204,18 @@ export default async function BookStudyPage({
                   manuscriptSummary.draftCount === 1 ? "draft" : "drafts"
                 } open`
               : ""}
+            {findingsCount > 0 ? (
+              <>
+                {" · "}
+                <Link
+                  href={`/workspace/authors/${author.slug}/books/${book.slug}/findings`}
+                  className="text-oxblood underline-offset-4 hover:underline"
+                >
+                  {findingsCount} open{" "}
+                  {findingsCount === 1 ? "finding" : "findings"}
+                </Link>
+              </>
+            ) : null}
           </p>
         ) : (
           <p className="mt-5 max-w-prose italic text-ink-soft">

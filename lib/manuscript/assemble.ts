@@ -19,6 +19,7 @@ export interface AssembledChapter {
   slug: string;
   title: string;
   kind: ChapterKind;
+  versionId: string;
   versionNumber: number;
   content: string;
   wordCount: number;
@@ -61,6 +62,7 @@ export async function assembleManuscript(
     slug: r.chapter_slug as string,
     title: r.chapter_title as string,
     kind: r.kind as ChapterKind,
+    versionId: r.version_id as string,
     versionNumber: r.version_number as number,
     content: (r.content as string) ?? "",
     wordCount: countWords((r.content as string) ?? ""),

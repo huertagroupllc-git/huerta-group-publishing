@@ -59,6 +59,10 @@ Applied in order:
    Review cost controls: the private audio-review storage bucket with
    policies (content-addressed cache) and the tts_usage table with RLS
    (daily character budget).
+10. `supabase/migrations/20260711000000_editorial_findings.sql` —
+    Capability 4 Slice 1: review_runs and editorial_findings with the
+    observation-immutability trigger, version-anchored references, the
+    raise_finding function, RLS with no delete policies, and grants.
 
 Preferred (keeps migration history tracked by the CLI):
 
