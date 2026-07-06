@@ -71,7 +71,7 @@ export default async function FindingsPage({
   }
   if (!room) notFound();
 
-  const { author, book, findings } = room;
+  const { author, book, findings, latestReview } = room;
   const bookPath = `/workspace/authors/${author.slug}/books/${book.slug}`;
   const findingsPath = `${bookPath}/findings`;
 
@@ -121,6 +121,42 @@ export default async function FindingsPage({
 
       <div className="mt-4">
         <ErrorNote message={query.error} />
+      </div>
+
+      <div className="rule mt-10 pt-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-6">
+          <h2 className="eyebrow">Reviews</h2>
+          {latestReview?.status !== "pending" ? (
+            <ActionLink href={`${findingsPath}/review`}>
+              Request a Constitution Review
+            </ActionLink>
+          ) : null}
+        </div>
+        {latestReview ? (
+          latestReview.status === "pending" ? (
+            <p className="mt-4 max-w-prose italic text-ink-soft">
+              A {reviewTypeLabel(latestReview.reviewType)} is reading the
+              manuscript — return in a few minutes.
+            </p>
+          ) : (
+            <div className="mt-4 max-w-prose">
+              <p className="font-sans text-xs text-ink-soft">
+                {reviewTypeLabel(latestReview.reviewType)} ·{" "}
+                {formatDate(latestReview.createdAt)} ·{" "}
+                {latestReview.findingsCount}{" "}
+                {latestReview.findingsCount === 1 ? "finding" : "findings"}
+                {latestReview.status === "failed"
+                  ? " · did not finish — findings raised before the failure are preserved"
+                  : ""}
+              </p>
+              {latestReview.summary ? (
+                <p className="mt-2 border-l-2 border-rule pl-4 text-sm italic leading-relaxed text-ink-soft">
+                  {latestReview.summary}
+                </p>
+              ) : null}
+            </div>
+          )
+        ) : null}
       </div>
 
       <div className="rule mt-10 flex flex-wrap items-baseline justify-between gap-x-6 pt-5">

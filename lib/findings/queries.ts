@@ -10,11 +10,21 @@ import type {
 import type { BookRecord } from "@/lib/books/types";
 import type { AuthorRecord } from "@/lib/memory/types";
 
+export interface LatestReview {
+  id: string;
+  reviewType: string;
+  status: "pending" | "complete" | "failed";
+  summary: string | null;
+  createdAt: string;
+  findingsCount: number;
+}
+
 export interface FindingsRoom {
   author: AuthorRecord;
   book: BookRecord;
   findings: FindingListEntry[];
   openCount: number;
+  latestReview: LatestReview | null;
 }
 
 export const getFindingsRoom = cache(async function getFindingsRoom(
@@ -132,11 +142,35 @@ export const getFindingsRoom = cache(async function getFindingsRoom(
     };
   });
 
+  // The latest AI review (manual review is ambient, not a run to show).
+  const { data: latestRun } = await supabase
+    .from("review_runs")
+    .select("id, review_type, status, summary, created_at")
+    .eq("book_id", book.id)
+    .neq("review_type", "manual")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  let latestReview: LatestReview | null = null;
+  if (latestRun) {
+    latestReview = {
+      id: latestRun.id,
+      reviewType: latestRun.review_type,
+      status: latestRun.status,
+      summary: latestRun.summary,
+      createdAt: latestRun.created_at,
+      findingsCount: rows.filter((f) => f.review_run_id === latestRun.id)
+        .length,
+    };
+  }
+
   return {
     author,
     book,
     findings: entries,
     openCount: entries.filter((f) => f.status === "open").length,
+    latestReview,
   };
 });
 

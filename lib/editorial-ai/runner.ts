@@ -142,7 +142,16 @@ export async function executeReview(
       );
       if (summary) summaries.push(summary);
 
-      const kept = findings.slice(
+      const accepted = def.validateFinding
+        ? findings.filter((f) => def.validateFinding!(f, material))
+        : findings;
+      if (accepted.length < findings.length) {
+        console.log(
+          `[editorial-ai] ${def.type} · "${pass.label}": ${findings.length - accepted.length} findings rejected by reviewer validation`,
+        );
+      }
+
+      const kept = accepted.slice(
         0,
         Math.max(0, def.maxFindingsPerRun - inserted),
       );

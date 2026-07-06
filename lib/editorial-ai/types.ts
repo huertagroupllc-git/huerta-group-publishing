@@ -79,6 +79,12 @@ export interface ReviewerDefinition {
   /** Slice the material into passes. The engine executes them in
    *  order and commits each pass's findings immediately. */
   buildPasses(material: ReviewMaterial): ReviewPass[];
+  /** Reviewer-specific validation applied after the engine's own
+   *  (e.g. a traceability rule). Return false to reject the finding. */
+  validateFinding?(
+    finding: ValidatedFinding,
+    material: ReviewMaterial,
+  ): boolean;
 }
 
 /** What the model returns per finding, before validation. */

@@ -63,6 +63,10 @@ Applied in order:
     Capability 4 Slice 1: review_runs and editorial_findings with the
     observation-immutability trigger, version-anchored references, the
     raise_finding function, RLS with no delete policies, and grants.
+11. `supabase/migrations/20260712000000_constitution_review.sql` —
+    Capability 5: the constitution review_type value (one ADD VALUE
+    statement; the first AI reviewer arrives as an enum value, no new
+    tables).
 
 Preferred (keeps migration history tracked by the CLI):
 

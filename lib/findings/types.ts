@@ -96,6 +96,7 @@ export interface FindingListEntry extends FindingRecord {
  *  rather than hidden. */
 export const REVIEW_TYPE_LABELS: Record<string, string> = {
   manual: "manual review",
+  constitution: "Constitution Review",
 };
 
 export function reviewTypeLabel(type: string): string {
