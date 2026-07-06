@@ -14,6 +14,11 @@ import {
   resolveFinding,
   setAsideFinding,
 } from "@/lib/findings/actions";
+import { deliberationStatesForBook } from "@/lib/deliberations/queries";
+import {
+  deliberationStatusLabel,
+  type DeliberationStatus,
+} from "@/lib/deliberations/types";
 import { getFindingsRoom, type FindingsRoom } from "@/lib/findings/queries";
 import {
   FINDING_STATUSES,
@@ -56,8 +61,18 @@ export default async function FindingsPage({
   const query = await searchParams;
 
   let room: FindingsRoom | null;
+  let deliberations = new Map<string, DeliberationStatus>();
   try {
     room = await getFindingsRoom(slug, bookSlug);
+    if (room) {
+      try {
+        deliberations = await deliberationStatesForBook(room.book.id);
+      } catch (deliberationError) {
+        // The deliberation migration may not be applied yet; the
+        // Findings page works without the deliberation lines.
+        console.error("[deliberations] states failed", deliberationError);
+      }
+    }
   } catch (loadError) {
     console.error("[findings] room failed to load", loadError);
     return (
@@ -238,6 +253,20 @@ export default async function FindingsPage({
                     ) : null}
                     {reviewTypeLabel(finding.reviewType)} · raised{" "}
                     {formatDate(finding.created_at)}
+                    {deliberations.has(finding.id) ? (
+                      <>
+                        {" · "}
+                        <Link
+                          href={`${findingsPath}/${finding.id}/deliberation`}
+                          className="underline-offset-4 hover:text-oxblood hover:underline"
+                        >
+                          Deliberation —{" "}
+                          {deliberationStatusLabel(
+                            deliberations.get(finding.id)!,
+                          )}
+                        </Link>
+                      </>
+                    ) : null}
                   </p>
 
                   {finding.status === "open" ? (
@@ -286,6 +315,13 @@ export default async function FindingsPage({
                             href={`${bookPath}/chapters/${finding.chapterSlug}?finding=${finding.id}`}
                           >
                             Revise the chapter
+                          </ActionLink>
+                        ) : null}
+                        {!deliberations.has(finding.id) ? (
+                          <ActionLink
+                            href={`${findingsPath}/${finding.id}/deliberation`}
+                          >
+                            Deliberate
                           </ActionLink>
                         ) : null}
                       </span>

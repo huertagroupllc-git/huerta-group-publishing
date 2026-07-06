@@ -25,6 +25,7 @@ import {
 } from "@/lib/manuscript/actions";
 import { assembleBookContext } from "@/lib/books/assemble";
 import { serializeChapterContext } from "@/lib/manuscript/assemble";
+import { adoptedJudgmentForFinding } from "@/lib/deliberations/queries";
 import { resolveFinding } from "@/lib/findings/actions";
 import {
   getRevisionBrief,
@@ -77,6 +78,7 @@ export default async function ChapterRoomPage({
   let chapterContext: string;
   let chapterFindings: ChapterFindingLine[] = [];
   let revisionBrief: RevisionBrief | null = null;
+  let adoptedJudgment: string | null = null;
   try {
     room = await getChapterRoom(slug, bookSlug, chapterSlug);
     if (room) {
@@ -88,6 +90,18 @@ export default async function ChapterRoomPage({
             queryEarly.finding,
             r.chapter.id,
           );
+          if (revisionBrief) {
+            try {
+              adoptedJudgment = (
+                await adoptedJudgmentForFinding(revisionBrief.id)
+              )?.judgment ?? null;
+            } catch (deliberationError) {
+              console.error(
+                "[deliberations] judgment lookup failed",
+                deliberationError,
+              );
+            }
+          }
         }
       } catch (findingsError) {
         // The findings migration may not be applied yet; the room
@@ -208,6 +222,14 @@ export default async function ChapterRoomPage({
               <p className="mt-2 text-sm leading-relaxed text-ink-soft">
                 {revisionBrief.explanation}
               </p>
+              {adoptedJudgment ? (
+                <p className="mt-3 text-sm leading-relaxed">
+                  <span className="font-sans text-[0.6875rem] uppercase tracking-[0.18em] text-ink-faint">
+                    Judgment —{" "}
+                  </span>
+                  {adoptedJudgment}
+                </p>
+              ) : null}
               <p className="mt-2 font-sans text-xs text-ink-faint">
                 Raised against Version{" "}
                 {revisionBrief.anchoredVersionNumber ?? "—"}

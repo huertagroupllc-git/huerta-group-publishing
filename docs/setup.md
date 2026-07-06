@@ -67,6 +67,10 @@ Applied in order:
     Capability 5: the constitution review_type value (one ADD VALUE
     statement; the first AI reviewer arrives as an enum value, no new
     tables).
+12. `supabase/migrations/20260713000000_editorial_deliberation.sql` —
+    Editorial Deliberation: the deliberations table (one per finding),
+    adoption-immutability and forward-only transition triggers,
+    draft-only deletion, RLS, and grants.
 
 Preferred (keeps migration history tracked by the CLI):
 
