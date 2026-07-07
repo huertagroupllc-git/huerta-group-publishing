@@ -1,5 +1,6 @@
 import "server-only";
 
+import { createHash } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import {
   assembleReviewMaterial,
@@ -87,6 +88,8 @@ export async function executeReview(
   const model = def.model ?? process.env.EDITORIAL_REVIEW_MODEL ?? DEFAULT_MODEL;
 
   const recordBlock = editorialRecordBlock(material.editorialRecord);
+  const passes = def.buildPasses(material);
+  const systemPrompt = buildSystemPrompt(def);
 
   // Full provenance, recorded before the first model call: exactly
   // what this run was shown, answerable forever — including which
@@ -111,6 +114,14 @@ export async function executeReview(
         (f) => f.id,
       ),
     },
+    // The reviewer's instructions evolve; every run stays attributable
+    // to the exact prompt that produced it.
+    prompt_sha256: createHash("sha256").update(systemPrompt).digest("hex"),
+    caps: {
+      per_pass: def.maxFindingsPerPass,
+      per_run: def.maxFindingsPerRun,
+    },
+    pass_count: passes.length,
   };
 
   const { data: run, error: runError } = await supabase
@@ -132,8 +143,6 @@ export async function executeReview(
     );
   }
 
-  const passes = def.buildPasses(material);
-  const systemPrompt = buildSystemPrompt(def);
   const summaries: string[] = [];
   const raisedThisRun: string[] = [];
   let inserted = 0;
@@ -302,7 +311,7 @@ async function runPass(
   }
 
   const findings = (parsed.findings ?? [])
-    .map((raw) => validateFinding(raw, pass))
+    .map((raw) => normalizeFinding(raw, pass))
     .filter((f): f is ValidatedFinding => f !== null)
     .slice(0, def.maxFindingsPerPass);
 
@@ -313,10 +322,10 @@ async function runPass(
   };
 }
 
-/** Standardized validation: malformed findings are rejected; excerpts
- *  that are not verbatim are dropped (the finding survives, the
- *  fabricated quote does not). */
-function validateFinding(
+/** The engine's own validation (reviewer hooks run after this):
+ *  malformed findings are rejected; excerpts that are not verbatim are
+ *  dropped (the finding survives, the fabricated quote does not). */
+function normalizeFinding(
   raw: RawFinding,
   pass: ReviewPass,
 ): ValidatedFinding | null {

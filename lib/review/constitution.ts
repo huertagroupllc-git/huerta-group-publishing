@@ -41,9 +41,9 @@ export const constitutionReview: ReviewerDefinition = {
   maxFindingsPerRun: 30,
 
   buildPasses(material: ReviewMaterial): ReviewPass[] {
-    const constitution = bookMemoryBlock(material, "Book Constitution");
+    const constitution = bookMemoryBlock(material, "book_constitution");
     if (!constitution) return []; // guarded upstream; defensive here
-    const outline = bookMemoryBlock(material, "Master Outline");
+    const outline = bookMemoryBlock(material, "master_outline");
     const shared = [constitution, ...(outline ? [outline] : [])];
 
     // The manuscript pass runs FIRST: one editorial letter begins with
@@ -96,7 +96,7 @@ export const constitutionReview: ReviewerDefinition = {
     material: ReviewMaterial,
   ): boolean {
     const constitution = material.bookMemory.documents.find(
-      (d) => d.label === "Book Constitution",
+      (d) => d.docType === "book_constitution",
     );
     if (!constitution) return false;
     return citesConstitution(finding.explanation, constitution.content);

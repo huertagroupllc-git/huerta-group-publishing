@@ -8,6 +8,8 @@ import type {
   EditorialRecord,
   ReviewMaterial,
 } from "@/lib/editorial-ai/types";
+import type { BookDocType } from "@/lib/books/types";
+import type { DocType } from "@/lib/memory/types";
 
 /**
  * The reusable context pipeline: assemble everything a reviewer might
@@ -281,16 +283,35 @@ export function memoryDocumentBlock(
   return `=== ${level} — ${label.toUpperCase()} (version ${versionNumber}) ===\n\n${content.trim()}`;
 }
 
-/** A named document from the book's memory, e.g. "Book Constitution". */
+/** A document from the book's memory, keyed by its stable type —
+ *  display labels are canon for humans, never lookup keys. */
 export function bookMemoryBlock(
   material: ReviewMaterial,
-  docLabel: string,
+  docType: BookDocType,
 ): string | null {
   const doc = material.bookMemory.documents.find(
-    (d) => d.label === docLabel,
+    (d) => d.docType === docType,
   );
   if (!doc) return null;
   return memoryDocumentBlock("BOOK", doc.label, doc.versionNumber, doc.content);
+}
+
+/** A document from the author's memory (e.g. the Voice Profile, for a
+ *  future Voice Review), keyed by its stable type. */
+export function authorMemoryBlock(
+  material: ReviewMaterial,
+  docType: DocType,
+): string | null {
+  const doc = material.authorMemory.documents.find(
+    (d) => d.docType === docType,
+  );
+  if (!doc) return null;
+  return memoryDocumentBlock(
+    "AUTHOR",
+    doc.label,
+    doc.versionNumber,
+    doc.content,
+  );
 }
 
 export function chapterFrameBlock(chapter: ChapterMaterial): string {
