@@ -39,6 +39,25 @@ export interface ChapterMaterial {
   frameBlock: string;
 }
 
+/**
+ * The Editorial Record — memory, not re-reading. What is already
+ * decided, kept intentionally concise: judgments, titles, and cited
+ * clauses only, never full bodies.
+ */
+export interface EditorialRecord {
+  /** Adopted/implemented deliberations: settled editorial positions. */
+  judgments: { id: string; question: string; judgment: string }[];
+  /** Resolved findings: title + the clause they cited. */
+  resolved: { id: string; title: string; clause: string | null }[];
+  /** Set-aside findings: considered and declined by the author. */
+  setAside: {
+    id: string;
+    title: string;
+    clause: string | null;
+    reason: string | null;
+  }[];
+}
+
 /** Everything the engine assembles before any reviewer looks. */
 export interface ReviewMaterial {
   author: AuthorRecord;
@@ -47,6 +66,8 @@ export interface ReviewMaterial {
   bookMemory: BookContext;
   /** Written chapters only, in reading order. */
   chapters: ChapterMaterial[];
+  /** The editorial history every reviewer returns to. */
+  editorialRecord: EditorialRecord;
 }
 
 /** One model call: its context and, when chapter-scoped, its anchor. */

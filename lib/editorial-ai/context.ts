@@ -5,6 +5,7 @@ import { assembleAuthorContext } from "@/lib/memory/assemble";
 import { assembleBookContext } from "@/lib/books/assemble";
 import type {
   ChapterMaterial,
+  EditorialRecord,
   ReviewMaterial,
 } from "@/lib/editorial-ai/types";
 
@@ -99,6 +100,8 @@ export async function assembleReviewMaterial(
   if (vError)
     throw new Error(`Could not load chapter versions: ${vError.message}`);
 
+  const editorialRecord = await assembleEditorialRecord(book.id);
+
   const numbered = ordered.filter((c) => c.kind === "chapter");
   const chapters: ChapterMaterial[] = written.map((c) => {
     const version = (versions ?? []).find(
@@ -127,7 +130,140 @@ export async function assembleReviewMaterial(
     return material;
   });
 
-  return { author, book, authorMemory, bookMemory, chapters };
+  return {
+    author,
+    book,
+    authorMemory,
+    bookMemory,
+    chapters,
+    editorialRecord,
+  };
+}
+
+/**
+ * The Editorial Record: what is already decided, assembled fresh per
+ * run. Concise by construction — judgments, titles, and cited clauses,
+ * never full bodies. Fails soft: a book with no editorial history (or
+ * a deliberation table not yet migrated) yields an empty record and
+ * the review proceeds without memory.
+ */
+async function assembleEditorialRecord(
+  bookId: string,
+): Promise<EditorialRecord> {
+  const supabase = await createClient();
+  const record: EditorialRecord = {
+    judgments: [],
+    resolved: [],
+    setAside: [],
+  };
+
+  try {
+    const { data: deliberations } = await supabase
+      .from("editorial_deliberations")
+      .select("id, question, judgment, status")
+      .eq("book_id", bookId)
+      .in("status", ["adopted", "implemented"])
+      .order("adopted_at", { ascending: true });
+    record.judgments = (deliberations ?? [])
+      .filter((d) => d.judgment)
+      .map((d) => ({
+        id: d.id,
+        question: clip(d.question, 160),
+        judgment: clip(d.judgment as string, 400),
+      }));
+  } catch (error) {
+    console.error("[editorial-ai] deliberation record unavailable", error);
+  }
+
+  try {
+    const { data: findings } = await supabase
+      .from("editorial_findings")
+      .select("id, title, explanation, status, resolution_note")
+      .eq("book_id", bookId)
+      .in("status", ["resolved", "dismissed"])
+      .order("created_at", { ascending: true });
+    for (const f of findings ?? []) {
+      const entry = {
+        id: f.id,
+        title: clip(f.title, 160),
+        clause: citedClause(f.explanation ?? ""),
+      };
+      if (f.status === "resolved") {
+        record.resolved.push(entry);
+      } else {
+        record.setAside.push({
+          ...entry,
+          reason: f.resolution_note ? clip(f.resolution_note, 200) : null,
+        });
+      }
+    }
+  } catch (error) {
+    console.error("[editorial-ai] findings record unavailable", error);
+  }
+
+  return record;
+}
+
+/** The first quoted passage in an explanation — the clause a finding
+ *  cited, when it cited one. */
+function citedClause(explanation: string): string | null {
+  const match = explanation.match(/[“"']([^”"']{12,}?)[”"']/);
+  return match ? clip(match[1].replace(/\s+/g, " ").trim(), 140) : null;
+}
+
+function clip(text: string, max: number): string {
+  const clean = text.trim();
+  return clean.length > max ? `${clean.slice(0, max - 1)}…` : clean;
+}
+
+/** The serialized block, carrying its own reading instructions. Empty
+ *  record → null (no block, no noise). */
+export function editorialRecordBlock(
+  record: EditorialRecord,
+): string | null {
+  if (
+    !record.judgments.length &&
+    !record.resolved.length &&
+    !record.setAside.length
+  ) {
+    return null;
+  }
+
+  const sections: string[] = ["=== THE EDITORIAL RECORD ==="];
+
+  if (record.judgments.length) {
+    sections.push(
+      [
+        "Adopted judgments — settled editorial positions; review against these as extensions of the governing documents:",
+        ...record.judgments.map((j) => `- ${j.question} → ${j.judgment}`),
+      ].join("\n"),
+    );
+  }
+
+  if (record.resolved.length) {
+    sections.push(
+      [
+        "Already resolved — do not re-raise unless the text has materially changed since:",
+        ...record.resolved.map(
+          (f) => `- ${f.title}${f.clause ? ` (cited "${f.clause}")` : ""}`,
+        ),
+      ].join("\n"),
+    );
+  }
+
+  if (record.setAside.length) {
+    sections.push(
+      [
+        "Considered and set aside by the author — do not re-raise:",
+        ...record.setAside.map(
+          (f) =>
+            `- ${f.title}${f.clause ? ` (cited "${f.clause}")` : ""}${f.reason ? ` — ${f.reason}` : ""}`,
+        ),
+      ].join("\n"),
+    );
+  }
+
+  return sections.join("\n\n");
 }
 
 // ---------------------------------------------------------------------------

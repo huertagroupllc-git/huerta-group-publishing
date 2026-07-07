@@ -1,7 +1,10 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import { assembleReviewMaterial } from "@/lib/editorial-ai/context";
+import {
+  assembleReviewMaterial,
+  editorialRecordBlock,
+} from "@/lib/editorial-ai/context";
 import {
   buildSystemPrompt,
   buildUserContent,
@@ -83,8 +86,11 @@ export async function executeReview(
 
   const model = def.model ?? process.env.EDITORIAL_REVIEW_MODEL ?? DEFAULT_MODEL;
 
+  const recordBlock = editorialRecordBlock(material.editorialRecord);
+
   // Full provenance, recorded before the first model call: exactly
-  // what this run was shown, answerable forever.
+  // what this run was shown, answerable forever — including which
+  // editorial memory it carried.
   const contextVersions = {
     model,
     reviewer: def.type,
@@ -98,6 +104,13 @@ export async function executeReview(
       chapter_id: c.id,
       version_id: c.activeVersionId,
     })),
+    editorial_record: {
+      judgments: material.editorialRecord.judgments.map((j) => j.id),
+      resolved_findings: material.editorialRecord.resolved.map((f) => f.id),
+      set_aside_findings: material.editorialRecord.setAside.map(
+        (f) => f.id,
+      ),
+    },
   };
 
   const { data: run, error: runError } = await supabase
@@ -133,12 +146,15 @@ export async function executeReview(
         break;
       }
 
+      const passWithMemory = recordBlock
+        ? { ...pass, contextBlocks: [recordBlock, ...pass.contextBlocks] }
+        : pass;
       const { findings, summary, usage } = await runPass(
         apiKey,
         model,
         def,
         systemPrompt,
-        pass,
+        passWithMemory,
       );
       if (summary) summaries.push(summary);
 
