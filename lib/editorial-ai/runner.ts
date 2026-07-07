@@ -135,6 +135,7 @@ export async function executeReview(
   const passes = def.buildPasses(material);
   const systemPrompt = buildSystemPrompt(def);
   const summaries: string[] = [];
+  const raisedThisRun: string[] = [];
   let inserted = 0;
 
   try {
@@ -146,8 +147,19 @@ export async function executeReview(
         break;
       }
 
-      const passWithMemory = recordBlock
-        ? { ...pass, contextBlocks: [recordBlock, ...pass.contextBlocks] }
+      const prefixBlocks: string[] = [];
+      if (recordBlock) prefixBlocks.push(recordBlock);
+      if (pass.includeRunFindings && raisedThisRun.length) {
+        prefixBlocks.push(
+          [
+            "=== RAISED EARLIER IN THIS REVIEW ===",
+            "Already raised in this review — do not repeat these. Raise only what is materially distinct from them, or where this text holds a unique problem or evidence beyond them:",
+            ...raisedThisRun,
+          ].join("\n"),
+        );
+      }
+      const passWithMemory = prefixBlocks.length
+        ? { ...pass, contextBlocks: [...prefixBlocks, ...pass.contextBlocks] }
         : pass;
       const { findings, summary, usage } = await runPass(
         apiKey,
@@ -194,6 +206,11 @@ export async function executeReview(
           );
         }
         inserted += kept.length;
+        for (const f of kept) {
+          raisedThisRun.push(
+            `- [${pass.chapterId ? pass.label : "Manuscript-wide"}] ${f.title} (${f.severity})`,
+          );
+        }
       }
 
       console.log(

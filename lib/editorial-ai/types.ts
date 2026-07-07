@@ -79,6 +79,10 @@ export interface ReviewPass {
   /** Verbatim source for excerpt verification (null = excerpts are
    *  dropped for this pass). */
   excerptSource: string | null;
+  /** When true, the engine prepends what this run has already raised —
+   *  so later passes add only what is materially distinct (pattern
+   *  consolidation within a run). */
+  includeRunFindings?: boolean;
 }
 
 export interface ReviewerDefinition {

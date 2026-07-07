@@ -32,6 +32,8 @@ export const constitutionReview: ReviewerDefinition = {
   instructions: [
     TRACEABILITY,
     "Evaluate only constitutional fidelity: scope drift; broken promises to the reader; promised ideas that never arrive; chapters or sections that do not serve the Constitution; contradictions with the Constitution; introduction or ending misalignment with the Constitution; overdevelopment of what the Constitution says is not central.",
+    "This review is one editorial letter in two movements. The first pass reads the manuscript as a whole and names SYSTEMIC patterns — one finding per book-wide pattern, with the affected chapters named inside the explanation. The chapter passes that follow raise only what is LOCAL: materially distinct from the systemic findings already raised, unique to that chapter, or carrying chapter-specific evidence a systemic finding cannot.",
+    "Identical pattern, identical severity; when torn between two severities, choose the lower.",
     "Never evaluate grammar, prose polish, voice, pacing, or concept consistency unless the Constitution itself makes them constitutional matters. Never judge publication readiness or marketability.",
     "Use the Master Outline only as context for structural promises; the Constitution is the law you check against.",
   ],
@@ -44,21 +46,13 @@ export const constitutionReview: ReviewerDefinition = {
     const outline = bookMemoryBlock(material, "Master Outline");
     const shared = [constitution, ...(outline ? [outline] : [])];
 
-    const chapterPasses: ReviewPass[] = material.chapters.map((chapter) => ({
-      label: `${chapter.positionLabel} — ${chapter.title}`,
-      contextBlocks: [
-        ...shared,
-        chapter.frameBlock,
-        chapterTextBlock(chapter),
-      ],
-      chapterId: chapter.id,
-      chapterVersionId: chapter.activeVersionId,
-      excerptSource: chapter.content,
-    }));
-
+    // The manuscript pass runs FIRST: one editorial letter begins with
+    // the whole, and its systemic findings become already-noted
+    // context for every chapter pass (pattern consolidation).
     const opening = material.chapters[0];
     const closing = material.chapters[material.chapters.length - 1];
     const manuscriptBlocks = [
+      `=== THIS PASS ===\n\nYou are reading the manuscript as a whole. Name the SYSTEMIC constitutional patterns — one finding per book-wide pattern, never one per chapter — with the affected chapters named inside the explanation. Watch especially for patterns such as: personal experience that does not return to the reader; universal claims where the Constitution requires exploratory framing; the reader's invitation missing across several chapters; understanding-over-agreement not consistently reinforced; constitutional promises appearing unevenly across the manuscript. Anchor everything to the Constitution's own words.`,
       ...shared,
       chapterSummariesBlock(material),
       `=== THE OPENING — ${opening.title.toUpperCase()} ===\n\n${opening.content.trim()}`,
@@ -80,7 +74,21 @@ export const constitutionReview: ReviewerDefinition = {
           : opening.content,
     };
 
-    return [...chapterPasses, manuscriptPass];
+    const chapterPasses: ReviewPass[] = material.chapters.map((chapter) => ({
+      label: `${chapter.positionLabel} — ${chapter.title}`,
+      contextBlocks: [
+        `=== THIS PASS ===\n\nYou are reading one chapter. The manuscript-wide patterns are already on the record above. Raise only what is LOCAL to this chapter: materially distinct from the systemic findings, unique to this chapter, or chapter-specific evidence a systemic finding cannot carry. A chapter that merely exemplifies an already-raised pattern is a clean pass.`,
+        ...shared,
+        chapter.frameBlock,
+        chapterTextBlock(chapter),
+      ],
+      chapterId: chapter.id,
+      chapterVersionId: chapter.activeVersionId,
+      excerptSource: chapter.content,
+      includeRunFindings: true,
+    }));
+
+    return [manuscriptPass, ...chapterPasses];
   },
 
   validateFinding(
