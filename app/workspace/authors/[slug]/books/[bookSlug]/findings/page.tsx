@@ -102,6 +102,16 @@ export default async function FindingsPage({
     : "open";
   const shown = findings.filter((f) => f.status === shownStatus);
 
+  // The Reviews block above counts only the most recent review run; the
+  // list below shows every finding ever raised. Mark AI findings that
+  // belong to an earlier run so the two never appear to disagree.
+  const latestRunId = latestReview?.id ?? null;
+  const isFromEarlierReview = (f: FindingListEntry): boolean =>
+    f.review_run_id != null &&
+    f.reviewType !== "manual" &&
+    f.review_run_id !== latestRunId;
+  const hasEarlierReviewFindings = findings.some(isFromEarlierReview);
+
   // Book-level findings first (The Manuscript), then by chapter.
   const groups: { heading: string; entries: FindingListEntry[] }[] = [];
   const bookLevel = shown.filter((f) => !f.chapter_id);
@@ -217,6 +227,13 @@ export default async function FindingsPage({
             </div>
           )
         ) : null}
+        {hasEarlierReviewFindings ? (
+          <p className="mt-4 max-w-prose font-sans text-xs text-ink-soft">
+            Only the most recent review&rsquo;s findings are counted above.
+            Findings from earlier readings remain below, each marked
+            &ldquo;from an earlier review.&rdquo;
+          </p>
+        ) : null}
       </div>
 
       <div className="rule mt-10 flex flex-wrap items-baseline justify-between gap-x-6 pt-5">
@@ -298,6 +315,11 @@ export default async function FindingsPage({
                     ) : null}
                     {reviewTypeLabel(finding.reviewType)} · raised{" "}
                     {formatDate(finding.created_at)}
+                    {isFromEarlierReview(finding) ? (
+                      <span className="text-ink-soft">
+                        {" · "}from an earlier review
+                      </span>
+                    ) : null}
                     {deliberations.has(finding.id) ? (
                       <>
                         {" · "}
