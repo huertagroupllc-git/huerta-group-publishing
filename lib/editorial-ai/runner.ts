@@ -39,6 +39,15 @@ import {
 
 const DEFAULT_MODEL = "gpt-4o";
 
+// A pending run older than this was killed mid-execution, not still
+// running: comfortably past the request's own maxDuration (300s).
+const STALE_PENDING_MS = 6 * 60 * 1000;
+
+// A review is many sequential model calls; a single transient upstream
+// hiccup must not doom the whole letter. Retry only transient classes.
+const MODEL_RETRY_ATTEMPTS = 3; // 1 initial + 2 retries
+const MODEL_RETRY_BASE_MS = 800;
+
 export class ReviewNotPossibleError extends Error {}
 
 export async function executeReview(
@@ -72,17 +81,45 @@ export async function executeReview(
   }
 
   // One run at a time per book: a review is a deliberate, singular act.
-  const { data: pending } = await supabase
+  //
+  // The run executes synchronously inside the request (maxDuration 300s).
+  // If the platform is killed mid-run — a genuine timeout, a redeploy, an
+  // infra blip — the try/catch below never runs and the row is stranded
+  // `pending`. A stranded run must not block reviews forever: a run still
+  // pending well past the request's own maximum lifetime cannot still be
+  // executing, so it is recovered (marked failed, its partial findings
+  // preserved) rather than treated as a live run holding the lock.
+  const { data: pendingRuns } = await supabase
     .from("review_runs")
-    .select("id")
+    .select("id, created_at")
     .eq("book_id", material.book.id)
-    .eq("status", "pending")
-    .limit(1)
-    .maybeSingle();
-  if (pending) {
+    .eq("status", "pending");
+  const nowMs = Date.now();
+  const liveRun = (pendingRuns ?? []).find(
+    (r) => nowMs - new Date(r.created_at).getTime() < STALE_PENDING_MS,
+  );
+  if (liveRun) {
     throw new ReviewNotPossibleError(
       "A review is already reading this manuscript. Let it finish first.",
     );
+  }
+  const abandonedRunIds = (pendingRuns ?? [])
+    .filter(
+      (r) => nowMs - new Date(r.created_at).getTime() >= STALE_PENDING_MS,
+    )
+    .map((r) => r.id);
+  if (abandonedRunIds.length) {
+    console.warn(
+      `[editorial-ai] recovering ${abandonedRunIds.length} abandoned pending run(s) for book ${material.book.id}`,
+    );
+    await supabase
+      .from("review_runs")
+      .update({
+        status: "failed",
+        summary:
+          "The review did not finish — it was interrupted before completing. Findings raised before the interruption are preserved.",
+      })
+      .in("id", abandonedRunIds);
   }
 
   const model = def.model ?? process.env.EDITORIAL_REVIEW_MODEL ?? DEFAULT_MODEL;
@@ -271,21 +308,18 @@ async function runPass(
   summary: string | null;
   usage: number | null;
 }> {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: buildUserContent(pass) },
-      ],
-      response_format: findingsResponseSchema(def),
-    }),
+  const body = JSON.stringify({
+    model,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: buildUserContent(pass) },
+    ],
+    response_format: findingsResponseSchema(def),
   });
+
+  // Retry transient upstream failures a few times; a persistent
+  // non-transient error still falls through to the honest failure below.
+  const response = await callModelWithRetry(apiKey, body);
 
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
@@ -320,6 +354,49 @@ async function runPass(
     summary: parsed.summary?.trim() || null,
     usage: payload.usage?.total_tokens ?? null,
   };
+}
+
+/** POST to the model, retrying only transient failures (a dropped
+ *  connection, a 429, or a 5xx) with a short linear backoff. The caller
+ *  still checks `response.ok`, so a persistent non-transient error (a
+ *  4xx other than 429) returns immediately and fails honestly. Added
+ *  latency occurs only when a transient error actually happens; the
+ *  normal path calls fetch exactly once. */
+async function callModelWithRetry(
+  apiKey: string,
+  body: string,
+): Promise<Response> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= MODEL_RETRY_ATTEMPTS; attempt++) {
+    try {
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body,
+        },
+      );
+      const transient = response.status === 429 || response.status >= 500;
+      if (!transient || attempt === MODEL_RETRY_ATTEMPTS) return response;
+      console.warn(
+        `[editorial-ai] transient model error ${response.status}; retry ${attempt}/${MODEL_RETRY_ATTEMPTS - 1}`,
+      );
+    } catch (error) {
+      lastError = error;
+      if (attempt === MODEL_RETRY_ATTEMPTS) throw error;
+      console.warn(
+        `[editorial-ai] model call network error; retry ${attempt}/${MODEL_RETRY_ATTEMPTS - 1}`,
+      );
+    }
+    await new Promise((resolve) =>
+      setTimeout(resolve, MODEL_RETRY_BASE_MS * attempt),
+    );
+  }
+  throw lastError ?? new Error("The reviewer's model call failed.");
 }
 
 /** The engine's own validation (reviewer hooks run after this):
