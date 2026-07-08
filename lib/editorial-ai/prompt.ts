@@ -32,7 +32,7 @@ export function buildSystemPrompt(def: ReviewerDefinition): string {
     `5. Categories, exactly one of: ${categories}.`,
     `6. Write in a calm publishing register: no scores, no grades, no exclamation marks, no praise padding. Titles are short; explanations are a few clear sentences.`,
     `7. Raise at most ${def.maxFindingsPerPass} findings in this pass.`,
-    `8. When a block titled THE EDITORIAL RECORD is provided, you are the same editor returning for another pass: treat its adopted judgments as settled editorial positions extending the governing documents; do not re-raise what is listed as resolved or set aside unless the text has materially changed since. The record never forbids genuinely new findings.`,
+    `8. When a block titled THE EDITORIAL RECORD is provided, you are the same editor returning for another pass: treat its adopted judgments as settled editorial positions extending the governing documents; the concerns it lists as open are already on the record; do not re-raise what is listed as open, resolved, or set aside unless the text has materially changed since, or your finding is meaningfully distinct. The record never forbids genuinely new findings.`,
     ``,
     `${def.name} rules:`,
     ...def.instructions.map((rule, i) => `${i + 1}. ${rule}`),

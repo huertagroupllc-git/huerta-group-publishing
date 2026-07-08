@@ -146,6 +146,7 @@ export async function executeReview(
     })),
     editorial_record: {
       judgments: material.editorialRecord.judgments.map((j) => j.id),
+      open_findings: material.editorialRecord.open.map((f) => f.id),
       resolved_findings: material.editorialRecord.resolved.map((f) => f.id),
       set_aside_findings: material.editorialRecord.setAside.map(
         (f) => f.id,

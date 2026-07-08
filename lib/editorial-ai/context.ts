@@ -10,6 +10,7 @@ import type {
 } from "@/lib/editorial-ai/types";
 import type { BookDocType } from "@/lib/books/types";
 import type { DocType } from "@/lib/memory/types";
+import { reviewTypeLabel } from "@/lib/findings/types";
 
 /**
  * The reusable context pipeline: assemble everything a reviewer might
@@ -155,6 +156,7 @@ async function assembleEditorialRecord(
   const supabase = await createClient();
   const record: EditorialRecord = {
     judgments: [],
+    open: [],
     resolved: [],
     setAside: [],
   };
@@ -203,6 +205,42 @@ async function assembleEditorialRecord(
     console.error("[editorial-ai] findings record unavailable", error);
   }
 
+  // Open findings: concerns already raised and not yet resolved or set
+  // aside. Kept concise — title, cited clause, review source, and the
+  // chapter it anchors to — so a returning review knows what is already
+  // on the record and can avoid duplicating it. Embeds read through RLS
+  // like everything else; a blocked embed degrades to a null field.
+  try {
+    type OpenRow = {
+      id: string;
+      title: string;
+      explanation: string | null;
+      run: { review_type: string } | null;
+      chapter: { title: string | null } | null;
+    };
+    const { data: open } = await supabase
+      .from("editorial_findings")
+      .select(
+        "id, title, explanation, run:review_runs(review_type), chapter:chapters(title)",
+      )
+      .eq("book_id", bookId)
+      .eq("status", "open")
+      .order("created_at", { ascending: true });
+    for (const f of (open ?? []) as unknown as OpenRow[]) {
+      record.open.push({
+        id: f.id,
+        title: clip(f.title, 160),
+        clause: citedClause(f.explanation ?? ""),
+        source: f.run?.review_type
+          ? reviewTypeLabel(f.run.review_type)
+          : null,
+        anchor: f.chapter?.title ? clip(f.chapter.title, 80) : null,
+      });
+    }
+  } catch (error) {
+    console.error("[editorial-ai] open findings record unavailable", error);
+  }
+
   return record;
 }
 
@@ -225,6 +263,7 @@ export function editorialRecordBlock(
 ): string | null {
   if (
     !record.judgments.length &&
+    !record.open.length &&
     !record.resolved.length &&
     !record.setAside.length
   ) {
@@ -238,6 +277,18 @@ export function editorialRecordBlock(
       [
         "Adopted judgments — settled editorial positions; review against these as extensions of the governing documents:",
         ...record.judgments.map((j) => `- ${j.question} → ${j.judgment}`),
+      ].join("\n"),
+    );
+  }
+
+  if (record.open.length) {
+    sections.push(
+      [
+        "Open concerns already on the record — do not re-raise the same concern unless the current manuscript has materially changed since it was raised, or your finding is meaningfully distinct:",
+        ...record.open.map(
+          (f) =>
+            `- ${f.title}${f.anchor ? ` — ${f.anchor}` : ""}${f.clause ? ` (cited "${f.clause}")` : ""}${f.source ? ` · ${f.source}` : ""}`,
+        ),
       ].join("\n"),
     );
   }

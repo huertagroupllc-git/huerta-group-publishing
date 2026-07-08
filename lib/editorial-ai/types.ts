@@ -47,6 +47,16 @@ export interface ChapterMaterial {
 export interface EditorialRecord {
   /** Adopted/implemented deliberations: settled editorial positions. */
   judgments: { id: string; question: string; judgment: string }[];
+  /** Open findings from prior runs: concerns already on the record, not
+   *  yet resolved or set aside. Title, cited clause, review source, and
+   *  anchor only — never full bodies. */
+  open: {
+    id: string;
+    title: string;
+    clause: string | null;
+    source: string | null;
+    anchor: string | null;
+  }[];
   /** Resolved findings: title + the clause they cited. */
   resolved: { id: string; title: string; clause: string | null }[];
   /** Set-aside findings: considered and declined by the author. */
