@@ -142,7 +142,12 @@ export interface ValidatedFinding {
 
 export interface ReviewRunResult {
   runId: string;
-  status: "complete" | "failed";
+  /** `incomplete` = this chunk paused with passes still to read; the run
+   *  is resumable. `complete`/`failed` are terminal. */
+  status: "complete" | "incomplete" | "failed";
   findingsInserted: number;
+  /** Passes read and committed so far, and the reading plan's total. */
+  completedPasses: number;
+  totalPasses: number;
   summary: string | null;
 }

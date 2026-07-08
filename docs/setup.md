@@ -71,6 +71,14 @@ Applied in order:
     Editorial Deliberation: the deliberations table (one per finding),
     adoption-immutability and forward-only transition triggers,
     draft-only deletion, RLS, and grants.
+13. `supabase/migrations/20260714000000_review_run_incomplete_status.sql`
+    — Constitution Review chunked execution: adds the `incomplete`
+    value to `review_run_status` (its own migration, transaction-safe).
+14. `supabase/migrations/20260715000000_review_run_progress.sql` —
+    per-run progress columns (`total_passes`, `completed_passes`,
+    `chunk_started_at`) so a review resumes across requests. Apply both
+    13 and 14 together; until they are applied, requesting or continuing
+    a Constitution Review reports the missing migration.
 
 Preferred (keeps migration history tracked by the CLI):
 

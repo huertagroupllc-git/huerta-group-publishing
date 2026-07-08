@@ -13,6 +13,7 @@ import {
 } from "@/lib/editorial-ai/prompt";
 import type {
   RawFinding,
+  ReviewMaterial,
   ReviewPass,
   ReviewRunResult,
   ReviewerDefinition,
@@ -24,37 +25,64 @@ import {
 } from "@/lib/findings/types";
 
 /**
- * The shared review-run engine. Every reviewer runs identically:
+ * The shared review-run engine. A review is many sequential model calls;
+ * on a full manuscript that no longer fits inside one request's
+ * maxDuration, so execution is CHUNKED and RESUMABLE:
  *
- *   guard (configured? no pending run?) → create run (pending, with
- *   full context_versions provenance) → execute passes in order,
- *   validating and committing each pass's findings immediately →
- *   complete with the cover note — or fail honestly, keeping whatever
- *   was already committed.
+ *   startReview → create run (pending, full provenance, total_passes) →
+ *   runChunk executes passes in reading order, committing each pass's
+ *   findings immediately and persisting completed_passes, until either
+ *   the reading plan is exhausted (status complete + cover note) or the
+ *   chunk's time budget is reached (status incomplete). The author
+ *   continues an incomplete run — continueReview claims it and runs the
+ *   next chunk from completed_passes. A chunk killed mid-execution (a
+ *   timeout, a redeploy) is recovered to incomplete from chunk_started_at.
  *
- * Everything runs as the requesting user through RLS: the reviewer
- * can only read what the author can read, and only write findings
- * the author could write. OPENAI_API_KEY never leaves the server.
+ * Nothing about meaning changes across chunks: provenance is frozen at
+ * creation, the record (not memory) carries within-run state between
+ * chunks, pass order is preserved, and every commit runs as the
+ * requesting user through RLS. OPENAI_API_KEY never leaves the server.
  */
 
 const DEFAULT_MODEL = "gpt-4o";
 
-// A pending run older than this was killed mid-execution, not still
-// running: comfortably past the request's own maxDuration (300s).
+// A pending run older than this was killed mid-chunk, not still running:
+// comfortably past the request's own maxDuration (300s).
 const STALE_PENDING_MS = 6 * 60 * 1000;
 
-// A review is many sequential model calls; a single transient upstream
-// hiccup must not doom the whole letter. Retry only transient classes.
+// Stop starting new passes once a chunk has run this long, leaving margin
+// for one final pass and its writes under the 300s request ceiling.
+const CHUNK_BUDGET_MS = 200 * 1000;
+
+// A single transient upstream hiccup must not doom a pass. Retry only
+// transient classes; a persistent non-transient error fails honestly.
 const MODEL_RETRY_ATTEMPTS = 3; // 1 initial + 2 retries
 const MODEL_RETRY_BASE_MS = 800;
 
+type Supa = Awaited<ReturnType<typeof createClient>>;
+
 export class ReviewNotPossibleError extends Error {}
 
-export async function executeReview(
+/** A structural failure to record findings (not a model error): the run
+ *  cannot make progress, so it fails rather than pausing as resumable. */
+class FindingsInsertError extends Error {}
+
+interface ReviewSetup {
+  supabase: Supa;
+  userId: string;
+  apiKey: string;
+  model: string;
+  material: ReviewMaterial;
+  systemPrompt: string;
+  recordBlock: string | null;
+}
+
+/** Shared guards and assembly for both starting and continuing a review. */
+async function prepareReview(
   def: ReviewerDefinition,
   authorSlug: string,
   bookSlug: string,
-): Promise<ReviewRunResult> {
+): Promise<ReviewSetup> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     throw new ReviewNotPossibleError(
@@ -80,57 +108,55 @@ export async function executeReview(
     );
   }
 
-  // One run at a time per book: a review is a deliberate, singular act.
-  //
-  // The run executes synchronously inside the request (maxDuration 300s).
-  // If the platform is killed mid-run — a genuine timeout, a redeploy, an
-  // infra blip — the try/catch below never runs and the row is stranded
-  // `pending`. A stranded run must not block reviews forever: a run still
-  // pending well past the request's own maximum lifetime cannot still be
-  // executing, so it is recovered (marked failed, its partial findings
-  // preserved) rather than treated as a live run holding the lock.
-  const { data: pendingRuns } = await supabase
+  return {
+    supabase,
+    userId: user.id,
+    apiKey,
+    model: def.model ?? process.env.EDITORIAL_REVIEW_MODEL ?? DEFAULT_MODEL,
+    material,
+    systemPrompt: buildSystemPrompt(def),
+    recordBlock: editorialRecordBlock(material.editorialRecord),
+  };
+}
+
+/**
+ * Begin a review: guard against an existing run, create the run row with
+ * full provenance, and execute the first chunk.
+ */
+export async function startReview(
+  def: ReviewerDefinition,
+  authorSlug: string,
+  bookSlug: string,
+): Promise<ReviewRunResult> {
+  const setup = await prepareReview(def, authorSlug, bookSlug);
+  const { supabase, userId, material, systemPrompt, model } = setup;
+
+  // A killed chunk leaves the run pending; recover any such corpse first
+  // so it neither blocks a fresh review nor is mistaken for one running.
+  await recoverStalePendingRuns(supabase, material.book.id);
+
+  // One review at a time per book. A pending run is actively reading; an
+  // incomplete run is waiting to be continued — either way, not a moment
+  // to start another.
+  const { data: existing } = await supabase
     .from("review_runs")
-    .select("id, created_at")
+    .select("id, status")
     .eq("book_id", material.book.id)
-    .eq("status", "pending");
-  const nowMs = Date.now();
-  const liveRun = (pendingRuns ?? []).find(
-    (r) => nowMs - new Date(r.created_at).getTime() < STALE_PENDING_MS,
-  );
-  if (liveRun) {
+    .eq("review_type", def.type)
+    .in("status", ["pending", "incomplete"]);
+  if (existing && existing.length) {
     throw new ReviewNotPossibleError(
-      "A review is already reading this manuscript. Let it finish first.",
+      existing.some((r) => r.status === "pending")
+        ? "A review is already reading this manuscript. Let it finish first."
+        : "An unfinished review is waiting to continue. Continue it from the Findings.",
     );
   }
-  const abandonedRunIds = (pendingRuns ?? [])
-    .filter(
-      (r) => nowMs - new Date(r.created_at).getTime() >= STALE_PENDING_MS,
-    )
-    .map((r) => r.id);
-  if (abandonedRunIds.length) {
-    console.warn(
-      `[editorial-ai] recovering ${abandonedRunIds.length} abandoned pending run(s) for book ${material.book.id}`,
-    );
-    await supabase
-      .from("review_runs")
-      .update({
-        status: "failed",
-        summary:
-          "The review did not finish — it was interrupted before completing. Findings raised before the interruption are preserved.",
-      })
-      .in("id", abandonedRunIds);
-  }
 
-  const model = def.model ?? process.env.EDITORIAL_REVIEW_MODEL ?? DEFAULT_MODEL;
-
-  const recordBlock = editorialRecordBlock(material.editorialRecord);
   const passes = def.buildPasses(material);
-  const systemPrompt = buildSystemPrompt(def);
 
-  // Full provenance, recorded before the first model call: exactly
-  // what this run was shown, answerable forever — including which
-  // editorial memory it carried.
+  // Full provenance, recorded before the first model call: exactly what
+  // this run was shown, answerable forever — including which editorial
+  // memory it carried. Frozen at creation and never rewritten by resumes.
   const contextVersions = {
     model,
     reviewer: def.type,
@@ -148,12 +174,8 @@ export async function executeReview(
       judgments: material.editorialRecord.judgments.map((j) => j.id),
       open_findings: material.editorialRecord.open.map((f) => f.id),
       resolved_findings: material.editorialRecord.resolved.map((f) => f.id),
-      set_aside_findings: material.editorialRecord.setAside.map(
-        (f) => f.id,
-      ),
+      set_aside_findings: material.editorialRecord.setAside.map((f) => f.id),
     },
-    // The reviewer's instructions evolve; every run stays attributable
-    // to the exact prompt that produced it.
     prompt_sha256: createHash("sha256").update(systemPrompt).digest("hex"),
     caps: {
       per_pass: def.maxFindingsPerPass,
@@ -169,7 +191,10 @@ export async function executeReview(
       review_type: def.type,
       status: "pending",
       context_versions: contextVersions,
-      created_by: user.id,
+      total_passes: passes.length,
+      completed_passes: 0,
+      chunk_started_at: new Date().toISOString(),
+      created_by: userId,
     })
     .select("id")
     .single();
@@ -181,19 +206,164 @@ export async function executeReview(
     );
   }
 
-  const summaries: string[] = [];
-  const raisedThisRun: string[] = [];
-  let inserted = 0;
+  return runChunk(setup, def, {
+    runId: run.id,
+    startAtPass: 0,
+    storedTotalPasses: passes.length,
+  });
+}
 
+/**
+ * Continue an unfinished review: claim the incomplete run atomically (so
+ * only one chunk runs it at a time) and execute the next chunk from where
+ * the last one paused.
+ */
+export async function continueReview(
+  def: ReviewerDefinition,
+  authorSlug: string,
+  bookSlug: string,
+): Promise<ReviewRunResult> {
+  const setup = await prepareReview(def, authorSlug, bookSlug);
+  const { supabase, material } = setup;
+
+  await recoverStalePendingRuns(supabase, material.book.id);
+
+  const { data: resumable } = await supabase
+    .from("review_runs")
+    .select("id")
+    .eq("book_id", material.book.id)
+    .eq("review_type", def.type)
+    .eq("status", "incomplete")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!resumable) {
+    throw new ReviewNotPossibleError(
+      "There is no unfinished review to continue.",
+    );
+  }
+
+  // Claim: flip incomplete → pending only if it is still incomplete. If a
+  // concurrent request already claimed it, this matches no row.
+  const { data: claimed } = await supabase
+    .from("review_runs")
+    .update({
+      status: "pending",
+      chunk_started_at: new Date().toISOString(),
+    })
+    .eq("id", resumable.id)
+    .eq("status", "incomplete")
+    .select("id, completed_passes, total_passes")
+    .maybeSingle();
+  if (!claimed) {
+    throw new ReviewNotPossibleError(
+      "This review is already being continued. Let it finish first.",
+    );
+  }
+
+  return runChunk(setup, def, {
+    runId: claimed.id,
+    startAtPass: claimed.completed_passes ?? 0,
+    storedTotalPasses: claimed.total_passes ?? null,
+  });
+}
+
+/** Recover runs whose chunk was killed mid-execution: a run still pending
+ *  past the request's own max lifetime cannot be running, so it returns to
+ *  `incomplete` (resumable) with its committed findings preserved. */
+async function recoverStalePendingRuns(
+  supabase: Supa,
+  bookId: string,
+): Promise<void> {
+  const { data: pendingRuns } = await supabase
+    .from("review_runs")
+    .select("id, chunk_started_at, created_at")
+    .eq("book_id", bookId)
+    .eq("status", "pending");
+  const now = Date.now();
+  const staleIds = (pendingRuns ?? [])
+    .filter((r) => {
+      const started = new Date(
+        (r.chunk_started_at as string | null) ?? r.created_at,
+      ).getTime();
+      return now - started >= STALE_PENDING_MS;
+    })
+    .map((r) => r.id);
+  if (staleIds.length) {
+    console.warn(
+      `[editorial-ai] recovering ${staleIds.length} interrupted chunk(s) for book ${bookId} → incomplete`,
+    );
+    await supabase
+      .from("review_runs")
+      .update({ status: "incomplete", chunk_started_at: null })
+      .in("id", staleIds);
+  }
+}
+
+/**
+ * Execute one chunk of a run: passes in reading order from startAtPass,
+ * committing each pass's findings immediately and persisting progress,
+ * until the reading plan is exhausted or the time budget is reached.
+ */
+async function runChunk(
+  setup: ReviewSetup,
+  def: ReviewerDefinition,
+  cursor: {
+    runId: string;
+    startAtPass: number;
+    storedTotalPasses: number | null;
+  },
+): Promise<ReviewRunResult> {
+  const { supabase, userId, apiKey, model, material, systemPrompt, recordBlock } =
+    setup;
+  const { runId, startAtPass, storedTotalPasses } = cursor;
+
+  const passes = def.buildPasses(material);
+  const totalPasses = passes.length;
+
+  // Resuming by index is only safe if the reading plan is the same size it
+  // was when this run began. If the manuscript's chapter set changed
+  // mid-review, fail honestly rather than read the wrong passes.
+  if (storedTotalPasses != null && storedTotalPasses !== totalPasses) {
+    await supabase
+      .from("review_runs")
+      .update({
+        status: "failed",
+        chunk_started_at: null,
+        summary:
+          "The manuscript changed while this review was in progress, so it cannot be continued safely. The findings raised so far are preserved; please start a fresh review.",
+      })
+      .eq("id", runId);
+    return {
+      runId,
+      status: "failed",
+      findingsInserted: 0,
+      completedPasses: startAtPass,
+      totalPasses,
+      summary: null,
+    };
+  }
+
+  // The record, not memory, carries within-run state between chunks:
+  // reconstruct what has been raised and the cover note from what is
+  // already committed to this run.
+  const progress = await loadRunProgress(supabase, runId, material);
+  const raisedThisRun = progress.raisedThisRun;
+  let inserted = progress.inserted;
+  let coverNote = progress.coverNote;
+
+  const chunkStart = Date.now();
+  let i = startAtPass;
   try {
-    for (const pass of passes) {
+    for (; i < passes.length; i++) {
       if (inserted >= def.maxFindingsPerRun) {
-        console.log(
-          `[editorial-ai] ${def.type}: run cap reached, skipping "${pass.label}"`,
-        );
+        // Run cap reached: the remaining passes are skipped and the run
+        // is complete.
+        i = passes.length;
         break;
       }
 
+      const pass = passes[i];
       const prefixBlocks: string[] = [];
       if (recordBlock) prefixBlocks.push(recordBlock);
       if (pass.includeRunFindings && raisedThisRun.length) {
@@ -208,24 +378,19 @@ export async function executeReview(
       const passWithMemory = prefixBlocks.length
         ? { ...pass, contextBlocks: [...prefixBlocks, ...pass.contextBlocks] }
         : pass;
-      const { findings, summary, usage } = await runPass(
+
+      const { findings, summary } = await runPass(
         apiKey,
         model,
         def,
         systemPrompt,
         passWithMemory,
       );
-      if (summary) summaries.push(summary);
+      if (summary) coverNote = coverNote ? `${coverNote}\n\n${summary}` : summary;
 
       const accepted = def.validateFinding
         ? findings.filter((f) => def.validateFinding!(f, material))
         : findings;
-      if (accepted.length < findings.length) {
-        console.log(
-          `[editorial-ai] ${def.type} · "${pass.label}": ${findings.length - accepted.length} findings rejected by reviewer validation`,
-        );
-      }
-
       const kept = accepted.slice(
         0,
         Math.max(0, def.maxFindingsPerRun - inserted),
@@ -236,7 +401,7 @@ export async function executeReview(
           .insert(
             kept.map((f) => ({
               book_id: material.book.id,
-              review_run_id: run.id,
+              review_run_id: runId,
               chapter_id: pass.chapterId,
               chapter_version_id: pass.chapterVersionId,
               excerpt: f.excerpt,
@@ -244,14 +409,10 @@ export async function executeReview(
               severity: f.severity,
               title: f.title,
               explanation: f.explanation,
-              created_by: user.id,
+              created_by: userId,
             })),
           );
-        if (insertError) {
-          throw new Error(
-            `Findings could not be recorded: ${insertError.message}`,
-          );
-        }
+        if (insertError) throw new FindingsInsertError(insertError.message);
         inserted += kept.length;
         for (const f of kept) {
           raisedThisRun.push(
@@ -260,42 +421,106 @@ export async function executeReview(
         }
       }
 
+      // Persist after every pass: the record survives a chunk killed
+      // immediately after this write.
+      await supabase
+        .from("review_runs")
+        .update({ completed_passes: i + 1, summary: coverNote || null })
+        .eq("id", runId);
+
       console.log(
-        `[editorial-ai] ${def.type} · "${pass.label}": ${kept.length} findings` +
-          (usage ? ` · ${usage} tokens` : ""),
+        `[editorial-ai] ${def.type} · "${pass.label}": ${kept.length} findings (pass ${i + 1}/${totalPasses})`,
       );
+
+      if (Date.now() - chunkStart >= CHUNK_BUDGET_MS && i + 1 < passes.length) {
+        i += 1; // this pass is done; pause before the next
+        break;
+      }
     }
-
-    const coverNote = summaries.length ? summaries.join("\n\n") : null;
-    await supabase
-      .from("review_runs")
-      .update({ status: "complete", summary: coverNote })
-      .eq("id", run.id);
-
-    return {
-      runId: run.id,
-      status: "complete",
-      findingsInserted: inserted,
-      summary: coverNote,
-    };
   } catch (error) {
-    console.error(`[editorial-ai] ${def.type} run failed`, error);
+    const structural = error instanceof FindingsInsertError;
+    console.error(
+      `[editorial-ai] ${def.type} chunk ${structural ? "insert" : "model"} error at pass ${i}`,
+      error,
+    );
+    // A model error after retries pauses the run as incomplete (the failed
+    // pass did not commit, so a continue retries it); a structural insert
+    // error cannot be made progress against, so it fails.
     await supabase
       .from("review_runs")
       .update({
-        status: "failed",
-        summary:
-          summaries.join("\n\n") ||
-          "The review could not finish. Findings raised before the failure are preserved.",
+        status: structural ? "failed" : "incomplete",
+        chunk_started_at: null,
+        completed_passes: i,
+        summary: coverNote || null,
       })
-      .eq("id", run.id);
+      .eq("id", runId);
     return {
-      runId: run.id,
-      status: "failed",
+      runId,
+      status: structural ? "failed" : "incomplete",
       findingsInserted: inserted,
+      completedPasses: i,
+      totalPasses,
       summary: null,
     };
   }
+
+  const done = i >= passes.length;
+  const completed = Math.min(i, passes.length);
+  await supabase
+    .from("review_runs")
+    .update({
+      status: done ? "complete" : "incomplete",
+      chunk_started_at: null,
+      completed_passes: completed,
+      summary: coverNote || null,
+    })
+    .eq("id", runId);
+
+  return {
+    runId,
+    status: done ? "complete" : "incomplete",
+    findingsInserted: inserted,
+    completedPasses: completed,
+    totalPasses,
+    summary: done ? coverNote || null : null,
+  };
+}
+
+/** Reconstruct a run's within-run memory and cover note from what it has
+ *  already committed — the record is the source of truth between chunks. */
+async function loadRunProgress(
+  supabase: Supa,
+  runId: string,
+  material: ReviewMaterial,
+): Promise<{ raisedThisRun: string[]; inserted: number; coverNote: string }> {
+  const { data: run } = await supabase
+    .from("review_runs")
+    .select("summary")
+    .eq("id", runId)
+    .maybeSingle();
+
+  const { data: findings } = await supabase
+    .from("editorial_findings")
+    .select("chapter_id, title, severity, created_at")
+    .eq("review_run_id", runId)
+    .order("created_at", { ascending: true });
+
+  const raisedThisRun = (findings ?? []).map((f) => {
+    const chapter = f.chapter_id
+      ? material.chapters.find((c) => c.id === f.chapter_id)
+      : null;
+    const label = chapter
+      ? `${chapter.positionLabel} — ${chapter.title}`
+      : "Manuscript-wide";
+    return `- [${label}] ${f.title} (${f.severity})`;
+  });
+
+  return {
+    raisedThisRun,
+    inserted: (findings ?? []).length,
+    coverNote: (run?.summary as string | null) ?? "",
+  };
 }
 
 async function runPass(

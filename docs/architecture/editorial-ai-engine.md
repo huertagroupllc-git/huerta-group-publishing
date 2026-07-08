@@ -4,6 +4,9 @@ Huerta Group Publishing · Author Operating System
 Status: permanent architecture document, July 2026. Describes the
 engine as built (through Editorial Memory, pattern consolidation, and
 the July 2026 engine audit). Amended, never silently rewritten.
+Amended July 2026 to add chunked, resumable execution (§5.1), which
+retires the synchronous-execution ceiling this document had flagged as
+its one structural weakness.
 
 Companion documents: the four constitutions, the Capability 4 and 5
 blueprints, the Editorial Deliberation blueprint, and the July 2026
@@ -128,6 +131,50 @@ leaves the platform, and the rough cost)
     — or, on any error: run failed, honest summary, committed
       findings preserved
 ```
+
+## 5.1 Chunked, Resumable Execution (amended July 2026)
+
+A full-manuscript review is many sequential model calls and no longer
+fits inside one request's `maxDuration`. Execution is therefore
+**chunked**: a run reads its passes in reading order, in time-bounded
+chunks, across one or more requests. Nothing about a review's *meaning*
+changes — this is the move the run model, immediate per-pass commits,
+and frozen provenance were always designed to allow.
+
+The run carries its own progress: `total_passes` (the reading plan's
+size, set at creation), `completed_passes` (read and committed so far),
+and `chunk_started_at` (when the executing chunk began). Status gains
+one value, `incomplete`, beside `pending`/`complete`/`failed`:
+
+- **`pending`** — a chunk is executing right now.
+- **`incomplete`** — the chunk paused with passes still to read; the run
+  is resumable and holds the one-review-per-book lock.
+- **`complete` / `failed`** — terminal, unchanged.
+
+A chunk runs passes from `completed_passes` until either the plan is
+exhausted (→ `complete`, cover note joined) or the time budget is
+reached (→ `incomplete`). The author continues an incomplete run from
+the Findings; `continueReview` claims it (an atomic `incomplete →
+pending` compare-and-swap, so only one chunk runs a run at a time) and
+executes the next chunk. A chunk **killed** mid-execution (timeout,
+redeploy) leaves the run `pending`; `recoverStalePendingRuns` returns any
+run pending past the request's own max lifetime to `incomplete`, so a
+dead chunk never bricks the reviewer and its committed findings survive.
+
+Because separate requests share no memory, the record *is* the state
+between chunks: within-run memory (raised-earlier) and the cover note are
+**reconstructed from the run's committed findings and stored summary**
+each chunk, so Pattern Consolidation compounds across chunks exactly as
+it did within one. Provenance is frozen at creation and never rewritten
+by a resume. A resume whose freshly-computed plan no longer matches
+`total_passes` — the manuscript's chapter set changed mid-review — fails
+honestly rather than read the wrong passes.
+
+Invariants preserved: provenance before the first call, per-finding
+version anchors, RLS on every read and write, caps in code, verbatim
+excerpts, author autonomy. Deliberately still simple: a lock, not a
+queue; the author (or a page revisit) drives continuation; a single
+pass is still assumed to fit one request.
 
 ## 6. Editorial Memory (across runs)
 
@@ -275,10 +322,12 @@ complete provenance including prompt hashing; failure modes designed
 rather than discovered; the definition surface is small and legible.
 
 **Weaknesses.**
-- **Synchronous execution inside a server action**: a run holds the
-  request open (maxDuration 300s). Long books, slow models, or more
-  passes will eventually breach it. Failure is honest and partials
-  survive, but the author experience of a timeout is a failed letter.
+- ~~**Synchronous execution inside a server action**~~ — *resolved,
+  July 2026 (§5.1).* Execution is now chunked and resumable: a run reads
+  in time-bounded chunks across requests, a killed chunk is recovered to
+  `incomplete` rather than lost, and the author continues an unfinished
+  review. The residual limit is narrower: a *single pass* is still
+  assumed to fit one request.
 - **The systemic pass reads summaries, not the full manuscript** —
   pattern detection is only as good as chapter summaries plus the
   opening and ending. Real recurring patterns living mid-chapter can
@@ -311,10 +360,10 @@ similar-but-different quote regexes in `citedClause` and
 reviewer's rule); pass-level token accounting only in logs.
 
 **Debt to address eventually.**
-- **Execution shape** — before books get long or reviewers multiply,
-  runs should move out of the request/response cycle (chunked
-  continuation or background execution with the same provenance).
-  This is the one weakness that time makes worse on its own.
+- ~~**Execution shape**~~ — *addressed, July 2026 (§5.1).* Runs now
+  continue across requests as chunks with the same provenance. If a
+  single pass ever outgrows one request (an enormous chapter), the next
+  step is to split within a pass; no evidence requires it yet.
 - **The systemic pass's evidence base**, if Review 3+ shows patterns
   escaping it — likely a middle-chapters sampling strategy, which is a
   reviewer change, not an engine change.
@@ -338,15 +387,12 @@ inherited by every future reviewer for free. New reviewers plug in
 without engine changes. That is a stable foundation by any fair
 definition.
 
-The asterisk: **the synchronous execution shape is the one structural
-decision that does not scale with the platform's own ambitions.** It is
-correct for one author, one book, and a dozen chapters; it will not be
-correct for three-hundred-page books or a shelf of reviewers run in an
-afternoon. Nothing about fixing it later is architecturally
-threatening — the run model, immediate commits, and provenance were all
-designed so execution could move to the background without changing
-meaning — but it is the one place where "stopped today" leaves a known
-ceiling rather than a finished room. Everything else is the platform's
-deepest patterns — immutable versions, RLS as the boundary, computed
-assembly, legible truth — extended to AI without exception, and those
-patterns have now survived five capabilities without bending.
+The asterisk — the synchronous execution shape — has since been
+**removed (July 2026, §5.1)**: execution is chunked and resumable, so a
+review completes across as many requests as a long manuscript needs,
+without changing a review's meaning. The move cost no deep pattern —
+the run model, immediate commits, and frozen provenance were built for
+it. What remains is everything the platform is made of: immutable
+versions, RLS as the boundary, computed assembly, legible truth —
+extended to AI without exception, and those patterns have now survived
+five capabilities, and one architectural amendment, without bending.

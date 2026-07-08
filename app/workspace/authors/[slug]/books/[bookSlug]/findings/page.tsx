@@ -29,8 +29,13 @@ import {
   type FindingListEntry,
   type FindingStatus,
 } from "@/lib/findings/types";
+import { continueConstitutionReview } from "@/lib/review/actions";
 import { formatDate } from "@/lib/memory/types";
 import { createClient } from "@/lib/supabase/server";
+
+// The Continue action runs a review chunk within this page's request;
+// give it the same room the request page has.
+export const maxDuration = 300;
 
 export async function generateMetadata({
   params,
@@ -141,7 +146,9 @@ export default async function FindingsPage({
       <div className="rule mt-10 pt-5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6">
           <h2 className="eyebrow">Reviews</h2>
-          {latestReview?.status !== "pending" ? (
+          {!latestReview ||
+          (latestReview.status !== "pending" &&
+            latestReview.status !== "incomplete") ? (
             <ActionLink href={`${findingsPath}/review`}>
               Request a Constitution Review
             </ActionLink>
@@ -151,8 +158,46 @@ export default async function FindingsPage({
           latestReview.status === "pending" ? (
             <p className="mt-4 max-w-prose italic text-ink-soft">
               A {reviewTypeLabel(latestReview.reviewType)} is reading the
-              manuscript — return in a few minutes.
+              manuscript now
+              {latestReview.totalPasses
+                ? ` — ${latestReview.completedPasses} of ${latestReview.totalPasses} readings done`
+                : ""}
+              . This takes a few minutes; refresh to see its findings when it
+              pauses or finishes.
             </p>
+          ) : latestReview.status === "incomplete" ? (
+            <div className="mt-4 max-w-prose">
+              <p className="font-sans text-xs text-ink-soft">
+                {reviewTypeLabel(latestReview.reviewType)} ·{" "}
+                {formatDate(latestReview.createdAt)}
+                {latestReview.totalPasses
+                  ? ` · ${latestReview.completedPasses} of ${latestReview.totalPasses} readings`
+                  : ""}{" "}
+                · {latestReview.findingsCount}{" "}
+                {latestReview.findingsCount === 1 ? "finding" : "findings"} so
+                far
+              </p>
+              <p className="mt-2 italic leading-relaxed text-ink-soft">
+                This review paused before finishing. The findings it has
+                raised are preserved below; continue to read the rest.
+              </p>
+              {latestReview.summary ? (
+                <p className="mt-2 border-l-2 border-rule pl-4 text-sm italic leading-relaxed text-ink-soft">
+                  {latestReview.summary}
+                </p>
+              ) : null}
+              <form action={continueConstitutionReview} className="mt-4">
+                <input type="hidden" name="author_slug" value={author.slug} />
+                <input type="hidden" name="book_slug" value={book.slug} />
+                <PrimaryButton className="px-4 py-2 text-xs">
+                  Continue the review
+                </PrimaryButton>
+                <p className="mt-2 font-sans text-[0.6875rem] text-ink-faint">
+                  The reviewer reads while this page waits — expect a minute
+                  or two before the Findings return.
+                </p>
+              </form>
+            </div>
           ) : (
             <div className="mt-4 max-w-prose">
               <p className="font-sans text-xs text-ink-soft">

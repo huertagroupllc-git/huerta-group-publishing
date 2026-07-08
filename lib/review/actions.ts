@@ -4,16 +4,39 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
   ReviewNotPossibleError,
-  executeReview,
+  continueReview,
+  startReview,
 } from "@/lib/editorial-ai/runner";
 import { constitutionReview } from "@/lib/review/constitution";
 
 const MIGRATION_MESSAGE =
-  "The database is missing the Constitution Review migration — apply supabase/migrations/20260712000000_constitution_review.sql (docs/setup.md §2).";
+  "The database is missing a Constitution Review migration — apply supabase/migrations/20260712000000_constitution_review.sql and the chunked-execution migrations 20260714/20260715 (docs/setup.md §2).";
 
-/** A review is a deliberate act: always requested, never scheduled.
- *  The run executes within this action; the request page's segment
- *  config extends the allowed duration. */
+/** redirect() throws internally; let those throws through untouched. */
+function isRedirect(error: unknown): boolean {
+  if (error instanceof Error && error.message === "NEXT_REDIRECT") return true;
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "digest" in error &&
+    String((error as { digest?: string }).digest).startsWith("NEXT_REDIRECT")
+  );
+}
+
+function messageFor(error: unknown): string {
+  if (error instanceof ReviewNotPossibleError) return error.message;
+  return /enum|invalid input value|review_type|column .* does not exist/i.test(
+    error instanceof Error ? error.message : "",
+  )
+    ? MIGRATION_MESSAGE
+    : "The review could not be started.";
+}
+
+/** A review is a deliberate act: always requested, never scheduled. It
+ *  executes in time-bounded chunks; this action runs the first chunk and
+ *  returns to the Findings, where the run's progress and a Continue action
+ *  are shown until it completes. The page's segment config extends the
+ *  allowed duration. */
 export async function requestConstitutionReview(formData: FormData) {
   const authorSlug = String(formData.get("author_slug") ?? "");
   const bookSlug = String(formData.get("book_slug") ?? "");
@@ -27,7 +50,39 @@ export async function requestConstitutionReview(formData: FormData) {
   if (!user) redirect("/signin");
 
   try {
-    const result = await executeReview(
+    const result = await startReview(constitutionReview, authorSlug, bookSlug);
+    if (result.status === "failed") {
+      redirect(
+        `${findingsPath}?error=${encodeURIComponent(
+          "The review could not finish. Findings raised before the failure are preserved below.",
+        )}`,
+      );
+    }
+    // complete or incomplete: the Findings page shows the outcome and, if
+    // more remains, the Continue action.
+    redirect(findingsPath);
+  } catch (error) {
+    if (isRedirect(error)) throw error;
+    console.error("[review] constitution request failed", error);
+    redirect(`${requestPath}?error=${encodeURIComponent(messageFor(error))}`);
+  }
+}
+
+/** Continue an unfinished review: run its next chunk and return to the
+ *  Findings, where progress will have advanced. */
+export async function continueConstitutionReview(formData: FormData) {
+  const authorSlug = String(formData.get("author_slug") ?? "");
+  const bookSlug = String(formData.get("book_slug") ?? "");
+  const findingsPath = `/workspace/authors/${authorSlug}/books/${bookSlug}/findings`;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/signin");
+
+  try {
+    const result = await continueReview(
       constitutionReview,
       authorSlug,
       bookSlug,
@@ -41,25 +96,8 @@ export async function requestConstitutionReview(formData: FormData) {
     }
     redirect(findingsPath);
   } catch (error) {
-    // redirect() throws internally; let it through.
-    if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "digest" in error &&
-      String((error as { digest?: string }).digest).startsWith("NEXT_REDIRECT")
-    ) {
-      throw error;
-    }
-    console.error("[review] constitution request failed", error);
-    const message =
-      error instanceof ReviewNotPossibleError
-        ? error.message
-        : /enum|invalid input value|review_type/i.test(
-              error instanceof Error ? error.message : "",
-            )
-          ? MIGRATION_MESSAGE
-          : "The review could not be started.";
-    redirect(`${requestPath}?error=${encodeURIComponent(message)}`);
+    if (isRedirect(error)) throw error;
+    console.error("[review] constitution continue failed", error);
+    redirect(`${findingsPath}?error=${encodeURIComponent(messageFor(error))}`);
   }
 }

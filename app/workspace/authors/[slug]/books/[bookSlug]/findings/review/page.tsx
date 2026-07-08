@@ -66,7 +66,9 @@ export default async function RequestReviewPage({
   const { author, book, openCount, latestReview } = room;
   const bookPath = `/workspace/authors/${author.slug}/books/${book.slug}`;
   const findingsPath = `${bookPath}/findings`;
-  const pending = latestReview?.status === "pending";
+  const runningNow = latestReview?.status === "pending";
+  const unfinished = latestReview?.status === "incomplete";
+  const busy = runningNow || unfinished;
 
   return (
     <WorkspaceFrame
@@ -133,16 +135,18 @@ export default async function RequestReviewPage({
             </p>
           </div>
 
-          {pending ? (
+          {busy ? (
             <p className="mt-10 max-w-prose italic text-ink-soft">
-              A review is already reading this manuscript — return to{" "}
+              {runningNow
+                ? "A review is already reading this manuscript — return to "
+                : "An unfinished review is waiting to continue — pick it up from "}
               <Link
                 href={findingsPath}
                 className="text-oxblood underline-offset-4 hover:underline"
               >
                 the Findings
-              </Link>{" "}
-              in a few minutes.
+              </Link>
+              {runningNow ? " in a few minutes." : "."}
             </p>
           ) : (
             <form action={requestConstitutionReview} className="mt-10">

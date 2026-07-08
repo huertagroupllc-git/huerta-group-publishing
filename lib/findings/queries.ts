@@ -13,10 +13,14 @@ import type { AuthorRecord } from "@/lib/memory/types";
 export interface LatestReview {
   id: string;
   reviewType: string;
-  status: "pending" | "complete" | "failed";
+  status: "pending" | "incomplete" | "complete" | "failed";
   summary: string | null;
   createdAt: string;
   findingsCount: number;
+  /** Chunked-execution progress; null until the progress migration is
+   *  applied, or for older runs. */
+  totalPasses: number | null;
+  completedPasses: number;
 }
 
 export interface FindingsRoom {
@@ -159,6 +163,14 @@ export const getFindingsRoom = cache(async function getFindingsRoom(
 
   let latestReview: LatestReview | null = null;
   if (latestRun) {
+    // Progress columns read separately so the page still works before the
+    // chunked-execution migration is applied (a missing column yields no
+    // row, not a thrown error).
+    const { data: progress } = await supabase
+      .from("review_runs")
+      .select("total_passes, completed_passes")
+      .eq("id", latestRun.id)
+      .maybeSingle();
     latestReview = {
       id: latestRun.id,
       reviewType: latestRun.review_type,
@@ -167,6 +179,8 @@ export const getFindingsRoom = cache(async function getFindingsRoom(
       createdAt: latestRun.created_at,
       findingsCount: rows.filter((f) => f.review_run_id === latestRun.id)
         .length,
+      totalPasses: progress?.total_passes ?? null,
+      completedPasses: progress?.completed_passes ?? 0,
     };
   }
 
