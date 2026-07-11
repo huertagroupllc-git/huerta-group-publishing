@@ -20,7 +20,7 @@ import {
  * the Constitution verbatim).
  */
 
-const TRACEABILITY = `Every finding must quote, inside double quotation marks within its explanation, the exact words of the Book Constitution clause it is evaluating — copied verbatim. If you cannot cite a specific clause of the Constitution, do not raise the finding.`;
+const TRACEABILITY = `Every finding must quote, inside quotation marks within its explanation, the exact words of the Book Constitution clause it is evaluating — a verbatim cited passage, copied character for character. If you cannot cite a specific clause of the Constitution, do not raise the finding.`;
 
 export const constitutionReview: ReviewerDefinition = {
   type: "constitution",
@@ -105,7 +105,13 @@ export const constitutionReview: ReviewerDefinition = {
 
 /** The traceability rule, in code: the explanation must contain at
  *  least one quoted passage (≥ 12 characters) that appears verbatim in
- *  the Constitution, whitespace-normalized. */
+ *  the Constitution, whitespace-normalized. Quotation recognition is
+ *  deliberately glyph-inclusive (straight, curly, «» ‹› „“ ‚‘ 「」 『』)
+ *  so a constitution quoted in another language's convention is not
+ *  silently rejected — the gate itself stays verbatim: what is inside
+ *  the marks must still appear character for character in the
+ *  Constitution. Deliberately separate from citedClause in
+ *  lib/editorial-ai/context.ts (different jobs). */
 export function citesConstitution(
   explanation: string,
   constitutionText: string,
@@ -113,7 +119,7 @@ export function citesConstitution(
   const normalize = (s: string) => s.replace(/\s+/g, " ").trim();
   const law = normalize(constitutionText);
   const quotes = [
-    ...explanation.matchAll(/[“"']([^”"']{12,}?)[”"']/g),
+    ...explanation.matchAll(/[“"'«‹„‚「『]([^”"'»›“‘」』]{12,}?)[”"'»›“‘」』]/g),
   ].map((m) => normalize(m[1]));
   return quotes.some((q) => law.includes(q));
 }

@@ -91,10 +91,15 @@ export interface VersionRecord {
 }
 
 /** House date style: "July 3, 2026" — never numeric, never relative
- *  (Design Constitution §8). */
-export function formatDate(iso: string | null | undefined): string {
+ *  (Design Constitution §8). The locale seam exists for future
+ *  interface locales; every current caller takes the en-US default,
+ *  and the long-date house presentation holds in any locale. */
+export function formatDate(
+  iso: string | null | undefined,
+  locale = "en-US",
+): string {
   if (!iso) return "";
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     month: "long",
     day: "numeric",
     year: "numeric",

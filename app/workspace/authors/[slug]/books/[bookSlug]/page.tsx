@@ -13,6 +13,7 @@ import Link from "next/link";
 import { assembleBookContext, serializeBookContext } from "@/lib/books/assemble";
 import { openFindingsCount } from "@/lib/findings/queries";
 import { getManuscriptSummary, type ManuscriptSummary } from "@/lib/manuscript/queries";
+import { formatWordCount } from "@/lib/manuscript/types";
 import { getBookStudy, type BookStudy } from "@/lib/books/queries";
 import { BOOK_DOC_TYPES, bookStatusLabel, isWritingStage } from "@/lib/books/types";
 import { assembleAuthorContext } from "@/lib/memory/assemble";
@@ -197,7 +198,7 @@ export default async function BookStudyPage({
                 }`
               : ""}
             {manuscriptSummary.totalWords > 0
-              ? ` · ${new Intl.NumberFormat("en-US").format(manuscriptSummary.totalWords)} words`
+              ? ` · ${formatWordCount(manuscriptSummary.totalWords)}`
               : ""}
             {manuscriptSummary.draftCount > 0
               ? ` · ${manuscriptSummary.draftCount} ${

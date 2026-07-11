@@ -7,6 +7,14 @@ the July 2026 engine audit). Amended, never silently rewritten.
 Amended July 2026 to add chunked, resumable execution (§5.1), which
 retires the synchronous-execution ceiling this document had flagged as
 its one structural weakness.
+Amended July 2026 (global-readiness foundation, Phase 1): quotation
+recognition in the citation paths is now glyph-inclusive and the
+traceability wording is quotation-convention-neutral (§8, §9);
+explicit manuscript-language and response-language provenance is
+deliberately deferred to the next global-readiness phase. Locale
+seams were also added to the platform's date and word-count
+formatters — outside the engine, noted here only because the same
+foundation work touched the engine's citation paths.
 
 Companion documents: the four constitutions, the Capability 4 and 5
 blueprints, the Editorial Deliberation blueprint, and the July 2026
@@ -216,7 +224,13 @@ better-grounded; a clean pass is valid; verbatim-or-omit excerpts;
 canonical severities and categories pulled from the findings types so
 prompt and schema can never drift from the enums; calm register;
 per-pass cap; the memory law) → the reviewer's numbered rules → the
-JSON instruction. User content is purely the joined blocks. The
+JSON instruction. Prompt text must not assume one language's
+quotation-mark convention (amended July 2026): rules speak of
+"quotation marks" and "a verbatim cited passage", never of a specific
+glyph — manuscripts and constitutions quote in their own conventions,
+and the validation layer recognizes them (§9). A wording change here
+changes the prompt hash for future runs; historical hashes and
+provenance are never rewritten. User content is purely the joined blocks. The
 response format is a strict JSON schema — the model cannot return
 prose, and severity/category are schema-enumerated before validation
 even begins.
@@ -232,6 +246,23 @@ Four gates, in order, each independent of model cooperation:
    the finding survives, the fabricated quote does not).
 3. **Reviewer hook** — e.g. no Constitution citation, no finding.
 4. **Caps** — per pass and per run, in code.
+
+Quotation recognition in the citation paths (`citedClause` in memory
+assembly, `citesConstitution` in the Constitution Review hook) is
+**intentionally glyph-inclusive** (amended July 2026): straight and
+curly English quotes, «guillemets», ‹single guillemets›, „German“ and
+‚single low‘ quotes, and CJK 「corner」/『double corner』 brackets. A
+constitution or manuscript that quotes in another language's
+convention must not have valid findings silently rejected. The gate
+itself remains **verbatim and language-neutral**: whatever stands
+inside the marks must appear character for character (whitespace-
+normalized) in the source text — quoted manuscript or constitution
+text is never translated, paraphrased, or fuzzily matched, and
+multilingual support must never be pursued by weakening this
+validation. What multilingual reviewing still awaits — recorded
+manuscript language, per-run response-language provenance, an
+output-language law — is deliberately deferred to the next
+global-readiness phase.
 
 ## 10. Provenance and Historical Reproducibility
 
@@ -357,7 +388,8 @@ background/chunked execution; any second reviewer.
 text (single-author platform; revisit before multi-author); the
 similar-but-different quote regexes in `citedClause` and
 `citesConstitution` (different jobs; merging couples memory to one
-reviewer's rule); pass-level token accounting only in logs.
+reviewer's rule — both made glyph-inclusive in step, July 2026);
+pass-level token accounting only in logs.
 
 **Debt to address eventually.**
 - ~~**Execution shape**~~ — *addressed, July 2026 (§5.1).* Runs now

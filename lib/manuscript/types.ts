@@ -51,6 +51,9 @@ export function countWords(content: string): number {
   return trimmed.split(/\s+/).length;
 }
 
-export function formatWordCount(count: number): string {
-  return `${new Intl.NumberFormat("en-US").format(count)} words`;
+/** The one word-count presentation. The locale seam drives numeric
+ *  grouping only; the English noun awaits the interface-string
+ *  catalog phase. Every current caller takes the en-US default. */
+export function formatWordCount(count: number, locale = "en-US"): string {
+  return `${new Intl.NumberFormat(locale).format(count)} words`;
 }

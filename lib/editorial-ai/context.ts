@@ -245,9 +245,17 @@ async function assembleEditorialRecord(
 }
 
 /** The first quoted passage in an explanation — the clause a finding
- *  cited, when it cited one. */
+ *  cited, when it cited one. Quotation recognition is deliberately
+ *  glyph-inclusive: straight and curly English quotes, «guillemets»,
+ *  ‹single guillemets›, „German“ and ‚single low‘ quotes, and CJK
+ *  「corner」/『double corner』 brackets — manuscripts are not required
+ *  to quote in one language's convention. Deliberately separate from
+ *  citesConstitution in lib/review/constitution.ts (different jobs:
+ *  memory extraction here, a reviewer's validation gate there). */
 function citedClause(explanation: string): string | null {
-  const match = explanation.match(/[“"']([^”"']{12,}?)[”"']/);
+  const match = explanation.match(
+    /[“"'«‹„‚「『]([^”"'»›“‘」』]{12,}?)[”"'»›“‘」』]/,
+  );
   return match ? clip(match[1].replace(/\s+/g, " ").trim(), 140) : null;
 }
 
