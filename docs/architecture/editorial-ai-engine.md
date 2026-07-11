@@ -10,11 +10,26 @@ its one structural weakness.
 Amended July 2026 (global-readiness foundation, Phase 1): quotation
 recognition in the citation paths is now glyph-inclusive and the
 traceability wording is quotation-convention-neutral (§8, §9);
-explicit manuscript-language and response-language provenance is
-deliberately deferred to the next global-readiness phase. Locale
-seams were also added to the platform's date and word-count
-formatters — outside the engine, noted here only because the same
-foundation work touched the engine's citation paths.
+explicit manuscript-language and response-language provenance was
+deferred to the next global-readiness phase — *delivered, July 2026
+(Phase 2, below)*. Locale seams were also added to the platform's
+date and word-count formatters — outside the engine, noted here only
+because the same foundation work touched the engine's citation paths.
+Amended July 2026 (global-readiness, Phase 2): language became an
+explicit, recorded fact instead of an ambient assumption. A book
+records its **manuscript language** (`books.language`, BCP 47, a
+CURRENT identity fact the author may edit); every review run freezes
+its **editorial response language** (`review_runs.response_language`,
+immutable provenance recorded before the first model call, mirrored
+into `context_versions`, and protected — with the rest of the run's
+frozen record — by a provenance-immutability trigger). One shared law
+(§8, law 9) tells every reviewer to respond in the run's language
+while quoting verbatim in the source's own language. Changing a
+book's language affects future runs only; a resumed run rebuilds its
+prompt from its own stored `response_language`, never re-reading the
+book. Prompt language and output language remain separate concepts;
+**interface locale remains deferred** to a later phase, as does any
+claim that a non-English editorial workflow is validated.
 
 Companion documents: the four constitutions, the Capability 4 and 5
 blueprints, the Editorial Deliberation blueprint, and the July 2026
@@ -223,8 +238,20 @@ One consistent shape: shared editorial laws (never rewrite; fewer,
 better-grounded; a clean pass is valid; verbatim-or-omit excerpts;
 canonical severities and categories pulled from the findings types so
 prompt and schema can never drift from the enums; calm register;
-per-pass cap; the memory law) → the reviewer's numbered rules → the
-JSON instruction. Prompt text must not assume one language's
+per-pass cap; the memory law; the response-language law) → the
+reviewer's numbered rules → the JSON instruction.
+
+The response-language law (law 9, amended July 2026) is composed by
+`buildSystemPrompt` from the run's frozen `response_language`, named
+via the language layer (`lib/languages.ts`) rather than a bare tag:
+titles, explanations, and summaries are written in the run's
+language; excerpts and quoted constitution clauses remain verbatim in
+the language they were written in — never translated; proper nouns
+stay as the author wrote them unless a finding discusses them; and
+editorial history in another language is read as it stands while the
+response stays in the run's language. Every reviewer inherits this
+law; no reviewer states its own language rule, and there is no
+per-language engine. Prompt text must not assume one language's
 quotation-mark convention (amended July 2026): rules speak of
 "quotation marks" and "a verbatim cited passage", never of a specific
 glyph — manuscripts and constitutions quote in their own conventions,
@@ -267,9 +294,13 @@ global-readiness phase.
 ## 10. Provenance and Historical Reproducibility
 
 `context_versions` on every run records: the model; the reviewer type;
-every author-memory, book-memory, and chapter version id shown; the
-Editorial Record's judgment and finding ids; the system prompt's
-sha256; the caps; the pass count. Combined with the platform's
+the response language (mirrored from `review_runs.response_language`,
+July 2026 — runs older than the language migration simply lack the
+key and remain readable; the column, backfilled `'en'`, is
+authoritative); every author-memory, book-memory, and chapter version
+id shown; the Editorial Record's judgment and finding ids; the system
+prompt's sha256 (which now also reflects the response-language law);
+the caps; the pass count. Combined with the platform's
 immutable versions, this makes every run **answerable forever**: *what
 did you see when you said this?* has an exact answer, and two runs'
 letters can be compared knowing whether the instructions, the
@@ -396,6 +427,19 @@ pass-level token accounting only in logs.
   continue across requests as chunks with the same provenance. If a
   single pass ever outgrows one request (an enormous chapter), the next
   step is to split within a pass; no evidence requires it yet.
+- **Audio Review voice selection** (noted July 2026, Phase 2): the
+  route still uses one global env-configured voice (English-optimized
+  by default) and does not vary by `books.language`. Multilingual
+  audio is not advertised; language-capable voice selection keyed off
+  the manuscript language — and the language joining the audio cache
+  key if voice ever varies per book — is documented future work.
+- **Deliberation language provenance** (noted July 2026, Phase 2):
+  deliberations are author-written and carry no AI path today, so they
+  record no language of their own; where one is ever needed it derives
+  from the finding's run (`finding → review_run.response_language`).
+  If deliberation gains an AI-assisted path, it must freeze its own
+  response language the way runs do — a schema change deliberately not
+  improvised in Phase 2.
 - **The systemic pass's evidence base**, if Review 3+ shows patterns
   escaping it — likely a middle-chapters sampling strategy, which is a
   reviewer change, not an engine change.

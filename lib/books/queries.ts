@@ -23,7 +23,7 @@ export async function listBooks(authorId: string): Promise<BookRosterEntry[]> {
   const { data, error } = await supabase
     .from("books")
     .select(
-      "id, author_id, slug, title, subtitle, working_title, status, created_at, book_documents(id, active_version_id)",
+      "id, author_id, slug, title, subtitle, working_title, status, language, created_at, book_documents(id, active_version_id)",
     )
     .eq("author_id", authorId)
     .order("created_at");
@@ -73,7 +73,7 @@ export const getBookStudy = cache(async function getBookStudy(
   const { data: book, error: bookError } = await supabase
     .from("books")
     .select(
-      "id, author_id, slug, title, subtitle, working_title, status, created_at, book_documents(id, doc_type, active_version_id)",
+      "id, author_id, slug, title, subtitle, working_title, status, language, created_at, book_documents(id, doc_type, active_version_id)",
     )
     .eq("author_id", author.id)
     .eq("slug", bookSlug)
@@ -227,7 +227,7 @@ export const getBookDocumentRoom = cache(async function getBookDocumentRoom(
   const { data: book, error: bookError } = await supabase
     .from("books")
     .select(
-      "id, author_id, slug, title, subtitle, working_title, status, created_at",
+      "id, author_id, slug, title, subtitle, working_title, status, language, created_at",
     )
     .eq("author_id", author.id)
     .eq("slug", bookSlug)

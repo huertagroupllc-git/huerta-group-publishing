@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BOOK_STATUSES, type BookStatus } from "@/lib/books/types";
+import { normalizeLanguageTag } from "@/lib/languages";
 import { slugify } from "@/lib/memory/types";
 
 async function requireUser() {
@@ -25,6 +26,7 @@ export async function createBook(formData: FormData) {
   const subtitle = String(formData.get("subtitle") ?? "").trim();
   const workingTitle = String(formData.get("working_title") ?? "").trim();
   const slugInput = String(formData.get("slug") ?? "").trim();
+  const languageInput = String(formData.get("language") ?? "en");
   const newPath = `/workspace/authors/${authorSlug}/books/new`;
 
   if (!title) {
@@ -36,6 +38,13 @@ export async function createBook(formData: FormData) {
     fail(newPath, "A usable slug could not be derived; please provide one.");
   }
 
+  // Manuscript language — a valid BCP 47 tag, casing normalized, never
+  // detected and never converted between regional variants.
+  const language = normalizeLanguageTag(languageInput);
+  if (!language) {
+    fail(newPath, "The manuscript language is not a valid language tag.");
+  }
+
   const supabase = await requireUser();
   const { error } = await supabase.rpc("create_book_with_origins", {
     p_author_id: authorId,
@@ -43,6 +52,7 @@ export async function createBook(formData: FormData) {
     p_title: title,
     p_subtitle: subtitle || null,
     p_working_title: workingTitle || null,
+    p_language: language,
   });
 
   if (error) {
@@ -243,6 +253,7 @@ export async function updateBook(formData: FormData) {
   const subtitle = String(formData.get("subtitle") ?? "").trim();
   const workingTitle = String(formData.get("working_title") ?? "").trim();
   const statusInput = String(formData.get("status") ?? "discovery");
+  const languageInput = String(formData.get("language") ?? "en");
   const studyPath = `/workspace/authors/${authorSlug}/books/${bookSlug}`;
   const editPath = `${studyPath}/edit`;
 
@@ -254,6 +265,14 @@ export async function updateBook(formData: FormData) {
     ? (statusInput as BookStatus)
     : "discovery";
 
+  // A language change is a statement about the manuscript, applied to
+  // future review runs only — completed and unfinished runs keep the
+  // response_language frozen when they were created.
+  const language = normalizeLanguageTag(languageInput);
+  if (!language) {
+    fail(editPath, "The manuscript language is not a valid language tag.");
+  }
+
   const supabase = await requireUser();
   const { data, error } = await supabase
     .from("books")
@@ -262,6 +281,7 @@ export async function updateBook(formData: FormData) {
       subtitle: subtitle || null,
       working_title: workingTitle || null,
       status,
+      language,
     })
     .eq("id", bookId)
     .select("id");

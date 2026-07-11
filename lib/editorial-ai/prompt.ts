@@ -3,19 +3,30 @@ import {
   FINDING_CATEGORIES,
   FINDING_SEVERITIES,
 } from "@/lib/findings/types";
+import { languageDefinition } from "@/lib/languages";
 
 /**
  * Prompt assembly — one consistent shape for every reviewer. The
  * shared editorial laws are the platform's philosophy stated to the
  * model; the reviewer contributes only its name, its question, and
  * its own rules.
+ *
+ * Prompt language and OUTPUT language are separate concepts: the laws
+ * and reviewer rules are authored in English, and law 9 — composed
+ * from the run's frozen response_language — names the language the
+ * response must be written in. Every reviewer inherits it; no reviewer
+ * states its own language rule.
  */
 
-export function buildSystemPrompt(def: ReviewerDefinition): string {
+export function buildSystemPrompt(
+  def: ReviewerDefinition,
+  responseLanguage = "en",
+): string {
   const severities = FINDING_SEVERITIES.map(
     (s) => `- "${s.value}" (${s.label}): ${s.meaning}`,
   ).join("\n");
   const categories = FINDING_CATEGORIES.map((c) => `"${c.value}"`).join(", ");
+  const language = languageDefinition(responseLanguage).instructionName;
 
   return [
     `You are the ${def.name} at Huerta Group Publishing — a senior editorial reviewer at a publishing house that exists to help authors sound more like themselves, not more like AI.`,
@@ -33,6 +44,7 @@ export function buildSystemPrompt(def: ReviewerDefinition): string {
     `6. Write in a calm publishing register: no scores, no grades, no exclamation marks, no praise padding. Titles are short; explanations are a few clear sentences.`,
     `7. Raise at most ${def.maxFindingsPerPass} findings in this pass.`,
     `8. When a block titled THE EDITORIAL RECORD is provided, you are the same editor returning for another pass: treat its adopted judgments as settled editorial positions extending the governing documents; the concerns it lists as open are already on the record; do not re-raise what is listed as open, resolved, or set aside unless the text has materially changed since, or your finding is meaningfully distinct. The record never forbids genuinely new findings.`,
+    `9. Write your response in ${language}: every finding title, every explanation, and the summary. The exception is quotations — law 3 stands in every language: excerpts and quoted constitution clauses are copied verbatim in the language they were written in, never translated. Keep proper nouns as the author wrote them unless the finding specifically discusses them. Editorial history provided in context may be in another language; read it as it stands, and still write your response in ${language}.`,
     ``,
     `${def.name} rules:`,
     ...def.instructions.map((rule, i) => `${i + 1}. ${rule}`),

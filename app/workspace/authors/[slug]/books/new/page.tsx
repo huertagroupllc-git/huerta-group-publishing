@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { Field, PrimaryButton } from "@/components/editorial";
+import { Field, PrimaryButton, SelectField } from "@/components/editorial";
 import { SetupNotice } from "@/components/setup-notice";
 import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
 import { createBook } from "@/lib/books/actions";
+import { SELECTABLE_LANGUAGES } from "@/lib/languages";
 import { getAuthorStudy, type AuthorStudy } from "@/lib/memory/queries";
 import { createClient } from "@/lib/supabase/server";
 
@@ -84,6 +85,23 @@ export default async function NewBookPage({
           type="text"
           placeholder="derived from the title if left blank"
         />
+
+        <div>
+          <SelectField
+            id="language"
+            label="Manuscript language"
+            defaultValue="en"
+            options={SELECTABLE_LANGUAGES.map((l) => ({
+              value: l.tag,
+              label: l.label,
+            }))}
+          />
+          <p className="mt-2 font-sans text-xs text-ink-faint">
+            The language the manuscript is written in. Future editorial
+            reviews will respond in this language. It does not change the
+            language of the platform itself.
+          </p>
+        </div>
 
         <ErrorNote message={error} />
 

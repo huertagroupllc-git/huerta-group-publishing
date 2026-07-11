@@ -79,6 +79,14 @@ Applied in order:
     `chunk_started_at`) so a review resumes across requests. Apply both
     13 and 14 together; until they are applied, requesting or continuing
     a Constitution Review reports the missing migration.
+15. `supabase/migrations/20260716000000_language_provenance.sql` —
+    Global Readiness Phase 2: `books.language` (manuscript language,
+    book identity) and `review_runs.response_language` (frozen per-run
+    provenance), both BCP 47 text defaulting to `'en'`; the run
+    provenance-immutability trigger; and `create_book_with_origins`
+    regains a `p_language` parameter (the old five-parameter signature
+    is dropped). Until this is applied, opening books or creating a
+    book reports a missing column/function.
 
 Preferred (keeps migration history tracked by the CLI):
 

@@ -6,6 +6,7 @@ import {
   reviewRunStatusLabel,
 } from "@/lib/admin/queries";
 import { reviewTypeLabel } from "@/lib/findings/types";
+import { languageLabel } from "@/lib/languages";
 import { formatDate } from "@/lib/memory/types";
 
 export async function generateMetadata({
@@ -130,6 +131,10 @@ export default async function AdminReviewRunDetailPage({
           <dl className="mt-4 grid max-w-2xl grid-cols-2 gap-x-10 gap-y-6 sm:grid-cols-3">
             <Fact label="Reviewer" value={run.provenance.reviewer ?? "—"} />
             <Fact label="Model" value={run.provenance.model ?? "—"} />
+            <Fact
+              label="Response language"
+              value={languageLabel(run.responseLanguage)}
+            />
             <Fact
               label="Prompt fingerprint"
               value={run.provenance.promptFingerprint ?? "—"}

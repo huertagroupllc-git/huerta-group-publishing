@@ -36,7 +36,7 @@ export async function assembleReviewMaterial(
   const { data: book, error: bookError } = await supabase
     .from("books")
     .select(
-      "id, author_id, slug, title, subtitle, working_title, status, created_at",
+      "id, author_id, slug, title, subtitle, working_title, status, language, created_at",
     )
     .eq("author_id", author.id)
     .eq("slug", bookSlug)

@@ -7,6 +7,7 @@ import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
 import { updateBook } from "@/lib/books/actions";
 import { getBookStudy, type BookStudy } from "@/lib/books/queries";
 import { BOOK_STATUSES } from "@/lib/books/types";
+import { SELECTABLE_LANGUAGES, languageLabel } from "@/lib/languages";
 import { createClient } from "@/lib/supabase/server";
 
 export async function generateMetadata({
@@ -55,6 +56,18 @@ export default async function EditBookPage({
 
   const { author, book } = study;
   const studyPath = `/workspace/authors/${author.slug}/books/${book.slug}`;
+
+  // The selector offers the platform's languages; a record already
+  // holding another valid tag (a regional variant, say) keeps it as a
+  // choice rather than being silently converted.
+  const languageOptions = SELECTABLE_LANGUAGES.some(
+    (l) => l.tag === book.language,
+  )
+    ? SELECTABLE_LANGUAGES.map((l) => ({ value: l.tag, label: l.label }))
+    : [
+        { value: book.language, label: languageLabel(book.language) },
+        ...SELECTABLE_LANGUAGES.map((l) => ({ value: l.tag, label: l.label })),
+      ];
 
   return (
     <WorkspaceFrame
@@ -116,6 +129,21 @@ export default async function EditBookPage({
           <p className="mt-2 font-sans text-xs text-ink-faint">
             Where the book stands in its life, from Discovery to Archived —
             a stated fact, not a gate.
+          </p>
+        </div>
+
+        <div>
+          <SelectField
+            id="language"
+            label="Manuscript language"
+            defaultValue={book.language}
+            options={languageOptions}
+          />
+          <p className="mt-2 font-sans text-xs text-ink-faint">
+            The language the manuscript is written in. Future editorial
+            reviews will respond in this language; reviews already
+            performed keep the language they were performed in. It does
+            not change the language of the platform itself.
           </p>
         </div>
 

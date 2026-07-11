@@ -7,6 +7,7 @@ import {
 } from "@/lib/admin/queries";
 import { bookStatusLabel } from "@/lib/books/types";
 import { reviewTypeLabel } from "@/lib/findings/types";
+import { languageLabel } from "@/lib/languages";
 import { formatDate } from "@/lib/memory/types";
 
 export async function generateMetadata({
@@ -69,6 +70,10 @@ export default async function AdminBookDetailPage({
 
       <dl className="rule mt-8 grid max-w-3xl grid-cols-2 gap-x-10 gap-y-6 pt-6 sm:grid-cols-4">
         <Fact label="Stage" value={bookStatusLabel(book.status)} />
+        <Fact
+          label="Manuscript language"
+          value={languageLabel(book.language)}
+        />
         <Fact
           label="Chapters"
           value={`${book.writtenChapterCount} written of ${book.chapterCount}`}

@@ -84,6 +84,11 @@ export interface BookRecord {
   subtitle: string | null;
   working_title: string | null;
   status: BookStatus;
+  /** BCP 47 tag for the language the manuscript is written in — book
+   *  identity, not the interface locale. Changing it affects future
+   *  review runs only; historical runs keep their frozen
+   *  response_language. */
+  language: string;
   created_at: string;
 }
 

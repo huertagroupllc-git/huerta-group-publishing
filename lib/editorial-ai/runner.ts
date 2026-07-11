@@ -23,6 +23,7 @@ import {
   FINDING_CATEGORIES,
   FINDING_SEVERITIES,
 } from "@/lib/findings/types";
+import { normalizeLanguageTag } from "@/lib/languages";
 
 /**
  * The shared review-run engine. A review is many sequential model calls;
@@ -73,7 +74,6 @@ interface ReviewSetup {
   apiKey: string;
   model: string;
   material: ReviewMaterial;
-  systemPrompt: string;
   recordBlock: string | null;
 }
 
@@ -108,13 +108,16 @@ async function prepareReview(
     );
   }
 
+  // NOTE: the system prompt is NOT built here. It depends on the run's
+  // response language — the book's current language when STARTING a run,
+  // the run's own frozen response_language when CONTINUING one — so each
+  // path composes it itself.
   return {
     supabase,
     userId: user.id,
     apiKey,
     model: def.model ?? process.env.EDITORIAL_REVIEW_MODEL ?? DEFAULT_MODEL,
     material,
-    systemPrompt: buildSystemPrompt(def),
     recordBlock: editorialRecordBlock(material.editorialRecord),
   };
 }
@@ -129,7 +132,14 @@ export async function startReview(
   bookSlug: string,
 ): Promise<ReviewRunResult> {
   const setup = await prepareReview(def, authorSlug, bookSlug);
-  const { supabase, userId, material, systemPrompt, model } = setup;
+  const { supabase, userId, material, model } = setup;
+
+  // The editorial response language, frozen for this run's whole life:
+  // the book's manuscript language as it stands at this moment. A later
+  // change to the book affects future runs only.
+  const responseLanguage =
+    normalizeLanguageTag(material.book.language ?? "en") ?? "en";
+  const systemPrompt = buildSystemPrompt(def, responseLanguage);
 
   // A killed chunk leaves the run pending; recover any such corpse first
   // so it neither blocks a fresh review nor is mistaken for one running.
@@ -160,6 +170,7 @@ export async function startReview(
   const contextVersions = {
     model,
     reviewer: def.type,
+    response_language: responseLanguage,
     author_memory: Object.fromEntries(
       material.authorMemory.documents.map((d) => [d.docType, d.versionId]),
     ),
@@ -190,6 +201,7 @@ export async function startReview(
       book_id: material.book.id,
       review_type: def.type,
       status: "pending",
+      response_language: responseLanguage,
       context_versions: contextVersions,
       total_passes: passes.length,
       completed_passes: 0,
@@ -210,6 +222,7 @@ export async function startReview(
     runId: run.id,
     startAtPass: 0,
     storedTotalPasses: passes.length,
+    systemPrompt,
   });
 }
 
@@ -253,7 +266,7 @@ export async function continueReview(
     })
     .eq("id", resumable.id)
     .eq("status", "incomplete")
-    .select("id, completed_passes, total_passes")
+    .select("id, completed_passes, total_passes, response_language")
     .maybeSingle();
   if (!claimed) {
     throw new ReviewNotPossibleError(
@@ -261,10 +274,20 @@ export async function continueReview(
     );
   }
 
+  // A continued run keeps the response language it was created with —
+  // deliberately NOT re-read from the book. A review that began in
+  // Spanish remains a Spanish-response run even if the book's language
+  // was changed before this chunk.
+  const responseLanguage =
+    normalizeLanguageTag((claimed.response_language as string | null) ?? "en") ??
+    "en";
+  const systemPrompt = buildSystemPrompt(def, responseLanguage);
+
   return runChunk(setup, def, {
     runId: claimed.id,
     startAtPass: claimed.completed_passes ?? 0,
     storedTotalPasses: claimed.total_passes ?? null,
+    systemPrompt,
   });
 }
 
@@ -312,11 +335,12 @@ async function runChunk(
     runId: string;
     startAtPass: number;
     storedTotalPasses: number | null;
+    /** Composed by the caller from the run's frozen response language. */
+    systemPrompt: string;
   },
 ): Promise<ReviewRunResult> {
-  const { supabase, userId, apiKey, model, material, systemPrompt, recordBlock } =
-    setup;
-  const { runId, startAtPass, storedTotalPasses } = cursor;
+  const { supabase, userId, apiKey, model, material, recordBlock } = setup;
+  const { runId, startAtPass, storedTotalPasses, systemPrompt } = cursor;
 
   const passes = def.buildPasses(material);
   const totalPasses = passes.length;

@@ -302,6 +302,8 @@ export async function getAdminAuthor(
 }
 
 export interface AdminBookDetail extends AdminBookRow {
+  /** BCP 47 tag for the manuscript's language (books.language). */
+  language: string;
   runs: {
     id: string;
     status: string;
@@ -320,7 +322,7 @@ export async function getAdminBook(
   const { data: book, error } = await supabase
     .from("books")
     .select(
-      "id, slug, title, subtitle, working_title, status, created_at, updated_at, authors!inner(id, slug, full_name, pen_name)",
+      "id, slug, title, subtitle, working_title, status, language, created_at, updated_at, authors!inner(id, slug, full_name, pen_name)",
     )
     .eq("id", bookId)
     .maybeSingle();
@@ -383,6 +385,7 @@ export async function getAdminBook(
     subtitle: (book.subtitle as string) ?? null,
     workingTitle: (book.working_title as string) ?? null,
     status: book.status as BookStatus,
+    language: (book.language as string) ?? "en",
     createdAt: book.created_at as string,
     updatedAt: book.updated_at as string,
     author: {
@@ -518,6 +521,9 @@ export interface AdminRunDetail {
   reviewType: string;
   status: string;
   createdAt: string;
+  /** BCP 47 tag for the language this run's editorial responses were
+   *  requested in — frozen provenance, recorded at creation. */
+  responseLanguage: string;
   summary: string | null;
   book: { id: string; slug: string; title: string };
   author: { id: string; slug: string; fullName: string };
@@ -543,7 +549,7 @@ export async function getAdminReviewRun(
   const { data: run, error } = await supabase
     .from("review_runs")
     .select(
-      "id, review_type, status, summary, context_versions, created_at, books!inner(id, slug, title, authors!inner(id, slug, full_name))",
+      "id, review_type, status, summary, response_language, context_versions, created_at, books!inner(id, slug, title, authors!inner(id, slug, full_name))",
     )
     .eq("id", runId)
     .maybeSingle();
@@ -594,6 +600,10 @@ export async function getAdminReviewRun(
     reviewType: run.review_type as string,
     status: run.status as string,
     createdAt: run.created_at as string,
+    // The column is authoritative; historical context_versions objects
+    // (runs before the language migration) simply lack the mirrored key
+    // and remain readable as they are.
+    responseLanguage: (run.response_language as string) ?? "en",
     summary: (run.summary as string) ?? null,
     book: {
       id: (book.id as string) ?? "",
