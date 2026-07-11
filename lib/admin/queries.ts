@@ -70,6 +70,12 @@ export function reviewRunStatusLabel(status: string): string {
   }
 }
 
+// The established rule (matches the runner's recoverStalePendingRuns): a
+// run still `pending` past the request's own max lifetime was killed, not
+// running. Applied ONLY to pending runs — an `incomplete` run is
+// intentionally paused and is never called stalled.
+const STALE_PENDING_MS = 6 * 60 * 1000;
+
 type Row = Record<string, unknown>;
 
 function toOne(value: unknown): Row | null {
@@ -393,5 +399,216 @@ export async function getAdminBook(
     openFindings: findings.open,
     runs,
     findings,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Review runs — the platform-wide operational log
+// ---------------------------------------------------------------------------
+
+export interface AdminRunRow {
+  id: string;
+  reviewType: string;
+  status: string;
+  createdAt: string;
+  book: { id: string; slug: string; title: string };
+  author: { id: string; slug: string; fullName: string };
+  totalPasses: number | null;
+  completedPasses: number | null;
+  /** Whether progress fields are recorded (the chunked-execution columns
+   *  exist). When false, progress is shown as not recorded, never guessed. */
+  progressKnown: boolean;
+  findingsCount: number;
+  /** pending past the established threshold — a killed chunk, not running.
+   *  Only ever true for pending runs. */
+  stalledPending: boolean;
+}
+
+/** Fetch the review runs' progress columns tolerantly: if the
+ *  chunked-execution migration is not applied, they simply are not
+ *  reported (rather than failing the whole view). */
+async function fetchRunProgress(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<{ known: boolean; byId: Map<string, Row> }> {
+  const { data, error } = await supabase
+    .from("review_runs")
+    .select("id, total_passes, completed_passes, chunk_started_at")
+    .neq("review_type", "manual")
+    .limit(20000);
+  if (error) return { known: false, byId: new Map() };
+  const byId = new Map<string, Row>();
+  for (const r of (data ?? []) as Row[]) byId.set(r.id as string, r);
+  return { known: true, byId };
+}
+
+/** The platform-wide review-run log. Excludes the ambient `manual` run
+ *  (the container for hand-raised findings, not a review execution).
+ *  Fixed bulk reads, aggregated by id — no per-row fan-out. */
+export async function listAdminReviewRuns(): Promise<AdminRunRow[]> {
+  const supabase = await createClient();
+  const nowMs = Date.now();
+
+  const [runsRes, progress, findRes] = await Promise.all([
+    supabase
+      .from("review_runs")
+      .select(
+        "id, review_type, status, created_at, book_id, books!inner(id, slug, title, authors!inner(id, slug, full_name))",
+      )
+      .neq("review_type", "manual")
+      .limit(20000),
+    fetchRunProgress(supabase),
+    supabase
+      .from("editorial_findings")
+      .select("review_run_id")
+      .limit(200000),
+  ]);
+
+  if (runsRes.error) {
+    throw new Error(`Could not load review runs: ${runsRes.error.message}`);
+  }
+  if (findRes.error) {
+    throw new Error(`Could not load review runs: ${findRes.error.message}`);
+  }
+
+  const findingsByRun = new Map<string, number>();
+  for (const f of (findRes.data ?? []) as Row[]) {
+    const runId = f.review_run_id as string | null;
+    if (!runId) continue;
+    findingsByRun.set(runId, (findingsByRun.get(runId) ?? 0) + 1);
+  }
+
+  return ((runsRes.data ?? []) as Row[]).map((r) => {
+    const book = toOne(r.books) ?? {};
+    const author = toOne(book.authors) ?? {};
+    const prog = progress.byId.get(r.id as string);
+    const total = (prog?.total_passes as number) ?? null;
+    const completed = (prog?.completed_passes as number) ?? null;
+    const chunkStartedAt = (prog?.chunk_started_at as string | null) ?? null;
+    const stalledPending =
+      (r.status as string) === "pending" &&
+      progress.known &&
+      chunkStartedAt != null &&
+      nowMs - new Date(chunkStartedAt).getTime() >= STALE_PENDING_MS;
+    return {
+      id: r.id as string,
+      reviewType: r.review_type as string,
+      status: r.status as string,
+      createdAt: r.created_at as string,
+      book: {
+        id: (book.id as string) ?? "",
+        slug: (book.slug as string) ?? "",
+        title: (book.title as string) ?? "Unknown book",
+      },
+      author: {
+        id: (author.id as string) ?? "",
+        slug: (author.slug as string) ?? "",
+        fullName: (author.full_name as string) ?? "Unknown author",
+      },
+      totalPasses: total,
+      completedPasses: completed,
+      progressKnown: progress.known,
+      findingsCount: findingsByRun.get(r.id as string) ?? 0,
+      stalledPending,
+    };
+  });
+}
+
+export interface AdminRunDetail {
+  id: string;
+  reviewType: string;
+  status: string;
+  createdAt: string;
+  summary: string | null;
+  book: { id: string; slug: string; title: string };
+  author: { id: string; slug: string; fullName: string };
+  totalPasses: number | null;
+  completedPasses: number | null;
+  progressKnown: boolean;
+  findings: { total: number; open: number; resolved: number; setAside: number };
+  provenance: {
+    reviewer: string | null;
+    model: string | null;
+    promptFingerprint: string | null;
+    perPassCap: number | null;
+    perRunCap: number | null;
+    passCount: number | null;
+  } | null;
+}
+
+export async function getAdminReviewRun(
+  runId: string,
+): Promise<AdminRunDetail | null> {
+  const supabase = await createClient();
+
+  const { data: run, error } = await supabase
+    .from("review_runs")
+    .select(
+      "id, review_type, status, summary, context_versions, created_at, books!inner(id, slug, title, authors!inner(id, slug, full_name))",
+    )
+    .eq("id", runId)
+    .maybeSingle();
+  if (error) throw new Error(`Could not load the review run: ${error.message}`);
+  if (!run) return null;
+
+  const { data: prog } = await supabase
+    .from("review_runs")
+    .select("total_passes, completed_passes")
+    .eq("id", runId)
+    .maybeSingle();
+
+  const { data: findingsData } = await supabase
+    .from("editorial_findings")
+    .select("status")
+    .eq("review_run_id", runId);
+
+  const fData = (findingsData ?? []) as Row[];
+  const findings = {
+    total: fData.length,
+    open: fData.filter((f) => f.status === "open").length,
+    resolved: fData.filter((f) => f.status === "resolved").length,
+    setAside: fData.filter((f) => f.status === "dismissed").length,
+  };
+
+  const book = toOne(run.books) ?? {};
+  const author = toOne(book.authors) ?? {};
+
+  // Provenance from context_versions — safe fields only: no secrets or
+  // credentials are stored there (the prompt is recorded as a hash, never
+  // in full).
+  const cv = (run.context_versions as Row | null) ?? null;
+  const caps = cv ? (cv.caps as Row | null) : null;
+  const sha = cv ? (cv.prompt_sha256 as string | null) : null;
+  const provenance = cv
+    ? {
+        reviewer: (cv.reviewer as string) ?? null,
+        model: (cv.model as string) ?? null,
+        promptFingerprint: sha ? sha.slice(0, 12) : null,
+        perPassCap: (caps?.per_pass as number) ?? null,
+        perRunCap: (caps?.per_run as number) ?? null,
+        passCount: (cv.pass_count as number) ?? null,
+      }
+    : null;
+
+  return {
+    id: run.id as string,
+    reviewType: run.review_type as string,
+    status: run.status as string,
+    createdAt: run.created_at as string,
+    summary: (run.summary as string) ?? null,
+    book: {
+      id: (book.id as string) ?? "",
+      slug: (book.slug as string) ?? "",
+      title: (book.title as string) ?? "Unknown book",
+    },
+    author: {
+      id: (author.id as string) ?? "",
+      slug: (author.slug as string) ?? "",
+      fullName: (author.full_name as string) ?? "Unknown author",
+    },
+    totalPasses: prog ? ((prog.total_passes as number) ?? null) : null,
+    completedPasses: prog ? ((prog.completed_passes as number) ?? null) : null,
+    progressKnown: Boolean(prog),
+    findings,
+    provenance,
   };
 }
