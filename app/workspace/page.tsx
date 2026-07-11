@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { ActionLink } from "@/components/editorial";
 import { SetupNotice } from "@/components/setup-notice";
 import { WorkspaceFrame } from "@/components/workspace-frame";
 import { listAuthors, type RosterEntry } from "@/lib/memory/queries";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = {
-  title: "Workspace",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("workspace.authors");
+  return { title: t("metaTitle") };
+}
 
 export default async function WorkspacePage() {
   const supabase = await createClient();
@@ -33,25 +35,27 @@ export default async function WorkspacePage() {
     );
   }
 
+  const t = await getTranslations("workspace.authors");
+  const tAuthor = await getTranslations("author");
+
   return (
     <WorkspaceFrame email={user.email ?? ""}>
-      <h1 className="font-display text-4xl tracking-tight">The Workspace</h1>
+      <h1 className="font-display text-4xl tracking-tight">{t("title")}</h1>
       <p className="mt-6 max-w-prose text-lg leading-relaxed text-ink-soft">
-        Each author kept here has a permanent, versioned memory. Conversations
-        discover ideas; what is worth keeping is preserved here — so every
-        future draft sounds more like its author, never more like AI.
+        {t("intro")}
       </p>
 
       <section className="mt-14">
         <div className="rule flex items-baseline justify-between pt-5">
-          <h2 className="eyebrow">The Author Roster</h2>
-          <ActionLink href="/workspace/authors/new">Add an author</ActionLink>
+          <h2 className="eyebrow">{t("rosterHeading")}</h2>
+          <ActionLink href="/workspace/authors/new">
+            {t("addAuthor")}
+          </ActionLink>
         </div>
 
         {authors.length === 0 ? (
           <p className="mt-8 max-w-prose italic text-ink-soft">
-            No authors yet. The roster begins with its first author — add one
-            to establish their permanent memory.
+            {t("emptyRoster")}
           </p>
         ) : (
           <ul>
@@ -69,12 +73,15 @@ export default async function WorkspacePage() {
                   </Link>
                   {author.pen_name ? (
                     <span className="italic text-ink-soft">
-                      writing as {author.pen_name}
+                      {tAuthor("writingAs", { penName: author.pen_name })}
                     </span>
                   ) : null}
                 </div>
                 <span className="font-sans text-xs text-ink-faint">
-                  {author.establishedCount} of 4 documents established
+                  {t("establishedOfTotal", {
+                    count: author.establishedCount,
+                    total: 4,
+                  })}
                 </span>
               </li>
             ))}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { DocumentRoomView, type RoomQuery } from "@/components/document-room";
 import { SetupNotice } from "@/components/setup-notice";
 import { WorkspaceFrame } from "@/components/workspace-frame";
@@ -22,9 +23,11 @@ export async function generateMetadata({
   const { slug, doc } = await params;
   const meta = docTypeBySlug(doc);
   if (!meta) return {};
+  const t = await getTranslations("memory.document");
+  const label = t(`${meta.type}.label`);
   const room = await getDocumentRoom(slug, meta.type).catch(() => null);
   return {
-    title: room ? `${meta.label} — ${room.author.full_name}` : meta.label,
+    title: room ? `${label} — ${room.author.full_name}` : label,
   };
 }
 
@@ -62,6 +65,7 @@ export default async function DocumentRoomPage({
   if (!room) notFound();
 
   const query = await searchParams;
+  const tDoc = await getTranslations("memory.document");
 
   return (
     <WorkspaceFrame
@@ -74,8 +78,8 @@ export default async function DocumentRoomPage({
     >
       <DocumentRoomView
         eyebrow={room.author.full_name}
-        title={meta.label}
-        description={meta.description}
+        title={tDoc(`${meta.type}.label`)}
+        description={tDoc(`${meta.type}.description`)}
         roomPath={`/workspace/authors/${slug}/memory/${docSlug}`}
         documentId={room.documentId}
         versions={room.versions}

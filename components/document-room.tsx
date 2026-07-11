@@ -1,5 +1,7 @@
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import { useLocale, useTranslations } from "next-intl";
+import { ActionMessage } from "@/components/action-message";
 import {
   ActionLink,
   Field,
@@ -20,6 +22,11 @@ import {
  * rule of two, satisfied): reading pane + margin version rail, with the
  * establish → draft → activate → restore → discard workflow. Presentation
  * only — each level supplies its own server actions and data.
+ *
+ * All interface copy resolves from the memory.documentRoom catalog
+ * namespace in the request's interface locale; the document's title,
+ * description, content, change summaries, and source notes are the
+ * author's own words and render verbatim, never translated.
  */
 
 export interface RoomActions {
@@ -60,6 +67,7 @@ export function DocumentRoomView({
   query: RoomQuery;
   actions: RoomActions;
 }) {
+  const t = useTranslations("memory.documentRoom");
   const draft = versions.find((v) => v.status === "draft") ?? null;
   const active = versions.find((v) => v.id === activeVersionId) ?? null;
   const finals = versions.filter((v) => v.status === "final");
@@ -80,13 +88,11 @@ export function DocumentRoomView({
         <h1 className="mt-2 font-display text-4xl tracking-tight">{title}</h1>
 
         <div className="mt-4">
-          {query.error ? (
-            <p className="font-sans text-sm text-oxblood" role="alert">
-              {query.error}
-            </p>
-          ) : null}
+          <ActionMessage code={query.error} namespace="memory.errors" />
           {query.saved === "1" ? (
-            <p className="font-sans text-sm text-ink-soft">Draft saved.</p>
+            <p className="font-sans text-sm text-ink-soft">
+              {t("draftSaved")}
+            </p>
           ) : null}
         </div>
 
@@ -141,16 +147,18 @@ export function VersionRail({
   activeVersionId: string | null;
   roomPath: string;
 }) {
+  const t = useTranslations("memory.documentRoom");
+  const locale = useLocale();
   const draft = versions.find((v) => v.status === "draft") ?? null;
   return (
     <>
       <div className="rule pt-5">
-        <h2 className="eyebrow">Versions</h2>
+        <h2 className="eyebrow">{t("versionsHeading")}</h2>
       </div>
 
       {versions.length === 0 ? (
         <p className="mt-4 font-sans text-xs italic text-ink-faint">
-          None yet.
+          {t("noneYet")}
         </p>
       ) : (
         <ul className="mt-1">
@@ -171,16 +179,19 @@ export function VersionRail({
                           : "text-ink group-hover:text-oxblood"
                       }
                     >
-                      Version {v.version_number}
+                      {t("version", { number: v.version_number })}
                     </span>
                     {isActive ? (
-                      <span className="text-oxblood"> · active</span>
+                      <span className="text-oxblood"> · {t("active")}</span>
                     ) : v.status === "draft" ? (
-                      <span className="italic text-ink-soft"> · draft</span>
+                      <span className="italic text-ink-soft">
+                        {" "}
+                        · {t("draft")}
+                      </span>
                     ) : null}
                   </span>
                   <span className="mt-1 block font-sans text-[0.6875rem] text-ink-faint">
-                    {formatDate(v.finalized_at ?? v.created_at)}
+                    {formatDate(v.finalized_at ?? v.created_at, locale)}
                   </span>
                   {v.change_summary ? (
                     <span className="mt-1 block text-xs leading-snug text-ink-soft">
@@ -196,7 +207,7 @@ export function VersionRail({
 
       {draft === null && versions.length > 0 ? (
         <div className="rule mt-1 pt-4">
-          <ActionLink href={`${roomPath}?new=1`}>New version</ActionLink>
+          <ActionLink href={`${roomPath}?new=1`}>{t("newVersion")}</ActionLink>
         </div>
       ) : null}
     </>
@@ -218,17 +229,22 @@ function ReadingPane({
   draftOpen: boolean;
   actions: RoomActions;
 }) {
-  const sourceLabel = IMPORT_SOURCES.find(
+  const t = useTranslations("memory.documentRoom");
+  const tSource = useTranslations("memory.source");
+  const locale = useLocale();
+  const sourceLabel = IMPORT_SOURCES.some(
     (s) => s.value === version.import_source,
-  )?.label;
+  )
+    ? tSource(version.import_source)
+    : null;
 
   return (
     <article className="mt-8">
       <p className="font-sans text-xs text-ink-faint">
-        Version {version.version_number}
-        {isActive ? " · active" : " · superseded"}
+        {t("version", { number: version.version_number })}
+        {isActive ? ` · ${t("active")}` : ` · ${t("superseded")}`}
         {version.finalized_at
-          ? ` · finalized ${formatDate(version.finalized_at)}`
+          ? ` · ${t("finalized", { date: formatDate(version.finalized_at, locale) })}`
           : ""}
         {sourceLabel ? ` · ${sourceLabel.toLowerCase()}` : ""}
         {version.source_note ? ` — ${version.source_note}` : ""}
@@ -237,27 +253,29 @@ function ReadingPane({
       {!isActive ? (
         <div className="mt-4 border-l-2 border-oxblood pl-4">
           <p className="text-sm italic text-ink-soft">
-            You are reading a superseded version.
+            {t("readingSuperseded")}
             {activeNumber
-              ? ` The active version is ${activeNumber}.`
-              : " No version is currently active."}
+              ? ` ${t("activeVersionIs", { number: activeNumber })}`
+              : ` ${t("noActiveVersion")}`}
           </p>
           <form action={actions.activateVersion} className="mt-2">
             <input type="hidden" name="version_id" value={version.id} />
             <input type="hidden" name="room_path" value={roomPath} />
-            <TextButton>Restore as the active version</TextButton>
+            <TextButton>{t("restore")}</TextButton>
           </form>
         </div>
       ) : draftOpen ? (
         <p className="mt-4 text-sm italic text-ink-soft">
-          A draft is open for this document —{" "}
-          <Link
-            href={`${roomPath}?draft=1`}
-            className="text-oxblood underline-offset-4 hover:underline"
-          >
-            continue editing it
-          </Link>
-          .
+          {t.rich("draftOpenContinue", {
+            link: (chunks) => (
+              <Link
+                href={`${roomPath}?draft=1`}
+                className="text-oxblood underline-offset-4 hover:underline"
+              >
+                {chunks}
+              </Link>
+            ),
+          })}
         </p>
       ) : null}
 
@@ -277,30 +295,33 @@ function EmptyState({
   roomPath: string;
   draft: VersionRecord | null;
 }) {
+  const t = useTranslations("memory.documentRoom");
   return (
     <div className="mt-10 max-w-prose">
       <p className="text-lg leading-relaxed text-ink-soft">{description}</p>
       {draft ? (
         <p className="mt-6 italic text-ink-soft">
-          A draft is open but nothing is active yet —{" "}
-          <Link
-            href={`${roomPath}?draft=1`}
-            className="text-oxblood underline-offset-4 hover:underline"
-          >
-            continue editing the draft
-          </Link>
-          .
+          {t.rich("emptyDraftOpen", {
+            link: (chunks) => (
+              <Link
+                href={`${roomPath}?draft=1`}
+                className="text-oxblood underline-offset-4 hover:underline"
+              >
+                {chunks}
+              </Link>
+            ),
+          })}
         </p>
       ) : (
         <>
           <p className="mt-6 italic text-ink-soft">
-            Nothing has been established yet.
+            {t("emptyNothingEstablished")}
           </p>
           <Link
             href={`${roomPath}?new=1`}
             className="mt-8 inline-block bg-oxblood px-6 py-2.5 font-sans text-sm tracking-wide text-paper hover:bg-oxblood-deep"
           >
-            Establish the first version
+            {t("establishFirst")}
           </Link>
         </>
       )}
@@ -321,12 +342,14 @@ export function VersionFields({
   sourceNote: string;
   contentRows?: number;
 }) {
+  const t = useTranslations("memory.documentRoom");
+  const tSource = useTranslations("memory.source");
   return (
     <>
       <TextareaField
         id="content"
-        label="Content"
-        hint="Markdown"
+        label={t("content")}
+        hint={t("markdownHint")}
         rows={contentRows}
         required
         defaultValue={content}
@@ -334,25 +357,28 @@ export function VersionFields({
 
       <Field
         id="change_summary"
-        label="Change summary"
+        label={t("changeSummary")}
         type="text"
         defaultValue={changeSummary}
-        placeholder="what this version changes"
+        placeholder={t("changeSummaryPlaceholder")}
       />
 
       <div className="grid gap-8 sm:grid-cols-2">
         <SelectField
           id="import_source"
-          label="Source"
+          label={t("source")}
           defaultValue={importSource}
-          options={IMPORT_SOURCES}
+          options={IMPORT_SOURCES.map((s) => ({
+            value: s.value,
+            label: tSource(s.value),
+          }))}
         />
         <Field
           id="source_note"
-          label="Source note"
+          label={t("sourceNote")}
           type="text"
           defaultValue={sourceNote}
-          placeholder="e.g. distilled from a voice conversation, July 2026"
+          placeholder={t("sourceNotePlaceholder")}
         />
       </div>
     </>
@@ -372,12 +398,12 @@ function NewVersionForm({
   isFirst: boolean;
   actions: RoomActions;
 }) {
+  const t = useTranslations("memory.documentRoom");
+  const tCommon = useTranslations("common");
   return (
     <div className="mt-8">
       <p className="max-w-prose text-sm italic text-ink-soft">
-        {isFirst
-          ? "This will become Version 1, saved as a draft until you make it active."
-          : "Starting from the current active version — edit it into the next version. It is saved as a draft until you make it active."}
+        {isFirst ? t("newFirstIntro") : t("newNextIntro")}
       </p>
       <form action={actions.createVersion} className="mt-8 space-y-8">
         <input type="hidden" name="document_id" value={documentId} />
@@ -389,12 +415,12 @@ function NewVersionForm({
           sourceNote=""
         />
         <div className="flex items-baseline gap-8">
-          <PrimaryButton>Save draft</PrimaryButton>
+          <PrimaryButton>{t("saveDraft")}</PrimaryButton>
           <Link
             href={roomPath}
             className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
           >
-            Cancel
+            {tCommon("cancel")}
           </Link>
         </div>
       </form>
@@ -411,15 +437,18 @@ function DraftEditor({
   roomPath: string;
   actions: RoomActions;
 }) {
+  const t = useTranslations("memory.documentRoom");
+  const locale = useLocale();
   return (
     <div className="mt-8">
       <p className="font-sans text-xs text-oxblood">
-        Draft · Version {draft.version_number} · begun{" "}
-        {formatDate(draft.created_at)}
+        {t("draftMeta", {
+          number: draft.version_number,
+          date: formatDate(draft.created_at, locale),
+        })}
       </p>
       <p className="mt-2 max-w-prose text-sm italic text-ink-soft">
-        A draft is private working space. Nothing reaches the permanent record
-        — or any future AI context — until you make it active.
+        {t("draftPrivacy")}
       </p>
 
       <form action={actions.updateDraft} className="mt-8 space-y-8">
@@ -432,9 +461,9 @@ function DraftEditor({
           sourceNote={draft.source_note ?? ""}
         />
         <div className="flex flex-wrap items-baseline gap-8">
-          <QuietButton>Save draft</QuietButton>
+          <QuietButton>{t("saveDraft")}</QuietButton>
           <PrimaryButton formAction={actions.saveAndActivateDraft}>
-            Make this the active version
+            {t("makeActive")}
           </PrimaryButton>
         </div>
       </form>
@@ -447,13 +476,12 @@ function DraftEditor({
             type="submit"
             className="font-sans text-xs text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
           >
-            Discard this draft
+            {t("discardDraft")}
           </button>
         </form>
       </div>
       <p className="mt-3 font-sans text-[0.6875rem] text-ink-faint">
-        Activating finalizes the text permanently; discarding removes the
-        draft. Neither touches earlier versions.
+        {t("activationNote")}
       </p>
     </div>
   );

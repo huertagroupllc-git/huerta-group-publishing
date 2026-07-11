@@ -1,18 +1,22 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { ActionMessage } from "@/components/action-message";
 import { Field, PrimaryButton, TextareaField } from "@/components/editorial";
-import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
+import { WorkspaceFrame } from "@/components/workspace-frame";
+import { actionMessageFromQuery } from "@/lib/action-messages";
 import { createAuthor } from "@/lib/memory/actions";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = {
-  title: "Add an author",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("author.form");
+  return { title: t("addMetaTitle") };
+}
 
 export default async function NewAuthorPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const supabase = await createClient();
   const {
@@ -20,38 +24,43 @@ export default async function NewAuthorPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/signin");
 
-  const { error } = await searchParams;
+  const message = actionMessageFromQuery(await searchParams);
+  const t = await getTranslations("author.form");
 
   return (
     <WorkspaceFrame
       email={user.email ?? ""}
       breadcrumbs={[{ href: "/workspace", label: "Workspace" }]}
     >
-      <h1 className="font-display text-4xl tracking-tight">Add an author</h1>
+      <h1 className="font-display text-4xl tracking-tight">
+        {t("addTitle")}
+      </h1>
       <p className="mt-6 max-w-prose text-lg leading-relaxed text-ink-soft">
-        This opens the author&rsquo;s permanent record. Their four memory
-        documents — Writing Philosophy, Author Bible, Voice Profile, and
-        Editorial Decisions — are created with it, ready to be established.
+        {t("addIntro")}
       </p>
 
       <form action={createAuthor} className="mt-12 max-w-md space-y-8">
-        <Field id="full_name" label="Full name" type="text" required />
+        <Field id="full_name" label={t("fullName")} type="text" required />
 
-        <Field id="pen_name" label="Pen name" optional type="text" />
+        <Field id="pen_name" label={t("penName")} optional type="text" />
 
         <Field
           id="slug"
-          label="Slug"
+          label={t("slug")}
           optional
           type="text"
-          placeholder="derived from the name if left blank"
+          placeholder={t("slugPlaceholder")}
         />
 
-        <TextareaField id="bio" label="Short bio" optional rows={4} />
+        <TextareaField id="bio" label={t("shortBio")} optional rows={4} />
 
-        <ErrorNote message={error} />
+        <ActionMessage
+          code={message?.code}
+          params={message?.params}
+          namespace="memory.errors"
+        />
 
-        <PrimaryButton>Open the record</PrimaryButton>
+        <PrimaryButton>{t("openRecord")}</PrimaryButton>
       </form>
     </WorkspaceFrame>
   );

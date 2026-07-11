@@ -1,11 +1,18 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { withActionMessage } from "@/lib/action-messages";
 import { createClient } from "@/lib/supabase/server";
 import { slugify, type ImportSource } from "@/lib/memory/types";
 
 /** All writes go through Supabase RPCs (atomic) or single-statement
- *  updates; Row Level Security applies to the signed-in user. */
+ *  updates; Row Level Security applies to the signed-in user.
+ *
+ *  Failures redirect with STABLE MESSAGE CODES from the memory.errors
+ *  catalog namespace (never English prose, never raw database errors —
+ *  those stay in the server logs). The receiving page translates at
+ *  the presentation boundary. This is the pattern later subsystem
+ *  actions adopt (lib/action-messages.ts). */
 
 async function requireUser() {
   const supabase = await createClient();
@@ -16,8 +23,12 @@ async function requireUser() {
   return supabase;
 }
 
-function fail(path: string, message: string): never {
-  redirect(`${path}?error=${encodeURIComponent(message)}`);
+function fail(
+  path: string,
+  code: string,
+  params?: Record<string, string>,
+): never {
+  redirect(withActionMessage(path, { code, params }));
 }
 
 /** Missing Phase B RPCs surface as PGRST202/42883 — say so plainly. */
@@ -29,8 +40,7 @@ function isMissingFunction(error: { code?: string; message?: string }) {
   );
 }
 
-const MIGRATION_MESSAGE =
-  "The database is missing the Phase B workflow functions — apply supabase/migrations/20260703000000_author_memory_workflow.sql (docs/setup.md §2).";
+const MIGRATION_CODE = "workflowMigrationMissing";
 
 export async function createAuthor(formData: FormData) {
   const fullName = String(formData.get("full_name") ?? "").trim();
@@ -39,15 +49,12 @@ export async function createAuthor(formData: FormData) {
   const slugInput = String(formData.get("slug") ?? "").trim();
 
   if (!fullName) {
-    fail("/workspace/authors/new", "The author's full name is required.");
+    fail("/workspace/authors/new", "fullNameRequired");
   }
 
   const slug = slugify(slugInput || fullName);
   if (!slug) {
-    fail(
-      "/workspace/authors/new",
-      "A usable slug could not be derived; please provide one.",
-    );
+    fail("/workspace/authors/new", "slugUnusable");
   }
 
   const supabase = await requireUser();
@@ -60,13 +67,12 @@ export async function createAuthor(formData: FormData) {
 
   if (error) {
     console.error("[memory] createAuthor failed", error);
+    if (error.code === "23505") {
+      fail("/workspace/authors/new", "slugTaken", { slug });
+    }
     fail(
       "/workspace/authors/new",
-      error.code === "23505"
-        ? `The slug “${slug}” is already in use.`
-        : isMissingFunction(error)
-          ? MIGRATION_MESSAGE
-          : "The author could not be created.",
+      isMissingFunction(error) ? MIGRATION_CODE : "authorCreateFailed",
     );
   }
 
@@ -83,7 +89,7 @@ export async function updateAuthor(formData: FormData) {
   const editPath = `/workspace/authors/${slug}/edit`;
 
   if (!fullName) {
-    fail(editPath, "The author's full name is required.");
+    fail(editPath, "fullNameRequired");
   }
 
   const supabase = await requireUser();
@@ -99,7 +105,7 @@ export async function updateAuthor(formData: FormData) {
 
   if (error || !data?.length) {
     console.error("[memory] updateAuthor failed", error);
-    fail(editPath, "The record could not be saved.");
+    fail(editPath, "recordSaveFailed");
   }
 
   redirect(`/workspace/authors/${slug}`);
@@ -116,7 +122,7 @@ export async function createVersion(formData: FormData) {
   const sourceNote = String(formData.get("source_note") ?? "").trim();
 
   if (!content.trim()) {
-    fail(`${roomPath}`, "A version needs content before it can be saved.");
+    fail(roomPath, "contentRequired");
   }
 
   const supabase = await requireUser();
@@ -133,10 +139,10 @@ export async function createVersion(formData: FormData) {
     fail(
       roomPath,
       error.code === "23505"
-        ? "A draft is already open for this document; continue editing it instead."
+        ? "draftAlreadyOpen"
         : isMissingFunction(error)
-          ? MIGRATION_MESSAGE
-          : "The draft could not be created.",
+          ? MIGRATION_CODE
+          : "draftCreateFailed",
     );
   }
 
@@ -168,7 +174,7 @@ export async function updateDraft(formData: FormData) {
 
   if (error || !data?.length) {
     console.error("[memory] updateDraft failed", error);
-    fail(`${roomPath}?draft=1`, "The draft could not be saved.");
+    fail(`${roomPath}?draft=1`, "draftSaveFailed");
   }
 
   redirect(`${roomPath}?draft=1&saved=1`);
@@ -187,7 +193,7 @@ export async function saveAndActivateDraft(formData: FormData) {
   const sourceNote = String(formData.get("source_note") ?? "").trim();
 
   if (!content.trim()) {
-    fail(`${roomPath}?draft=1`, "A version needs content to be activated.");
+    fail(`${roomPath}?draft=1`, "contentRequiredToActivate");
   }
 
   const supabase = await requireUser();
@@ -205,7 +211,7 @@ export async function saveAndActivateDraft(formData: FormData) {
 
   if (error || !data?.length) {
     console.error("[memory] saveAndActivateDraft save failed", error);
-    fail(`${roomPath}?draft=1`, "The draft could not be saved.");
+    fail(`${roomPath}?draft=1`, "draftSaveFailed");
   }
 
   const { error: activateError } = await supabase.rpc(
@@ -217,9 +223,7 @@ export async function saveAndActivateDraft(formData: FormData) {
     console.error("[memory] saveAndActivateDraft activate failed", activateError);
     fail(
       `${roomPath}?draft=1`,
-      isMissingFunction(activateError)
-        ? MIGRATION_MESSAGE
-        : "The version could not be activated.",
+      isMissingFunction(activateError) ? MIGRATION_CODE : "activateFailed",
     );
   }
 
@@ -239,9 +243,7 @@ export async function activateVersion(formData: FormData) {
     console.error("[memory] activateVersion failed", error);
     fail(
       roomPath,
-      isMissingFunction(error)
-        ? MIGRATION_MESSAGE
-        : "The version could not be activated.",
+      isMissingFunction(error) ? MIGRATION_CODE : "activateFailed",
     );
   }
 
@@ -261,7 +263,7 @@ export async function discardDraft(formData: FormData) {
 
   if (error) {
     console.error("[memory] discardDraft failed", error);
-    fail(roomPath, "The draft could not be discarded.");
+    fail(roomPath, "discardFailed");
   }
 
   redirect(roomPath);

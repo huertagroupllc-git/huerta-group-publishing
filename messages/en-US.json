@@ -34,6 +34,126 @@
       "notFoundTitle": "There is no page at this address",
       "notFoundBody": "Nothing in the record answers to it — the address may be mistyped, or the link may predate the page. Nothing has been lost.",
       "notFoundReturn": "Return to the Workspace"
+    },
+    "authors": {
+      "metaTitle": "Workspace",
+      "title": "The Workspace",
+      "intro": "Each author kept here has a permanent, versioned memory. Conversations discover ideas; what is worth keeping is preserved here — so every future draft sounds more like its author, never more like AI.",
+      "rosterHeading": "The Author Roster",
+      "addAuthor": "Add an author",
+      "emptyRoster": "No authors yet. The roster begins with its first author — add one to establish their permanent memory.",
+      "establishedOfTotal": "{count, number} of {total, number} documents established"
+    }
+  },
+  "author": {
+    "writingAs": "writing as {penName}",
+    "study": {
+      "metaFallback": "Author",
+      "editRecord": "Edit the record",
+      "memoryHeading": "The Author’s Memory",
+      "version": "Version {number}",
+      "finalized": "finalized {date}",
+      "notEstablished": "Not yet established",
+      "draftOpen": "Draft open",
+      "booksHeading": "Books",
+      "addBook": "Add a book",
+      "emptyBooks": "No books yet. Every book opened here begins under this author’s established memory.",
+      "theRecord": "the record",
+      "assembledMemory": "Assembled Memory",
+      "assembledMemoryHint": "the exact record future AI assistance will receive — active, finalized versions only",
+      "show": "Show",
+      "hide": "Hide"
+    },
+    "form": {
+      "addMetaTitle": "Add an author",
+      "addTitle": "Add an author",
+      "addIntro": "This opens the author’s permanent record. Their four memory documents — Writing Philosophy, Author Bible, Voice Profile, and Editorial Decisions — are created with it, ready to be established.",
+      "fullName": "Full name",
+      "penName": "Pen name",
+      "slug": "Slug",
+      "slugPlaceholder": "derived from the name if left blank",
+      "shortBio": "Short bio",
+      "openRecord": "Open the record",
+      "editTitle": "Edit the record",
+      "editMetaFallback": "Edit",
+      "editIntro": "The author’s identity, as the imprint keeps it. The record’s address remains <address>/{slug}</address> — it was set when the record was opened and does not change.",
+      "saveRecord": "Save the record"
+    }
+  },
+  "memory": {
+    "documentRoom": {
+      "versionsHeading": "Versions",
+      "noneYet": "None yet.",
+      "newVersion": "New version",
+      "version": "Version {number}",
+      "active": "active",
+      "draft": "draft",
+      "superseded": "superseded",
+      "finalized": "finalized {date}",
+      "draftSaved": "Draft saved.",
+      "readingSuperseded": "You are reading a superseded version.",
+      "activeVersionIs": "The active version is {number}.",
+      "noActiveVersion": "No version is currently active.",
+      "restore": "Restore as the active version",
+      "draftOpenContinue": "A draft is open for this document — <link>continue editing it</link>.",
+      "emptyNothingEstablished": "Nothing has been established yet.",
+      "establishFirst": "Establish the first version",
+      "emptyDraftOpen": "A draft is open but nothing is active yet — <link>continue editing the draft</link>.",
+      "newFirstIntro": "This will become Version 1, saved as a draft until you make it active.",
+      "newNextIntro": "Starting from the current active version — edit it into the next version. It is saved as a draft until you make it active.",
+      "saveDraft": "Save draft",
+      "makeActive": "Make this the active version",
+      "discardDraft": "Discard this draft",
+      "draftMeta": "Draft · Version {number} · begun {date}",
+      "draftPrivacy": "A draft is private working space. Nothing reaches the permanent record — or any future AI context — until you make it active.",
+      "activationNote": "Activating finalizes the text permanently; discarding removes the draft. Neither touches earlier versions.",
+      "content": "Content",
+      "markdownHint": "Markdown",
+      "changeSummary": "Change summary",
+      "changeSummaryPlaceholder": "what this version changes",
+      "source": "Source",
+      "sourceNote": "Source note",
+      "sourceNotePlaceholder": "e.g. distilled from a voice conversation, July 2026"
+    },
+    "document": {
+      "writing_philosophy": {
+        "label": "Writing Philosophy",
+        "description": "What this author believes about writing itself — the principles that govern every decision below."
+      },
+      "author_bible": {
+        "label": "Author Bible",
+        "description": "The permanent record of who this author is: history, themes, convictions, and worldview."
+      },
+      "voice_profile": {
+        "label": "Voice Profile",
+        "description": "How this author sounds: rhythm, vocabulary, sentence habits, and tone."
+      },
+      "editorial_decisions": {
+        "label": "Editorial Decisions",
+        "description": "Choices the author has committed to, recorded once so they are never re-litigated."
+      }
+    },
+    "source": {
+      "manual": "Written directly",
+      "chatgpt": "Distilled from ChatGPT",
+      "claude": "Distilled from Claude",
+      "file": "Imported from a file",
+      "other": "Other"
+    },
+    "errors": {
+      "fullNameRequired": "The author's full name is required.",
+      "slugUnusable": "A usable slug could not be derived; please provide one.",
+      "slugTaken": "The slug “{slug}” is already in use.",
+      "authorCreateFailed": "The author could not be created.",
+      "recordSaveFailed": "The record could not be saved.",
+      "contentRequired": "A version needs content before it can be saved.",
+      "contentRequiredToActivate": "A version needs content to be activated.",
+      "draftAlreadyOpen": "A draft is already open for this document; continue editing it instead.",
+      "draftCreateFailed": "The draft could not be created.",
+      "draftSaveFailed": "The draft could not be saved.",
+      "activateFailed": "The version could not be activated.",
+      "discardFailed": "The draft could not be discarded.",
+      "workflowMigrationMissing": "The database is missing the Phase B workflow functions — apply supabase/migrations/20260703000000_author_memory_workflow.sql (docs/setup.md §2)."
     }
   },
   "admin": {

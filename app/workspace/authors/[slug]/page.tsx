@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
+import { ActionMessage } from "@/components/action-message";
 import { ActionLink } from "@/components/editorial";
 import { SetupNotice } from "@/components/setup-notice";
-import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
+import { WorkspaceFrame } from "@/components/workspace-frame";
+import { actionMessageFromQuery } from "@/lib/action-messages";
 import { assembleAuthorContext, serializeContext } from "@/lib/memory/assemble";
 import { listBooks, type BookRosterEntry } from "@/lib/books/queries";
 import { bookStatusLabel, isWritingStage } from "@/lib/books/types";
@@ -18,7 +21,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const study = await getAuthorStudy(slug).catch(() => null);
-  return { title: study?.author.full_name ?? "Author" };
+  if (study) return { title: study.author.full_name };
+  const t = await getTranslations("author.study");
+  return { title: t("metaFallback") };
 }
 
 export default async function AuthorStudyPage({
@@ -26,7 +31,7 @@ export default async function AuthorStudyPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const supabase = await createClient();
   const {
@@ -35,7 +40,7 @@ export default async function AuthorStudyPage({
   if (!user) redirect("/signin");
 
   const { slug } = await params;
-  const { error } = await searchParams;
+  const message = actionMessageFromQuery(await searchParams);
 
   let study: AuthorStudy | null;
   let memory: string;
@@ -67,6 +72,11 @@ export default async function AuthorStudyPage({
   if (!study) notFound();
 
   const { author, documents } = study;
+  const locale = await getLocale();
+  const t = await getTranslations("author.study");
+  const tAuthor = await getTranslations("author");
+  const tDoc = await getTranslations("memory.document");
+  const tRoster = await getTranslations("workspace.authors");
 
   return (
     <WorkspaceFrame
@@ -79,7 +89,7 @@ export default async function AuthorStudyPage({
         </h1>
         {author.pen_name ? (
           <p className="mt-3 text-lg italic text-ink-soft">
-            writing as {author.pen_name}
+            {tAuthor("writingAs", { penName: author.pen_name })}
           </p>
         ) : null}
         {author.bio ? (
@@ -89,18 +99,22 @@ export default async function AuthorStudyPage({
         ) : null}
         <div className="mt-5">
           <ActionLink href={`/workspace/authors/${author.slug}/edit`}>
-            Edit the record
+            {t("editRecord")}
           </ActionLink>
         </div>
       </header>
 
       <div className="mt-4">
-        <ErrorNote message={error} />
+        <ActionMessage
+          code={message?.code}
+          params={message?.params}
+          namespace="memory.errors"
+        />
       </div>
 
       <section className="mt-14">
         <div className="rule pt-5">
-          <h2 className="eyebrow">The Author&rsquo;s Memory</h2>
+          <h2 className="eyebrow">{t("memoryHeading")}</h2>
         </div>
 
         <ul>
@@ -116,23 +130,25 @@ export default async function AuthorStudyPage({
                     href={`/workspace/authors/${author.slug}/memory/${meta.slug}`}
                     className="font-display text-2xl tracking-tight hover:text-oxblood"
                   >
-                    {meta.label}
+                    {tDoc(`${doc.docType}.label`)}
                   </Link>
                   <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-                    {meta.description}
+                    {tDoc(`${doc.docType}.description`)}
                   </p>
                 </div>
                 <div className="text-right font-sans text-xs">
                   {doc.activeVersion ? (
                     <span className="text-ink-soft">
-                      Version {doc.activeVersion.versionNumber}
+                      {t("version", {
+                        number: doc.activeVersion.versionNumber,
+                      })}
                       {doc.activeVersion.finalizedAt
-                        ? ` · finalized ${formatDate(doc.activeVersion.finalizedAt)}`
+                        ? ` · ${t("finalized", { date: formatDate(doc.activeVersion.finalizedAt, locale) })}`
                         : ""}
                     </span>
                   ) : (
                     <span className="italic text-ink-faint">
-                      Not yet established
+                      {t("notEstablished")}
                     </span>
                   )}
                   {doc.hasDraft ? (
@@ -140,7 +156,7 @@ export default async function AuthorStudyPage({
                       href={`/workspace/authors/${author.slug}/memory/${meta.slug}?draft=1`}
                       className="ml-3 text-oxblood underline-offset-4 hover:underline"
                     >
-                      Draft open
+                      {t("draftOpen")}
                     </Link>
                   ) : null}
                 </div>
@@ -152,16 +168,15 @@ export default async function AuthorStudyPage({
 
       <section className="mt-14">
         <div className="rule flex items-baseline justify-between pt-5">
-          <h2 className="eyebrow">Books</h2>
+          <h2 className="eyebrow">{t("booksHeading")}</h2>
           <ActionLink href={`/workspace/authors/${author.slug}/books/new`}>
-            Add a book
+            {t("addBook")}
           </ActionLink>
         </div>
 
         {books.length === 0 ? (
           <p className="mt-6 max-w-prose italic text-ink-soft">
-            No books yet. Every book opened here begins under this
-            author&rsquo;s established memory.
+            {t("emptyBooks")}
           </p>
         ) : (
           <ul>
@@ -190,13 +205,16 @@ export default async function AuthorStudyPage({
                       href={bookPath}
                       className="font-sans text-xs text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
                     >
-                      the record
+                      {t("theRecord")}
                     </Link>
                   ) : null}
                 </div>
                 <span className="font-sans text-xs text-ink-faint">
-                  {bookStatusLabel(book.status)} · {book.establishedCount} of
-                  3 documents established
+                  {bookStatusLabel(book.status)} ·{" "}
+                  {tRoster("establishedOfTotal", {
+                    count: book.establishedCount,
+                    total: 3,
+                  })}
                 </span>
               </li>
               );
@@ -210,16 +228,15 @@ export default async function AuthorStudyPage({
           <summary className="rule flex cursor-pointer list-none items-baseline justify-between pt-5">
             <span>
               <span className="eyebrow group-open:text-oxblood">
-                Assembled Memory
+                {t("assembledMemory")}
               </span>
               <span className="ml-3 font-sans text-xs text-ink-faint">
-                the exact record future AI assistance will receive — active,
-                finalized versions only
+                {t("assembledMemoryHint")}
               </span>
             </span>
             <span className="font-sans text-xs text-oxblood">
-              <span className="group-open:hidden">Show</span>
-              <span className="hidden group-open:inline">Hide</span>
+              <span className="group-open:hidden">{t("show")}</span>
+              <span className="hidden group-open:inline">{t("hide")}</span>
             </span>
           </summary>
           <pre className="mt-6 max-w-prose whitespace-pre-wrap border-l border-rule pl-6 font-serif text-sm leading-relaxed text-ink">

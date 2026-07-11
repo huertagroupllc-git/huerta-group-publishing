@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { ActionMessage } from "@/components/action-message";
 import { Field, PrimaryButton, TextareaField } from "@/components/editorial";
 import { SetupNotice } from "@/components/setup-notice";
-import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
+import { WorkspaceFrame } from "@/components/workspace-frame";
+import { actionMessageFromQuery } from "@/lib/action-messages";
 import { updateAuthor } from "@/lib/memory/actions";
 import { getAuthorStudy, type AuthorStudy } from "@/lib/memory/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -15,8 +18,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const study = await getAuthorStudy(slug).catch(() => null);
+  const t = await getTranslations("author.form");
   return {
-    title: study ? `Edit the record — ${study.author.full_name}` : "Edit",
+    title: study
+      ? `${t("editTitle")} — ${study.author.full_name}`
+      : t("editMetaFallback"),
   };
 }
 
@@ -25,7 +31,7 @@ export default async function EditAuthorPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const supabase = await createClient();
   const {
@@ -34,7 +40,7 @@ export default async function EditAuthorPage({
   if (!user) redirect("/signin");
 
   const { slug } = await params;
-  const { error } = await searchParams;
+  const message = actionMessageFromQuery(await searchParams);
 
   let study: AuthorStudy | null;
   try {
@@ -53,6 +59,8 @@ export default async function EditAuthorPage({
   if (!study) notFound();
 
   const { author } = study;
+  const t = await getTranslations("author.form");
+  const tCommon = await getTranslations("common");
 
   return (
     <WorkspaceFrame
@@ -62,12 +70,16 @@ export default async function EditAuthorPage({
         { href: `/workspace/authors/${author.slug}`, label: author.full_name },
       ]}
     >
-      <h1 className="font-display text-4xl tracking-tight">Edit the record</h1>
+      <h1 className="font-display text-4xl tracking-tight">
+        {t("editTitle")}
+      </h1>
       <p className="mt-6 max-w-prose text-lg leading-relaxed text-ink-soft">
-        The author&rsquo;s identity, as the imprint keeps it. The record&rsquo;s
-        address remains{" "}
-        <span className="font-sans text-sm">/{author.slug}</span> — it was set
-        when the record was opened and does not change.
+        {t.rich("editIntro", {
+          slug: author.slug,
+          address: (chunks) => (
+            <span className="font-sans text-sm">{chunks}</span>
+          ),
+        })}
       </p>
 
       <form action={updateAuthor} className="mt-12 max-w-md space-y-8">
@@ -75,7 +87,7 @@ export default async function EditAuthorPage({
 
         <Field
           id="full_name"
-          label="Full name"
+          label={t("fullName")}
           type="text"
           required
           defaultValue={author.full_name}
@@ -83,7 +95,7 @@ export default async function EditAuthorPage({
 
         <Field
           id="pen_name"
-          label="Pen name"
+          label={t("penName")}
           optional
           type="text"
           defaultValue={author.pen_name ?? ""}
@@ -91,21 +103,25 @@ export default async function EditAuthorPage({
 
         <TextareaField
           id="bio"
-          label="Short bio"
+          label={t("shortBio")}
           optional
           rows={4}
           defaultValue={author.bio ?? ""}
         />
 
-        <ErrorNote message={error} />
+        <ActionMessage
+          code={message?.code}
+          params={message?.params}
+          namespace="memory.errors"
+        />
 
         <div className="flex items-baseline gap-8">
-          <PrimaryButton>Save the record</PrimaryButton>
+          <PrimaryButton>{t("saveRecord")}</PrimaryButton>
           <Link
             href={`/workspace/authors/${author.slug}`}
             className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
           >
-            Cancel
+            {tCommon("cancel")}
           </Link>
         </div>
       </form>
