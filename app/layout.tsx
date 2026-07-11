@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Newsreader, Inter } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -30,17 +32,28 @@ export const metadata: Metadata = {
     "Huerta Group Publishing helps authors create books that sound more like themselves, not more like AI. Conversation discovers ideas; the platform preserves them.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // The document language is the resolved interface locale — the stored
+  // preference for signed-in users, en-US otherwise (and always en-US
+  // today, the only offered interface locale). Rendered server-side into
+  // the root html element, so assistive technology receives the correct
+  // language with no client-side locale flash. One root layout serves
+  // both surfaces; when a non-English interface ships, the English-only
+  // public pages move to their own route group with an en-US root.
+  const locale = await getLocale();
+  const messages = await getMessages();
   return (
-    <html lang="en-US">
+    <html lang={locale}>
       <body
         className={`${fraunces.variable} ${newsreader.variable} ${inter.variable}`}
       >
-        {children}
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

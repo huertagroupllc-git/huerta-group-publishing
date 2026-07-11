@@ -2,16 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 /** The Administration sections. Read-oriented in this phase; each is a
- *  real route with an honest overview. */
-export const ADMIN_SECTIONS: { href: string; label: string }[] = [
-  { href: "/admin", label: "Overview" },
-  { href: "/admin/authors", label: "Authors" },
-  { href: "/admin/books", label: "Books" },
-  { href: "/admin/review-runs", label: "Review Runs" },
-  { href: "/admin/ai-usage", label: "AI Usage" },
-  { href: "/admin/system", label: "System" },
+ *  real route with an honest overview. Labels live in the message
+ *  catalog (admin.shell.nav); the hrefs and keys are stable identifiers. */
+export const ADMIN_SECTIONS: { href: string; key: string }[] = [
+  { href: "/admin", key: "overview" },
+  { href: "/admin/authors", key: "authors" },
+  { href: "/admin/books", key: "books" },
+  { href: "/admin/review-runs", key: "reviewRuns" },
+  { href: "/admin/ai-usage", key: "aiUsage" },
+  { href: "/admin/system", key: "system" },
 ];
 
 /**
@@ -21,9 +23,11 @@ export const ADMIN_SECTIONS: { href: string; label: string }[] = [
  */
 export function AdminNav() {
   const pathname = usePathname();
+  const t = useTranslations("admin.shell.nav");
+  const tNav = useTranslations("navigation");
   return (
     <nav
-      aria-label="Administration sections"
+      aria-label={tNav("adminSections")}
       className="rule -mx-1 mt-4 flex flex-wrap gap-x-5 gap-y-1 overflow-x-auto pt-3"
     >
       {ADMIN_SECTIONS.map((s) => {
@@ -42,7 +46,7 @@ export function AdminNav() {
                 : "text-ink-faint hover:text-oxblood hover:underline"
             }`}
           >
-            {s.label}
+            {t(s.key)}
           </Link>
         );
       })}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 /**
  * Workspace ⁄ Administration mode switch — shown only inside the
@@ -8,18 +9,19 @@ import Link from "next/link";
  * route is gated server-side regardless of what this shows.
  */
 export function ModeSwitch({ active }: { active: "workspace" | "admin" }) {
+  const t = useTranslations("navigation");
   const base =
     "font-sans text-xs tracking-wide underline-offset-4 focus-visible:outline-none focus-visible:underline focus-visible:text-oxblood";
   const on = "text-ink";
   const off = "text-ink-faint hover:text-oxblood hover:underline";
   return (
-    <nav aria-label="Mode" className="flex items-baseline gap-3">
+    <nav aria-label={t("mode")} className="flex items-baseline gap-3">
       <Link
         href="/workspace"
         aria-current={active === "workspace" ? "page" : undefined}
         className={`${base} ${active === "workspace" ? on : off}`}
       >
-        Workspace
+        {t("workspace")}
       </Link>
       <span aria-hidden className="text-rule">
         |
@@ -29,7 +31,7 @@ export function ModeSwitch({ active }: { active: "workspace" | "admin" }) {
         aria-current={active === "admin" ? "page" : undefined}
         className={`${base} ${active === "admin" ? on : off}`}
       >
-        Administration
+        {t("administration")}
       </Link>
     </nav>
   );

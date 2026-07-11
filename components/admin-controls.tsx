@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 /** Shared field styles for the read-only admin search/filter forms. */
 export const adminInputClass =
@@ -18,6 +19,8 @@ export function Pagination({
   params: Record<string, string | undefined>;
   basePath: string;
 }) {
+  const t = useTranslations("common");
+  const tNav = useTranslations("navigation");
   if (pageCount <= 1) return null;
   const href = (p: number) => {
     const sp = new URLSearchParams();
@@ -32,25 +35,23 @@ export function Pagination({
   const muted = "font-sans text-xs text-ink-faint";
   return (
     <nav
-      aria-label="Pagination"
+      aria-label={tNav("pagination")}
       className="rule mt-8 flex items-center justify-between pt-4"
     >
       {page > 1 ? (
         <Link href={href(page - 1)} className={link}>
-          ← Previous
+          {t("previous")}
         </Link>
       ) : (
-        <span className={muted}>← Previous</span>
+        <span className={muted}>{t("previous")}</span>
       )}
-      <span className={muted}>
-        Page {page} of {pageCount}
-      </span>
+      <span className={muted}>{t("pageOf", { page, pageCount })}</span>
       {page < pageCount ? (
         <Link href={href(page + 1)} className={link}>
-          Next →
+          {t("next")}
         </Link>
       ) : (
-        <span className={muted}>Next →</span>
+        <span className={muted}>{t("next")}</span>
       )}
     </nav>
   );

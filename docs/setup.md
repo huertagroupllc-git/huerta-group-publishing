@@ -87,6 +87,12 @@ Applied in order:
     regains a `p_language` parameter (the old five-parameter signature
     is dropped). Until this is applied, opening books or creating a
     book reports a missing column/function.
+16. `supabase/migrations/20260717000000_interface_locale_profiles.sql`
+    — Global Readiness Phase 3A: the `profiles` table
+    (`interface_locale`, BCP 47, default `'en-US'`) with own-row RLS,
+    staff read, and lazy row creation. The platform runs without it —
+    every account simply reads as en-US and saving the preference on
+    the Account page reports the missing migration.
 
 Preferred (keeps migration history tracked by the CLI):
 

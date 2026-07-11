@@ -44,6 +44,18 @@ export const SELECTABLE_LANGUAGES: LanguageDefinition[] = [
   { tag: "es", label: "Spanish", instructionName: "Spanish" },
 ];
 
+/** Interface locales a user may choose for the platform chrome.
+ *  Deliberately just English until a complete, ratified catalog exists
+ *  for another language — an interface language is never offered ahead
+ *  of its full editorial-workflow validation. Distinct from
+ *  SELECTABLE_LANGUAGES (manuscript languages): a manuscript may be in
+ *  Spanish while the interface remains English. */
+export const INTERFACE_LOCALES: LanguageDefinition[] = [
+  { tag: "en-US", label: "English (United States)", instructionName: "English" },
+];
+
+export const DEFAULT_INTERFACE_LOCALE = "en-US";
+
 /** Tags the platform can already name precisely when it meets them
  *  (stored via variants, historical data, future selectors). */
 const KNOWN_LANGUAGES: LanguageDefinition[] = [

@@ -1,0 +1,100 @@
+{
+  "common": {
+    "brand": "Huerta Group Publishing",
+    "copyright": "© 2026 Huerta Group Publishing",
+    "signOut": "Sign out",
+    "save": "Save",
+    "cancel": "Cancel",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "next": "Next →",
+    "previous": "← Previous",
+    "pageOf": "Page {page, number} of {pageCount, number}",
+    "tryAgain": "Try again"
+  },
+  "navigation": {
+    "mode": "Mode",
+    "workspace": "Workspace",
+    "administration": "Administration",
+    "account": "Account",
+    "adminSections": "Administration sections",
+    "pagination": "Pagination"
+  },
+  "auth": {
+    "title": "The Workspace",
+    "intro": "The editorial desk for authors and their permanent record. Sign in to continue.",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "footer": "Access is provided by the publisher."
+  },
+  "workspace": {
+    "shell": {
+      "notFoundTitle": "There is no page at this address",
+      "notFoundBody": "Nothing in the record answers to it — the address may be mistyped, or the link may predate the page. Nothing has been lost.",
+      "notFoundReturn": "Return to the Workspace"
+    }
+  },
+  "admin": {
+    "shell": {
+      "footer": "© 2026 Huerta Group Publishing · Administration",
+      "nav": {
+        "overview": "Overview",
+        "authors": "Authors",
+        "books": "Books",
+        "reviewRuns": "Review Runs",
+        "aiUsage": "AI Usage",
+        "system": "System"
+      }
+    }
+  },
+  "account": {
+    "title": "Account",
+    "intro": "The platform as it presents itself to you. Preferences here shape menus, labels, dates, and platform instructions — never the words of any manuscript.",
+    "signedInAs": "Signed in as",
+    "language": {
+      "label": "Interface language",
+      "explanation": "The language of the platform's own chrome — menus, labels, dates, and instructions. This is not the language of any manuscript: each book states its own manuscript language on its record, and editorial reviews follow the book, not this setting.",
+      "onlyEnglish": "English is the platform's interface language today. Another language becomes available here only when its complete interface and editorial workflow can be trusted.",
+      "save": "Save the preference"
+    }
+  },
+  "status": {
+    "book": {
+      "discovery": "Discovery",
+      "writing": "Writing",
+      "editorial_review": "Editorial Review",
+      "revision": "Revision",
+      "final_manuscript": "Final Manuscript",
+      "ready_for_publication": "Ready for Publication",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "finding": {
+      "open": "Open",
+      "resolved": "Resolved",
+      "dismissed": "Set aside"
+    },
+    "severity": {
+      "note": "Note",
+      "suggestion": "Suggestion",
+      "concern": "Concern"
+    },
+    "run": {
+      "complete": "Complete",
+      "incomplete": "Incomplete — can continue",
+      "failed": "Did not finish",
+      "pending": "Reading now"
+    }
+  },
+  "errors": {
+    "shared": {
+      "somethingWentWrong": "Something went wrong",
+      "workspaceTitle": "The workspace hit an unexpected error",
+      "workspaceBody": "Nothing in the permanent record has been lost. Try again; if the error persists, the server logs carry the details{digest, select, none {} other { (digest {digest})}}.",
+      "adminTitle": "This view could not load",
+      "adminBody": "Administration reads live platform data; a query may have failed. Try again; if it persists, the server logs carry the details{digest, select, none {} other { (digest {digest})}}."
+    }
+  }
+}
