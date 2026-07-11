@@ -38,3 +38,24 @@ export async function isAuthenticated(): Promise<boolean> {
 export function isStaff(user: User | null): boolean {
   return user?.app_metadata?.role === "staff";
 }
+
+/**
+ * Whether the current visitor is staff, read from the session already in
+ * the request cookies — no second `getUser()` round-trip. This is for the
+ * navigation switch only; it is never an authorization decision (the admin
+ * middleware and layout gate access with a validated getUser). Reading the
+ * session locally keeps the switch reliably present on every authenticated
+ * page, rather than depending on a redundant network call that can race
+ * the page's own auth refresh and momentarily hide it.
+ */
+export async function sessionIsStaff(): Promise<boolean> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    return session?.user?.app_metadata?.role === "staff";
+  } catch {
+    return false;
+  }
+}

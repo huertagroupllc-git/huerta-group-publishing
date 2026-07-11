@@ -31,7 +31,7 @@ export function AdminFrame({
               Administration
             </span>
           </div>
-          <div className="flex items-baseline gap-6">
+          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
             <ModeSwitch active="admin" />
             <span className="hidden font-sans text-xs text-ink-faint sm:inline">
               {email}
