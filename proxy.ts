@@ -8,5 +8,5 @@ export default async function proxy(request: NextRequest) {
 export const config = {
   // Only auth-relevant routes pass through the proxy; the public site
   // never depends on Supabase and stays up regardless of its configuration.
-  matcher: ["/workspace/:path*", "/signin"],
+  matcher: ["/workspace/:path*", "/admin/:path*", "/signin"],
 };

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { signOut } from "@/lib/auth/actions";
+import { ModeSwitch } from "@/components/mode-switch";
+import { getCurrentUser, isStaff } from "@/lib/auth/session";
 
 interface Crumb {
   href: string;
@@ -7,8 +9,9 @@ interface Crumb {
 }
 
 /** Shared editorial frame for every workspace page: masthead, hairline
- *  rules, sign-out, imprint footer. */
-export function WorkspaceFrame({
+ *  rules, sign-out, imprint footer. Staff also see the Workspace ⁄
+ *  Administration mode switch. */
+export async function WorkspaceFrame({
   email,
   breadcrumbs = [],
   children,
@@ -19,6 +22,7 @@ export function WorkspaceFrame({
   children: React.ReactNode;
   wide?: boolean;
 }) {
+  const staff = isStaff(await getCurrentUser());
   return (
     <div
       className={`mx-auto flex min-h-screen ${wide ? "max-w-5xl" : "max-w-3xl"} flex-col px-6 py-10 sm:px-8`}
@@ -41,6 +45,7 @@ export function WorkspaceFrame({
           ))}
         </div>
         <div className="flex items-baseline gap-6">
+          {staff ? <ModeSwitch active="workspace" /> : null}
           <span className="font-sans text-xs text-ink-faint">{email}</span>
           <form action={signOut}>
             <button

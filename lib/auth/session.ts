@@ -1,25 +1,40 @@
 import "server-only";
 
+import { cache } from "react";
+import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Whether the current visitor has a valid session — for session-aware
- * PUBLIC navigation only (a header label), never for authorization:
- * workspace routes enforce their own access and redirects.
- *
- * Reuses the platform's single Supabase auth client (no second session
- * system) and fails soft to signed-out, so the public site never errors
- * or blocks on Supabase being unreachable — the same resilience the
- * static public site had before.
+ * The current visitor, or null — deduped per request. Reuses the
+ * platform's single Supabase auth client (no second session system) and
+ * fails soft to null, so public surfaces never error or block on Supabase
+ * being unreachable.
  */
-export async function isAuthenticated(): Promise<boolean> {
+export const getCurrentUser = cache(async (): Promise<User | null> => {
   try {
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    return Boolean(user);
+    return user;
   } catch {
-    return false;
+    return null;
   }
+});
+
+/** Whether the current visitor has a valid session — for session-aware
+ *  public navigation only, never for authorization. */
+export async function isAuthenticated(): Promise<boolean> {
+  return Boolean(await getCurrentUser());
+}
+
+/**
+ * Platform administrators are the existing STAFF role — the same claim
+ * `is_staff()` enforces in every RLS policy (JWT app_metadata.role =
+ * 'staff', assigned manually in Supabase). No second role system: the UI
+ * switch and the server-side boundary read the exact claim the database
+ * already trusts.
+ */
+export function isStaff(user: User | null): boolean {
+  return user?.app_metadata?.role === "staff";
 }
