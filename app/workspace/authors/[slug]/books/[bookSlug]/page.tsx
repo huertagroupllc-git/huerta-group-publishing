@@ -12,8 +12,8 @@ import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
 import Link from "next/link";
 import { assembleBookContext, serializeBookContext } from "@/lib/books/assemble";
 import { openFindingsCount } from "@/lib/findings/queries";
+import { getTranslations } from "next-intl/server";
 import { getManuscriptSummary, type ManuscriptSummary } from "@/lib/manuscript/queries";
-import { formatWordCount } from "@/lib/manuscript/types";
 import { getBookStudy, type BookStudy } from "@/lib/books/queries";
 import { BOOK_DOC_TYPES, bookStatusLabel, isWritingStage } from "@/lib/books/types";
 import { assembleAuthorContext } from "@/lib/memory/assemble";
@@ -99,6 +99,7 @@ export default async function BookStudyPage({
   const memoryPath = `/workspace/authors/${author.slug}/books/${book.slug}/memory`;
 
   const writingStage = isWritingStage(book.status);
+  const tProgress = await getTranslations("manuscript.progress");
 
   // Principle XIV made visible: from the Writing stage onward the
   // manuscript leads and memory becomes reference. Emphasis only.
@@ -190,20 +191,15 @@ export default async function BookStudyPage({
           </p>
         ) : manuscriptSummary && manuscriptSummary.chapterCount > 0 ? (
           <p className="mt-5 font-sans text-xs text-ink-soft">
-            {manuscriptSummary.chapterCount}{" "}
-            {manuscriptSummary.chapterCount === 1 ? "chapter" : "chapters"}
+            {tProgress("chapters", { count: manuscriptSummary.chapterCount })}
             {manuscriptSummary.partCount > 0
-              ? ` in ${manuscriptSummary.partCount} ${
-                  manuscriptSummary.partCount === 1 ? "part" : "parts"
-                }`
+              ? ` ${tProgress("inParts", { count: manuscriptSummary.partCount })}`
               : ""}
             {manuscriptSummary.totalWords > 0
-              ? ` · ${formatWordCount(manuscriptSummary.totalWords)}`
+              ? ` · ${tProgress("words", { count: manuscriptSummary.totalWords })}`
               : ""}
             {manuscriptSummary.draftCount > 0
-              ? ` · ${manuscriptSummary.draftCount} ${
-                  manuscriptSummary.draftCount === 1 ? "draft" : "drafts"
-                } open`
+              ? ` · ${tProgress("draftsOpen", { count: manuscriptSummary.draftCount })}`
               : ""}
             {findingsCount > 0 ? (
               <>
@@ -212,8 +208,7 @@ export default async function BookStudyPage({
                   href={`/workspace/authors/${author.slug}/books/${book.slug}/findings`}
                   className="text-oxblood underline-offset-4 hover:underline"
                 >
-                  {findingsCount} open{" "}
-                  {findingsCount === 1 ? "finding" : "findings"}
+                  {tProgress("openFindings", { count: findingsCount })}
                 </Link>
               </>
             ) : null}

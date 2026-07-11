@@ -1,12 +1,17 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { withActionMessage } from "@/lib/action-messages";
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/memory/types";
 import type { ChapterKind } from "@/lib/manuscript/types";
 
-const MIGRATION_MESSAGE =
-  "The database is missing the manuscript migration — apply supabase/migrations/20260708000000_manuscript_foundation.sql (docs/setup.md §2).";
+/** Failures redirect with STABLE MESSAGE CODES from the
+ *  manuscript.errors catalog namespace (the Phase 3B pattern) — never
+ *  English prose, never raw database errors, which stay in the server
+ *  logs. */
+
+const MIGRATION_CODE = "manuscriptMigrationMissing";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -17,8 +22,12 @@ async function requireUser() {
   return supabase;
 }
 
-function fail(path: string, message: string): never {
-  redirect(`${path}?error=${encodeURIComponent(message)}`);
+function fail(
+  path: string,
+  code: string,
+  params?: Record<string, string>,
+): never {
+  redirect(withActionMessage(path, { code, params }));
 }
 
 function isMissingFunction(error: { code?: string; message?: string }) {
@@ -48,19 +57,16 @@ export async function createChapter(formData: FormData) {
   const newPath = `${libraryPath}/new`;
 
   if (!title) {
-    fail(newPath, "The chapter's title is required.");
+    fail(newPath, "titleRequired");
   }
 
   if (!coreQuestion) {
-    fail(
-      newPath,
-      "The chapter's Core Question is required — the single question it exists to answer.",
-    );
+    fail(newPath, "coreQuestionRequired");
   }
 
   const slug = slugify(title);
   if (!slug) {
-    fail(newPath, "A usable slug could not be derived from the title.");
+    fail(newPath, "slugUnusable");
   }
 
   const supabase = await requireUser();
@@ -78,13 +84,12 @@ export async function createChapter(formData: FormData) {
 
   if (error) {
     console.error("[manuscript] createChapter failed", error);
+    if (error.code === "23505") {
+      fail(newPath, "chapterSlugTaken", { slug });
+    }
     fail(
       newPath,
-      error.code === "23505"
-        ? `This manuscript already has a chapter at “${slug}” — retitle slightly.`
-        : isMissingFunction(error)
-          ? MIGRATION_MESSAGE
-          : "The chapter could not be created.",
+      isMissingFunction(error) ? MIGRATION_CODE : "chapterCreateFailed",
     );
   }
 
@@ -108,7 +113,7 @@ export async function updateChapter(formData: FormData) {
   const kind = chapterKind(String(formData.get("kind") ?? "chapter"));
 
   if (!title) {
-    fail(editPath, "The chapter's title is required.");
+    fail(editPath, "titleRequired");
   }
 
   const supabase = await requireUser();
@@ -128,7 +133,7 @@ export async function updateChapter(formData: FormData) {
 
   if (error || !data?.length) {
     console.error("[manuscript] updateChapter failed", error);
-    fail(editPath, "The chapter could not be saved.");
+    fail(editPath, "chapterSaveFailed");
   }
 
   redirect(libraryPath);
@@ -140,7 +145,7 @@ export async function createPart(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
 
   if (!title) {
-    fail(libraryPath, "The part's title is required.");
+    fail(libraryPath, "partTitleRequired");
   }
 
   const supabase = await requireUser();
@@ -153,9 +158,7 @@ export async function createPart(formData: FormData) {
     console.error("[manuscript] createPart failed", error);
     fail(
       libraryPath,
-      isMissingFunction(error)
-        ? MIGRATION_MESSAGE
-        : "The part could not be created.",
+      isMissingFunction(error) ? MIGRATION_CODE : "partCreateFailed",
     );
   }
 
@@ -178,9 +181,7 @@ export async function moveChapter(formData: FormData) {
     console.error("[manuscript] moveChapter failed", error);
     fail(
       libraryPath,
-      isMissingFunction(error)
-        ? MIGRATION_MESSAGE
-        : "The chapter could not be moved.",
+      isMissingFunction(error) ? MIGRATION_CODE : "chapterMoveFailed",
     );
   }
 
@@ -199,7 +200,7 @@ export async function createChapterVersion(formData: FormData) {
   const sourceNote = String(formData.get("source_note") ?? "").trim();
 
   if (!content.trim()) {
-    fail(roomPath, "A version needs content before it can be saved.");
+    fail(roomPath, "contentRequired");
   }
 
   const supabase = await requireUser();
@@ -216,10 +217,10 @@ export async function createChapterVersion(formData: FormData) {
     fail(
       roomPath,
       error.code === "23505"
-        ? "A draft is already open for this chapter; continue writing it instead."
+        ? "draftAlreadyOpen"
         : isMissingFunction(error)
-          ? MIGRATION_MESSAGE
-          : "The draft could not be created.",
+          ? MIGRATION_CODE
+          : "draftCreateFailed",
     );
   }
 
@@ -250,7 +251,7 @@ export async function updateChapterDraft(formData: FormData) {
 
   if (error || !data?.length) {
     console.error("[manuscript] updateChapterDraft failed", error);
-    fail(`${roomPath}?draft=1`, "The draft could not be saved.");
+    fail(`${roomPath}?draft=1`, "draftSaveFailed");
   }
 
   const finding = String(formData.get("finding_id") ?? "");
@@ -270,7 +271,7 @@ export async function saveAndActivateChapterDraft(formData: FormData) {
   const sourceNote = String(formData.get("source_note") ?? "").trim();
 
   if (!content.trim()) {
-    fail(`${roomPath}?draft=1`, "A version needs content to be activated.");
+    fail(`${roomPath}?draft=1`, "contentRequiredToActivate");
   }
 
   const supabase = await requireUser();
@@ -288,7 +289,7 @@ export async function saveAndActivateChapterDraft(formData: FormData) {
 
   if (error || !data?.length) {
     console.error("[manuscript] saveAndActivateChapterDraft save failed", error);
-    fail(`${roomPath}?draft=1`, "The draft could not be saved.");
+    fail(`${roomPath}?draft=1`, "draftSaveFailed");
   }
 
   const { error: activateError } = await supabase.rpc(
@@ -303,9 +304,7 @@ export async function saveAndActivateChapterDraft(formData: FormData) {
     );
     fail(
       `${roomPath}?draft=1`,
-      isMissingFunction(activateError)
-        ? MIGRATION_MESSAGE
-        : "The version could not be activated.",
+      isMissingFunction(activateError) ? MIGRATION_CODE : "activateFailed",
     );
   }
 
@@ -326,9 +325,7 @@ export async function activateChapterVersion(formData: FormData) {
     console.error("[manuscript] activateChapterVersion failed", error);
     fail(
       roomPath,
-      isMissingFunction(error)
-        ? MIGRATION_MESSAGE
-        : "The version could not be activated.",
+      isMissingFunction(error) ? MIGRATION_CODE : "activateFailed",
     );
   }
 
@@ -348,7 +345,7 @@ export async function discardChapterDraft(formData: FormData) {
 
   if (error) {
     console.error("[manuscript] discardChapterDraft failed", error);
-    fail(roomPath, "The draft could not be discarded.");
+    fail(roomPath, "discardFailed");
   }
 
   redirect(roomPath);

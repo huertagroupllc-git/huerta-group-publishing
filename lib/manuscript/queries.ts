@@ -218,8 +218,16 @@ export interface ChapterRoom {
   outlineVersionNumber: number | null;
   /** The active Concept Dictionary, for the read-only margin reference. */
   conceptDictionary: { versionNumber: number; content: string } | null;
-  /** Reading-order position, e.g. "Chapter 4 of 12" or "Appendix". */
+  /** Reading-order position, e.g. "Chapter 4 of 12" or "Appendix".
+   *  English by design: this string is part of the Chapter Context
+   *  payload future AI assistance receives (stable serialization).
+   *  The interface renders the structured fields below instead. */
   positionLabel: string;
+  /** 1-based reading-order number among numbered chapters; null for an
+   *  appendix. Presentation composes the localized position from this. */
+  positionNumber: number | null;
+  /** How many numbered chapters the manuscript holds. */
+  chapterTotal: number;
   previousChapter: ChapterNeighbor | null;
   nextChapter: ChapterNeighbor | null;
 }
@@ -339,10 +347,14 @@ export const getChapterRoom = cache(async function getChapterRoom(
   ];
   const index = ordered.findIndex((c) => c.id === chapter.id);
   const numbered = ordered.filter((c) => c.kind === "chapter");
-  const positionLabel =
+  const positionNumber =
     chapter.kind === "appendix"
+      ? null
+      : numbered.findIndex((c) => c.id === chapter.id) + 1;
+  const positionLabel =
+    positionNumber === null
       ? "Appendix"
-      : `Chapter ${numbered.findIndex((c) => c.id === chapter.id) + 1} of ${numbered.length}`;
+      : `Chapter ${positionNumber} of ${numbered.length}`;
   const previous = index > 0 ? ordered[index - 1] : null;
   const next =
     index >= 0 && index < ordered.length - 1 ? ordered[index + 1] : null;
@@ -361,6 +373,8 @@ export const getChapterRoom = cache(async function getChapterRoom(
           }
         : null,
     positionLabel,
+    positionNumber,
+    chapterTotal: numbered.length,
     previousChapter: previous
       ? { slug: previous.slug, title: previous.title }
       : null,

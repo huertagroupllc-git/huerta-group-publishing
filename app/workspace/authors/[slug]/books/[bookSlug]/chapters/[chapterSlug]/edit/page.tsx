@@ -7,8 +7,11 @@ import {
   SelectField,
   TextareaField,
 } from "@/components/editorial";
+import { getTranslations } from "next-intl/server";
+import { ActionMessage } from "@/components/action-message";
 import { SetupNotice } from "@/components/setup-notice";
-import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
+import { WorkspaceFrame } from "@/components/workspace-frame";
+import { actionMessageFromQuery } from "@/lib/action-messages";
 import { updateChapter } from "@/lib/manuscript/actions";
 import {
   getManuscriptLibrary,
@@ -27,7 +30,12 @@ export async function generateMetadata({
     () => null,
   );
   const chapter = library?.chapters.find((c) => c.slug === chapterSlug);
-  return { title: chapter ? `Edit — ${chapter.title}` : "Edit chapter" };
+  const t = await getTranslations("manuscript.form");
+  return {
+    title: chapter
+      ? `${t("editMetaPrefix")} — ${chapter.title}`
+      : t("editMetaFallback"),
+  };
 }
 
 export default async function EditChapterPage({
@@ -35,7 +43,7 @@ export default async function EditChapterPage({
   searchParams,
 }: {
   params: Promise<{ slug: string; bookSlug: string; chapterSlug: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const supabase = await createClient();
   const {
@@ -44,7 +52,7 @@ export default async function EditChapterPage({
   if (!user) redirect("/signin");
 
   const { slug, bookSlug, chapterSlug } = await params;
-  const { error } = await searchParams;
+  const message = actionMessageFromQuery(await searchParams);
 
   let library: ManuscriptLibrary | null;
   try {
@@ -68,18 +76,22 @@ export default async function EditChapterPage({
   const { author, book, parts } = library;
   const libraryPath = `/workspace/authors/${author.slug}/books/${book.slug}/chapters`;
   const editPath = `${libraryPath}/${chapter.slug}/edit`;
+  const t = await getTranslations("manuscript.form");
+  const tCommon = await getTranslations("common");
+  const tNav = await getTranslations("navigation");
+  const tOverview = await getTranslations("manuscript.overview");
 
   return (
     <WorkspaceFrame
       email={user.email ?? ""}
       breadcrumbs={[
-        { href: "/workspace", label: "Workspace" },
+        { href: "/workspace", label: tNav("workspace") },
         { href: `/workspace/authors/${author.slug}`, label: author.full_name },
         {
           href: `/workspace/authors/${author.slug}/books/${book.slug}`,
           label: book.title,
         },
-        { href: libraryPath, label: "The Manuscript" },
+        { href: libraryPath, label: tOverview("title") },
       ]}
     >
       <p className="eyebrow">{book.title}</p>
@@ -87,10 +99,12 @@ export default async function EditChapterPage({
         {chapter.title}
       </h1>
       <p className="mt-6 max-w-prose text-lg leading-relaxed text-ink-soft">
-        The chapter&rsquo;s identity, as the manuscript keeps it. Its
-        address remains{" "}
-        <span className="font-sans text-sm">/{chapter.slug}</span>; its
-        number is always computed from its place in the manuscript.
+        {t.rich("editIntro", {
+          slug: chapter.slug,
+          address: (chunks) => (
+            <span className="font-sans text-sm">{chunks}</span>
+          ),
+        })}
       </p>
 
       <form action={updateChapter} className="mt-12 max-w-md space-y-8">
@@ -100,7 +114,7 @@ export default async function EditChapterPage({
 
         <Field
           id="title"
-          label="Title"
+          label={t("title")}
           type="text"
           required
           defaultValue={chapter.title}
@@ -108,68 +122,78 @@ export default async function EditChapterPage({
 
         <TextareaField
           id="core_question"
-          label="Core Question"
-          hint="the single question this chapter exists to answer"
+          label={t("coreQuestion")}
+          hint={t("coreQuestionHint")}
           rows={2}
           defaultValue={chapter.core_question ?? ""}
         />
 
         <TextareaField
           id="purpose"
-          label="Purpose"
+          label={t("purpose")}
           optional
-          hint="why this chapter exists"
+          hint={t("purposeHint")}
           rows={3}
           defaultValue={chapter.purpose ?? ""}
         />
 
         <TextareaField
           id="summary"
-          label="Summary"
+          label={t("summary")}
           optional
-          hint="what happens in this chapter"
+          hint={t("summaryHint")}
           rows={3}
           defaultValue={chapter.summary ?? ""}
         />
 
         <Field
           id="outline_section"
-          label="Master Outline Location"
+          label={t("outlineLocation")}
           optional
           type="text"
           defaultValue={chapter.outline_section ?? ""}
-          placeholder="the part of the Master Outline this chapter serves"
+          placeholder={t("outlinePlaceholder")}
         />
 
         <div className="grid gap-8 sm:grid-cols-2">
           <SelectField
             id="kind"
-            label="Kind"
+            label={t("kind")}
             defaultValue={chapter.kind}
-            options={CHAPTER_KINDS}
+            options={CHAPTER_KINDS.map((k) => ({
+              value: k.value,
+              label:
+                k.value === "appendix"
+                  ? t("kindAppendix")
+                  : t("kindChapter"),
+            }))}
           />
           {parts.length > 0 ? (
             <SelectField
               id="part_id"
-              label="Part"
+              label={t("part")}
               defaultValue={chapter.part_id ?? ""}
               options={[
-                { value: "", label: "No part" },
+                { value: "", label: t("noPart") },
                 ...parts.map((p) => ({ value: p.id, label: p.title })),
               ]}
             />
           ) : null}
         </div>
 
-        <ErrorNote message={error} />
+        <ActionMessage
+          code={message?.code}
+          params={message?.params}
+          namespace="manuscript.errors"
+        />
 
         <div className="flex items-baseline gap-8">
-          <PrimaryButton>Save the chapter</PrimaryButton>
+          <PrimaryButton>{t("saveChapter")}</PrimaryButton>
           <Link
             href={libraryPath}
             className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
           >
-            Cancel
+            {tCommon("cancel")}
           </Link>
         </div>
       </form>

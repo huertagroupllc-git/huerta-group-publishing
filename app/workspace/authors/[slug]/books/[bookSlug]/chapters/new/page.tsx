@@ -7,8 +7,11 @@ import {
   SelectField,
   TextareaField,
 } from "@/components/editorial";
+import { getTranslations } from "next-intl/server";
+import { ActionMessage } from "@/components/action-message";
 import { SetupNotice } from "@/components/setup-notice";
-import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
+import { WorkspaceFrame } from "@/components/workspace-frame";
+import { actionMessageFromQuery } from "@/lib/action-messages";
 import { createChapter } from "@/lib/manuscript/actions";
 import {
   getManuscriptLibrary,
@@ -17,16 +20,17 @@ import {
 import { CHAPTER_KINDS } from "@/lib/manuscript/types";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = {
-  title: "Add a chapter",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("manuscript.form");
+  return { title: t("addMetaTitle") };
+}
 
 export default async function NewChapterPage({
   params,
   searchParams,
 }: {
   params: Promise<{ slug: string; bookSlug: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const supabase = await createClient();
   const {
@@ -35,7 +39,7 @@ export default async function NewChapterPage({
   if (!user) redirect("/signin");
 
   const { slug, bookSlug } = await params;
-  const { error } = await searchParams;
+  const message = actionMessageFromQuery(await searchParams);
 
   let library: ManuscriptLibrary | null;
   try {
@@ -55,97 +59,109 @@ export default async function NewChapterPage({
 
   const { author, book, manuscript, parts } = library;
   const libraryPath = `/workspace/authors/${author.slug}/books/${book.slug}/chapters`;
+  const t = await getTranslations("manuscript.form");
+  const tCommon = await getTranslations("common");
+  const tNav = await getTranslations("navigation");
+  const tOverview = await getTranslations("manuscript.overview");
 
   return (
     <WorkspaceFrame
       email={user.email ?? ""}
       breadcrumbs={[
-        { href: "/workspace", label: "Workspace" },
+        { href: "/workspace", label: tNav("workspace") },
         { href: `/workspace/authors/${author.slug}`, label: author.full_name },
         {
           href: `/workspace/authors/${author.slug}/books/${book.slug}`,
           label: book.title,
         },
-        { href: libraryPath, label: "The Manuscript" },
+        { href: libraryPath, label: tOverview("title") },
       ]}
     >
       <p className="eyebrow">{book.title}</p>
       <h1 className="mt-2 font-display text-4xl tracking-tight">
-        Add a chapter
+        {t("addTitle")}
       </h1>
       <p className="mt-6 max-w-prose text-lg leading-relaxed text-ink-soft">
-        A chapter is the unit of authorship: it carries its own purpose and
-        its own history. The words come later, in the chapter itself — this
-        opens its place in the manuscript.
+        {t("addIntro")}
       </p>
 
       <form action={createChapter} className="mt-12 max-w-md space-y-8">
         <input type="hidden" name="manuscript_id" value={manuscript.id} />
         <input type="hidden" name="library_path" value={libraryPath} />
 
-        <Field id="title" label="Title" type="text" required />
+        <Field id="title" label={t("title")} type="text" required />
 
         <TextareaField
           id="core_question"
-          label="Core Question"
-          hint="the single question this chapter exists to answer"
+          label={t("coreQuestion")}
+          hint={t("coreQuestionHint")}
           rows={2}
           required
         />
 
         <TextareaField
           id="purpose"
-          label="Purpose"
+          label={t("purpose")}
           optional
-          hint="why this chapter exists"
+          hint={t("purposeHint")}
           rows={3}
         />
 
         <TextareaField
           id="summary"
-          label="Summary"
+          label={t("summary")}
           optional
-          hint="what happens in this chapter"
+          hint={t("summaryHint")}
           rows={3}
         />
 
         <Field
           id="outline_section"
-          label="Master Outline Location"
+          label={t("outlineLocation")}
           optional
           type="text"
-          placeholder="the part of the Master Outline this chapter serves"
+          placeholder={t("outlinePlaceholder")}
         />
 
         <div className="grid gap-8 sm:grid-cols-2">
           <SelectField
             id="kind"
-            label="Kind"
+            label={t("kind")}
             defaultValue="chapter"
-            options={CHAPTER_KINDS}
+            options={CHAPTER_KINDS.map((k) => ({
+              value: k.value,
+              label:
+                k.value === "appendix"
+                  ? t("kindAppendix")
+                  : t("kindChapter"),
+            }))}
           />
           {parts.length > 0 ? (
             <SelectField
               id="part_id"
-              label="Part"
+              label={t("part")}
               defaultValue=""
               options={[
-                { value: "", label: "No part" },
+                { value: "", label: t("noPart") },
                 ...parts.map((p) => ({ value: p.id, label: p.title })),
               ]}
             />
           ) : null}
         </div>
 
-        <ErrorNote message={error} />
+        <ActionMessage
+          code={message?.code}
+          params={message?.params}
+          namespace="manuscript.errors"
+        />
 
         <div className="flex items-baseline gap-8">
-          <PrimaryButton>Add the chapter</PrimaryButton>
+          <PrimaryButton>{t("addChapterButton")}</PrimaryButton>
           <Link
             href={libraryPath}
             className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
           >
-            Cancel
+            {tCommon("cancel")}
           </Link>
         </div>
       </form>

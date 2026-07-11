@@ -75,6 +75,7 @@ export default async function AuthorStudyPage({
   const locale = await getLocale();
   const t = await getTranslations("author.study");
   const tAuthor = await getTranslations("author");
+  const tCommon = await getTranslations("common");
   const tDoc = await getTranslations("memory.document");
   const tRoster = await getTranslations("workspace.authors");
 
@@ -235,8 +236,8 @@ export default async function AuthorStudyPage({
               </span>
             </span>
             <span className="font-sans text-xs text-oxblood">
-              <span className="group-open:hidden">{t("show")}</span>
-              <span className="hidden group-open:inline">{t("hide")}</span>
+              <span className="group-open:hidden">{tCommon("show")}</span>
+              <span className="hidden group-open:inline">{tCommon("hide")}</span>
             </span>
           </summary>
           <pre className="mt-6 max-w-prose whitespace-pre-wrap border-l border-rule pl-6 font-serif text-sm leading-relaxed text-ink">

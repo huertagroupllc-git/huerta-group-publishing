@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import ReactMarkdown from "react-markdown";
 import { SetupNotice } from "@/components/setup-notice";
 import { WorkspaceFrame } from "@/components/workspace-frame";
@@ -18,8 +19,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug, bookSlug } = await params;
   const study = await getBookStudy(slug, bookSlug).catch(() => null);
+  const t = await getTranslations("manuscript.readingCopy");
   return {
-    title: study ? `Reading Copy — ${study.book.title}` : "Reading Copy",
+    title: study ? `${t("title")} — ${study.book.title}` : t("title"),
   };
 }
 
@@ -66,24 +68,29 @@ export default async function ReadingCopyPage({
   const bookPath = `/workspace/authors/${author.slug}/books/${book.slug}`;
 
   let chapterNumber = 0;
+  const t = await getTranslations("manuscript.readingCopy");
+  const tOverview = await getTranslations("manuscript.overview");
+  const tRoom = await getTranslations("manuscript.writingRoom");
+  const tChapter = await getTranslations("manuscript.chapter");
+  const tCommon = await getTranslations("common");
 
   return (
     <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-6 py-10 sm:px-8">
       {/* Running information: one quiet line, nothing more. */}
       <header className="rule flex items-baseline justify-between pt-5">
-        <p className="eyebrow">Reading Copy</p>
+        <p className="eyebrow">{t("title")}</p>
         <div className="flex items-baseline gap-6 font-sans text-xs">
           <Link
             href={`${bookPath}/chapters`}
             className="text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
           >
-            The Manuscript
+            {tOverview("title")}
           </Link>
           <Link
             href={bookPath}
             className="text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
           >
-            The Record
+            {tRoom("theRecord")}
           </Link>
         </div>
       </header>
@@ -106,7 +113,7 @@ export default async function ReadingCopyPage({
 
         {manuscript.writtenChapterCount === 0 ? (
           <p className="mx-auto max-w-prose pb-32 text-center italic text-ink-soft">
-            The manuscript begins with its first chapter.
+            {t("emptyManuscript")}
           </p>
         ) : (
           manuscript.sections.map((section, sectionIndex) => (
@@ -124,8 +131,10 @@ export default async function ReadingCopyPage({
                   <article key={chapter.chapterId} className="py-16">
                     <p className="eyebrow text-center">
                       {chapter.kind === "appendix"
-                        ? "Appendix"
-                        : `Chapter ${chapterNumber}`}
+                        ? tOverview("appendix")
+                        : tOverview("chapterNumber", {
+                            number: chapterNumber,
+                          })}
                     </p>
                     <h3 className="mt-4 text-center font-display text-3xl tracking-tight">
                       {chapter.title}
@@ -138,7 +147,7 @@ export default async function ReadingCopyPage({
                         href={`${bookPath}/findings/new?chapter=${chapter.slug}&version=${chapter.versionId}`}
                         className="font-sans text-[0.6875rem] text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
                       >
-                        Raise a finding
+                        {tChapter("raiseFinding")}
                       </Link>
                     </p>
                   </article>
@@ -154,7 +163,7 @@ export default async function ReadingCopyPage({
           {book.title} · {author.pen_name ?? author.full_name}
         </p>
         <p className="font-sans text-xs text-ink-faint">
-          © 2026 Huerta Group Publishing
+          {tCommon("copyright")}
         </p>
       </footer>
     </div>

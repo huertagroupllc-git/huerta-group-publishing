@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { ActionMessage } from "@/components/action-message";
 import { ActionLink, Field, QuietButton, TextButton } from "@/components/editorial";
 import { SetupNotice } from "@/components/setup-notice";
-import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
+import { WorkspaceFrame } from "@/components/workspace-frame";
+import { actionMessageFromQuery } from "@/lib/action-messages";
 import { createPart, moveChapter } from "@/lib/manuscript/actions";
 import {
   getManuscriptLibrary,
   type ManuscriptLibrary,
 } from "@/lib/manuscript/queries";
 import {
-  formatWordCount,
   type ChapterListEntry,
   type PartRecord,
 } from "@/lib/manuscript/types";
@@ -25,8 +27,11 @@ export async function generateMetadata({
   const library = await getManuscriptLibrary(slug, bookSlug).catch(
     () => null,
   );
+  const t = await getTranslations("manuscript.overview");
   return {
-    title: library ? `The Manuscript — ${library.book.title}` : "Manuscript",
+    title: library
+      ? `${t("title")} — ${library.book.title}`
+      : t("metaFallback"),
   };
 }
 
@@ -35,7 +40,7 @@ export default async function ChapterLibraryPage({
   searchParams,
 }: {
   params: Promise<{ slug: string; bookSlug: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const supabase = await createClient();
   const {
@@ -44,7 +49,7 @@ export default async function ChapterLibraryPage({
   if (!user) redirect("/signin");
 
   const { slug, bookSlug } = await params;
-  const { error } = await searchParams;
+  const message = actionMessageFromQuery(await searchParams);
 
   let library: ManuscriptLibrary | null;
   try {
@@ -76,12 +81,17 @@ export default async function ChapterLibraryPage({
     ].filter((g) => g.part !== null || g.chapters.length > 0);
 
   let chapterNumber = 0;
+  const t = await getTranslations("manuscript.overview");
+  const tRoom = await getTranslations("memory.documentRoom");
+  const tProgress = await getTranslations("manuscript.progress");
+  const tStudy = await getTranslations("author.study");
+  const tNav = await getTranslations("navigation");
 
   return (
     <WorkspaceFrame
       email={user.email ?? ""}
       breadcrumbs={[
-        { href: "/workspace", label: "Workspace" },
+        { href: "/workspace", label: tNav("workspace") },
         { href: `/workspace/authors/${author.slug}`, label: author.full_name },
         {
           href: `/workspace/authors/${author.slug}/books/${book.slug}`,
@@ -91,37 +101,44 @@ export default async function ChapterLibraryPage({
     >
       <p className="eyebrow">{book.title}</p>
       <h1 className="mt-2 font-display text-4xl tracking-tight">
-        The Manuscript
+        {t("title")}
       </h1>
 
       <div className="mt-4">
-        <ErrorNote message={error} />
+        <ActionMessage
+          code={message?.code}
+          params={message?.params}
+          namespace="manuscript.errors"
+        />
       </div>
 
       <section className="mt-10">
         <div className="rule flex items-baseline justify-between gap-x-6 pt-5">
-          <h2 className="eyebrow">Chapters</h2>
+          <h2 className="eyebrow">{t("chaptersHeading")}</h2>
           <span className="flex items-baseline gap-6">
-            <ActionLink href={`${libraryPath}/new`}>Add a chapter</ActionLink>
+            <ActionLink href={`${libraryPath}/new`}>
+              {t("addChapter")}
+            </ActionLink>
             <ActionLink
               href={`/workspace/authors/${author.slug}/books/${book.slug}/manuscript`}
             >
-              Reading Copy
+              {t("readingCopy")}
             </ActionLink>
           </span>
         </div>
 
         {chapters.length === 0 ? (
           <p className="mt-6 max-w-prose italic text-ink-soft">
-            The manuscript begins with its first chapter. Your{" "}
-            <Link
-              href={`/workspace/authors/${author.slug}/books/${book.slug}/memory/master-outline`}
-              className="text-oxblood underline-offset-4 hover:underline"
-            >
-              Master Outline
-            </Link>{" "}
-            already holds the shape — open it beside you and add the first
-            chapter here.
+            {t.rich("emptyManuscript", {
+              link: (chunks) => (
+                <Link
+                  href={`/workspace/authors/${author.slug}/books/${book.slug}/memory/master-outline`}
+                  className="text-oxblood underline-offset-4 hover:underline"
+                >
+                  {chunks}
+                </Link>
+              ),
+            })}
           </p>
         ) : (
           groups.map((group) => (
@@ -134,8 +151,8 @@ export default async function ChapterLibraryPage({
                   if (chapter.kind === "chapter") chapterNumber += 1;
                   const numberLabel =
                     chapter.kind === "appendix"
-                      ? "Appendix"
-                      : `Chapter ${chapterNumber}`;
+                      ? t("appendix")
+                      : t("chapterNumber", { number: chapterNumber });
                   return (
                     <li
                       key={chapter.id}
@@ -159,20 +176,23 @@ export default async function ChapterLibraryPage({
                         <p className="mt-2.5 font-sans text-xs text-ink-faint">
                           {chapter.activeVersion ? (
                             <span className="text-ink-soft">
-                              Version {chapter.activeVersion.versionNumber} ·{" "}
-                              {formatWordCount(
-                                chapter.activeVersion.wordCount,
-                              )}
+                              {tRoom("version", {
+                                number: chapter.activeVersion.versionNumber,
+                              })}{" "}
+                              ·{" "}
+                              {tProgress("words", {
+                                count: chapter.activeVersion.wordCount,
+                              })}
                             </span>
                           ) : (
-                            <span className="italic">Unwritten</span>
+                            <span className="italic">{t("unwritten")}</span>
                           )}
                           {chapter.hasDraft ? (
                             <Link
                               href={`${libraryPath}/${chapter.slug}?draft=1`}
                               className="ml-3 not-italic text-oxblood underline-offset-4 hover:underline"
                             >
-                              Draft open
+                              {tStudy("draftOpen")}
                             </Link>
                           ) : null}
                         </p>
@@ -191,7 +211,7 @@ export default async function ChapterLibraryPage({
                           />
                           <input type="hidden" name="direction" value="up" />
                           <TextButton className="text-ink-faint hover:text-oxblood">
-                            Move up
+                            {t("moveUp")}
                           </TextButton>
                         </form>
                         <form action={moveChapter}>
@@ -211,7 +231,7 @@ export default async function ChapterLibraryPage({
                             value="down"
                           />
                           <TextButton className="text-ink-faint hover:text-oxblood">
-                            Move down
+                            {t("moveDown")}
                           </TextButton>
                         </form>
                       </div>
@@ -226,13 +246,11 @@ export default async function ChapterLibraryPage({
 
       <section className="mt-14">
         <div className="rule pt-5">
-          <h2 className="eyebrow">Parts</h2>
+          <h2 className="eyebrow">{t("partsHeading")}</h2>
         </div>
         {parts.length === 0 ? (
           <p className="mt-5 max-w-prose text-sm italic text-ink-soft">
-            Parts are optional. A manuscript without them reads as one
-            sequence of chapters; add a part when the book needs larger
-            movements.
+            {t("partsEmpty")}
           </p>
         ) : null}
         <form
@@ -244,12 +262,12 @@ export default async function ChapterLibraryPage({
           <div className="flex-1">
             <Field
               id="title"
-              label="New part"
+              label={t("newPart")}
               type="text"
-              placeholder="e.g. Part I — Origins"
+              placeholder={t("partPlaceholder")}
             />
           </div>
-          <QuietButton>Add the part</QuietButton>
+          <QuietButton>{t("addPart")}</QuietButton>
         </form>
       </section>
     </WorkspaceFrame>

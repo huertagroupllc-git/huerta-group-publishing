@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import ReactMarkdown from "react-markdown";
 import { AudioReview } from "@/components/audio-review";
 import {
@@ -14,8 +16,9 @@ import {
   QuietButton,
   TextButton,
 } from "@/components/editorial";
+import { ActionMessage } from "@/components/action-message";
 import { SetupNotice } from "@/components/setup-notice";
-import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
+import { WorkspaceFrame } from "@/components/workspace-frame";
 import {
   activateChapterVersion,
   createChapterVersion,
@@ -36,7 +39,7 @@ import {
 import { severityLabel } from "@/lib/findings/types";
 import { getChapterRoom, type ChapterRoom } from "@/lib/manuscript/queries";
 import { assembleAuthorContext } from "@/lib/memory/assemble";
-import { countWords, formatWordCount } from "@/lib/manuscript/types";
+import { countWords } from "@/lib/manuscript/types";
 import {
   IMPORT_SOURCES,
   formatDate,
@@ -53,9 +56,9 @@ export async function generateMetadata({
   const room = await getChapterRoom(slug, bookSlug, chapterSlug).catch(
     () => null,
   );
-  return {
-    title: room ? `${room.chapter.title} — ${room.book.title}` : "Chapter",
-  };
+  if (room) return { title: `${room.chapter.title} — ${room.book.title}` };
+  const t = await getTranslations("manuscript.chapter");
+  return { title: t("metaFallback") };
 }
 
 export default async function ChapterRoomPage({
@@ -151,6 +154,13 @@ export default async function ChapterRoomPage({
 
   const query = queryEarly;
   const { author, book, chapter, versions } = room;
+  const t = await getTranslations("manuscript.writingRoom");
+  const tRoom = await getTranslations("memory.documentRoom");
+  const tForm = await getTranslations("manuscript.form");
+  const tOverview = await getTranslations("manuscript.overview");
+  const tProgress = await getTranslations("manuscript.progress");
+  const tCommon = await getTranslations("common");
+  const tNav = await getTranslations("navigation");
   const libraryPath = `/workspace/authors/${author.slug}/books/${book.slug}/chapters`;
   const roomPath = `${libraryPath}/${chapter.slug}`;
 
@@ -178,13 +188,13 @@ export default async function ChapterRoomPage({
       email={user.email ?? ""}
       wide
       breadcrumbs={[
-        { href: "/workspace", label: "Workspace" },
+        { href: "/workspace", label: tNav("workspace") },
         { href: `/workspace/authors/${author.slug}`, label: author.full_name },
         {
           href: `/workspace/authors/${author.slug}/books/${book.slug}`,
           label: book.title,
         },
-        { href: libraryPath, label: "The Manuscript" },
+        { href: libraryPath, label: tOverview("title") },
       ]}
     >
       <div className="grid gap-12 md:grid-cols-[minmax(0,1fr)_230px]">
@@ -195,20 +205,27 @@ export default async function ChapterRoomPage({
             {chapter.title}
           </h1>
           <p className="mt-2 font-sans text-[0.6875rem] text-ink-faint">
-            {room.positionLabel}
+            {room.positionNumber === null
+              ? tOverview("appendix")
+              : t("positionOf", {
+                  number: room.positionNumber,
+                  total: room.chapterTotal,
+                })}
           </p>
 
           <div className="mt-4">
-            <ErrorNote message={query.error} />
+            <ActionMessage code={query.error} namespace="manuscript.errors" />
             {query.saved === "1" ? (
-              <p className="font-sans text-sm text-ink-soft">Draft saved.</p>
+              <p className="font-sans text-sm text-ink-soft">
+                {tRoom("draftSaved")}
+              </p>
             ) : null}
           </div>
 
           {revisionBrief ? (
             <aside className="mt-6 max-w-prose border-l-2 border-oxblood pl-4">
               <p className="font-sans text-[0.6875rem] uppercase tracking-[0.18em] text-ink-faint">
-                Revising from a finding ·{" "}
+                {t("revisingFromFinding")} ·{" "}
                 {severityLabel(revisionBrief.severity)}
               </p>
               <p className="mt-1.5 font-serif text-lg leading-snug">
@@ -225,25 +242,28 @@ export default async function ChapterRoomPage({
               {adoptedJudgment ? (
                 <p className="mt-3 text-sm leading-relaxed">
                   <span className="font-sans text-[0.6875rem] uppercase tracking-[0.18em] text-ink-faint">
-                    Judgment —{" "}
+                    {t("judgmentLabel")} —{" "}
                   </span>
                   {adoptedJudgment}
                 </p>
               ) : null}
               <p className="mt-2 font-sans text-xs text-ink-faint">
-                Raised against Version{" "}
-                {revisionBrief.anchoredVersionNumber ?? "—"}
+                {t("raisedAgainstVersion", {
+                  number: revisionBrief.anchoredVersionNumber ?? "—",
+                })}
                 {active
-                  ? ` · the chapter is now at Version ${active.version_number}`
+                  ? ` · ${t("nowAtVersion", { number: active.version_number })}`
                   : ""}
                 {revisionBrief.status === "resolved"
-                  ? ` · resolved${
+                  ? ` · ${
                       revisionBrief.resolvedInVersionNumber
-                        ? ` in Version ${revisionBrief.resolvedInVersionNumber}`
-                        : ""
+                        ? t("resolvedInVersion", {
+                            number: revisionBrief.resolvedInVersionNumber,
+                          })
+                        : t("resolvedLower")
                     }`
                   : revisionBrief.status === "dismissed"
-                    ? " · set aside"
+                    ? ` · ${t("setAsideLower")}`
                     : ""}
               </p>
               {revisionBrief.status === "open" &&
@@ -269,17 +289,18 @@ export default async function ChapterRoomPage({
                       htmlFor="resolution-note"
                       className="eyebrow block"
                     >
-                      Note <span className="normal-case">(optional)</span>
+                      {t("noteLabel")}{" "}
+                      <span className="normal-case">{t("noteOptional")}</span>
                     </label>
                     <input
                       id="resolution-note"
                       name="note"
                       type="text"
-                      placeholder="what the revision did"
+                      placeholder={t("notePlaceholder")}
                       className="w-full border-b border-rule bg-transparent py-1.5 font-serif text-base text-ink placeholder:text-ink-faint focus:border-oxblood focus:outline-none"
                     />
                   </div>
-                  <TextButton>Mark resolved</TextButton>
+                  <TextButton>{t("markResolved")}</TextButton>
                 </form>
               ) : null}
             </aside>
@@ -318,36 +339,36 @@ export default async function ChapterRoomPage({
             not rendered. */}
         <aside>
           <div className="rule pt-5">
-            <h2 className="eyebrow">The Brief</h2>
+            <h2 className="eyebrow">{t("brief")}</h2>
           </div>
           <div className="mt-4 space-y-4 font-sans text-xs leading-relaxed text-ink-soft">
             {chapter.core_question ? (
               <p>
-                <span className="text-ink-faint">Core Question — </span>
+                <span className="text-ink-faint">{tForm("coreQuestion")} — </span>
                 {chapter.core_question}
               </p>
             ) : null}
             {chapter.purpose ? (
               <p>
-                <span className="text-ink-faint">Purpose — </span>
+                <span className="text-ink-faint">{tForm("purpose")} — </span>
                 {chapter.purpose}
               </p>
             ) : null}
             {chapter.summary ? (
               <p>
-                <span className="text-ink-faint">Summary — </span>
+                <span className="text-ink-faint">{tForm("summary")} — </span>
                 {chapter.summary}
               </p>
             ) : null}
             {chapter.outline_section ? (
               <p>
-                <span className="text-ink-faint">Master Outline Location — </span>
+                <span className="text-ink-faint">{tForm("outlineLocation")} — </span>
                 {chapter.outline_section}
               </p>
             ) : null}
             {room.outlineVersionNumber ? (
               <p className="text-ink-faint">
-                Shaped under Master Outline v{room.outlineVersionNumber}
+                {t("shapedUnder", { number: room.outlineVersionNumber })}
               </p>
             ) : null}
             {!chapter.core_question &&
@@ -356,15 +377,15 @@ export default async function ChapterRoomPage({
             !chapter.outline_section &&
             !room.outlineVersionNumber ? (
               <p className="italic text-ink-faint">
-                No brief yet — give the chapter a purpose from its record.
+                {t("noBrief")}
               </p>
             ) : null}
             <p className="text-ink-faint">
-              {formatWordCount(marginWords)}
+              {tProgress("words", { count: marginWords })}
             </p>
             <p>
               <ActionLink href={`${roomPath}/edit`}>
-                Edit the chapter
+                {t("editChapter")}
               </ActionLink>
             </p>
           </div>
@@ -372,7 +393,7 @@ export default async function ChapterRoomPage({
           {chapterFindings.length > 0 ? (
             <div className="mt-8">
               <div className="rule pt-5">
-                <h2 className="eyebrow">Findings</h2>
+                <h2 className="eyebrow">{t("findingsHeading")}</h2>
               </div>
               <ul className="mt-3 space-y-2.5">
                 {chapterFindings.map((finding) => (
@@ -390,7 +411,10 @@ export default async function ChapterRoomPage({
                       {finding.anchoredVersionNumber ? (
                         <span className="text-ink-faint">
                           {" "}
-                          · v{finding.anchoredVersionNumber}
+                          ·{" "}
+                          {t("versionShort", {
+                            number: finding.anchoredVersionNumber,
+                          })}
                         </span>
                       ) : null}
                     </Link>
@@ -411,18 +435,21 @@ export default async function ChapterRoomPage({
           <details className="group mt-8">
             <summary className="rule flex cursor-pointer list-none items-baseline justify-between pt-5">
               <span className="eyebrow group-open:text-oxblood">
-                Concepts
+                {t("concepts")}
               </span>
               <span className="font-sans text-xs text-oxblood">
-                <span className="group-open:hidden">Show</span>
-                <span className="hidden group-open:inline">Hide</span>
+                <span className="group-open:hidden">{tCommon("show")}</span>
+                <span className="hidden group-open:inline">
+                  {tCommon("hide")}
+                </span>
               </span>
             </summary>
             {room.conceptDictionary ? (
               <div className="mt-4">
                 <p className="font-sans text-[0.6875rem] text-ink-faint">
-                  Concept Dictionary · v
-                  {room.conceptDictionary.versionNumber} · reference only
+                  {t("conceptDictionaryMeta", {
+                    number: room.conceptDictionary.versionNumber,
+                  })}
                 </p>
                 <div className="doc-prose mt-3 text-sm">
                   <ReactMarkdown>
@@ -432,7 +459,7 @@ export default async function ChapterRoomPage({
               </div>
             ) : (
               <p className="mt-4 font-sans text-xs italic text-ink-faint">
-                The Concept Dictionary has not been established.
+                {t("conceptsNotEstablished")}
               </p>
             )}
           </details>
@@ -440,16 +467,17 @@ export default async function ChapterRoomPage({
           <details className="group mt-8">
             <summary className="rule flex cursor-pointer list-none items-baseline justify-between pt-5">
               <span className="eyebrow group-open:text-oxblood">
-                Chapter Context
+                {t("chapterContext")}
               </span>
               <span className="font-sans text-xs text-oxblood">
-                <span className="group-open:hidden">Show</span>
-                <span className="hidden group-open:inline">Hide</span>
+                <span className="group-open:hidden">{tCommon("show")}</span>
+                <span className="hidden group-open:inline">
+                  {tCommon("hide")}
+                </span>
               </span>
             </summary>
             <p className="mt-3 font-sans text-[0.6875rem] text-ink-faint">
-              the exact record future AI assistance would receive for this
-              chapter — active, finalized versions only
+              {t("chapterContextHint")}
             </p>
             <pre className="mt-4 whitespace-pre-wrap border-l border-rule pl-4 font-serif text-xs leading-relaxed text-ink">
               {chapterContext}
@@ -467,7 +495,7 @@ export default async function ChapterRoomPage({
                 href={`${libraryPath}/${room.previousChapter.slug}`}
                 className="text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
               >
-                Previous: {room.previousChapter.title}
+                {t("previousChapter", { title: room.previousChapter.title })}
               </Link>
             ) : null}
           </div>
@@ -477,7 +505,7 @@ export default async function ChapterRoomPage({
                 href={`${libraryPath}/${room.nextChapter.slug}`}
                 className="text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
               >
-                Next: {room.nextChapter.title}
+                {t("nextChapter", { title: room.nextChapter.title })}
               </Link>
             ) : null}
           </div>
@@ -487,13 +515,13 @@ export default async function ChapterRoomPage({
             href={libraryPath}
             className="text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
           >
-            The Manuscript
+            {tOverview("title")}
           </Link>
           <Link
             href={`/workspace/authors/${author.slug}/books/${book.slug}`}
             className="text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
           >
-            The Record
+            {t("theRecord")}
           </Link>
         </div>
       </nav>
@@ -516,17 +544,24 @@ function ChapterReadingPane({
   draftOpen: boolean;
   raiseFindingHref: string;
 }) {
-  const sourceLabel = IMPORT_SOURCES.find(
+  const t = useTranslations("memory.documentRoom");
+  const tRoom = useTranslations("manuscript.writingRoom");
+  const tChapter = useTranslations("manuscript.chapter");
+  const tSource = useTranslations("memory.source");
+  const locale = useLocale();
+  const sourceLabel = IMPORT_SOURCES.some(
     (s) => s.value === version.import_source,
-  )?.label;
+  )
+    ? tSource(version.import_source)
+    : null;
 
   return (
     <article className="mt-8">
       <p className="font-sans text-xs text-ink-faint">
-        Version {version.version_number}
-        {isActive ? " · active" : " · superseded"}
+        {t("version", { number: version.version_number })}
+        {isActive ? ` · ${t("active")}` : ` · ${t("superseded")}`}
         {version.finalized_at
-          ? ` · finalized ${formatDate(version.finalized_at)}`
+          ? ` · ${t("finalized", { date: formatDate(version.finalized_at, locale) })}`
           : ""}
         {sourceLabel && version.import_source !== "manual"
           ? ` · ${sourceLabel.toLowerCase()}`
@@ -536,34 +571,36 @@ function ChapterReadingPane({
           href={raiseFindingHref}
           className="text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
         >
-          Raise a finding
+          {tChapter("raiseFinding")}
         </Link>
       </p>
 
       {!isActive ? (
         <div className="mt-4 border-l-2 border-oxblood pl-4">
           <p className="text-sm italic text-ink-soft">
-            You are reading a superseded version.
+            {t("readingSuperseded")}
             {activeNumber
-              ? ` The active version is ${activeNumber}.`
-              : " No version is currently active."}
+              ? ` ${t("activeVersionIs", { number: activeNumber })}`
+              : ` ${t("noActiveVersion")}`}
           </p>
           <form action={activateChapterVersion} className="mt-2">
             <input type="hidden" name="version_id" value={version.id} />
             <input type="hidden" name="room_path" value={roomPath} />
-            <TextButton>Restore as the active version</TextButton>
+            <TextButton>{t("restore")}</TextButton>
           </form>
         </div>
       ) : draftOpen ? (
         <p className="mt-4 text-sm italic text-ink-soft">
-          A draft is open for this chapter —{" "}
-          <Link
-            href={`${roomPath}?draft=1`}
-            className="text-oxblood underline-offset-4 hover:underline"
-          >
-            continue writing
-          </Link>
-          .
+          {tRoom.rich("draftOpenContinueWriting", {
+            link: (chunks) => (
+              <Link
+                href={`${roomPath}?draft=1`}
+                className="text-oxblood underline-offset-4 hover:underline"
+              >
+                {chunks}
+              </Link>
+            ),
+          })}
         </p>
       ) : null}
 
@@ -583,10 +620,11 @@ function UnwrittenState({
   purpose: string | null;
   roomPath: string;
 }) {
+  const t = useTranslations("manuscript.writingRoom");
   return (
     <div className="mt-10 max-w-prose">
       <p className="text-lg italic leading-relaxed text-ink-soft">
-        Unwritten.
+        {t("unwrittenState")}
       </p>
       {purpose ? (
         <p className="mt-4 text-lg leading-relaxed text-ink-soft">
@@ -597,7 +635,7 @@ function UnwrittenState({
         href={`${roomPath}?new=1`}
         className="mt-8 inline-block bg-oxblood px-6 py-2.5 font-sans text-sm tracking-wide text-paper hover:bg-oxblood-deep"
       >
-        Begin the chapter
+        {t("beginChapter")}
       </Link>
     </div>
   );
@@ -616,12 +654,13 @@ function NewChapterVersionForm({
   isFirst: boolean;
   findingId: string | null;
 }) {
+  const t = useTranslations("memory.documentRoom");
+  const tRoom = useTranslations("manuscript.writingRoom");
+  const tCommon = useTranslations("common");
   return (
     <div className="mt-8">
       <p className="max-w-prose text-sm italic text-ink-soft">
-        {isFirst
-          ? "This will become Version 1, saved as a draft until you make it active."
-          : "Starting from the current active version — write it into the next version. It is saved as a draft until you make it active."}
+        {isFirst ? t("newFirstIntro") : tRoom("newNextIntro")}
       </p>
       <form action={createChapterVersion} className="mt-8 space-y-8">
         <input type="hidden" name="document_id" value={chapterId} />
@@ -637,12 +676,12 @@ function NewChapterVersionForm({
           contentRows={30}
         />
         <div className="flex items-baseline gap-8">
-          <PrimaryButton>Save draft</PrimaryButton>
+          <PrimaryButton>{t("saveDraft")}</PrimaryButton>
           <Link
             href={roomPath}
             className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
           >
-            Cancel
+            {tCommon("cancel")}
           </Link>
         </div>
       </form>
@@ -659,18 +698,23 @@ function ChapterDraftEditor({
   roomPath: string;
   findingId: string | null;
 }) {
+  const t = useTranslations("memory.documentRoom");
+  const tRoom = useTranslations("manuscript.writingRoom");
+  const locale = useLocale();
   return (
     <div className="mt-8">
       <p className="font-sans text-xs text-oxblood">
-        Draft · Version {draft.version_number} · begun{" "}
-        {formatDate(draft.created_at)}
+        {t("draftMeta", {
+          number: draft.version_number,
+          date: formatDate(draft.created_at, locale),
+        })}
       </p>
 
       <AudioReview
         markdown={draft.content}
         versionId={draft.id}
         renderProse={false}
-        note="Reads the draft as last saved."
+        note={tRoom("audioDraftNote")}
       />
 
       <form action={updateChapterDraft} className="mt-6 space-y-8">
@@ -687,9 +731,9 @@ function ChapterDraftEditor({
           contentRows={30}
         />
         <div className="flex flex-wrap items-baseline gap-8">
-          <QuietButton>Save draft</QuietButton>
+          <QuietButton>{t("saveDraft")}</QuietButton>
           <PrimaryButton formAction={saveAndActivateChapterDraft}>
-            Make this the active version
+            {t("makeActive")}
           </PrimaryButton>
         </div>
       </form>
@@ -702,14 +746,12 @@ function ChapterDraftEditor({
             type="submit"
             className="font-sans text-xs text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
           >
-            Discard this draft
+            {t("discardDraft")}
           </button>
         </form>
       </div>
       <p className="mt-3 font-sans text-[0.6875rem] text-ink-faint">
-        Activating finalizes the text permanently; discarding removes the
-        draft. Neither touches earlier versions. Nothing is saved until you
-        save it.
+        {tRoom("activationNote")}
       </p>
     </div>
   );

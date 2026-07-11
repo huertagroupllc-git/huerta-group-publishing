@@ -11,7 +11,9 @@
     "next": "Next →",
     "previous": "← Previous",
     "pageOf": "Page {page, number} of {pageCount, number}",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "show": "Show",
+    "hide": "Hide"
   },
   "navigation": {
     "mode": "Mode",
@@ -60,9 +62,7 @@
       "emptyBooks": "No books yet. Every book opened here begins under this author’s established memory.",
       "theRecord": "the record",
       "assembledMemory": "Assembled Memory",
-      "assembledMemoryHint": "the exact record future AI assistance will receive — active, finalized versions only",
-      "show": "Show",
-      "hide": "Hide"
+      "assembledMemoryHint": "the exact record future AI assistance will receive — active, finalized versions only"
     },
     "form": {
       "addMetaTitle": "Add an author",
@@ -78,6 +78,118 @@
       "editMetaFallback": "Edit",
       "editIntro": "The author’s identity, as the imprint keeps it. The record’s address remains <address>/{slug}</address> — it was set when the record was opened and does not change.",
       "saveRecord": "Save the record"
+    }
+  },
+  "manuscript": {
+    "overview": {
+      "metaFallback": "Manuscript",
+      "title": "The Manuscript",
+      "chaptersHeading": "Chapters",
+      "addChapter": "Add a chapter",
+      "readingCopy": "Reading Copy",
+      "emptyManuscript": "The manuscript begins with its first chapter. Your <link>Master Outline</link> already holds the shape — open it beside you and add the first chapter here.",
+      "chapterNumber": "Chapter {number}",
+      "appendix": "Appendix",
+      "unwritten": "Unwritten",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "partsHeading": "Parts",
+      "partsEmpty": "Parts are optional. A manuscript without them reads as one sequence of chapters; add a part when the book needs larger movements.",
+      "newPart": "New part",
+      "partPlaceholder": "e.g. Part I — Origins",
+      "addPart": "Add the part"
+    },
+    "chapter": {
+      "metaFallback": "Chapter",
+      "raiseFinding": "Raise a finding"
+    },
+    "form": {
+      "addMetaTitle": "Add a chapter",
+      "addTitle": "Add a chapter",
+      "addIntro": "A chapter is the unit of authorship: it carries its own purpose and its own history. The words come later, in the chapter itself — this opens its place in the manuscript.",
+      "editMetaFallback": "Edit chapter",
+      "editMetaPrefix": "Edit",
+      "editIntro": "The chapter’s identity, as the manuscript keeps it. Its address remains <address>/{slug}</address>; its number is always computed from its place in the manuscript.",
+      "title": "Title",
+      "coreQuestion": "Core Question",
+      "coreQuestionHint": "the single question this chapter exists to answer",
+      "purpose": "Purpose",
+      "purposeHint": "why this chapter exists",
+      "summary": "Summary",
+      "summaryHint": "what happens in this chapter",
+      "outlineLocation": "Master Outline Location",
+      "outlinePlaceholder": "the part of the Master Outline this chapter serves",
+      "kind": "Kind",
+      "kindChapter": "Chapter",
+      "kindAppendix": "Appendix",
+      "part": "Part",
+      "noPart": "No part",
+      "addChapterButton": "Add the chapter",
+      "saveChapter": "Save the chapter"
+    },
+    "writingRoom": {
+      "positionOf": "Chapter {number} of {total}",
+      "brief": "The Brief",
+      "shapedUnder": "Shaped under Master Outline v{number}",
+      "noBrief": "No brief yet — give the chapter a purpose from its record.",
+      "editChapter": "Edit the chapter",
+      "findingsHeading": "Findings",
+      "versionShort": "v{number}",
+      "revisingFromFinding": "Revising from a finding",
+      "judgmentLabel": "Judgment",
+      "raisedAgainstVersion": "Raised against Version {number}",
+      "nowAtVersion": "the chapter is now at Version {number}",
+      "resolvedLower": "resolved",
+      "resolvedInVersion": "resolved in Version {number}",
+      "setAsideLower": "set aside",
+      "noteLabel": "Note",
+      "noteOptional": "(optional)",
+      "notePlaceholder": "what the revision did",
+      "markResolved": "Mark resolved",
+      "draftOpenContinueWriting": "A draft is open for this chapter — <link>continue writing</link>.",
+      "newNextIntro": "Starting from the current active version — write it into the next version. It is saved as a draft until you make it active.",
+      "activationNote": "Activating finalizes the text permanently; discarding removes the draft. Neither touches earlier versions. Nothing is saved until you save it.",
+      "audioDraftNote": "Reads the draft as last saved.",
+      "unwrittenState": "Unwritten.",
+      "beginChapter": "Begin the chapter",
+      "previousChapter": "Previous: {title}",
+      "nextChapter": "Next: {title}",
+      "theRecord": "The Record",
+      "concepts": "Concepts",
+      "conceptDictionaryMeta": "Concept Dictionary · v{number} · reference only",
+      "conceptsNotEstablished": "The Concept Dictionary has not been established.",
+      "chapterContext": "Chapter Context",
+      "chapterContextHint": "the exact record future AI assistance would receive for this chapter — active, finalized versions only"
+    },
+    "readingCopy": {
+      "title": "Reading Copy",
+      "emptyManuscript": "The manuscript begins with its first chapter."
+    },
+    "progress": {
+      "chapters": "{count, plural, one {# chapter} other {# chapters}}",
+      "inParts": "in {count, plural, one {# part} other {# parts}}",
+      "draftsOpen": "{count, plural, one {# draft} other {# drafts}} open",
+      "openFindings": "{count, plural, one {# open finding} other {# open findings}}",
+      "words": "{count, plural, one {# word} other {# words}}"
+    },
+    "errors": {
+      "titleRequired": "The chapter's title is required.",
+      "coreQuestionRequired": "The chapter's Core Question is required — the single question it exists to answer.",
+      "slugUnusable": "A usable slug could not be derived from the title.",
+      "chapterSlugTaken": "This manuscript already has a chapter at “{slug}” — retitle slightly.",
+      "chapterCreateFailed": "The chapter could not be created.",
+      "chapterSaveFailed": "The chapter could not be saved.",
+      "partTitleRequired": "The part's title is required.",
+      "partCreateFailed": "The part could not be created.",
+      "chapterMoveFailed": "The chapter could not be moved.",
+      "contentRequired": "A version needs content before it can be saved.",
+      "contentRequiredToActivate": "A version needs content to be activated.",
+      "draftAlreadyOpen": "A draft is already open for this chapter; continue writing it instead.",
+      "draftCreateFailed": "The draft could not be created.",
+      "draftSaveFailed": "The draft could not be saved.",
+      "activateFailed": "The version could not be activated.",
+      "discardFailed": "The draft could not be discarded.",
+      "manuscriptMigrationMissing": "The database is missing the manuscript migration — apply supabase/migrations/20260708000000_manuscript_foundation.sql (docs/setup.md §2)."
     }
   },
   "memory": {
