@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { isAuthenticated } from "@/lib/auth/session";
 import {
   SITE_DESCRIPTION,
   SITE_NAME,
@@ -8,6 +9,12 @@ import {
 } from "@/lib/site";
 
 const PROMISE = "Develop books, not just manuscripts.";
+
+// The header CTA reflects the visitor's session, so the page renders
+// per-request and its HTML is never shared-cached across users. Metadata,
+// JSON-LD, robots, sitemap, and the OG image are unaffected — they carry
+// no per-user state.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: {
@@ -166,7 +173,13 @@ const PRINCIPLES: { title: string; body: string }[] = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Session-aware navigation: one authenticated visitor's "Workspace"
+  // state is never the source shared with a signed-out visitor.
+  const signedIn = await isAuthenticated();
+  const authHref = signedIn ? "/workspace" : "/signin";
+  const authLabel = signedIn ? "Workspace" : "Sign in";
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -202,11 +215,8 @@ export default function HomePage() {
             {SITE_NAME}
           </Link>
           <nav aria-label="Primary" className="flex items-baseline gap-6">
-            <Link href="/workspace" className={`${navLink} text-ink-soft`}>
-              The Workspace
-            </Link>
-            <Link href="/signin" className={`${navLink} text-oxblood`}>
-              Sign in
+            <Link href={authHref} className={`${navLink} text-oxblood`}>
+              {authLabel}
             </Link>
           </nav>
         </header>
@@ -236,7 +246,7 @@ export default function HomePage() {
               with the author&rsquo;s voice intact.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
-              <PrimaryLink href="/signin">Sign in</PrimaryLink>
+              <PrimaryLink href={authHref}>{authLabel}</PrimaryLink>
               <a
                 href="#the-journey"
                 className={`${navLink} text-sm text-ink-soft`}
@@ -470,11 +480,12 @@ export default function HomePage() {
               and to keep faith with what they set out to write.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
-              <QuietLink href="/signin">Sign in</QuietLink>
+              <QuietLink href={authHref}>{authLabel}</QuietLink>
             </div>
             <p className="mt-6 max-w-prose font-sans text-xs leading-relaxed text-ink-faint">
               Access is arranged with the publisher; there is no public
-              sign-up. Authors with an account can sign in above.
+              sign-up.
+              {signedIn ? "" : " Authors with an account can sign in above."}
             </p>
           </section>
         </main>
@@ -502,8 +513,8 @@ export default function HomePage() {
             <a href="#editorial-review" className={navLink}>
               Editorial review
             </a>
-            <Link href="/signin" className={`${navLink} text-oxblood`}>
-              Sign in
+            <Link href={authHref} className={`${navLink} text-oxblood`}>
+              {authLabel}
             </Link>
           </nav>
         </footer>
