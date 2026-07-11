@@ -25,7 +25,7 @@ export function WorkspaceFrame({
     >
       <header className="rule flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 pt-5">
         <div className="flex items-baseline gap-4">
-          <Link href="/workspace" className="eyebrow hover:text-oxblood">
+          <Link href="/" className="eyebrow hover:text-oxblood">
             Huerta Group Publishing
           </Link>
           {breadcrumbs.map((crumb) => (
