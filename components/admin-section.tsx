@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 
 /**
  * An honest administrative section: what it will manage, what is genuinely
@@ -19,6 +20,7 @@ export function AdminSection({
   today: ReactNode[];
   deferred: ReactNode[];
 }) {
+  const t = useTranslations("admin.section");
   return (
     <>
       <p className="eyebrow">{eyebrow}</p>
@@ -29,7 +31,7 @@ export function AdminSection({
 
       <div className="mt-12 grid gap-10 sm:grid-cols-2 sm:gap-0">
         <div className="sm:border-r sm:border-rule sm:pr-10">
-          <p className="eyebrow">Available today</p>
+          <p className="eyebrow">{t("availableToday")}</p>
           <ul className="mt-4 space-y-3 leading-relaxed text-ink">
             {today.map((item, i) => (
               <li key={i}>{item}</li>
@@ -37,7 +39,7 @@ export function AdminSection({
           </ul>
         </div>
         <div className="border-t border-rule pt-8 sm:border-t-0 sm:pt-0 sm:pl-10">
-          <p className="eyebrow">Not yet built</p>
+          <p className="eyebrow">{t("notYetBuilt")}</p>
           <ul className="mt-4 space-y-3 leading-relaxed text-ink-soft">
             {deferred.map((item, i) => (
               <li key={i}>{item}</li>

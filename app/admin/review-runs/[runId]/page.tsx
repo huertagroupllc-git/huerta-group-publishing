@@ -5,7 +5,8 @@ import {
   getAdminReviewRun,
   reviewRunStatusLabel,
 } from "@/lib/admin/queries";
-import { reviewTypeLabel } from "@/lib/findings/types";
+import { getLocale, getTranslations } from "next-intl/server";
+import { REVIEW_TYPE_LABELS, reviewTypeLabel } from "@/lib/findings/types";
 import { languageLabel } from "@/lib/languages";
 import { formatDate } from "@/lib/memory/types";
 
@@ -16,9 +17,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { runId } = await params;
   const run = await getAdminReviewRun(runId).catch(() => null);
-  return {
-    title: run ? `${reviewTypeLabel(run.reviewType)} — ${run.book.title}` : "Review run",
-  };
+  if (run) {
+    return { title: `${reviewTypeLabel(run.reviewType)} — ${run.book.title}` };
+  }
+  const t = await getTranslations("admin.reviewRunDetail");
+  return { title: t("metaFallback") };
 }
 
 function Fact({ label, value }: { label: string; value: React.ReactNode }) {
@@ -41,6 +44,18 @@ export default async function AdminReviewRunDetailPage({
   const { runId } = await params;
   const run = await getAdminReviewRun(runId);
   if (!run) notFound();
+  const locale = await getLocale();
+  const t = await getTranslations("admin.reviewRunDetail");
+  const tStatus = await getTranslations("status");
+  const tShell = await getTranslations("admin.shell.nav");
+  const runStatusName = (status: string) => {
+    const known = ["pending", "incomplete", "complete", "failed"];
+    return known.includes(status)
+      ? tStatus(`run.${status}`)
+      : reviewRunStatusLabel(status);
+  };
+  const reviewTypeName = (rt: string) =>
+    rt in REVIEW_TYPE_LABELS ? tStatus(`reviewType.${rt}`) : reviewTypeLabel(rt);
 
   const workspaceBook = `/workspace/authors/${run.author.slug}/books/${run.book.slug}`;
 
@@ -51,20 +66,20 @@ export default async function AdminReviewRunDetailPage({
           href="/admin/review-runs"
           className="underline-offset-4 hover:text-oxblood hover:underline"
         >
-          Review Runs
+          {tShell("reviewRuns")}
         </Link>{" "}
-        / {reviewTypeLabel(run.reviewType)}
+        / {reviewTypeName(run.reviewType)}
       </p>
 
       <h1 className="mt-3 font-display text-4xl tracking-tight">
-        {reviewTypeLabel(run.reviewType)}
+        {reviewTypeName(run.reviewType)}
       </h1>
       <p className="mt-1 font-sans text-sm text-ink-soft">
-        for{" "}
+        {t("forLabel")}{" "}
         <Link href={`/admin/books/${run.book.id}`} className={`font-sans ${link}`}>
           {run.book.title}
         </Link>{" "}
-        by{" "}
+        {t("byLabel")}{" "}
         <Link
           href={`/admin/authors/${run.author.id}`}
           className={`font-sans ${link}`}
@@ -74,45 +89,52 @@ export default async function AdminReviewRunDetailPage({
       </p>
 
       <dl className="rule mt-8 grid max-w-3xl grid-cols-2 gap-x-10 gap-y-6 pt-6 sm:grid-cols-4">
-        <Fact label="Status" value={reviewRunStatusLabel(run.status)} />
+        <Fact label={t("status")} value={runStatusName(run.status)} />
         <Fact
-          label="Progress"
+          label={t("progress")}
           value={
             run.progressKnown && run.totalPasses != null
-              ? `${run.completedPasses ?? 0} of ${run.totalPasses} readings`
-              : "Not recorded"
+              ? t("progressValue", {
+                  completed: run.completedPasses ?? 0,
+                  total: run.totalPasses,
+                })
+              : t("notRecorded")
           }
         />
-        <Fact label="Findings from this run" value={run.findings.total} />
-        <Fact label="Created" value={formatDate(run.createdAt)} />
+        <Fact label={t("findingsFromRun")} value={run.findings.total} />
+        <Fact label={t("created")} value={formatDate(run.createdAt, locale)} />
       </dl>
 
       {run.status === "incomplete" ? (
         <p className="mt-4 max-w-prose font-sans text-xs text-ink-faint">
-          This review paused between chunks and can be continued by the author
-          from the Workspace. It is not a failure.
+          {t("incompleteNote")}
         </p>
       ) : null}
 
       <section className="rule mt-12 pt-6" aria-labelledby="findings-heading">
         <h2 id="findings-heading" className="eyebrow">
-          Findings from this run
+          {t("findingsFromRun")}
         </h2>
         <dl className="mt-4 grid max-w-md grid-cols-3 gap-x-8">
-          <Fact label="Open" value={run.findings.open} />
-          <Fact label="Resolved" value={run.findings.resolved} />
-          <Fact label="Set aside" value={run.findings.setAside} />
+          <Fact label={tStatus("finding.open")} value={run.findings.open} />
+          <Fact
+            label={tStatus("finding.resolved")}
+            value={run.findings.resolved}
+          />
+          <Fact
+            label={tStatus("finding.dismissed")}
+            value={run.findings.setAside}
+          />
         </dl>
         <p className="mt-4 font-sans text-xs text-ink-faint">
-          Counts are scoped to this run. Earlier runs&rsquo; findings are
-          preserved separately.
+          {t("countsScoped")}
         </p>
       </section>
 
       {run.summary ? (
         <section className="rule mt-12 pt-6" aria-labelledby="note-heading">
           <h2 id="note-heading" className="eyebrow">
-            Cover note
+            {t("coverNote")}
           </h2>
           <p className="mt-3 max-w-prose whitespace-pre-line border-l-2 border-rule pl-4 italic leading-relaxed text-ink-soft">
             {run.summary}
@@ -126,29 +148,29 @@ export default async function AdminReviewRunDetailPage({
           aria-labelledby="provenance-heading"
         >
           <h2 id="provenance-heading" className="eyebrow">
-            Provenance
+            {t("provenance")}
           </h2>
           <dl className="mt-4 grid max-w-2xl grid-cols-2 gap-x-10 gap-y-6 sm:grid-cols-3">
-            <Fact label="Reviewer" value={run.provenance.reviewer ?? "—"} />
-            <Fact label="Model" value={run.provenance.model ?? "—"} />
+            <Fact label={t("reviewer")} value={run.provenance.reviewer ?? "—"} />
+            <Fact label={t("model")} value={run.provenance.model ?? "—"} />
             <Fact
-              label="Response language"
+              label={t("responseLanguage")}
               value={languageLabel(run.responseLanguage)}
             />
             <Fact
-              label="Prompt fingerprint"
+              label={t("promptFingerprint")}
               value={run.provenance.promptFingerprint ?? "—"}
             />
             <Fact
-              label="Planned passes"
+              label={t("plannedPasses")}
               value={run.provenance.passCount ?? "—"}
             />
             <Fact
-              label="Cap · per pass"
+              label={t("capPerPass")}
               value={run.provenance.perPassCap ?? "—"}
             />
             <Fact
-              label="Cap · per run"
+              label={t("capPerRun")}
               value={run.provenance.perRunCap ?? "—"}
             />
           </dl>
@@ -157,19 +179,18 @@ export default async function AdminReviewRunDetailPage({
 
       <section className="rule mt-12 pt-6" aria-labelledby="open-heading">
         <h2 id="open-heading" className="eyebrow">
-          Open in the Workspace
+          {t("openInWorkspace")}
         </h2>
         <div className="mt-4 flex flex-wrap gap-x-8 gap-y-2">
           <Link href={`${workspaceBook}/findings`} className={`font-sans text-sm ${link}`}>
-            This book&rsquo;s Findings →
+            {t("bookFindings")}
           </Link>
           <Link href={workspaceBook} className={`font-sans text-sm ${link}`}>
-            The book →
+            {t("theBook")}
           </Link>
         </div>
         <p className="mt-2 font-sans text-xs text-ink-faint">
-          These open the author-facing Workspace for inspection — not an
-          administrative edit mode.
+          {t("inspectionNote")}
         </p>
       </section>
     </>

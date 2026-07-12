@@ -325,6 +325,7 @@
   },
   "admin": {
     "shell": {
+      "metaTitle": "Administration",
       "footer": "© 2026 Huerta Group Publishing · Administration",
       "nav": {
         "overview": "Overview",
@@ -334,6 +335,175 @@
         "aiUsage": "AI Usage",
         "system": "System"
       }
+    },
+    "overview": {
+      "title": "The imprint’s operations",
+      "intro": "The same account and session as your Workspace, in an operational view — for running Huerta Group Publishing rather than writing within it. This area is read-oriented for now, growing as the imprint’s operations take shape.",
+      "sectionsLabel": "Sections",
+      "blurbs": {
+        "authors": "The author roster as the imprint holds it, independent of any one book.",
+        "books": "Every book across every author — the whole shelf in one place.",
+        "reviewRuns": "Constitution Review runs across the platform, and how each finished.",
+        "aiUsage": "Where the platform's use of external editorial models is accounted for.",
+        "system": "Configuration, migrations, and platform health — in plain terms."
+      },
+      "statusLabel": "Status",
+      "statusNote": "Commercial plans, billing, and public access are not configured. Administration reads the platform; it does not yet change author content, and nothing here alters a manuscript, a review, or the permanent record. Those remain the author’s, in the <link>Workspace</link>."
+    },
+    "section": {
+      "availableToday": "Available today",
+      "notYetBuilt": "Not yet built"
+    },
+    "filters": {
+      "apply": "Apply",
+      "search": "Search",
+      "searchByName": "Search by name",
+      "sort": "Sort",
+      "matchingQuery": "matching “{query}”",
+      "matchingFilters": "matching your filters"
+    },
+    "sort": {
+      "nameAZ": "Name (A–Z)",
+      "titleAZ": "Title (A–Z)",
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "updated": "Recently updated",
+      "mostFindings": "Most findings",
+      "fewestFindings": "Fewest findings"
+    },
+    "flags": {
+      "needsAttention": "Needs attention",
+      "stalled": "Stalled"
+    },
+    "counts": {
+      "authors": "{count, plural, one {# author} other {# authors}}",
+      "books": "{count, plural, one {# book} other {# books}}",
+      "runs": "{count, plural, one {# run} other {# runs}}"
+    },
+    "authors": {
+      "intro": "Every author the platform holds. Read-only — the roster reflects the record; it never edits it.",
+      "searchPlaceholder": "Author or pen name",
+      "emptyNone": "No authors exist on the platform yet.",
+      "emptyNoMatch": "No authors match this search.",
+      "active": "Active",
+      "archived": "Archived",
+      "bookCount": "{count, plural, one {# book} other {# books}}",
+      "inProgress": "{count, number} in progress",
+      "created": "Created {date}",
+      "latestBookUpdate": "Latest book update {date}",
+      "noLinkedAccount": "No linked account"
+    },
+    "authorDetail": {
+      "metaFallback": "Author",
+      "status": "Status",
+      "created": "Created",
+      "account": "Account",
+      "linked": "Linked",
+      "notLinked": "Not linked",
+      "booksLabel": "Books",
+      "openWorkspace": "Open this author in the Workspace →",
+      "booksHeading": "Books",
+      "emptyBooks": "This author has no books yet.",
+      "chaptersOf": "{written, number}/{count, plural, one {# chapter} other {# chapters}}",
+      "updated": "Updated {date}"
+    },
+    "books": {
+      "intro": "Every book across every author, with its lifecycle stage and current editorial state. Read-only.",
+      "searchPlaceholder": "Title or author",
+      "lifecycleLabel": "Lifecycle stage",
+      "allStages": "All stages",
+      "attentionLabel": "Attention",
+      "flagAll": "All books",
+      "flagUnfinished": "Unfinished / failed review",
+      "flagOpenFindings": "Open findings",
+      "emptyNone": "No books exist on the platform yet.",
+      "emptyNoMatch": "No books match these filters.",
+      "byAuthor": "by {name}",
+      "chaptersWritten": "{written, number}/{count, plural, one {# chapter} other {# chapters}} written",
+      "reviewLabel": "Review: {status}",
+      "reviewNone": "none yet",
+      "updated": "Updated {date}"
+    },
+    "bookDetail": {
+      "metaFallback": "Book",
+      "byLabel": "by",
+      "stage": "Stage",
+      "manuscriptLanguage": "Manuscript language",
+      "chapters": "Chapters",
+      "chaptersValue": "{written, number} written of {total, number}",
+      "created": "Created",
+      "updated": "Updated",
+      "workingTitle": "Working title",
+      "openBook": "Open the book in the Workspace →",
+      "openFindings": "Open the Findings in the Workspace →",
+      "inspectionNote": "These open the author-facing Workspace for inspection — not an administrative edit mode.",
+      "findingsHeading": "Findings",
+      "reviewsHeading": "Review runs",
+      "emptyRuns": "No review runs yet.",
+      "readingsParen": "({completed, number}/{total, number} readings)"
+    },
+    "reviewRuns": {
+      "intro": "Every review across the platform, and how each is progressing. Read-only — Administration observes the review lifecycle; it never starts, continues, or changes one.",
+      "byLabel": "by",
+      "legendPending": "created or actively performing a reading.",
+      "legendIncomplete": "intentionally paused between chunks and resumable; not a failure.",
+      "legendComplete": "all planned readings finished.",
+      "legendFailed": "execution ended with a failure; findings raised beforehand are preserved.",
+      "searchPlaceholder": "Book or author",
+      "typeLabel": "Review type",
+      "allTypes": "All types",
+      "statusLabel": "Status",
+      "allStatuses": "All statuses",
+      "findingsLabel": "Findings",
+      "findingsAny": "Any",
+      "findingsWith": "With findings",
+      "emptyNone": "No review runs exist on the platform yet.",
+      "emptyNoMatch": "No review runs match these filters.",
+      "readingsShort": "{completed, number}/{total, number} readings",
+      "progressNotRecorded": "progress not recorded",
+      "created": "Created {date}"
+    },
+    "reviewRunDetail": {
+      "metaFallback": "Review run",
+      "forLabel": "for",
+      "byLabel": "by",
+      "status": "Status",
+      "progress": "Progress",
+      "progressValue": "{completed, number} of {total, number} readings",
+      "notRecorded": "Not recorded",
+      "findingsFromRun": "Findings from this run",
+      "created": "Created",
+      "incompleteNote": "This review paused between chunks and can be continued by the author from the Workspace. It is not a failure.",
+      "countsScoped": "Counts are scoped to this run. Earlier runs’ findings are preserved separately.",
+      "coverNote": "Cover note",
+      "provenance": "Provenance",
+      "reviewer": "Reviewer",
+      "model": "Model",
+      "promptFingerprint": "Prompt fingerprint",
+      "plannedPasses": "Planned passes",
+      "capPerPass": "Cap · per pass",
+      "capPerRun": "Cap · per run",
+      "responseLanguage": "Response language",
+      "openInWorkspace": "Open in the Workspace",
+      "bookFindings": "This book’s Findings →",
+      "theBook": "The book →",
+      "inspectionNote": "These open the author-facing Workspace for inspection — not an administrative edit mode."
+    },
+    "aiUsage": {
+      "intro": "Where the platform's use of external editorial models will be accounted for — reading now, and one day listening.",
+      "today1": "Nothing is metered here yet; model usage is not instrumented.",
+      "today2": "Editorial review runs against configured model credentials, bounded by caps held in code.",
+      "deferred1": "Usage and cost accounting for editorial review and audio synthesis.",
+      "deferred2": "The commercial model for Audio Review — metering, credits, plan placement, and the line between editorial listening and audiobook production — a deliberate future decision, not this phase.",
+      "deferred3": "No spending controls or billing here."
+    },
+    "system": {
+      "intro": "The platform's configuration and health, in plain terms — how Huerta Group Publishing is wired, without changing it from here.",
+      "today1": "Configuration lives in environment variables and database migrations, production-first.",
+      "today2": "Row Level Security is the security boundary; the application never uses elevated database access.",
+      "deferred1": "A read-only view of configured integrations and migration state.",
+      "deferred2": "Health indicators drawn from real signals — never invented status.",
+      "deferred3": "No configuration writes and no feature flags from Administration in this phase."
     }
   },
   "account": {

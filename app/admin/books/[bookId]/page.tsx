@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import {
   getAdminBook,
   reviewRunStatusLabel,
 } from "@/lib/admin/queries";
-import { bookStatusLabel } from "@/lib/books/types";
-import { reviewTypeLabel } from "@/lib/findings/types";
+import { REVIEW_TYPE_LABELS, reviewTypeLabel } from "@/lib/findings/types";
 import { languageLabel } from "@/lib/languages";
 import { formatDate } from "@/lib/memory/types";
 
@@ -17,7 +17,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { bookId } = await params;
   const book = await getAdminBook(bookId).catch(() => null);
-  return { title: book ? book.title : "Book" };
+  if (book) return { title: book.title };
+  const t = await getTranslations("admin.bookDetail");
+  return { title: t("metaFallback") };
 }
 
 function Fact({ label, value }: { label: string; value: React.ReactNode }) {
@@ -37,6 +39,20 @@ export default async function AdminBookDetailPage({
   const { bookId } = await params;
   const book = await getAdminBook(bookId);
   if (!book) notFound();
+  const locale = await getLocale();
+  const t = await getTranslations("admin.bookDetail");
+  const tStatus = await getTranslations("status");
+  const tShell = await getTranslations("admin.shell.nav");
+  const runStatusName = (status: string) => {
+    const known = ["pending", "incomplete", "complete", "failed"];
+    return known.includes(status)
+      ? tStatus(`run.${status}`)
+      : reviewRunStatusLabel(status);
+  };
+  const reviewTypeName = (type: string) =>
+    type in REVIEW_TYPE_LABELS
+      ? tStatus(`reviewType.${type}`)
+      : reviewTypeLabel(type);
 
   const workspaceBook = `/workspace/authors/${book.author.slug}/books/${book.slug}`;
 
@@ -47,7 +63,7 @@ export default async function AdminBookDetailPage({
           href="/admin/books"
           className="underline-offset-4 hover:text-oxblood hover:underline"
         >
-          Books
+          {tShell("books")}
         </Link>{" "}
         / {book.title}
       </p>
@@ -59,7 +75,7 @@ export default async function AdminBookDetailPage({
         <p className="mt-1 font-serif text-lg text-ink-soft">{book.subtitle}</p>
       ) : null}
       <p className="mt-2 font-sans text-sm text-ink-soft">
-        by{" "}
+        {t("byLabel")}{" "}
         <Link
           href={`/admin/authors/${book.author.id}`}
           className="text-oxblood underline-offset-4 hover:underline"
@@ -69,19 +85,28 @@ export default async function AdminBookDetailPage({
       </p>
 
       <dl className="rule mt-8 grid max-w-3xl grid-cols-2 gap-x-10 gap-y-6 pt-6 sm:grid-cols-4">
-        <Fact label="Stage" value={bookStatusLabel(book.status)} />
+        <Fact label={t("stage")} value={tStatus(`book.${book.status}`)} />
         <Fact
-          label="Manuscript language"
+          label={t("manuscriptLanguage")}
           value={languageLabel(book.language)}
         />
         <Fact
-          label="Chapters"
-          value={`${book.writtenChapterCount} written of ${book.chapterCount}`}
+          label={t("chapters")}
+          value={t("chaptersValue", {
+            written: book.writtenChapterCount,
+            total: book.chapterCount,
+          })}
         />
-        <Fact label="Created" value={formatDate(book.createdAt)} />
-        <Fact label="Updated" value={formatDate(book.updatedAt)} />
+        <Fact
+          label={t("created")}
+          value={formatDate(book.createdAt, locale)}
+        />
+        <Fact
+          label={t("updated")}
+          value={formatDate(book.updatedAt, locale)}
+        />
         {book.workingTitle ? (
-          <Fact label="Working title" value={book.workingTitle} />
+          <Fact label={t("workingTitle")} value={book.workingTitle} />
         ) : null}
       </dl>
 
@@ -90,38 +115,43 @@ export default async function AdminBookDetailPage({
           href={workspaceBook}
           className="font-sans text-sm text-oxblood underline-offset-4 hover:underline focus-visible:outline-none focus-visible:underline"
         >
-          Open the book in the Workspace →
+          {t("openBook")}
         </Link>
         <Link
           href={`${workspaceBook}/findings`}
           className="font-sans text-sm text-oxblood underline-offset-4 hover:underline focus-visible:outline-none focus-visible:underline"
         >
-          Open the Findings in the Workspace →
+          {t("openFindings")}
         </Link>
       </div>
       <p className="mt-2 font-sans text-xs text-ink-faint">
-        These open the author-facing Workspace for inspection — not an
-        administrative edit mode.
+        {t("inspectionNote")}
       </p>
 
       <section className="rule mt-12 pt-6" aria-labelledby="findings-heading">
         <h2 id="findings-heading" className="eyebrow">
-          Findings
+          {t("findingsHeading")}
         </h2>
         <dl className="mt-4 grid max-w-md grid-cols-3 gap-x-8">
-          <Fact label="Open" value={book.findings.open} />
-          <Fact label="Resolved" value={book.findings.resolved} />
-          <Fact label="Set aside" value={book.findings.setAside} />
+          <Fact label={tStatus("finding.open")} value={book.findings.open} />
+          <Fact
+            label={tStatus("finding.resolved")}
+            value={book.findings.resolved}
+          />
+          <Fact
+            label={tStatus("finding.dismissed")}
+            value={book.findings.setAside}
+          />
         </dl>
       </section>
 
       <section className="rule mt-12 pt-6" aria-labelledby="reviews-heading">
         <h2 id="reviews-heading" className="eyebrow">
-          Review runs
+          {t("reviewsHeading")}
         </h2>
         {book.runs.length === 0 ? (
           <p className="mt-4 max-w-prose italic text-ink-soft">
-            No review runs yet.
+            {t("emptyRuns")}
           </p>
         ) : (
           <ul className="mt-2">
@@ -131,19 +161,19 @@ export default async function AdminBookDetailPage({
                 className="rule flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-4"
               >
                 <span className="font-sans text-sm text-ink">
-                  {reviewTypeLabel(r.reviewType)}
+                  {reviewTypeName(r.reviewType)}
                   {r.reviewType !== "manual" ? (
                     <span className="text-ink-soft">
                       {" "}
-                      — {reviewRunStatusLabel(r.status)}
+                      — {runStatusName(r.status)}
                       {r.totalPasses
-                        ? ` (${r.completedPasses ?? 0}/${r.totalPasses} readings)`
+                        ? ` ${t("readingsParen", { completed: r.completedPasses ?? 0, total: r.totalPasses })}`
                         : ""}
                     </span>
                   ) : null}
                 </span>
                 <span className="font-sans text-xs text-ink-faint">
-                  {formatDate(r.createdAt)}
+                  {formatDate(r.createdAt, locale)}
                 </span>
               </li>
             ))}

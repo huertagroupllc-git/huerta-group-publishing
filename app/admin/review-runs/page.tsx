@@ -5,31 +5,32 @@ import {
   adminInputClass,
   adminSelectClass,
 } from "@/components/admin-controls";
+import { getLocale, getTranslations } from "next-intl/server";
 import {
   listAdminReviewRuns,
   reviewRunStatusLabel,
   type AdminRunRow,
 } from "@/lib/admin/queries";
-import { reviewTypeLabel } from "@/lib/findings/types";
+import { REVIEW_TYPE_LABELS, reviewTypeLabel } from "@/lib/findings/types";
 import { formatDate } from "@/lib/memory/types";
 
-export const metadata: Metadata = { title: "Review Runs" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("admin.shell.nav");
+  return { title: t("reviewRuns") };
+}
 
 const PAGE_SIZE = 20;
 
-const STATUSES: { value: string; label: string }[] = [
-  { value: "", label: "All statuses" },
-  { value: "pending", label: "Reading now" },
-  { value: "incomplete", label: "Incomplete" },
-  { value: "complete", label: "Complete" },
-  { value: "failed", label: "Did not finish" },
-];
+// Filter option VALUES are stable query parameters; labels resolve from
+// the status.run canon at render time. NOTE: "incomplete"/"complete"
+// list labels historically matched the canon labels.
+const STATUS_VALUES = ["", "pending", "incomplete", "complete", "failed"];
 
-const SORTS: { value: string; label: string }[] = [
-  { value: "newest", label: "Newest" },
-  { value: "oldest", label: "Oldest" },
-  { value: "most_findings", label: "Most findings" },
-  { value: "fewest_findings", label: "Fewest findings" },
+const SORTS: { value: string; labelKey: string }[] = [
+  { value: "newest", labelKey: "newest" },
+  { value: "oldest", labelKey: "oldest" },
+  { value: "most_findings", labelKey: "mostFindings" },
+  { value: "fewest_findings", labelKey: "fewestFindings" },
 ];
 
 function sortRuns(rows: AdminRunRow[], sort: string): AdminRunRow[] {
@@ -92,33 +93,51 @@ export default async function AdminReviewRunsPage({
     pageCount,
   );
   const rows = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const locale = await getLocale();
+  const t = await getTranslations("admin.reviewRuns");
+  const tFilters = await getTranslations("admin.filters");
+  const tSort = await getTranslations("admin.sort");
+  const tCounts = await getTranslations("admin.counts");
+  const tFlags = await getTranslations("admin.flags");
+  const tFindingsRun = await getTranslations("findings.run");
+  const tStatus = await getTranslations("status");
+  const tNav = await getTranslations("navigation");
+  const tShell = await getTranslations("admin.shell.nav");
+  const runStatusName = (status: string) => {
+    const known = ["pending", "incomplete", "complete", "failed"];
+    return known.includes(status)
+      ? tStatus(`run.${status}`)
+      : reviewRunStatusLabel(status);
+  };
+  const reviewTypeName = (rt: string) =>
+    rt in REVIEW_TYPE_LABELS ? tStatus(`reviewType.${rt}`) : reviewTypeLabel(rt);
 
   return (
     <>
-      <p className="eyebrow">Administration</p>
-      <h1 className="mt-2 font-display text-4xl tracking-tight">Review Runs</h1>
+      <p className="eyebrow">{tNav("administration")}</p>
+      <h1 className="mt-2 font-display text-4xl tracking-tight">
+        {tShell("reviewRuns")}
+      </h1>
       <p className="mt-4 max-w-prose leading-relaxed text-ink-soft">
-        Every review across the platform, and how each is progressing.
-        Read-only — Administration observes the review lifecycle; it never
-        starts, continues, or changes one.
+        {t("intro")}
       </p>
 
       <dl className="mt-6 max-w-3xl space-y-1 font-sans text-xs text-ink-soft">
         <div>
-          <dt className="inline text-ink">Reading now</dt> — created or
-          actively performing a reading.
+          <dt className="inline text-ink">{tStatus("run.pending")}</dt> —{" "}
+          {t("legendPending")}
         </div>
         <div>
-          <dt className="inline text-ink">Incomplete</dt> — intentionally
-          paused between chunks and resumable; not a failure.
+          <dt className="inline text-ink">{tStatus("run.incomplete")}</dt> —{" "}
+          {t("legendIncomplete")}
         </div>
         <div>
-          <dt className="inline text-ink">Complete</dt> — all planned readings
-          finished.
+          <dt className="inline text-ink">{tStatus("run.complete")}</dt> —{" "}
+          {t("legendComplete")}
         </div>
         <div>
-          <dt className="inline text-ink">Did not finish</dt> — execution
-          ended with a failure; findings raised beforehand are preserved.
+          <dt className="inline text-ink">{tStatus("run.failed")}</dt> —{" "}
+          {t("legendFailed")}
         </div>
       </dl>
 
@@ -129,20 +148,20 @@ export default async function AdminReviewRunsPage({
       >
         <div className="sm:col-span-2 lg:col-span-1">
           <label htmlFor="q" className="eyebrow block">
-            Search
+            {tFilters("search")}
           </label>
           <input
             id="q"
             name="q"
             type="search"
             defaultValue={q}
-            placeholder="Book or author"
+            placeholder={t("searchPlaceholder")}
             className={adminInputClass}
           />
         </div>
         <div>
           <label htmlFor="type" className="eyebrow block">
-            Review type
+            {t("typeLabel")}
           </label>
           <select
             id="type"
@@ -150,17 +169,17 @@ export default async function AdminReviewRunsPage({
             defaultValue={type}
             className={adminSelectClass}
           >
-            <option value="">All types</option>
-            {types.map((t) => (
-              <option key={t} value={t}>
-                {reviewTypeLabel(t)}
+            <option value="">{t("allTypes")}</option>
+            {types.map((rt) => (
+              <option key={rt} value={rt}>
+                {reviewTypeName(rt)}
               </option>
             ))}
           </select>
         </div>
         <div>
           <label htmlFor="status" className="eyebrow block">
-            Status
+            {t("statusLabel")}
           </label>
           <select
             id="status"
@@ -168,16 +187,16 @@ export default async function AdminReviewRunsPage({
             defaultValue={status}
             className={adminSelectClass}
           >
-            {STATUSES.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
+            {STATUS_VALUES.map((v) => (
+              <option key={v} value={v}>
+                {v === "" ? t("allStatuses") : tStatus(`run.${v}`)}
               </option>
             ))}
           </select>
         </div>
         <div>
           <label htmlFor="findings" className="eyebrow block">
-            Findings
+            {t("findingsLabel")}
           </label>
           <select
             id="findings"
@@ -185,14 +204,14 @@ export default async function AdminReviewRunsPage({
             defaultValue={findings}
             className={adminSelectClass}
           >
-            <option value="">Any</option>
-            <option value="with">With findings</option>
+            <option value="">{t("findingsAny")}</option>
+            <option value="with">{t("findingsWith")}</option>
           </select>
         </div>
         <div className="flex items-end gap-4">
           <div className="flex-1">
             <label htmlFor="sort" className="eyebrow block">
-              Sort
+              {tFilters("sort")}
             </label>
             <select
               id="sort"
@@ -202,7 +221,7 @@ export default async function AdminReviewRunsPage({
             >
               {SORTS.map((s) => (
                 <option key={s.value} value={s.value}>
-                  {s.label}
+                  {tSort(s.labelKey)}
                 </option>
               ))}
             </select>
@@ -211,21 +230,21 @@ export default async function AdminReviewRunsPage({
             type="submit"
             className="border border-rule px-5 py-2 font-sans text-sm tracking-wide text-ink hover:border-oxblood hover:text-oxblood focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oxblood"
           >
-            Apply
+            {tFilters("apply")}
           </button>
         </div>
       </form>
 
       <p className="mt-6 font-sans text-xs text-ink-faint">
-        {sorted.length} {sorted.length === 1 ? "run" : "runs"}
-        {query || type || status || findings ? " matching your filters" : ""}
+        {tCounts("runs", { count: sorted.length })}
+        {query || type || status || findings
+          ? ` ${tFilters("matchingFilters")}`
+          : ""}
       </p>
 
       {rows.length === 0 ? (
         <p className="mt-8 max-w-prose italic text-ink-soft">
-          {all.length === 0
-            ? "No review runs exist on the platform yet."
-            : "No review runs match these filters."}
+          {all.length === 0 ? t("emptyNone") : t("emptyNoMatch")}
         </p>
       ) : (
         <ul className="mt-2">
@@ -239,17 +258,23 @@ export default async function AdminReviewRunsPage({
                   {r.book.title}
                 </Link>
                 <span className="font-sans text-xs text-ink-soft">
-                  {reviewRunStatusLabel(r.status)}
+                  {runStatusName(r.status)}
                   {r.status === "failed" ? (
-                    <span className="text-oxblood"> · Needs attention</span>
+                    <span className="text-oxblood">
+                      {" "}
+                      · {tFlags("needsAttention")}
+                    </span>
                   ) : null}
                   {r.stalledPending ? (
-                    <span className="text-oxblood"> · Stalled</span>
+                    <span className="text-oxblood">
+                      {" "}
+                      · {tFlags("stalled")}
+                    </span>
                   ) : null}
                 </span>
               </div>
               <p className="mt-1 font-sans text-xs text-ink-soft">
-                {reviewTypeLabel(r.reviewType)} · by{" "}
+                {reviewTypeName(r.reviewType)} · {t("byLabel")}{" "}
                 <Link
                   href={`/admin/authors/${r.author.id}`}
                   className="text-oxblood underline-offset-4 hover:underline focus-visible:outline-none focus-visible:underline"
@@ -258,11 +283,13 @@ export default async function AdminReviewRunsPage({
                 </Link>{" "}
                 ·{" "}
                 {r.progressKnown && r.totalPasses != null
-                  ? `${r.completedPasses ?? 0}/${r.totalPasses} readings`
-                  : "progress not recorded"}{" "}
-                · {r.findingsCount}{" "}
-                {r.findingsCount === 1 ? "finding" : "findings"} · Created{" "}
-                {formatDate(r.createdAt)}
+                  ? t("readingsShort", {
+                      completed: r.completedPasses ?? 0,
+                      total: r.totalPasses,
+                    })
+                  : t("progressNotRecorded")}{" "}
+                · {tFindingsRun("findingsCount", { count: r.findingsCount })} ·{" "}
+                {t("created", { date: formatDate(r.createdAt, locale) })}
               </p>
             </li>
           ))}

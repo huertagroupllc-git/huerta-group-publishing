@@ -5,18 +5,22 @@ import {
   adminInputClass,
   adminSelectClass,
 } from "@/components/admin-controls";
+import { getLocale, getTranslations } from "next-intl/server";
 import { listAdminAuthors, type AdminAuthorRow } from "@/lib/admin/queries";
 import { formatDate } from "@/lib/memory/types";
 
-export const metadata: Metadata = { title: "Authors" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("admin.shell.nav");
+  return { title: t("authors") };
+}
 
 const PAGE_SIZE = 20;
 
-const SORTS: { value: string; label: string }[] = [
-  { value: "name", label: "Name (A–Z)" },
-  { value: "newest", label: "Newest" },
-  { value: "oldest", label: "Oldest" },
-  { value: "updated", label: "Recently updated" },
+const SORTS: { value: string; labelKey: string }[] = [
+  { value: "name", labelKey: "nameAZ" },
+  { value: "newest", labelKey: "newest" },
+  { value: "oldest", labelKey: "oldest" },
+  { value: "updated", labelKey: "updated" },
 ];
 
 function sortAuthors(rows: AdminAuthorRow[], sort: string): AdminAuthorRow[] {
@@ -60,14 +64,23 @@ export default async function AdminAuthorsPage({
     pageCount,
   );
   const rows = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const locale = await getLocale();
+  const t = await getTranslations("admin.authors");
+  const tFilters = await getTranslations("admin.filters");
+  const tSort = await getTranslations("admin.sort");
+  const tCounts = await getTranslations("admin.counts");
+  const tAuthor = await getTranslations("author");
+  const tNav = await getTranslations("navigation");
+  const tShell = await getTranslations("admin.shell.nav");
 
   return (
     <>
-      <p className="eyebrow">Administration</p>
-      <h1 className="mt-2 font-display text-4xl tracking-tight">Authors</h1>
+      <p className="eyebrow">{tNav("administration")}</p>
+      <h1 className="mt-2 font-display text-4xl tracking-tight">
+        {tShell("authors")}
+      </h1>
       <p className="mt-4 max-w-prose leading-relaxed text-ink-soft">
-        Every author the platform holds. Read-only — the roster reflects the
-        record; it never edits it.
+        {t("intro")}
       </p>
 
       <form
@@ -77,20 +90,20 @@ export default async function AdminAuthorsPage({
       >
         <div className="min-w-56 flex-1">
           <label htmlFor="q" className="eyebrow block">
-            Search by name
+            {tFilters("searchByName")}
           </label>
           <input
             id="q"
             name="q"
             type="search"
             defaultValue={q}
-            placeholder="Author or pen name"
+            placeholder={t("searchPlaceholder")}
             className={adminInputClass}
           />
         </div>
         <div className="w-48">
           <label htmlFor="sort" className="eyebrow block">
-            Sort
+            {tFilters("sort")}
           </label>
           <select
             id="sort"
@@ -100,7 +113,7 @@ export default async function AdminAuthorsPage({
           >
             {SORTS.map((s) => (
               <option key={s.value} value={s.value}>
-                {s.label}
+                {tSort(s.labelKey)}
               </option>
             ))}
           </select>
@@ -109,20 +122,18 @@ export default async function AdminAuthorsPage({
           type="submit"
           className="border border-rule px-5 py-2 font-sans text-sm tracking-wide text-ink hover:border-oxblood hover:text-oxblood focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oxblood"
         >
-          Apply
+          {tFilters("apply")}
         </button>
       </form>
 
       <p className="mt-6 font-sans text-xs text-ink-faint">
-        {sorted.length} {sorted.length === 1 ? "author" : "authors"}
-        {query ? ` matching “${q.trim()}”` : ""}
+        {tCounts("authors", { count: sorted.length })}
+        {query ? ` ${tFilters("matchingQuery", { query: q.trim() })}` : ""}
       </p>
 
       {rows.length === 0 ? (
         <p className="mt-8 max-w-prose italic text-ink-soft">
-          {all.length === 0
-            ? "No authors exist on the platform yet."
-            : "No authors match this search."}
+          {all.length === 0 ? t("emptyNone") : t("emptyNoMatch")}
         </p>
       ) : (
         <ul className="mt-2">
@@ -137,26 +148,26 @@ export default async function AdminAuthorsPage({
                     {a.fullName}
                     {a.penName ? (
                       <span className="ml-2 font-sans text-xs text-ink-faint">
-                        writing as {a.penName}
+                        {tAuthor("writingAs", { penName: a.penName })}
                       </span>
                     ) : null}
                   </span>
                   {a.status === "archived" ? (
                     <span className="font-sans text-xs text-ink-faint">
-                      Archived
+                      {t("archived")}
                     </span>
                   ) : null}
                 </div>
                 <p className="mt-1 font-sans text-xs text-ink-soft">
-                  {a.bookCount} {a.bookCount === 1 ? "book" : "books"}
+                  {t("bookCount", { count: a.bookCount })}
                   {a.bookCount > 0
-                    ? ` · ${a.inProgressBookCount} in progress`
+                    ? ` · ${t("inProgress", { count: a.inProgressBookCount })}`
                     : ""}{" "}
-                  · Created {formatDate(a.createdAt)}
+                  · {t("created", { date: formatDate(a.createdAt, locale) })}
                   {a.lastBookUpdate
-                    ? ` · Latest book update ${formatDate(a.lastBookUpdate)}`
+                    ? ` · ${t("latestBookUpdate", { date: formatDate(a.lastBookUpdate, locale) })}`
                     : ""}
-                  {a.hasAccount ? "" : " · No linked account"}
+                  {a.hasAccount ? "" : ` · ${t("noLinkedAccount")}`}
                 </p>
               </Link>
             </li>

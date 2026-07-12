@@ -5,29 +5,33 @@ import {
   adminInputClass,
   adminSelectClass,
 } from "@/components/admin-controls";
+import { getLocale, getTranslations } from "next-intl/server";
 import {
   listAdminBooks,
   reviewRunStatusLabel,
   type AdminBookRow,
 } from "@/lib/admin/queries";
-import { BOOK_STATUSES, bookStatusLabel } from "@/lib/books/types";
+import { BOOK_STATUSES } from "@/lib/books/types";
 import { formatDate } from "@/lib/memory/types";
 
-export const metadata: Metadata = { title: "Books" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("admin.shell.nav");
+  return { title: t("books") };
+}
 
 const PAGE_SIZE = 20;
 
-const SORTS: { value: string; label: string }[] = [
-  { value: "updated", label: "Recently updated" },
-  { value: "newest", label: "Newest" },
-  { value: "oldest", label: "Oldest" },
-  { value: "title", label: "Title (A–Z)" },
+const SORTS: { value: string; labelKey: string }[] = [
+  { value: "updated", labelKey: "updated" },
+  { value: "newest", labelKey: "newest" },
+  { value: "oldest", labelKey: "oldest" },
+  { value: "title", labelKey: "titleAZ" },
 ];
 
-const FLAGS: { value: string; label: string }[] = [
-  { value: "", label: "All books" },
-  { value: "unfinished", label: "Unfinished / failed review" },
-  { value: "open_findings", label: "Open findings" },
+const FLAGS: { value: string; labelKey: string }[] = [
+  { value: "", labelKey: "flagAll" },
+  { value: "unfinished", labelKey: "flagUnfinished" },
+  { value: "open_findings", labelKey: "flagOpenFindings" },
 ];
 
 function sortBooks(rows: AdminBookRow[], sort: string): AdminBookRow[] {
@@ -88,14 +92,31 @@ export default async function AdminBooksPage({
     pageCount,
   );
   const rows = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const locale = await getLocale();
+  const t = await getTranslations("admin.books");
+  const tFilters = await getTranslations("admin.filters");
+  const tSort = await getTranslations("admin.sort");
+  const tCounts = await getTranslations("admin.counts");
+  const tFlags = await getTranslations("admin.flags");
+  const tStatus = await getTranslations("status");
+  const tNav = await getTranslations("navigation");
+  const tShell = await getTranslations("admin.shell.nav");
+  const tProgress = await getTranslations("manuscript.progress");
+  const runStatusName = (status: string) => {
+    const known = ["pending", "incomplete", "complete", "failed"];
+    return known.includes(status)
+      ? tStatus(`run.${status}`)
+      : reviewRunStatusLabel(status);
+  };
 
   return (
     <>
-      <p className="eyebrow">Administration</p>
-      <h1 className="mt-2 font-display text-4xl tracking-tight">Books</h1>
+      <p className="eyebrow">{tNav("administration")}</p>
+      <h1 className="mt-2 font-display text-4xl tracking-tight">
+        {tShell("books")}
+      </h1>
       <p className="mt-4 max-w-prose leading-relaxed text-ink-soft">
-        Every book across every author, with its lifecycle stage and current
-        editorial state. Read-only.
+        {t("intro")}
       </p>
 
       <form
@@ -105,20 +126,20 @@ export default async function AdminBooksPage({
       >
         <div className="sm:col-span-2 lg:col-span-1">
           <label htmlFor="q" className="eyebrow block">
-            Search
+            {tFilters("search")}
           </label>
           <input
             id="q"
             name="q"
             type="search"
             defaultValue={q}
-            placeholder="Title or author"
+            placeholder={t("searchPlaceholder")}
             className={adminInputClass}
           />
         </div>
         <div>
           <label htmlFor="status" className="eyebrow block">
-            Lifecycle stage
+            {t("lifecycleLabel")}
           </label>
           <select
             id="status"
@@ -126,17 +147,17 @@ export default async function AdminBooksPage({
             defaultValue={status}
             className={adminSelectClass}
           >
-            <option value="">All stages</option>
+            <option value="">{t("allStages")}</option>
             {BOOK_STATUSES.map((s) => (
               <option key={s.value} value={s.value}>
-                {s.label}
+                {tStatus(`book.${s.value}`)}
               </option>
             ))}
           </select>
         </div>
         <div>
           <label htmlFor="flag" className="eyebrow block">
-            Attention
+            {t("attentionLabel")}
           </label>
           <select
             id="flag"
@@ -146,7 +167,7 @@ export default async function AdminBooksPage({
           >
             {FLAGS.map((f) => (
               <option key={f.value} value={f.value}>
-                {f.label}
+                {t(f.labelKey)}
               </option>
             ))}
           </select>
@@ -154,7 +175,7 @@ export default async function AdminBooksPage({
         <div className="flex items-end gap-4">
           <div className="flex-1">
             <label htmlFor="sort" className="eyebrow block">
-              Sort
+              {tFilters("sort")}
             </label>
             <select
               id="sort"
@@ -164,7 +185,7 @@ export default async function AdminBooksPage({
             >
               {SORTS.map((s) => (
                 <option key={s.value} value={s.value}>
-                  {s.label}
+                  {tSort(s.labelKey)}
                 </option>
               ))}
             </select>
@@ -173,21 +194,19 @@ export default async function AdminBooksPage({
             type="submit"
             className="border border-rule px-5 py-2 font-sans text-sm tracking-wide text-ink hover:border-oxblood hover:text-oxblood focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oxblood"
           >
-            Apply
+            {tFilters("apply")}
           </button>
         </div>
       </form>
 
       <p className="mt-6 font-sans text-xs text-ink-faint">
-        {sorted.length} {sorted.length === 1 ? "book" : "books"}
-        {query || status || flag ? " matching your filters" : ""}
+        {tCounts("books", { count: sorted.length })}
+        {query || status || flag ? ` ${tFilters("matchingFilters")}` : ""}
       </p>
 
       {rows.length === 0 ? (
         <p className="mt-8 max-w-prose italic text-ink-soft">
-          {all.length === 0
-            ? "No books exist on the platform yet."
-            : "No books match these filters."}
+          {all.length === 0 ? t("emptyNone") : t("emptyNoMatch")}
         </p>
       ) : (
         <ul className="mt-2">
@@ -202,22 +221,28 @@ export default async function AdminBooksPage({
                     {b.title}
                   </span>
                   <span className="font-sans text-xs text-ink-soft">
-                    {bookStatusLabel(b.status)}
+                    {tStatus(`book.${b.status}`)}
                   </span>
                 </div>
                 <p className="mt-1 font-sans text-xs text-ink-soft">
-                  by {b.author.fullName} · {b.writtenChapterCount}/
-                  {b.chapterCount}{" "}
-                  {b.chapterCount === 1 ? "chapter" : "chapters"} written ·
-                  Review:{" "}
-                  {b.latestReviewStatus
-                    ? reviewRunStatusLabel(b.latestReviewStatus)
-                    : "none yet"}{" "}
-                  · {b.openFindings} open{" "}
-                  {b.openFindings === 1 ? "finding" : "findings"} · Updated{" "}
-                  {formatDate(b.updatedAt)}
+                  {t("byAuthor", { name: b.author.fullName })} ·{" "}
+                  {t("chaptersWritten", {
+                    written: b.writtenChapterCount,
+                    count: b.chapterCount,
+                  })}{" "}
+                  ·{" "}
+                  {t("reviewLabel", {
+                    status: b.latestReviewStatus
+                      ? runStatusName(b.latestReviewStatus)
+                      : t("reviewNone"),
+                  })}{" "}
+                  · {tProgress("openFindings", { count: b.openFindings })} ·{" "}
+                  {t("updated", { date: formatDate(b.updatedAt, locale) })}
                   {b.hasUnfinishedReview ? (
-                    <span className="text-oxblood"> · Needs attention</span>
+                    <span className="text-oxblood">
+                      {" "}
+                      · {tFlags("needsAttention")}
+                    </span>
                   ) : null}
                 </p>
               </Link>
