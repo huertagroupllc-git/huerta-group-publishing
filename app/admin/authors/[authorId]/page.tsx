@@ -43,6 +43,7 @@ export default async function AdminAuthorDetailPage({
   const tProgress = await getTranslations("manuscript.progress");
   const tShell = await getTranslations("admin.shell.nav");
   const tFlags = await getTranslations("admin.flags");
+  const tDeletion = await getTranslations("admin.deletion");
 
   return (
     <>
@@ -145,6 +146,21 @@ export default async function AdminAuthorDetailPage({
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="rule mt-14 pt-6" aria-labelledby="danger-heading">
+        <h2 id="danger-heading" className="eyebrow text-oxblood">
+          {tDeletion("dangerHeading")}
+        </h2>
+        <p className="mt-3 max-w-prose font-sans text-sm text-ink-soft">
+          {tDeletion("authorDangerNote")}
+        </p>
+        <Link
+          href={`/admin/authors/${author.id}/delete`}
+          className="mt-4 inline-block font-sans text-sm text-oxblood underline-offset-4 hover:underline focus-visible:outline-none focus-visible:underline"
+        >
+          {tDeletion("authorDangerLink")}
+        </Link>
       </section>
     </>
   );

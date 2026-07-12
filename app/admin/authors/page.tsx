@@ -6,6 +6,7 @@ import {
   adminSelectClass,
 } from "@/components/admin-controls";
 import { getLocale, getTranslations } from "next-intl/server";
+import { ActionMessage } from "@/components/action-message";
 import { listAdminAuthors, type AdminAuthorRow } from "@/lib/admin/queries";
 import { formatDate } from "@/lib/memory/types";
 
@@ -42,9 +43,21 @@ function sortAuthors(rows: AdminAuthorRow[], sort: string): AdminAuthorRow[] {
 export default async function AdminAuthorsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; sort?: string; page?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    sort?: string;
+    page?: string;
+    error?: string;
+    m_name?: string;
+  }>;
 }) {
-  const { q = "", sort = "name", page: pageParam } = await searchParams;
+  const {
+    q = "",
+    sort = "name",
+    page: pageParam,
+    error: messageCode,
+    m_name: messageName,
+  } = await searchParams;
   const query = q.trim().toLowerCase();
 
   const all = await listAdminAuthors();
@@ -82,6 +95,15 @@ export default async function AdminAuthorsPage({
       <p className="mt-4 max-w-prose leading-relaxed text-ink-soft">
         {t("intro")}
       </p>
+
+      <div className="mt-4">
+        <ActionMessage
+          code={messageCode}
+          params={messageName ? { name: messageName } : undefined}
+          namespace="admin.deletion.messages"
+          legacyText={false}
+        />
+      </div>
 
       <form
         method="get"

@@ -6,6 +6,7 @@ import {
   adminSelectClass,
 } from "@/components/admin-controls";
 import { getLocale, getTranslations } from "next-intl/server";
+import { ActionMessage } from "@/components/action-message";
 import {
   listAdminBooks,
   reviewRunStatusLabel,
@@ -61,6 +62,8 @@ export default async function AdminBooksPage({
     flag?: string;
     sort?: string;
     page?: string;
+    error?: string;
+    m_title?: string;
   }>;
 }) {
   const {
@@ -69,6 +72,8 @@ export default async function AdminBooksPage({
     flag = "",
     sort = "updated",
     page: pageParam,
+    error: messageCode,
+    m_title: messageTitle,
   } = await searchParams;
   const query = q.trim().toLowerCase();
 
@@ -122,6 +127,15 @@ export default async function AdminBooksPage({
       <p className="mt-4 max-w-prose leading-relaxed text-ink-soft">
         {t("intro")}
       </p>
+
+      <div className="mt-4">
+        <ActionMessage
+          code={messageCode}
+          params={messageTitle ? { title: messageTitle } : undefined}
+          namespace="admin.deletion.messages"
+          legacyText={false}
+        />
+      </div>
 
       <form
         method="get"

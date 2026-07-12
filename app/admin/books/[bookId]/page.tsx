@@ -48,6 +48,7 @@ export default async function AdminBookDetailPage({
   const tStatus = await getTranslations("status");
   const tShell = await getTranslations("admin.shell.nav");
   const tLangs = await getTranslations("languages");
+  const tDeletion = await getTranslations("admin.deletion");
   const langName = (tag: string) => {
     const n = normalizeLanguageTag(tag) ?? "en";
     const name = tLangs.has(n) ? tLangs(n) : languageDefinition(n).label;
@@ -196,6 +197,21 @@ export default async function AdminBookDetailPage({
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="rule mt-14 pt-6" aria-labelledby="danger-heading">
+        <h2 id="danger-heading" className="eyebrow text-oxblood">
+          {tDeletion("dangerHeading")}
+        </h2>
+        <p className="mt-3 max-w-prose font-sans text-sm text-ink-soft">
+          {tDeletion("bookDangerNote")}
+        </p>
+        <Link
+          href={`/admin/books/${bookId}/delete`}
+          className="mt-4 inline-block font-sans text-sm text-oxblood underline-offset-4 hover:underline focus-visible:outline-none focus-visible:underline"
+        >
+          {tDeletion("bookDangerLink")}
+        </Link>
       </section>
     </>
   );
