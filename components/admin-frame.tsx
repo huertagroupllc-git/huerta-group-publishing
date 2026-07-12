@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Logo } from "@/components/brand/logo";
 import { signOut } from "@/lib/auth/actions";
 import { AdminNav } from "@/components/admin-nav";
 import { ModeSwitch } from "@/components/mode-switch";
@@ -28,7 +29,13 @@ export function AdminFrame({
       <header className="rule pt-5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
           <div className="flex items-baseline gap-4">
-            <Link href="/" className="eyebrow hover:text-oxblood">
+            {/* The compact mark beside the text identity — the text names
+                the company, so the mark is decorative to assistive tech. */}
+            <Link
+              href="/"
+              className="eyebrow flex items-center gap-2.5 hover:text-oxblood focus-visible:text-oxblood focus-visible:underline focus-visible:outline-none"
+            >
+              <Logo variant="mark" height={26} decorative />
               {t("brand")}
             </Link>
             <span className="font-sans text-xs text-ink-faint">

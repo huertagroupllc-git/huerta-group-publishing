@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { Logo } from "@/components/brand/logo";
 import { signOut } from "@/lib/auth/actions";
 import { ModeSwitch } from "@/components/mode-switch";
 import { sessionIsStaff } from "@/lib/auth/session";
@@ -32,7 +33,13 @@ export async function WorkspaceFrame({
     >
       <header className="rule flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 pt-5">
         <div className="flex items-baseline gap-4">
-          <Link href="/" className="eyebrow hover:text-oxblood">
+          {/* The compact mark beside the text identity — the text names
+              the company, so the mark is decorative to assistive tech. */}
+          <Link
+            href="/"
+            className="eyebrow flex items-center gap-2.5 hover:text-oxblood focus-visible:text-oxblood focus-visible:underline focus-visible:outline-none"
+          >
+            <Logo variant="mark" height={26} decorative />
             {t("brand")}
           </Link>
           {breadcrumbs.map((crumb) => (
@@ -51,7 +58,7 @@ export async function WorkspaceFrame({
           {staff ? <ModeSwitch active="workspace" /> : null}
           <Link
             href="/workspace/account"
-            className="font-sans text-xs text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
+            className="font-sans text-xs text-ink-faint underline-offset-4 hover:text-oxblood hover:underline focus-visible:text-oxblood focus-visible:underline focus-visible:outline-none"
             title={tNav("account")}
           >
             {email}
@@ -59,7 +66,7 @@ export async function WorkspaceFrame({
           <form action={signOut}>
             <button
               type="submit"
-              className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
+              className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline focus-visible:text-oxblood focus-visible:underline focus-visible:outline-none"
             >
               {t("signOut")}
             </button>
