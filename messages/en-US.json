@@ -47,6 +47,134 @@
       "establishedOfTotal": "{count, number} of {total, number} documents established"
     }
   },
+  "home": {
+    "nav": {
+      "workshop": "The Workshop",
+      "howItWorks": "How It Works",
+      "about": "About",
+      "signIn": "Sign in",
+      "workspace": "Workspace",
+      "menu": "Menu",
+      "closeMenu": "Close menu",
+      "skip": "Skip to content",
+      "primary": "Primary"
+    },
+    "hero": {
+      "eyebrow": "An Author Operating System",
+      "headline1": "Every book begins somewhere.",
+      "headline2": "This is where yours takes shape.",
+      "lead": "The Workshop is a dedicated space for authors to develop ideas, write with focus, refine their work, and bring a manuscript to life — one chapter at a time.",
+      "enterWorkshop": "Enter the Workshop",
+      "signIn": "Sign in",
+      "seeHow": "See how it works",
+      "accessNote": "Access is provided by the publisher.",
+      "fromIdea": "From idea to manuscript. From manuscript toward publication."
+    },
+    "journey": {
+      "eyebrow": "How it works",
+      "heading": "The life of a book",
+      "intro": "Not a pipeline — an editorial practice. Each stage of the Workshop preserves a different kind of work, and the book carries all of it forward.",
+      "stages": {
+        "discovery": {
+          "title": "Discovery",
+          "body": "Before the writing, the thinking: what the book is for, who it serves, and what it must not become."
+        },
+        "bookMemory": {
+          "title": "Book Memory",
+          "body": "The book's own constitution, outline, and vocabulary — its stated intentions, kept where the work can always answer to them."
+        },
+        "manuscript": {
+          "title": "The Manuscript",
+          "body": "Written one chapter at a time, each a complete unit with its own purpose, then assembled into the reader's experience."
+        },
+        "review": {
+          "title": "Editorial Review",
+          "body": "A senior editorial reading of the finished draft against the book's own constitution — what it honors, and where it has drifted."
+        },
+        "deliberation": {
+          "title": "Deliberation",
+          "body": "Judgment between observation and revision: the author weighs each finding and records the decision behind it."
+        },
+        "revision": {
+          "title": "Revision",
+          "body": "The manuscript improves through the same deliberate versions it was written in — nothing overwritten, nothing lost."
+        },
+        "publication": {
+          "title": "Toward Publication",
+          "body": "The end the whole process is built toward: a book brought to completion and readiness, on the author's terms."
+        }
+      }
+    },
+    "workshop": {
+      "eyebrow": "Inside the Workshop",
+      "heading": "One place for the life of a book",
+      "intro": "A serious creative environment: calm rooms for writing and review, and a permanent record that preserves every intention, version, and decision — so a book always remembers how it became itself.",
+      "rooms": {
+        "authorMemory": {
+          "name": "Author Memory",
+          "body": "Who the author is and how they sound, preserved across every book they will ever write."
+        },
+        "bookMemory": {
+          "name": "Book Memory",
+          "body": "Why this particular book exists, and the boundaries it agreed to keep."
+        },
+        "writingRoom": {
+          "name": "The Writing Room",
+          "body": "Where a chapter is written, its purpose and the book's memory always in the margin."
+        },
+        "readingCopy": {
+          "name": "Reading Copy",
+          "body": "The manuscript assembled for continuous reading, exactly as a reader would meet it."
+        },
+        "findings": {
+          "name": "Editorial Findings",
+          "body": "Observations that guide revision, each citing the book's own words — never a rewrite."
+        },
+        "deliberation": {
+          "name": "Editorial Deliberation",
+          "body": "A place to reason about a finding and decide, before a single word changes."
+        },
+        "versions": {
+          "name": "Version History",
+          "body": "Every draft numbered and kept; the permanent record only grows."
+        },
+        "constitutionReview": {
+          "name": "Constitution Review",
+          "body": "A reading of the whole manuscript against the book's founding intent."
+        }
+      }
+    },
+    "authorship": {
+      "eyebrow": "About",
+      "heading": "The pen stays in your hand",
+      "principles": {
+        "authorship": {
+          "title": "Authorship is the foundation.",
+          "body": "Automation serves the author's voice; it is never the source of it. The platform will not write a book for you, and would not be worth using if it did."
+        },
+        "complete": {
+          "title": "Complete before perfect.",
+          "body": "Finish the thought before polishing the sentence. A whole draft can be judged and matured; a fragment can only be fussed over."
+        },
+        "deliberate": {
+          "title": "Revision is deliberate.",
+          "body": "Every change is a decision, worded as one — and the reasoning is kept, so a book always remembers how it became itself."
+        }
+      }
+    },
+    "publication": {
+      "eyebrow": "Toward publication",
+      "heading": "Built with publication in view",
+      "body": "Every stage of the Workshop points toward a finished book. Publishing capabilities will grow within the ecosystem; today, the Workshop's work is making the manuscript worthy of them — developed, reviewed, revised, and preserved on the author's terms."
+    },
+    "cta": {
+      "heading": "Your book has a place to take shape.",
+      "body": "The Workshop is where authors and their books are kept — deliberately, permanently, in the author's own voice."
+    },
+    "footer": {
+      "statement": "An editorial house with a memory — a dedicated space where books are developed, refined, and kept."
+    }
+  },
   "author": {
     "writingAs": "writing as {penName}",
     "study": {
