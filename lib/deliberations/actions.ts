@@ -1,10 +1,13 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { withActionMessage } from "@/lib/action-messages";
 import { createClient } from "@/lib/supabase/server";
 
-const MIGRATION_MESSAGE =
-  "The database is missing the Editorial Deliberation migration — apply supabase/migrations/20260713000000_editorial_deliberation.sql (docs/setup.md §2).";
+/** Failures redirect with STABLE MESSAGE CODES from the
+ *  deliberation.errors namespace (the Phase 3B pattern); raw database
+ *  errors stay in the server logs. */
+const MIGRATION_CODE = "deliberationMigrationMissing";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -15,8 +18,12 @@ async function requireUser() {
   return { supabase, user };
 }
 
-function fail(path: string, message: string): never {
-  redirect(`${path}?error=${encodeURIComponent(message)}`);
+function fail(
+  path: string,
+  code: string,
+  params?: Record<string, string>,
+): never {
+  redirect(withActionMessage(path, { code, params }));
 }
 
 function isMissingTable(error: { code?: string; message?: string }) {
@@ -37,7 +44,7 @@ export async function saveDeliberationDraft(formData: FormData) {
   const affected = String(formData.get("affected_artifacts") ?? "").trim();
 
   if (!question) {
-    fail(pagePath, "The deliberation needs its question.");
+    fail(pagePath, "questionRequired");
   }
 
   const { supabase, user } = await requireUser();
@@ -59,9 +66,7 @@ export async function saveDeliberationDraft(formData: FormData) {
     console.error("[deliberations] save draft failed", error);
     fail(
       pagePath,
-      isMissingTable(error)
-        ? MIGRATION_MESSAGE
-        : "The deliberation could not be saved.",
+      isMissingTable(error) ? MIGRATION_CODE : "saveFailed",
     );
   }
 
@@ -80,10 +85,10 @@ export async function adoptJudgment(formData: FormData) {
   const affected = String(formData.get("affected_artifacts") ?? "").trim();
 
   if (!question) {
-    fail(pagePath, "The deliberation needs its question.");
+    fail(pagePath, "questionRequired");
   }
   if (!judgment || !reasoning) {
-    fail(pagePath, "Adoption requires a judgment and its reasoning.");
+    fail(pagePath, "adoptionRequires");
   }
 
   const { supabase, user } = await requireUser();
@@ -106,9 +111,7 @@ export async function adoptJudgment(formData: FormData) {
     console.error("[deliberations] adopt failed", error);
     fail(
       pagePath,
-      isMissingTable(error)
-        ? MIGRATION_MESSAGE
-        : "The judgment could not be adopted.",
+      isMissingTable(error) ? MIGRATION_CODE : "adoptFailed",
     );
   }
 
@@ -135,7 +138,7 @@ export async function markImplemented(formData: FormData) {
 
   if (error || !data?.length) {
     console.error("[deliberations] mark implemented failed", error);
-    fail(pagePath, "The deliberation could not be marked implemented.");
+    fail(pagePath, "implementFailed");
   }
 
   redirect(pagePath);
@@ -155,7 +158,7 @@ export async function discardDeliberationDraft(formData: FormData) {
 
   if (error) {
     console.error("[deliberations] discard failed", error);
-    fail(returnPath, "The draft could not be discarded.");
+    fail(returnPath, "discardFailed");
   }
 
   redirect(returnPath);

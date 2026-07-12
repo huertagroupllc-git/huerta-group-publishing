@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { withActionMessage } from "@/lib/action-messages";
 import { createClient } from "@/lib/supabase/server";
 import type {
   FindingCategory,
@@ -11,8 +12,10 @@ import {
   FINDING_SEVERITIES,
 } from "@/lib/findings/types";
 
-const MIGRATION_MESSAGE =
-  "The database is missing the Editorial Findings migration — apply supabase/migrations/20260711000000_editorial_findings.sql (docs/setup.md §2).";
+/** Failures redirect with STABLE MESSAGE CODES from the findings.errors
+ *  namespace (the Phase 3B pattern); raw database errors stay in the
+ *  server logs. */
+const MIGRATION_CODE = "findingsMigrationMissing";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -23,8 +26,12 @@ async function requireUser() {
   return supabase;
 }
 
-function fail(path: string, message: string): never {
-  redirect(`${path}?error=${encodeURIComponent(message)}`);
+function fail(
+  path: string,
+  code: string,
+  params?: Record<string, string>,
+): never {
+  redirect(withActionMessage(path, { code, params }));
 }
 
 function isMissingFunction(error: { code?: string; message?: string }) {
@@ -62,19 +69,16 @@ export async function raiseFinding(formData: FormData) {
     : "other";
 
   if (!severity) {
-    fail(newPath, "A finding needs a severity.");
+    fail(newPath, "severityRequired");
   }
   if (!title) {
-    fail(newPath, "A finding needs a title.");
+    fail(newPath, "titleRequired");
   }
   if (!explanation) {
-    fail(newPath, "A finding needs an explanation — what was seen, and why it matters.");
+    fail(newPath, "explanationRequired");
   }
   if (chapterId && !chapterVersionId) {
-    fail(
-      newPath,
-      "A chapter finding must anchor to the version observed.",
-    );
+    fail(newPath, "anchorRequired");
   }
 
   const supabase = await requireUser();
@@ -93,9 +97,7 @@ export async function raiseFinding(formData: FormData) {
     console.error("[findings] raiseFinding failed", error);
     fail(
       newPath,
-      isMissingFunction(error)
-        ? MIGRATION_MESSAGE
-        : "The finding could not be raised.",
+      isMissingFunction(error) ? MIGRATION_CODE : "raiseFailed",
     );
   }
 
@@ -136,7 +138,7 @@ export async function resolveFinding(formData: FormData) {
 
   if (error || !data?.length) {
     console.error("[findings] resolveFinding failed", error);
-    fail(findingsPath, "The finding could not be resolved.");
+    fail(findingsPath, "resolveFailed");
   }
 
   redirect(findingsPath);
@@ -162,7 +164,7 @@ export async function setAsideFinding(formData: FormData) {
 
   if (error || !data?.length) {
     console.error("[findings] setAsideFinding failed", error);
-    fail(findingsPath, "The finding could not be set aside.");
+    fail(findingsPath, "setAsideFailed");
   }
 
   redirect(findingsPath);
@@ -186,7 +188,7 @@ export async function reopenFinding(formData: FormData) {
 
   if (error || !data?.length) {
     console.error("[findings] reopenFinding failed", error);
-    fail(findingsPath, "The finding could not be reopened.");
+    fail(findingsPath, "reopenFailed");
   }
 
   redirect(findingsPath);

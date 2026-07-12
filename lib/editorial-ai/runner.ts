@@ -62,7 +62,19 @@ const MODEL_RETRY_BASE_MS = 800;
 
 type Supa = Awaited<ReturnType<typeof createClient>>;
 
-export class ReviewNotPossibleError extends Error {}
+/** A review that cannot proceed. `code` is a stable application-message
+ *  identifier (findings.errors namespace) resolved at the presentation
+ *  boundary in the request's interface locale; the English message
+ *  remains for server logs. Presentation metadata only — nothing about
+ *  review execution keys on it. */
+export class ReviewNotPossibleError extends Error {
+  constructor(
+    public readonly code: string,
+    message: string,
+  ) {
+    super(message);
+  }
+}
 
 /** A structural failure to record findings (not a model error): the run
  *  cannot make progress, so it fails rather than pausing as resumable. */
@@ -86,6 +98,7 @@ async function prepareReview(
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     throw new ReviewNotPossibleError(
+      "reviewNotConfigured",
       "Editorial review is not configured: OPENAI_API_KEY is not set.",
     );
   }
@@ -95,15 +108,22 @@ async function prepareReview(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    throw new ReviewNotPossibleError("Sign in to request a review.");
+    throw new ReviewNotPossibleError(
+      "signInRequired",
+      "Sign in to request a review.",
+    );
   }
 
   const material = await assembleReviewMaterial(authorSlug, bookSlug);
   if (!material) {
-    throw new ReviewNotPossibleError("The book could not be found.");
+    throw new ReviewNotPossibleError(
+      "bookNotFound",
+      "The book could not be found.",
+    );
   }
   if (material.chapters.length === 0) {
     throw new ReviewNotPossibleError(
+      "nothingToReview",
       "There is nothing to review yet — the manuscript has no written chapters.",
     );
   }
@@ -155,8 +175,10 @@ export async function startReview(
     .eq("review_type", def.type)
     .in("status", ["pending", "incomplete"]);
   if (existing && existing.length) {
+    const pendingNow = existing.some((r) => r.status === "pending");
     throw new ReviewNotPossibleError(
-      existing.some((r) => r.status === "pending")
+      pendingNow ? "alreadyReading" : "unfinishedWaiting",
+      pendingNow
         ? "A review is already reading this manuscript. Let it finish first."
         : "An unfinished review is waiting to continue. Continue it from the Findings.",
     );
@@ -214,6 +236,7 @@ export async function startReview(
   if (runError || !run) {
     console.error("[editorial-ai] run creation failed", runError);
     throw new ReviewNotPossibleError(
+      "startFailed",
       "The review could not be started. If this persists, the reviewer's migration may not be applied.",
     );
   }
@@ -252,6 +275,7 @@ export async function continueReview(
     .maybeSingle();
   if (!resumable) {
     throw new ReviewNotPossibleError(
+      "nothingToContinue",
       "There is no unfinished review to continue.",
     );
   }
@@ -270,6 +294,7 @@ export async function continueReview(
     .maybeSingle();
   if (!claimed) {
     throw new ReviewNotPossibleError(
+      "alreadyContinuing",
       "This review is already being continued. Let it finish first.",
     );
   }

@@ -7,8 +7,11 @@ import {
   SelectField,
   TextareaField,
 } from "@/components/editorial";
+import { getTranslations } from "next-intl/server";
+import { ActionMessage } from "@/components/action-message";
 import { SetupNotice } from "@/components/setup-notice";
-import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
+import { WorkspaceFrame } from "@/components/workspace-frame";
+import { actionMessageFromQuery } from "@/lib/action-messages";
 import { raiseFinding } from "@/lib/findings/actions";
 import {
   FINDING_CATEGORIES,
@@ -20,21 +23,17 @@ import {
 } from "@/lib/manuscript/queries";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = {
-  title: "Raise a finding",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("findings.form");
+  return { title: t("metaTitle") };
+}
 
 export default async function NewFindingPage({
   params,
   searchParams,
 }: {
   params: Promise<{ slug: string; bookSlug: string }>;
-  searchParams: Promise<{
-    chapter?: string;
-    version?: string;
-    return?: string;
-    error?: string;
-  }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const supabase = await createClient();
   const {
@@ -43,7 +42,13 @@ export default async function NewFindingPage({
   if (!user) redirect("/signin");
 
   const { slug, bookSlug } = await params;
-  const query = await searchParams;
+  const rawQuery = await searchParams;
+  const query = {
+    chapter: typeof rawQuery.chapter === "string" ? rawQuery.chapter : undefined,
+    version: typeof rawQuery.version === "string" ? rawQuery.version : undefined,
+    return: typeof rawQuery.return === "string" ? rawQuery.return : undefined,
+  };
+  const message = actionMessageFromQuery(rawQuery);
 
   let library: ManuscriptLibrary | null;
   try {
@@ -62,6 +67,11 @@ export default async function NewFindingPage({
   if (!library) notFound();
 
   const { author, book, chapters } = library;
+  const t = await getTranslations("findings.form");
+  const tPage = await getTranslations("findings.page");
+  const tStatus = await getTranslations("status");
+  const tCommon = await getTranslations("common");
+  const tNav = await getTranslations("navigation");
   const bookPath = `/workspace/authors/${author.slug}/books/${book.slug}`;
   const findingsPath = `${bookPath}/findings`;
   const newPath = `${findingsPath}/new`;
@@ -80,19 +90,18 @@ export default async function NewFindingPage({
     <WorkspaceFrame
       email={user.email ?? ""}
       breadcrumbs={[
-        { href: "/workspace", label: "Workspace" },
+        { href: "/workspace", label: tNav("workspace") },
         { href: `/workspace/authors/${author.slug}`, label: author.full_name },
         { href: bookPath, label: book.title },
-        { href: findingsPath, label: "The Findings" },
+        { href: findingsPath, label: tPage("title") },
       ]}
     >
       <p className="eyebrow">{book.title}</p>
       <h1 className="mt-2 font-display text-4xl tracking-tight">
-        Raise a finding
+        {t("title")}
       </h1>
       <p className="mt-6 max-w-prose text-lg leading-relaxed text-ink-soft">
-        An observation, made permanent: what was seen, and why it matters.
-        Findings guide revision; they never touch the text.
+        {t("intro")}
       </p>
 
       <form action={raiseFinding} className="mt-12 max-w-md space-y-8">
@@ -113,18 +122,18 @@ export default async function NewFindingPage({
               value={presetVersionId}
             />
             <p className="font-sans text-xs text-ink-soft">
-              About{" "}
-              <span className="text-ink">{presetChapter.title}</span>
-              {" — anchored to the version being read."}
+              {t("about")}{" "}
+              <span className="text-ink">{presetChapter.title}</span>{" "}
+              {t("anchoredNote")}
             </p>
           </>
         ) : (
           <SelectField
             id="chapter_ref"
-            label="About"
+            label={t("about")}
             defaultValue=""
             options={[
-              { value: "", label: "The manuscript as a whole" },
+              { value: "", label: t("wholeManuscript") },
               ...chapters
                 .filter((c) => c.active_version_id)
                 .map((c) => ({
@@ -138,48 +147,55 @@ export default async function NewFindingPage({
         <div className="grid gap-8 sm:grid-cols-2">
           <SelectField
             id="severity"
-            label="Severity"
+            label={t("severity")}
             defaultValue="suggestion"
             options={FINDING_SEVERITIES.map((s) => ({
               value: s.value,
-              label: `${s.label} — ${s.meaning}`,
+              label: `${tStatus(`severity.${s.value}`)} — ${tStatus(`severityMeaning.${s.value}`)}`,
             }))}
           />
           <SelectField
             id="category"
-            label="Category"
+            label={t("category")}
             defaultValue="other"
-            options={FINDING_CATEGORIES}
+            options={FINDING_CATEGORIES.map((c) => ({
+              value: c.value,
+              label: tStatus(`category.${c.value}`),
+            }))}
           />
         </div>
 
-        <Field id="title" label="Title" type="text" required />
+        <Field id="title" label={t("titleField")} type="text" required />
 
         <TextareaField
           id="explanation"
-          label="Explanation"
-          hint="what was seen, and why it matters"
+          label={t("explanation")}
+          hint={t("explanationHint")}
           rows={4}
           required
         />
 
         <TextareaField
           id="excerpt"
-          label="Excerpt"
+          label={t("excerpt")}
           optional
-          hint="quote the passage verbatim"
+          hint={t("excerptHint")}
           rows={3}
         />
 
-        <ErrorNote message={query.error} />
+        <ActionMessage
+          code={message?.code}
+          params={message?.params}
+          namespace="findings.errors"
+        />
 
         <div className="flex items-baseline gap-8">
-          <PrimaryButton>Raise the finding</PrimaryButton>
+          <PrimaryButton>{t("submit")}</PrimaryButton>
           <Link
             href={returnPath}
             className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
           >
-            Cancel
+            {tCommon("cancel")}
           </Link>
         </div>
       </form>

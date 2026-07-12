@@ -7,8 +7,11 @@ import {
   QuietButton,
   TextareaField,
 } from "@/components/editorial";
+import { getLocale, getTranslations } from "next-intl/server";
+import { ActionMessage } from "@/components/action-message";
 import { SetupNotice } from "@/components/setup-notice";
-import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
+import { WorkspaceFrame } from "@/components/workspace-frame";
+import { actionMessageFromQuery } from "@/lib/action-messages";
 import {
   adoptJudgment,
   discardDeliberationDraft,
@@ -19,8 +22,6 @@ import {
   getDeliberationPage,
   type DeliberationPage,
 } from "@/lib/deliberations/queries";
-import { deliberationStatusLabel } from "@/lib/deliberations/types";
-import { categoryLabel, severityLabel } from "@/lib/findings/types";
 import { formatDate } from "@/lib/memory/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -33,8 +34,11 @@ export async function generateMetadata({
   const page = await getDeliberationPage(slug, bookSlug, findingId).catch(
     () => null,
   );
+  const t = await getTranslations("deliberation.page");
   return {
-    title: page ? `Deliberation — ${page.finding.title}` : "Deliberation",
+    title: page
+      ? `${t("metaTitle")} — ${page.finding.title}`
+      : t("metaTitle"),
   };
 }
 
@@ -43,7 +47,7 @@ export default async function DeliberationPageRoute({
   searchParams,
 }: {
   params: Promise<{ slug: string; bookSlug: string; findingId: string }>;
-  searchParams: Promise<{ error?: string; saved?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const supabase = await createClient();
   const {
@@ -53,6 +57,7 @@ export default async function DeliberationPageRoute({
 
   const { slug, bookSlug, findingId } = await params;
   const query = await searchParams;
+  const message = actionMessageFromQuery(query);
 
   let page: DeliberationPage | null;
   try {
@@ -76,39 +81,52 @@ export default async function DeliberationPageRoute({
   const pagePath = `${findingsPath}/${finding.id}/deliberation`;
 
   const editable = !deliberation || deliberation.status === "draft";
+  const locale = await getLocale();
+  const t = await getTranslations("deliberation.page");
+  const tForm = await getTranslations("deliberation.form");
+  const tFindings = await getTranslations("findings");
+  const tRoom = await getTranslations("memory.documentRoom");
+  const tWriting = await getTranslations("manuscript.writingRoom");
+  const tStatus = await getTranslations("status");
+  const tCommon = await getTranslations("common");
+  const tNav = await getTranslations("navigation");
 
   return (
     <WorkspaceFrame
       email={user.email ?? ""}
       breadcrumbs={[
-        { href: "/workspace", label: "Workspace" },
+        { href: "/workspace", label: tNav("workspace") },
         { href: `/workspace/authors/${author.slug}`, label: author.full_name },
         { href: bookPath, label: book.title },
-        { href: findingsPath, label: "The Findings" },
+        { href: findingsPath, label: tFindings("page.title") },
       ]}
     >
       <p className="eyebrow">{book.title}</p>
       <h1 className="mt-2 font-display text-4xl tracking-tight">
-        Deliberation
+        {t("title")}
       </h1>
       <p className="mt-6 max-w-prose text-lg leading-relaxed text-ink-soft">
-        Judgment, preserved. The finding observed; this memo decides what
-        the book will do about it, and why. The revisions themselves
-        remain the work of versions — a deliberation edits nothing.
+        {t("intro")}
       </p>
 
       <div className="mt-4">
-        <ErrorNote message={query.error} />
+        <ActionMessage
+          code={message?.code}
+          params={message?.params}
+          namespace="deliberation.errors"
+        />
         {query.saved === "1" ? (
-          <p className="font-sans text-sm text-ink-soft">Draft saved.</p>
+          <p className="font-sans text-sm text-ink-soft">
+            {tRoom("draftSaved")}
+          </p>
         ) : null}
       </div>
 
       {/* The prompt: the originating finding, immutable, quoted. */}
       <div className="rule mt-10 max-w-prose pt-5">
         <p className="font-sans text-[0.6875rem] uppercase tracking-[0.18em] text-ink-faint">
-          The finding · {severityLabel(finding.severity)} ·{" "}
-          {categoryLabel(finding.category)}
+          {t("findingLabel")} · {tStatus(`severity.${finding.severity}`)} ·{" "}
+          {tStatus(`category.${finding.category}`)}
         </p>
         <p className="mt-2 font-serif text-xl leading-snug">
           {finding.title}
@@ -131,11 +149,11 @@ export default async function DeliberationPageRoute({
                 {finding.chapterTitle}
               </Link>
               {finding.anchoredVersionNumber
-                ? ` · raised against Version ${finding.anchoredVersionNumber}`
+                ? ` · ${tFindings("list.raisedAgainst", { number: finding.anchoredVersionNumber })}`
                 : ""}
             </>
           ) : (
-            "The manuscript as a whole"
+            tFindings("form.wholeManuscript")
           )}
         </p>
       </div>
@@ -149,8 +167,8 @@ export default async function DeliberationPageRoute({
 
             <Field
               id="question"
-              label="Question"
-              hint="what is being weighed"
+              label={tForm("question")}
+              hint={tForm("questionHint")}
               type="text"
               required
               defaultValue={deliberation?.question ?? finding.title}
@@ -158,47 +176,46 @@ export default async function DeliberationPageRoute({
 
             <TextareaField
               id="judgment"
-              label="Judgment"
-              hint="what the book will do — never the words that will do it"
+              label={tForm("judgment")}
+              hint={tForm("judgmentHint")}
               rows={4}
               defaultValue={deliberation?.judgment ?? ""}
             />
 
             <TextareaField
               id="reasoning"
-              label="Reasoning"
-              hint="why this position"
+              label={tForm("reasoning")}
+              hint={tForm("reasoningHint")}
               rows={5}
               defaultValue={deliberation?.reasoning ?? ""}
             />
 
             <TextareaField
               id="affected_artifacts"
-              label="Affected"
+              label={tForm("affected")}
               optional
-              hint="what this touches, in your own words"
+              hint={tForm("affectedHint")}
               rows={2}
               defaultValue={deliberation?.affected_artifacts ?? ""}
             />
 
             <div className="flex flex-wrap items-baseline gap-8">
               <QuietButton formAction={saveDeliberationDraft}>
-                Save the draft
+                {tForm("saveDraft")}
               </QuietButton>
               <PrimaryButton formAction={adoptJudgment}>
-                Adopt the judgment
+                {tForm("adopt")}
               </PrimaryButton>
               <Link
                 href={findingsPath}
                 className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
               >
-                Cancel
+                {tCommon("cancel")}
               </Link>
             </div>
           </form>
           <p className="mt-3 max-w-prose font-sans text-[0.6875rem] text-ink-faint">
-            Adoption makes the judgment permanent — like activating a
-            version. Until then, the draft is yours to shape or discard.
+            {t("adoptionNote")}
           </p>
           {deliberation ? (
             <form action={discardDeliberationDraft} className="mt-6">
@@ -212,7 +229,7 @@ export default async function DeliberationPageRoute({
                 type="submit"
                 className="font-sans text-xs text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
               >
-                Discard this draft
+                {tRoom("discardDraft")}
               </button>
             </form>
           ) : null}
@@ -226,44 +243,44 @@ export default async function DeliberationPageRoute({
           <p className="mt-5 leading-relaxed">{deliberation.reasoning}</p>
           {deliberation.affected_artifacts ? (
             <p className="mt-5 font-sans text-xs text-ink-soft">
-              <span className="text-ink-faint">Affected — </span>
+              <span className="text-ink-faint">{t("affectedLabel")} — </span>
               {deliberation.affected_artifacts}
             </p>
           ) : null}
           {deliberation.implementation_note ? (
             <p className="mt-2 font-sans text-xs text-ink-soft">
-              <span className="text-ink-faint">Implementation — </span>
+              <span className="text-ink-faint">{t("implementationLabel")} — </span>
               {deliberation.implementation_note}
             </p>
           ) : null}
 
           <dl className="rule mt-8 flex flex-wrap gap-x-14 gap-y-4 pt-5">
             <div>
-              <dt className="eyebrow">Drafted</dt>
+              <dt className="eyebrow">{t("drafted")}</dt>
               <dd className="mt-1 font-sans text-xs text-ink-soft">
-                {formatDate(deliberation.created_at)}
+                {formatDate(deliberation.created_at, locale)}
               </dd>
             </div>
             {deliberation.adopted_at ? (
               <div>
-                <dt className="eyebrow">Adopted</dt>
+                <dt className="eyebrow">{t("adopted")}</dt>
                 <dd className="mt-1 font-sans text-xs text-ink-soft">
-                  {formatDate(deliberation.adopted_at)}
+                  {formatDate(deliberation.adopted_at, locale)}
                 </dd>
               </div>
             ) : null}
             {deliberation.implemented_at ? (
               <div>
-                <dt className="eyebrow">Implemented</dt>
+                <dt className="eyebrow">{t("implemented")}</dt>
                 <dd className="mt-1 font-sans text-xs text-ink-soft">
-                  {formatDate(deliberation.implemented_at)}
+                  {formatDate(deliberation.implemented_at, locale)}
                 </dd>
               </div>
             ) : null}
             <div>
-              <dt className="eyebrow">Standing</dt>
+              <dt className="eyebrow">{t("standing")}</dt>
               <dd className="mt-1 font-sans text-xs text-ink-soft">
-                {deliberationStatusLabel(deliberation.status)}
+                {tStatus(`deliberation.${deliberation.status}`)}
               </dd>
             </div>
           </dl>
@@ -281,18 +298,21 @@ export default async function DeliberationPageRoute({
               <input type="hidden" name="page_path" value={pagePath} />
               <div className="min-w-56 flex-1">
                 <label htmlFor="note" className="eyebrow block">
-                  Note <span className="normal-case">(optional)</span>
+                  {tWriting("noteLabel")}{" "}
+                  <span className="normal-case">
+                    {tWriting("noteOptional")}
+                  </span>
                 </label>
                 <input
                   id="note"
                   name="note"
                   type="text"
-                  placeholder="where the judgment was carried out"
+                  placeholder={t("implementedNotePlaceholder")}
                   className="w-full border-b border-rule bg-transparent py-1.5 font-serif text-base text-ink placeholder:text-ink-faint focus:border-oxblood focus:outline-none"
                 />
               </div>
               <QuietButton className="px-4 py-2 text-xs">
-                Mark implemented
+                {t("markImplemented")}
               </QuietButton>
             </form>
           ) : null}

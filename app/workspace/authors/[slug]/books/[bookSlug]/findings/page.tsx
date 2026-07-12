@@ -7,25 +7,23 @@ import {
   QuietButton,
   TextButton,
 } from "@/components/editorial";
+import { getLocale, getTranslations } from "next-intl/server";
+import { ActionMessage } from "@/components/action-message";
 import { SetupNotice } from "@/components/setup-notice";
-import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
+import { WorkspaceFrame } from "@/components/workspace-frame";
+import { actionMessageFromQuery } from "@/lib/action-messages";
 import {
   reopenFinding,
   resolveFinding,
   setAsideFinding,
 } from "@/lib/findings/actions";
 import { deliberationStatesForBook } from "@/lib/deliberations/queries";
-import {
-  deliberationStatusLabel,
-  type DeliberationStatus,
-} from "@/lib/deliberations/types";
+import type { DeliberationStatus } from "@/lib/deliberations/types";
 import { getFindingsRoom, type FindingsRoom } from "@/lib/findings/queries";
 import {
   FINDING_STATUSES,
-  categoryLabel,
+  REVIEW_TYPE_LABELS,
   reviewTypeLabel,
-  severityLabel,
-  statusLabel,
   type FindingListEntry,
   type FindingStatus,
 } from "@/lib/findings/types";
@@ -44,8 +42,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug, bookSlug } = await params;
   const room = await getFindingsRoom(slug, bookSlug).catch(() => null);
+  const t = await getTranslations("findings.page");
   return {
-    title: room ? `The Findings — ${room.book.title}` : "The Findings",
+    title: room ? `${t("title")} — ${room.book.title}` : t("title"),
   };
 }
 
@@ -54,7 +53,7 @@ export default async function FindingsPage({
   searchParams,
 }: {
   params: Promise<{ slug: string; bookSlug: string }>;
-  searchParams: Promise<{ status?: string; error?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const supabase = await createClient();
   const {
@@ -64,6 +63,7 @@ export default async function FindingsPage({
 
   const { slug, bookSlug } = await params;
   const query = await searchParams;
+  const message = actionMessageFromQuery(query);
 
   let room: FindingsRoom | null;
   let deliberations = new Map<string, DeliberationStatus>();
@@ -92,6 +92,20 @@ export default async function FindingsPage({
   if (!room) notFound();
 
   const { author, book, findings, latestReview } = room;
+  const locale = await getLocale();
+  const t = await getTranslations("findings.page");
+  const tRun = await getTranslations("findings.run");
+  const tList = await getTranslations("findings.list");
+  const tRoom = await getTranslations("manuscript.writingRoom");
+  const tChapter = await getTranslations("manuscript.chapter");
+  const tStatus = await getTranslations("status");
+  const tNav = await getTranslations("navigation");
+  // Known review types render from the controlled catalog; unknown
+  // future types fall back to the humanizing label function.
+  const reviewTypeName = (type: string) =>
+    type in REVIEW_TYPE_LABELS
+      ? tStatus(`reviewType.${type}`)
+      : reviewTypeLabel(type);
   const bookPath = `/workspace/authors/${author.slug}/books/${book.slug}`;
   const findingsPath = `${bookPath}/findings`;
 
@@ -116,7 +130,7 @@ export default async function FindingsPage({
   const groups: { heading: string; entries: FindingListEntry[] }[] = [];
   const bookLevel = shown.filter((f) => !f.chapter_id);
   if (bookLevel.length) {
-    groups.push({ heading: "The Manuscript", entries: bookLevel });
+    groups.push({ heading: t("manuscriptGroup"), entries: bookLevel });
   }
   const chapterTitles = [
     ...new Set(
@@ -134,62 +148,63 @@ export default async function FindingsPage({
     <WorkspaceFrame
       email={user.email ?? ""}
       breadcrumbs={[
-        { href: "/workspace", label: "Workspace" },
+        { href: "/workspace", label: tNav("workspace") },
         { href: `/workspace/authors/${author.slug}`, label: author.full_name },
         { href: bookPath, label: book.title },
       ]}
     >
       <p className="eyebrow">{book.title}</p>
       <h1 className="mt-2 font-display text-4xl tracking-tight">
-        The Findings
+        {t("title")}
       </h1>
       <p className="mt-6 max-w-prose text-lg leading-relaxed text-ink-soft">
-        What review sees: observations that guide revision without touching
-        a word. The manuscript improves through the same deliberate
-        versions it was written in.
+        {t("intro")}
       </p>
 
       <div className="mt-4">
-        <ErrorNote message={query.error} />
+        <ActionMessage
+          code={message?.code}
+          params={message?.params}
+          namespace="findings.errors"
+        />
       </div>
 
       <div className="rule mt-10 pt-5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6">
-          <h2 className="eyebrow">Reviews</h2>
+          <h2 className="eyebrow">{t("reviewsHeading")}</h2>
           {!latestReview ||
           (latestReview.status !== "pending" &&
             latestReview.status !== "incomplete") ? (
             <ActionLink href={`${findingsPath}/review`}>
-              Request a Constitution Review
+              {t("requestReview")}
             </ActionLink>
           ) : null}
         </div>
         {latestReview ? (
           latestReview.status === "pending" ? (
             <p className="mt-4 max-w-prose italic text-ink-soft">
-              A {reviewTypeLabel(latestReview.reviewType)} is reading the
-              manuscript now
-              {latestReview.totalPasses
-                ? ` — ${latestReview.completedPasses} of ${latestReview.totalPasses} readings done`
-                : ""}
-              . This takes a few minutes; refresh to see its findings when it
-              pauses or finishes.
+              {tRun("readingNow", {
+                reviewType: reviewTypeName(latestReview.reviewType),
+                progress: latestReview.totalPasses
+                  ? tRun("readingsDoneSuffix", {
+                      completed: latestReview.completedPasses,
+                      total: latestReview.totalPasses,
+                    })
+                  : "",
+              })}
             </p>
           ) : latestReview.status === "incomplete" ? (
             <div className="mt-4 max-w-prose">
               <p className="font-sans text-xs text-ink-soft">
-                {reviewTypeLabel(latestReview.reviewType)} ·{" "}
-                {formatDate(latestReview.createdAt)}
+                {reviewTypeName(latestReview.reviewType)} ·{" "}
+                {formatDate(latestReview.createdAt, locale)}
                 {latestReview.totalPasses
-                  ? ` · ${latestReview.completedPasses} of ${latestReview.totalPasses} readings`
+                  ? ` · ${tRun("readingsOf", { completed: latestReview.completedPasses, total: latestReview.totalPasses })}`
                   : ""}{" "}
-                · {latestReview.findingsCount}{" "}
-                {latestReview.findingsCount === 1 ? "finding" : "findings"} so
-                far
+                · {tRun("findingsSoFar", { count: latestReview.findingsCount })}
               </p>
               <p className="mt-2 italic leading-relaxed text-ink-soft">
-                This review paused before finishing. The findings it has
-                raised are preserved below; continue to read the rest.
+                {tRun("pausedNote")}
               </p>
               {latestReview.summary ? (
                 <p className="mt-2 border-l-2 border-rule pl-4 text-sm italic leading-relaxed text-ink-soft">
@@ -200,23 +215,21 @@ export default async function FindingsPage({
                 <input type="hidden" name="author_slug" value={author.slug} />
                 <input type="hidden" name="book_slug" value={book.slug} />
                 <PrimaryButton className="px-4 py-2 text-xs">
-                  Continue the review
+                  {tRun("continueReview")}
                 </PrimaryButton>
                 <p className="mt-2 font-sans text-[0.6875rem] text-ink-faint">
-                  The reviewer reads while this page waits — expect a minute
-                  or two before the Findings return.
+                  {tRun("continueWait")}
                 </p>
               </form>
             </div>
           ) : (
             <div className="mt-4 max-w-prose">
               <p className="font-sans text-xs text-ink-soft">
-                {reviewTypeLabel(latestReview.reviewType)} ·{" "}
-                {formatDate(latestReview.createdAt)} ·{" "}
-                {latestReview.findingsCount}{" "}
-                {latestReview.findingsCount === 1 ? "finding" : "findings"}
+                {reviewTypeName(latestReview.reviewType)} ·{" "}
+                {formatDate(latestReview.createdAt, locale)} ·{" "}
+                {tRun("findingsCount", { count: latestReview.findingsCount })}
                 {latestReview.status === "failed"
-                  ? " · did not finish — findings raised before the failure are preserved"
+                  ? ` · ${tRun("didNotFinish")}`
                   : ""}
               </p>
               {latestReview.summary ? (
@@ -229,9 +242,7 @@ export default async function FindingsPage({
         ) : null}
         {hasEarlierReviewFindings ? (
           <p className="mt-4 max-w-prose font-sans text-xs text-ink-soft">
-            Only the most recent review&rsquo;s findings are counted above.
-            Findings from earlier readings remain below, each marked
-            &ldquo;from an earlier review.&rdquo;
+            {tRun("earlierNote")}
           </p>
         ) : null}
       </div>
@@ -252,18 +263,22 @@ export default async function FindingsPage({
                   : "text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
               }
             >
-              {s.label}
+              {tStatus(`finding.${s.value}`)}
             </Link>
           ))}
         </span>
-        <ActionLink href={`${findingsPath}/new`}>Raise a finding</ActionLink>
+        <ActionLink href={`${findingsPath}/new`}>
+          {tChapter("raiseFinding")}
+        </ActionLink>
       </div>
 
       {shown.length === 0 ? (
         <p className="mt-8 max-w-prose italic text-ink-soft">
           {findings.length === 0
-            ? "Findings are what review sees: observations that guide revision without touching a word. Raise the first from a chapter's page, or from here."
-            : `Nothing ${statusLabel(shownStatus).toLowerCase()} at present.`}
+            ? t("emptyFirst")
+            : t("emptyStatus", {
+                status: tStatus(`finding.${shownStatus}`).toLowerCase(),
+              })}
         </p>
       ) : (
         groups.map((group) => (
@@ -273,8 +288,8 @@ export default async function FindingsPage({
               {group.entries.map((finding) => (
                 <li key={finding.id} className="rule py-6 first:border-t-0">
                   <p className="font-sans text-[0.6875rem] uppercase tracking-[0.18em] text-ink-faint">
-                    {severityLabel(finding.severity)} ·{" "}
-                    {categoryLabel(finding.category)}
+                    {tStatus(`severity.${finding.severity}`)} ·{" "}
+                    {tStatus(`category.${finding.category}`)}
                   </p>
                   <h3 className="mt-2 font-display text-2xl tracking-tight">
                     {finding.title}
@@ -303,21 +318,24 @@ export default async function FindingsPage({
                           {finding.chapterTitle}
                         </Link>
                         {finding.anchoredVersionNumber
-                          ? ` · raised against Version ${finding.anchoredVersionNumber}`
+                          ? ` · ${tList("raisedAgainst", { number: finding.anchoredVersionNumber })}`
                           : ""}
                         {finding.currentVersionNumber &&
                         finding.anchoredVersionNumber !==
                           finding.currentVersionNumber
-                          ? ` · now at Version ${finding.currentVersionNumber}`
+                          ? ` · ${tList("nowAt", { number: finding.currentVersionNumber })}`
                           : ""}
                         {" · "}
                       </>
                     ) : null}
-                    {reviewTypeLabel(finding.reviewType)} · raised{" "}
-                    {formatDate(finding.created_at)}
+                    {reviewTypeName(finding.reviewType)} ·{" "}
+                    {tList("raisedOn", {
+                      date: formatDate(finding.created_at, locale),
+                    })}
                     {isFromEarlierReview(finding) ? (
                       <span className="text-ink-soft">
-                        {" · "}from an earlier review
+                        {" · "}
+                        {tList("fromEarlierReview")}
                       </span>
                     ) : null}
                     {deliberations.has(finding.id) ? (
@@ -327,10 +345,11 @@ export default async function FindingsPage({
                           href={`${findingsPath}/${finding.id}/deliberation`}
                           className="underline-offset-4 hover:text-oxblood hover:underline"
                         >
-                          Deliberation —{" "}
-                          {deliberationStatusLabel(
-                            deliberations.get(finding.id)!,
-                          )}
+                          {tList("deliberationLink", {
+                            status: tStatus(
+                              `deliberation.${deliberations.get(finding.id)!}`,
+                            ),
+                          })}
                         </Link>
                       </>
                     ) : null}
@@ -358,7 +377,10 @@ export default async function FindingsPage({
                       />
                       <div className="min-w-56 flex-1">
                         <label htmlFor={`note-${finding.id}`} className="eyebrow block">
-                          Note <span className="normal-case">(optional)</span>
+                          {tRoom("noteLabel")}{" "}
+                          <span className="normal-case">
+                            {tRoom("noteOptional")}
+                          </span>
                         </label>
                         <input
                           id={`note-${finding.id}`}
@@ -369,26 +391,26 @@ export default async function FindingsPage({
                       </div>
                       <span className="flex items-baseline gap-5">
                         <PrimaryButton className="px-4 py-2 text-xs">
-                          Resolve
+                          {tList("resolve")}
                         </PrimaryButton>
                         <QuietButton
                           formAction={setAsideFinding}
                           className="px-4 py-2 text-xs"
                         >
-                          Set aside
+                          {tStatus("finding.dismissed")}
                         </QuietButton>
                         {finding.chapterSlug ? (
                           <ActionLink
                             href={`${bookPath}/chapters/${finding.chapterSlug}?finding=${finding.id}`}
                           >
-                            Revise the chapter
+                            {tList("reviseChapter")}
                           </ActionLink>
                         ) : null}
                         {!deliberations.has(finding.id) ? (
                           <ActionLink
                             href={`${findingsPath}/${finding.id}/deliberation`}
                           >
-                            Deliberate
+                            {tList("deliberate")}
                           </ActionLink>
                         ) : null}
                       </span>
@@ -396,13 +418,13 @@ export default async function FindingsPage({
                   ) : (
                     <div className="mt-4">
                       <p className="max-w-prose font-sans text-xs text-ink-soft">
-                        {statusLabel(finding.status)}
+                        {tStatus(`finding.${finding.status}`)}
                         {finding.resolved_at
-                          ? ` ${formatDate(finding.resolved_at)}`
+                          ? ` ${formatDate(finding.resolved_at, locale)}`
                           : ""}
                         {finding.status === "resolved" &&
                         finding.resolvedInVersionNumber
-                          ? ` in Version ${finding.resolvedInVersionNumber}`
+                          ? ` ${tList("inVersion", { number: finding.resolvedInVersionNumber })}`
                           : ""}
                         {finding.resolution_note
                           ? ` — ${finding.resolution_note}`
@@ -419,7 +441,7 @@ export default async function FindingsPage({
                           name="findings_path"
                           value={findingsPath}
                         />
-                        <TextButton>Reopen</TextButton>
+                        <TextButton>{tList("reopen")}</TextButton>
                       </form>
                     </div>
                   )}

@@ -373,6 +373,159 @@
       "incomplete": "Incomplete — can continue",
       "failed": "Did not finish",
       "pending": "Reading now"
+    },
+    "category": {
+      "voice": "Voice",
+      "intent": "Intent",
+      "concepts": "Concepts",
+      "structure": "Structure",
+      "pacing": "Pacing",
+      "continuity": "Continuity",
+      "repetition": "Repetition",
+      "clarity": "Clarity",
+      "reader_experience": "Reader Experience",
+      "other": "Other"
+    },
+    "severityMeaning": {
+      "note": "worth knowing",
+      "suggestion": "worth considering",
+      "concern": "worth resolving before this stage ends"
+    },
+    "reviewType": {
+      "manual": "manual review",
+      "constitution": "Constitution Review"
+    },
+    "deliberation": {
+      "draft": "Draft",
+      "adopted": "Adopted",
+      "implemented": "Implemented"
+    }
+  },
+  "findings": {
+    "page": {
+      "title": "The Findings",
+      "intro": "What review sees: observations that guide revision without touching a word. The manuscript improves through the same deliberate versions it was written in.",
+      "reviewsHeading": "Reviews",
+      "requestReview": "Request a Constitution Review",
+      "emptyFirst": "Findings are what review sees: observations that guide revision without touching a word. Raise the first from a chapter's page, or from here.",
+      "emptyStatus": "Nothing {status} at present.",
+      "manuscriptGroup": "The Manuscript"
+    },
+    "run": {
+      "readingNow": "A {reviewType} is reading the manuscript now{progress}. This takes a few minutes; refresh to see its findings when it pauses or finishes.",
+      "readingsDoneSuffix": " — {completed, number} of {total, number} readings done",
+      "readingsOf": "{completed, number} of {total, number} readings",
+      "findingsSoFar": "{count, plural, one {# finding} other {# findings}} so far",
+      "findingsCount": "{count, plural, one {# finding} other {# findings}}",
+      "pausedNote": "This review paused before finishing. The findings it has raised are preserved below; continue to read the rest.",
+      "continueReview": "Continue the review",
+      "continueWait": "The reviewer reads while this page waits — expect a minute or two before the Findings return.",
+      "didNotFinish": "did not finish — findings raised before the failure are preserved",
+      "earlierNote": "Only the most recent review’s findings are counted above. Findings from earlier readings remain below, each marked “from an earlier review.”"
+    },
+    "list": {
+      "raisedAgainst": "raised against Version {number}",
+      "nowAt": "now at Version {number}",
+      "raisedOn": "raised {date}",
+      "fromEarlierReview": "from an earlier review",
+      "deliberationLink": "Deliberation — {status}",
+      "resolve": "Resolve",
+      "reviseChapter": "Revise the chapter",
+      "deliberate": "Deliberate",
+      "reopen": "Reopen",
+      "inVersion": "in Version {number}"
+    },
+    "form": {
+      "metaTitle": "Raise a finding",
+      "title": "Raise a finding",
+      "intro": "An observation, made permanent: what was seen, and why it matters. Findings guide revision; they never touch the text.",
+      "about": "About",
+      "wholeManuscript": "The manuscript as a whole",
+      "anchoredNote": "— anchored to the version being read.",
+      "severity": "Severity",
+      "category": "Category",
+      "titleField": "Title",
+      "explanation": "Explanation",
+      "explanationHint": "what was seen, and why it matters",
+      "excerpt": "Excerpt",
+      "excerptHint": "quote the passage verbatim",
+      "submit": "Raise the finding"
+    },
+    "review": {
+      "metaTitle": "Request a Constitution Review",
+      "title": "Request a Constitution Review",
+      "intro": "A senior editorial reading with one question: does the completed manuscript still honor the Book Constitution? The reviewer observes, identifies, and explains — it never touches a word. Its findings arrive below yours, with the same standing, and every finding must cite the Constitution’s own words.",
+      "noConstitution": "The Book Constitution has not been established — there is nothing to review against. Establish it first; the Constitution is the law this reviewer checks.",
+      "willRead": "Will read",
+      "constitutionV": "Book Constitution v{number}",
+      "outlineV": "Master Outline v{number}",
+      "openNow": "Open findings now",
+      "disclosureOutbound": "The Constitution, the Outline, and the manuscript text are sent to OpenAI for this review, and for nothing else. Identity documents are not sent.",
+      "disclosureCost": "A review of this size typically costs a few dollars and takes a few minutes. Each run is a fresh reading — running again may see differently, and repeated runs may restate ground already covered.",
+      "busyReading": "A review is already reading this manuscript — return to <link>the Findings</link> in a few minutes.",
+      "busyUnfinished": "An unfinished review is waiting to continue — pick it up from <link>the Findings</link>.",
+      "request": "Request the review",
+      "requestWait": "The reviewer reads while this page waits — expect a few minutes before the Findings return."
+    },
+    "errors": {
+      "severityRequired": "A finding needs a severity.",
+      "titleRequired": "A finding needs a title.",
+      "explanationRequired": "A finding needs an explanation — what was seen, and why it matters.",
+      "anchorRequired": "A chapter finding must anchor to the version observed.",
+      "raiseFailed": "The finding could not be raised.",
+      "resolveFailed": "The finding could not be resolved.",
+      "setAsideFailed": "The finding could not be set aside.",
+      "reopenFailed": "The finding could not be reopened.",
+      "findingsMigrationMissing": "The database is missing the Editorial Findings migration — apply supabase/migrations/20260711000000_editorial_findings.sql (docs/setup.md §2).",
+      "reviewNotConfigured": "Editorial review is not configured: OPENAI_API_KEY is not set.",
+      "bookNotFound": "The book could not be found.",
+      "nothingToReview": "There is nothing to review yet — the manuscript has no written chapters.",
+      "alreadyReading": "A review is already reading this manuscript. Let it finish first.",
+      "unfinishedWaiting": "An unfinished review is waiting to continue. Continue it from the Findings.",
+      "startFailed": "The review could not be started. If this persists, the reviewer's migration may not be applied.",
+      "alreadyContinuing": "This review is already being continued. Let it finish first.",
+      "nothingToContinue": "There is no unfinished review to continue.",
+      "signInRequired": "Sign in to request a review.",
+      "reviewMigrationMissing": "The database is missing a Constitution Review migration — apply supabase/migrations/20260712000000_constitution_review.sql and the chunked-execution migrations 20260714/20260715 (docs/setup.md §2).",
+      "reviewDidNotFinish": "The review could not finish. Findings raised before the failure are preserved below."
+    }
+  },
+  "deliberation": {
+    "page": {
+      "metaTitle": "Deliberation",
+      "title": "Deliberation",
+      "intro": "Judgment, preserved. The finding observed; this memo decides what the book will do about it, and why. The revisions themselves remain the work of versions — a deliberation edits nothing.",
+      "findingLabel": "The finding",
+      "adoptionNote": "Adoption makes the judgment permanent — like activating a version. Until then, the draft is yours to shape or discard.",
+      "affectedLabel": "Affected",
+      "implementationLabel": "Implementation",
+      "drafted": "Drafted",
+      "adopted": "Adopted",
+      "implemented": "Implemented",
+      "standing": "Standing",
+      "markImplemented": "Mark implemented",
+      "implementedNotePlaceholder": "where the judgment was carried out"
+    },
+    "form": {
+      "question": "Question",
+      "questionHint": "what is being weighed",
+      "judgment": "Judgment",
+      "judgmentHint": "what the book will do — never the words that will do it",
+      "reasoning": "Reasoning",
+      "reasoningHint": "why this position",
+      "affected": "Affected",
+      "affectedHint": "what this touches, in your own words",
+      "saveDraft": "Save the draft",
+      "adopt": "Adopt the judgment"
+    },
+    "errors": {
+      "questionRequired": "The deliberation needs its question.",
+      "adoptionRequires": "Adoption requires a judgment and its reasoning.",
+      "saveFailed": "The deliberation could not be saved.",
+      "adoptFailed": "The judgment could not be adopted.",
+      "implementFailed": "The deliberation could not be marked implemented.",
+      "discardFailed": "The draft could not be discarded.",
+      "deliberationMigrationMissing": "The database is missing the Editorial Deliberation migration — apply supabase/migrations/20260713000000_editorial_deliberation.sql (docs/setup.md §2)."
     }
   },
   "errors": {

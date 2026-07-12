@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { withActionMessage } from "@/lib/action-messages";
 import { createClient } from "@/lib/supabase/server";
 import {
   ReviewNotPossibleError,
@@ -9,8 +10,9 @@ import {
 } from "@/lib/editorial-ai/runner";
 import { constitutionReview } from "@/lib/review/constitution";
 
-const MIGRATION_MESSAGE =
-  "The database is missing a Constitution Review migration — apply supabase/migrations/20260712000000_constitution_review.sql and the chunked-execution migrations 20260714/20260715 (docs/setup.md §2).";
+/** Failures redirect with STABLE MESSAGE CODES from the findings.errors
+ *  namespace (the Phase 3B pattern); raw exception, model, and database
+ *  text stays in the server logs. */
 
 /** redirect() throws internally; let those throws through untouched. */
 function isRedirect(error: unknown): boolean {
@@ -23,13 +25,13 @@ function isRedirect(error: unknown): boolean {
   );
 }
 
-function messageFor(error: unknown): string {
-  if (error instanceof ReviewNotPossibleError) return error.message;
+function codeFor(error: unknown): string {
+  if (error instanceof ReviewNotPossibleError) return error.code;
   return /enum|invalid input value|review_type|column .* does not exist/i.test(
     error instanceof Error ? error.message : "",
   )
-    ? MIGRATION_MESSAGE
-    : "The review could not be started.";
+    ? "reviewMigrationMissing"
+    : "startFailed";
 }
 
 /** A review is a deliberate act: always requested, never scheduled. It
@@ -53,9 +55,7 @@ export async function requestConstitutionReview(formData: FormData) {
     const result = await startReview(constitutionReview, authorSlug, bookSlug);
     if (result.status === "failed") {
       redirect(
-        `${findingsPath}?error=${encodeURIComponent(
-          "The review could not finish. Findings raised before the failure are preserved below.",
-        )}`,
+        withActionMessage(findingsPath, { code: "reviewDidNotFinish" }),
       );
     }
     // complete or incomplete: the Findings page shows the outcome and, if
@@ -64,7 +64,7 @@ export async function requestConstitutionReview(formData: FormData) {
   } catch (error) {
     if (isRedirect(error)) throw error;
     console.error("[review] constitution request failed", error);
-    redirect(`${requestPath}?error=${encodeURIComponent(messageFor(error))}`);
+    redirect(withActionMessage(requestPath, { code: codeFor(error) }));
   }
 }
 
@@ -89,15 +89,13 @@ export async function continueConstitutionReview(formData: FormData) {
     );
     if (result.status === "failed") {
       redirect(
-        `${findingsPath}?error=${encodeURIComponent(
-          "The review could not finish. Findings raised before the failure are preserved below.",
-        )}`,
+        withActionMessage(findingsPath, { code: "reviewDidNotFinish" }),
       );
     }
     redirect(findingsPath);
   } catch (error) {
     if (isRedirect(error)) throw error;
     console.error("[review] constitution continue failed", error);
-    redirect(`${findingsPath}?error=${encodeURIComponent(messageFor(error))}`);
+    redirect(withActionMessage(findingsPath, { code: codeFor(error) }));
   }
 }

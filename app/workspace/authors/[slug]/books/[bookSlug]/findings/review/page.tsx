@@ -1,18 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { ActionMessage } from "@/components/action-message";
 import { PrimaryButton } from "@/components/editorial";
 import { SetupNotice } from "@/components/setup-notice";
-import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
+import { WorkspaceFrame } from "@/components/workspace-frame";
+import { actionMessageFromQuery } from "@/lib/action-messages";
 import { getFindingsRoom, type FindingsRoom } from "@/lib/findings/queries";
 import { assembleBookContext } from "@/lib/books/assemble";
 import { getManuscriptSummary } from "@/lib/manuscript/queries";
 import { requestConstitutionReview } from "@/lib/review/actions";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = {
-  title: "Request a Constitution Review",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("findings.review");
+  return { title: t("metaTitle") };
+}
 
 // The review runs within the request action; give it room to read.
 export const maxDuration = 300;
@@ -22,7 +26,7 @@ export default async function RequestReviewPage({
   searchParams,
 }: {
   params: Promise<{ slug: string; bookSlug: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const supabase = await createClient();
   const {
@@ -31,7 +35,7 @@ export default async function RequestReviewPage({
   if (!user) redirect("/signin");
 
   const { slug, bookSlug } = await params;
-  const { error } = await searchParams;
+  const message = actionMessageFromQuery(await searchParams);
 
   let room: FindingsRoom | null;
   let constitutionVersion: number | null = null;
@@ -64,6 +68,11 @@ export default async function RequestReviewPage({
   if (!room) notFound();
 
   const { author, book, openCount, latestReview } = room;
+  const t = await getTranslations("findings.review");
+  const tPage = await getTranslations("findings.page");
+  const tProgress = await getTranslations("manuscript.progress");
+  const tCommon = await getTranslations("common");
+  const tNav = await getTranslations("navigation");
   const bookPath = `/workspace/authors/${author.slug}/books/${book.slug}`;
   const findingsPath = `${bookPath}/findings`;
   const runningNow = latestReview?.status === "pending";
@@ -74,47 +83,47 @@ export default async function RequestReviewPage({
     <WorkspaceFrame
       email={user.email ?? ""}
       breadcrumbs={[
-        { href: "/workspace", label: "Workspace" },
+        { href: "/workspace", label: tNav("workspace") },
         { href: `/workspace/authors/${author.slug}`, label: author.full_name },
         { href: bookPath, label: book.title },
-        { href: findingsPath, label: "The Findings" },
+        { href: findingsPath, label: tPage("title") },
       ]}
     >
       <p className="eyebrow">{book.title}</p>
       <h1 className="mt-2 font-display text-4xl tracking-tight">
-        Request a Constitution Review
+        {t("title")}
       </h1>
       <p className="mt-6 max-w-prose text-lg leading-relaxed text-ink-soft">
-        A senior editorial reading with one question: does the completed
-        manuscript still honor the Book Constitution? The reviewer
-        observes, identifies, and explains — it never touches a word. Its
-        findings arrive below yours, with the same standing, and every
-        finding must cite the Constitution&rsquo;s own words.
+        {t("intro")}
       </p>
 
       <div className="mt-4">
-        <ErrorNote message={error} />
+        <ActionMessage
+          code={message?.code}
+          params={message?.params}
+          namespace="findings.errors"
+        />
       </div>
 
       {constitutionVersion === null ? (
         <p className="rule mt-10 max-w-prose pt-6 italic text-ink-soft">
-          The Book Constitution has not been established — there is nothing
-          to review against. Establish it first; the Constitution is the
-          law this reviewer checks.
+          {t("noConstitution")}
         </p>
       ) : (
         <>
           <dl className="rule mt-10 flex max-w-3xl flex-wrap gap-x-16 gap-y-6 pt-6">
             <div>
-              <dt className="eyebrow">Will read</dt>
+              <dt className="eyebrow">{t("willRead")}</dt>
               <dd className="mt-1.5 font-serif text-xl leading-snug">
-                Book Constitution v{constitutionVersion}
-                {outlineVersion ? `, Master Outline v${outlineVersion}` : ""}
-                {`, ${chapterCount} ${chapterCount === 1 ? "chapter" : "chapters"}`}
+                {t("constitutionV", { number: constitutionVersion })}
+                {outlineVersion
+                  ? `, ${t("outlineV", { number: outlineVersion })}`
+                  : ""}
+                {`, ${tProgress("chapters", { count: chapterCount })}`}
               </dd>
             </div>
             <div>
-              <dt className="eyebrow">Open findings now</dt>
+              <dt className="eyebrow">{t("openNow")}</dt>
               <dd className="mt-1.5 font-serif text-xl leading-snug">
                 {openCount}
               </dd>
@@ -122,48 +131,38 @@ export default async function RequestReviewPage({
           </dl>
 
           <div className="mt-8 max-w-prose space-y-3 font-sans text-xs leading-relaxed text-ink-soft">
-            <p>
-              The Constitution, the Outline, and the manuscript text are
-              sent to OpenAI for this review, and for nothing else. Identity
-              documents are not sent.
-            </p>
-            <p>
-              A review of this size typically costs a few dollars and takes
-              a few minutes. Each run is a fresh reading — running again may
-              see differently, and repeated runs may restate ground already
-              covered.
-            </p>
+            <p>{t("disclosureOutbound")}</p>
+            <p>{t("disclosureCost")}</p>
           </div>
 
           {busy ? (
             <p className="mt-10 max-w-prose italic text-ink-soft">
-              {runningNow
-                ? "A review is already reading this manuscript — return to "
-                : "An unfinished review is waiting to continue — pick it up from "}
-              <Link
-                href={findingsPath}
-                className="text-oxblood underline-offset-4 hover:underline"
-              >
-                the Findings
-              </Link>
-              {runningNow ? " in a few minutes." : "."}
+              {t.rich(runningNow ? "busyReading" : "busyUnfinished", {
+                link: (chunks) => (
+                  <Link
+                    href={findingsPath}
+                    className="text-oxblood underline-offset-4 hover:underline"
+                  >
+                    {chunks}
+                  </Link>
+                ),
+              })}
             </p>
           ) : (
             <form action={requestConstitutionReview} className="mt-10">
               <input type="hidden" name="author_slug" value={author.slug} />
               <input type="hidden" name="book_slug" value={book.slug} />
               <div className="flex items-baseline gap-8">
-                <PrimaryButton>Request the review</PrimaryButton>
+                <PrimaryButton>{t("request")}</PrimaryButton>
                 <Link
                   href={findingsPath}
                   className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
                 >
-                  Cancel
+                  {tCommon("cancel")}
                 </Link>
               </div>
               <p className="mt-3 font-sans text-[0.6875rem] text-ink-faint">
-                The reviewer reads while this page waits — expect a few
-                minutes before the Findings return.
+                {t("requestWait")}
               </p>
             </form>
           )}
