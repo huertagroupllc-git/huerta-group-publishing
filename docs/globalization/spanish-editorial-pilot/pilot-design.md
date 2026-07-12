@@ -72,3 +72,15 @@ false claims, translation of quotes, or unstable response language.
 Human review: the final grade requires a fluent Spanish reader's
 sign-off (Esteban / designated editor). AI-side grading informs; it
 does not approve.
+
+## Execution notes (deviations recorded, gold standard unchanged)
+
+- **Manuscript tag stored as `es`, not `es-MX`**: the platform's
+  language selector deliberately offers macro-languages only
+  (SELECTABLE_LANGUAGES); es-MX is a KNOWN tag (display/storage) but
+  not user-selectable. The phase spec allows "es or a more specific
+  valid tag", so the book is stored as `es`; the manuscript itself
+  carries es-MX voice (N2 regionalisms), which is what the seeds
+  exercise. Variant-tag selection remains future product work.
+- The seeded matrix and expected results above were not modified after
+  the reviews ran; grading lives in pilot-results.md.

@@ -21,7 +21,12 @@ export async function generateMetadata({
   const { runId } = await params;
   const run = await getAdminReviewRun(runId).catch(() => null);
   if (run) {
-    return { title: `${reviewTypeLabel(run.reviewType)} — ${run.book.title}` };
+    const tStatus = await getTranslations("status");
+    const typeName =
+      run.reviewType in REVIEW_TYPE_LABELS
+        ? tStatus(`reviewType.${run.reviewType}`)
+        : reviewTypeLabel(run.reviewType);
+    return { title: `${typeName} — ${run.book.title}` };
   }
   const t = await getTranslations("admin.reviewRunDetail");
   return { title: t("metaFallback") };

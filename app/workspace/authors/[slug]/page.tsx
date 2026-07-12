@@ -9,7 +9,12 @@ import { WorkspaceFrame } from "@/components/workspace-frame";
 import { actionMessageFromQuery } from "@/lib/action-messages";
 import { assembleAuthorContext, serializeContext } from "@/lib/memory/assemble";
 import { listBooks, type BookRosterEntry } from "@/lib/books/queries";
-import { bookStatusLabel, isWritingStage } from "@/lib/books/types";
+import {
+  bookStatusLabel,
+  isKnownBookStatus,
+  isWritingStage,
+  type BookStatus,
+} from "@/lib/books/types";
 import { getAuthorStudy, type AuthorStudy } from "@/lib/memory/queries";
 import { docTypeMeta, formatDate } from "@/lib/memory/types";
 import { createClient } from "@/lib/supabase/server";
@@ -78,6 +83,11 @@ export default async function AuthorStudyPage({
   const tCommon = await getTranslations("common");
   const tDoc = await getTranslations("memory.document");
   const tRoster = await getTranslations("workspace.authors");
+  const tStatus = await getTranslations("status");
+  const bookStatusName = (status: BookStatus) =>
+    isKnownBookStatus(status)
+      ? tStatus(`book.${status}`)
+      : bookStatusLabel(status);
 
   return (
     <WorkspaceFrame
@@ -211,7 +221,7 @@ export default async function AuthorStudyPage({
                   ) : null}
                 </div>
                 <span className="font-sans text-xs text-ink-faint">
-                  {bookStatusLabel(book.status)} ·{" "}
+                  {bookStatusName(book.status)} ·{" "}
                   {tRoster("establishedOfTotal", {
                     count: book.establishedCount,
                     total: 3,

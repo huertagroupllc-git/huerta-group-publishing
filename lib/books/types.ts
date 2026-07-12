@@ -66,6 +66,15 @@ export function bookStatusLabel(status: BookStatus): string {
   return BOOK_STATUSES.find((s) => s.value === status)?.label ?? status;
 }
 
+/** Guard for catalog-driven status rendering: only statuses the catalog
+ *  knows (status.book.*) may go through t(); anything else — e.g. a stored
+ *  value from an unapplied migration — falls back to bookStatusLabel so a
+ *  raw message key never renders. (Measured in the Spanish editorial
+ *  pilot: a pre-20260707 'developing' row rendered "status.book.developing".) */
+export function isKnownBookStatus(status: string): boolean {
+  return BOOK_STATUSES.some((s) => s.value === status);
+}
+
 /**
  * The home transition (Capability 3, Amendment 3 / Principle XIV): from
  * the Writing stage onward the Writing Workspace is the author's home

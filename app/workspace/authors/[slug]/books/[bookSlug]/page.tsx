@@ -17,7 +17,12 @@ import { openFindingsCount } from "@/lib/findings/queries";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getManuscriptSummary, type ManuscriptSummary } from "@/lib/manuscript/queries";
 import { getBookStudy, type BookStudy } from "@/lib/books/queries";
-import { BOOK_DOC_TYPES, isWritingStage } from "@/lib/books/types";
+import {
+  BOOK_DOC_TYPES,
+  bookStatusLabel,
+  isKnownBookStatus,
+  isWritingStage,
+} from "@/lib/books/types";
 import { assembleAuthorContext } from "@/lib/memory/assemble";
 import { formatDate } from "@/lib/memory/types";
 import { createClient } from "@/lib/supabase/server";
@@ -263,7 +268,9 @@ export default async function BookStudyPage({
           <div>
             <dt className="eyebrow">{t("status")}</dt>
             <dd className="mt-1.5 font-serif text-xl leading-snug">
-              {tStatus(book.status)}
+              {isKnownBookStatus(book.status)
+                ? tStatus(book.status)
+                : bookStatusLabel(book.status)}
             </dd>
           </div>
 

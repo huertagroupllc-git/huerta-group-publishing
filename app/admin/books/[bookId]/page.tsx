@@ -6,6 +6,7 @@ import {
   getAdminBook,
   reviewRunStatusLabel,
 } from "@/lib/admin/queries";
+import { bookStatusLabel, isKnownBookStatus } from "@/lib/books/types";
 import { REVIEW_TYPE_LABELS, reviewTypeLabel } from "@/lib/findings/types";
 import {
   languageDefinition,
@@ -94,7 +95,14 @@ export default async function AdminBookDetailPage({
       </p>
 
       <dl className="rule mt-8 grid max-w-3xl grid-cols-2 gap-x-10 gap-y-6 pt-6 sm:grid-cols-4">
-        <Fact label={t("stage")} value={tStatus(`book.${book.status}`)} />
+        <Fact
+          label={t("stage")}
+          value={
+            isKnownBookStatus(book.status)
+              ? tStatus(`book.${book.status}`)
+              : bookStatusLabel(book.status)
+          }
+        />
         <Fact
           label={t("manuscriptLanguage")}
           value={langName(book.language)}

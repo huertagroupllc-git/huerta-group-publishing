@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getAdminAuthor } from "@/lib/admin/queries";
+import { bookStatusLabel, isKnownBookStatus } from "@/lib/books/types";
 import { formatDate } from "@/lib/memory/types";
 
 export async function generateMetadata({
@@ -120,7 +121,9 @@ export default async function AdminAuthorDetailPage({
                       {b.title}
                     </span>
                     <span className="font-sans text-xs text-ink-soft">
-                      {tStatus(`book.${b.status}`)}
+                      {isKnownBookStatus(b.status)
+                        ? tStatus(`book.${b.status}`)
+                        : bookStatusLabel(b.status)}
                     </span>
                   </div>
                   <p className="mt-1 font-sans text-xs text-ink-soft">

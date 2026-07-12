@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { AdminFrame } from "@/components/admin-frame";
 import { getCurrentUser, isStaff } from "@/lib/auth/session";
 
-export const metadata: Metadata = {
-  title: { default: "Administration", template: "%s · Administration" },
-  // Authenticated operations surface: never indexed.
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("admin.shell");
+  return {
+    title: { default: t("metaTitle"), template: `%s · ${t("metaTitle")}` },
+    // Authenticated operations surface: never indexed.
+    robots: { index: false, follow: false },
+  };
+}
 
 /**
  * The Administration authorization boundary. This server layout wraps

@@ -11,7 +11,11 @@ import {
   reviewRunStatusLabel,
   type AdminBookRow,
 } from "@/lib/admin/queries";
-import { BOOK_STATUSES } from "@/lib/books/types";
+import {
+  BOOK_STATUSES,
+  bookStatusLabel,
+  isKnownBookStatus,
+} from "@/lib/books/types";
 import { formatDate } from "@/lib/memory/types";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -221,7 +225,9 @@ export default async function AdminBooksPage({
                     {b.title}
                   </span>
                   <span className="font-sans text-xs text-ink-soft">
-                    {tStatus(`book.${b.status}`)}
+                    {isKnownBookStatus(b.status)
+                      ? tStatus(`book.${b.status}`)
+                      : bookStatusLabel(b.status)}
                   </span>
                 </div>
                 <p className="mt-1 font-sans text-xs text-ink-soft">
