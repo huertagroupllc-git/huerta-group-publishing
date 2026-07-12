@@ -7,7 +7,10 @@ import {
   reviewRunStatusLabel,
 } from "@/lib/admin/queries";
 import { REVIEW_TYPE_LABELS, reviewTypeLabel } from "@/lib/findings/types";
-import { languageLabel } from "@/lib/languages";
+import {
+  languageDefinition,
+  normalizeLanguageTag,
+} from "@/lib/languages";
 import { formatDate } from "@/lib/memory/types";
 
 export async function generateMetadata({
@@ -43,6 +46,12 @@ export default async function AdminBookDetailPage({
   const t = await getTranslations("admin.bookDetail");
   const tStatus = await getTranslations("status");
   const tShell = await getTranslations("admin.shell.nav");
+  const tLangs = await getTranslations("languages");
+  const langName = (tag: string) => {
+    const n = normalizeLanguageTag(tag) ?? "en";
+    const name = tLangs.has(n) ? tLangs(n) : languageDefinition(n).label;
+    return n === "en" || n === "es" ? name : `${name} · ${n}`;
+  };
   const runStatusName = (status: string) => {
     const known = ["pending", "incomplete", "complete", "failed"];
     return known.includes(status)
@@ -88,7 +97,7 @@ export default async function AdminBookDetailPage({
         <Fact label={t("stage")} value={tStatus(`book.${book.status}`)} />
         <Fact
           label={t("manuscriptLanguage")}
-          value={languageLabel(book.language)}
+          value={langName(book.language)}
         />
         <Fact
           label={t("chapters")}

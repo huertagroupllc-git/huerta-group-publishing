@@ -45,13 +45,16 @@ export const SELECTABLE_LANGUAGES: LanguageDefinition[] = [
 ];
 
 /** Interface locales a user may choose for the platform chrome.
- *  Deliberately just English until a complete, ratified catalog exists
- *  for another language — an interface language is never offered ahead
- *  of its full editorial-workflow validation. Distinct from
- *  SELECTABLE_LANGUAGES (manuscript languages): a manuscript may be in
- *  Spanish while the interface remains English. */
+ *  A language appears here only when its complete, ratified catalog
+ *  exists (docs/globalization/). Labels are endonyms — a language
+ *  selector names each language in itself, by convention. es-419 is an
+ *  INTERNAL PILOT: selectable on the Account page, not publicly
+ *  marketed. Distinct from SELECTABLE_LANGUAGES (manuscript
+ *  languages): a manuscript may be in Spanish while the interface
+ *  remains English, and vice versa. */
 export const INTERFACE_LOCALES: LanguageDefinition[] = [
   { tag: "en-US", label: "English (United States)", instructionName: "English" },
+  { tag: "es-419", label: "Español (Latinoamérica)", instructionName: "Latin American Spanish" },
 ];
 
 export const DEFAULT_INTERFACE_LOCALE = "en-US";

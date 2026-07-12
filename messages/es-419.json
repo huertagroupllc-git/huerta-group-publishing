@@ -1,0 +1,849 @@
+{
+  "common": {
+    "brand": "Huerta Group Publishing",
+    "copyright": "© 2026 Huerta Group Publishing",
+    "signOut": "Cerrar sesión",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "next": "Siguiente →",
+    "previous": "← Anterior",
+    "pageOf": "Página {page, number} de {pageCount, number}",
+    "tryAgain": "Intentar de nuevo",
+    "show": "Mostrar",
+    "hide": "Ocultar"
+  },
+  "navigation": {
+    "mode": "Modo",
+    "workspace": "Estudio",
+    "administration": "Administración",
+    "account": "Cuenta",
+    "adminSections": "Secciones de Administración",
+    "pagination": "Paginación"
+  },
+  "auth": {
+    "title": "El Estudio",
+    "intro": "El escritorio editorial para los autores y su registro permanente. Inicie sesión para continuar.",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "signIn": "Iniciar sesión",
+    "footer": "El acceso lo proporciona la editorial."
+  },
+  "workspace": {
+    "shell": {
+      "notFoundTitle": "No hay ninguna página en esta dirección",
+      "notFoundBody": "Nada en el registro responde a ella — la dirección puede estar mal escrita, o el enlace puede ser anterior a la página. Nada se ha perdido.",
+      "notFoundReturn": "Volver al Estudio"
+    },
+    "authors": {
+      "metaTitle": "Estudio",
+      "title": "El Estudio",
+      "intro": "Cada autor que se guarda aquí tiene una memoria permanente y versionada. Las conversaciones descubren ideas; lo que vale la pena conservar se preserva aquí — para que cada borrador futuro suene más a su autor, nunca más a una IA.",
+      "rosterHeading": "El Registro de Autores",
+      "addAuthor": "Agregar un autor",
+      "emptyRoster": "Aún no hay autores. El registro comienza con su primer autor — agregue uno para establecer su memoria permanente.",
+      "establishedOfTotal": "{count, number} de {total, number} documentos establecidos"
+    }
+  },
+  "home": {
+    "nav": {
+      "workshop": "El Taller",
+      "howItWorks": "Cómo funciona",
+      "about": "Acerca de",
+      "signIn": "Iniciar sesión",
+      "workspace": "Estudio",
+      "menu": "Menú",
+      "closeMenu": "Cerrar menú",
+      "skip": "Ir al contenido",
+      "primary": "Principal"
+    },
+    "hero": {
+      "eyebrow": "Un sistema operativo para autores",
+      "headline1": "Todo libro comienza en alguna parte.",
+      "headline2": "Aquí es donde el suyo toma forma.",
+      "lead": "El Taller es un espacio dedicado para que los autores desarrollen ideas, escriban con concentración, refinen su trabajo y den vida a un manuscrito — un capítulo a la vez.",
+      "enterWorkshop": "Entrar al Taller",
+      "signIn": "Iniciar sesión",
+      "seeHow": "Vea cómo funciona",
+      "accessNote": "El acceso lo proporciona la editorial.",
+      "fromIdea": "De la idea al manuscrito. Del manuscrito hacia la publicación."
+    },
+    "journey": {
+      "eyebrow": "Cómo funciona",
+      "heading": "La vida de un libro",
+      "intro": "No es una cadena de producción — es una práctica editorial. Cada etapa del Taller preserva un tipo de trabajo distinto, y el libro lo lleva todo consigo.",
+      "stages": {
+        "discovery": {
+          "title": "Descubrimiento",
+          "body": "Antes de la escritura, el pensamiento: para qué existe el libro, a quién sirve y aquello en lo que no debe convertirse."
+        },
+        "bookMemory": {
+          "title": "Memoria del Libro",
+          "body": "La constitución, el esquema y el vocabulario propios del libro — sus intenciones declaradas, guardadas donde la obra siempre pueda responder ante ellas."
+        },
+        "manuscript": {
+          "title": "El Manuscrito",
+          "body": "Escrito un capítulo a la vez, cada uno una unidad completa con su propio propósito, y luego ensamblado en la experiencia del lector."
+        },
+        "review": {
+          "title": "Revisión Editorial",
+          "body": "Una lectura editorial de fondo del borrador terminado frente a la constitución del propio libro — qué honra, y dónde se ha desviado."
+        },
+        "deliberation": {
+          "title": "Deliberación",
+          "body": "El juicio entre la observación y la revisión: el autor sopesa cada hallazgo y deja constancia de la decisión que lo acompaña."
+        },
+        "revision": {
+          "title": "Revisión del Texto",
+          "body": "El manuscrito mejora mediante las mismas versiones deliberadas con las que fue escrito — nada se sobrescribe, nada se pierde."
+        },
+        "publication": {
+          "title": "Hacia la Publicación",
+          "body": "El fin hacia el que apunta todo el proceso: un libro llevado a su término y a su madurez, en los términos del autor."
+        }
+      }
+    },
+    "workshop": {
+      "eyebrow": "Dentro del Taller",
+      "heading": "Un solo lugar para la vida de un libro",
+      "intro": "Un entorno creativo serio: salas serenas para escribir y revisar, y un registro permanente que preserva cada intención, versión y decisión — para que un libro siempre recuerde cómo llegó a ser él mismo.",
+      "rooms": {
+        "authorMemory": {
+          "name": "Memoria del Autor",
+          "body": "Quién es el autor y cómo suena, preservado a través de cada libro que llegue a escribir."
+        },
+        "bookMemory": {
+          "name": "Memoria del Libro",
+          "body": "Por qué existe este libro en particular, y los límites que se comprometió a respetar."
+        },
+        "writingRoom": {
+          "name": "La Sala de Escritura",
+          "body": "Donde se escribe un capítulo, con su propósito y la memoria del libro siempre al margen."
+        },
+        "readingCopy": {
+          "name": "Copia de Lectura",
+          "body": "El manuscrito ensamblado para una lectura continua, exactamente como lo encontraría un lector."
+        },
+        "findings": {
+          "name": "Hallazgos Editoriales",
+          "body": "Observaciones que orientan la revisión, cada una citando las palabras del propio libro — nunca una reescritura."
+        },
+        "deliberation": {
+          "name": "Deliberación Editorial",
+          "body": "Un lugar para razonar sobre un hallazgo y decidir, antes de que cambie una sola palabra."
+        },
+        "versions": {
+          "name": "Historial de Versiones",
+          "body": "Cada borrador numerado y conservado; el registro permanente solo crece."
+        },
+        "constitutionReview": {
+          "name": "Revisión de Constitución",
+          "body": "Una lectura del manuscrito completo frente a la intención fundacional del libro."
+        }
+      }
+    },
+    "authorship": {
+      "eyebrow": "Acerca de",
+      "heading": "La pluma sigue en su mano",
+      "principles": {
+        "authorship": {
+          "title": "La autoría es el fundamento.",
+          "body": "La automatización sirve a la voz del autor; nunca es su origen. La plataforma no escribirá un libro por usted, y no valdría la pena usarla si lo hiciera."
+        },
+        "complete": {
+          "title": "Completo antes que perfecto.",
+          "body": "Termine el pensamiento antes de pulir la frase. Un borrador completo puede juzgarse y madurar; un fragmento solo puede retocarse sin fin."
+        },
+        "deliberate": {
+          "title": "La revisión es deliberada.",
+          "body": "Cada cambio es una decisión, expresada como tal — y el razonamiento se conserva, para que un libro siempre recuerde cómo llegó a ser él mismo."
+        }
+      }
+    },
+    "publication": {
+      "eyebrow": "Hacia la publicación",
+      "heading": "Construido con la publicación en el horizonte",
+      "body": "Cada etapa del Taller apunta hacia un libro terminado. Las capacidades de publicación crecerán dentro del ecosistema; hoy, el trabajo del Taller es hacer que el manuscrito sea digno de ellas — desarrollado, revisado, corregido y preservado en los términos del autor."
+    },
+    "cta": {
+      "heading": "Su libro tiene un lugar donde tomar forma.",
+      "body": "El Taller es donde se guardan los autores y sus libros — deliberadamente, permanentemente, en la propia voz del autor."
+    },
+    "footer": {
+      "statement": "Una casa editorial con memoria — un espacio dedicado donde los libros se desarrollan, se refinan y se conservan."
+    }
+  },
+  "author": {
+    "writingAs": "escribe como {penName}",
+    "study": {
+      "metaFallback": "Autor",
+      "editRecord": "Editar la ficha",
+      "memoryHeading": "La Memoria del Autor",
+      "version": "Versión {number}",
+      "finalized": "finalizada el {date}",
+      "notEstablished": "Aún sin establecer",
+      "draftOpen": "Borrador abierto",
+      "booksHeading": "Libros",
+      "addBook": "Agregar un libro",
+      "emptyBooks": "Aún no hay libros. Todo libro que se abre aquí comienza bajo la memoria establecida de este autor.",
+      "theRecord": "la ficha",
+      "assembledMemory": "Memoria Ensamblada",
+      "assembledMemoryHint": "el registro exacto que recibirá la futura asistencia de IA — únicamente versiones activas y finalizadas"
+    },
+    "form": {
+      "addMetaTitle": "Agregar un autor",
+      "addTitle": "Agregar un autor",
+      "addIntro": "Esto abre la ficha permanente del autor. Sus cuatro documentos de memoria — Filosofía de Escritura, Biblia del Autor, Perfil de Voz y Decisiones Editoriales — se crean con ella, listos para establecerse.",
+      "fullName": "Nombre completo",
+      "penName": "Seudónimo",
+      "slug": "Slug",
+      "slugPlaceholder": "se deriva del nombre si se deja en blanco",
+      "shortBio": "Biografía breve",
+      "openRecord": "Abrir la ficha",
+      "editTitle": "Editar la ficha",
+      "editMetaFallback": "Editar",
+      "editIntro": "La identidad del autor, tal como la conserva la editorial. La dirección de la ficha sigue siendo <address>/{slug}</address> — se fijó cuando se abrió la ficha y no cambia.",
+      "saveRecord": "Guardar la ficha"
+    }
+  },
+  "book": {
+    "study": {
+      "metaFallback": "Libro",
+      "memoryHeading": "La Memoria del Libro",
+      "chaptersLink": "Capítulos",
+      "findingsLink": "Hallazgos",
+      "status": "Estado",
+      "begun": "Iniciado",
+      "workingTitle": "Título de Trabajo",
+      "inheritedFrom": "Heredado De",
+      "memoryNotEstablished": "Memoria del Autor aún sin establecer",
+      "assembledMemoryHint": "el registro exacto que recibirá la futura asistencia de IA — primero la memoria del autor, luego la del libro; únicamente versiones activas y finalizadas"
+    },
+    "form": {
+      "addMetaTitle": "Agregar un libro",
+      "addTitle": "Agregar un libro",
+      "addIntro": "Esto abre la ficha del libro bajo este autor, junto con sus tres documentos de memoria — Constitución del Libro, Esquema Maestro y Diccionario de Conceptos — listos para establecerse. La ficha dejará constancia de bajo qué versiones de la memoria del autor comienza el libro.",
+      "editIntro": "La identidad del libro, tal como la conserva la editorial. La dirección de la ficha sigue siendo <address>/{slug}</address> — se fijó cuando se abrió la ficha y no cambia. Por qué existe el libro pertenece a su Constitución, no a este formulario.",
+      "editMetaFallback": "Editar",
+      "title": "Título",
+      "subtitle": "Subtítulo",
+      "workingTitle": "Título de trabajo interno",
+      "slug": "Slug",
+      "slugPlaceholder": "se deriva del título si se deja en blanco",
+      "status": "Estado",
+      "statusHint": "Dónde se encuentra el libro en su vida, del Descubrimiento al Archivo — un hecho declarado, no una barrera.",
+      "language": "Idioma del manuscrito",
+      "languageHintNew": "El idioma en que está escrito el manuscrito. Las futuras revisiones editoriales responderán en este idioma. No cambia el idioma de la plataforma.",
+      "languageHintEdit": "El idioma en que está escrito el manuscrito. Las futuras revisiones editoriales responderán en este idioma; las revisiones ya realizadas conservan el idioma en que se realizaron. No cambia el idioma de la plataforma."
+    },
+    "memoryDocuments": {
+      "book_constitution": {
+        "label": "Constitución del Libro",
+        "description": "Por qué existe este libro y qué no es: premisa, propósito, la promesa al lector, el público y los límites."
+      },
+      "master_outline": {
+        "label": "Esquema Maestro",
+        "description": "La forma que toma el libro — partes, capítulos y el orden de su argumento o de su historia."
+      },
+      "concept_dictionary": {
+        "label": "Diccionario de Conceptos",
+        "description": "Qué significan las palabras del libro: ideas con nombre, definiciones canónicas y distinciones de las que el libro depende."
+      }
+    },
+    "errors": {
+      "titleRequired": "El título del libro es obligatorio.",
+      "slugUnusable": "No se pudo derivar un slug utilizable; proporcione uno.",
+      "languageInvalid": "El idioma del manuscrito no es una etiqueta de idioma válida.",
+      "bookSlugTaken": "Este autor ya tiene un libro en “{slug}”.",
+      "bookCreateFailed": "No se pudo crear el libro.",
+      "recordSaveFailed": "No se pudo guardar la ficha.",
+      "recordsMigrationMissing": "A la base de datos le falta la migración de la Capacidad 2 — aplique supabase/migrations/20260705000000_book_records.sql (docs/setup.md §2)."
+    }
+  },
+  "manuscript": {
+    "overview": {
+      "metaFallback": "Manuscrito",
+      "title": "El Manuscrito",
+      "chaptersHeading": "Capítulos",
+      "addChapter": "Agregar un capítulo",
+      "readingCopy": "Copia de Lectura",
+      "emptyManuscript": "El manuscrito comienza con su primer capítulo. Su <link>Esquema Maestro</link> ya contiene la forma — ábralo a su lado y agregue aquí el primer capítulo.",
+      "chapterNumber": "Capítulo {number}",
+      "appendix": "Apéndice",
+      "unwritten": "Sin escribir",
+      "moveUp": "Subir",
+      "moveDown": "Bajar",
+      "partsHeading": "Partes",
+      "partsEmpty": "Las partes son opcionales. Un manuscrito sin ellas se lee como una sola secuencia de capítulos; agregue una parte cuando el libro necesite movimientos mayores.",
+      "newPart": "Nueva parte",
+      "partPlaceholder": "p. ej. Parte I — Orígenes",
+      "addPart": "Agregar la parte"
+    },
+    "chapter": {
+      "metaFallback": "Capítulo",
+      "raiseFinding": "Levantar un hallazgo"
+    },
+    "form": {
+      "addMetaTitle": "Agregar un capítulo",
+      "addTitle": "Agregar un capítulo",
+      "addIntro": "El capítulo es la unidad de la autoría: lleva su propio propósito y su propia historia. Las palabras vienen después, en el capítulo mismo — esto abre su lugar en el manuscrito.",
+      "editMetaFallback": "Editar capítulo",
+      "editMetaPrefix": "Editar",
+      "editIntro": "La identidad del capítulo, tal como la conserva el manuscrito. Su dirección sigue siendo <address>/{slug}</address>; su número se calcula siempre a partir de su lugar en el manuscrito.",
+      "title": "Título",
+      "coreQuestion": "Pregunta Central",
+      "coreQuestionHint": "la única pregunta que este capítulo existe para responder",
+      "purpose": "Propósito",
+      "purposeHint": "por qué existe este capítulo",
+      "summary": "Resumen",
+      "summaryHint": "qué sucede en este capítulo",
+      "outlineLocation": "Ubicación en el Esquema Maestro",
+      "outlinePlaceholder": "la parte del Esquema Maestro a la que sirve este capítulo",
+      "kind": "Tipo",
+      "kindChapter": "Capítulo",
+      "kindAppendix": "Apéndice",
+      "part": "Parte",
+      "noPart": "Sin parte",
+      "addChapterButton": "Agregar el capítulo",
+      "saveChapter": "Guardar el capítulo"
+    },
+    "writingRoom": {
+      "positionOf": "Capítulo {number} de {total}",
+      "brief": "La Consigna",
+      "shapedUnder": "Formado bajo el Esquema Maestro v{number}",
+      "noBrief": "Aún no hay consigna — dele al capítulo un propósito desde su ficha.",
+      "editChapter": "Editar el capítulo",
+      "findingsHeading": "Hallazgos",
+      "versionShort": "v{number}",
+      "revisingFromFinding": "Revisando a partir de un hallazgo",
+      "judgmentLabel": "Juicio",
+      "raisedAgainstVersion": "Levantado contra la Versión {number}",
+      "nowAtVersion": "el capítulo está ahora en la Versión {number}",
+      "resolvedLower": "resuelto",
+      "resolvedInVersion": "resuelto en la Versión {number}",
+      "setAsideLower": "apartado",
+      "noteLabel": "Nota",
+      "noteOptional": "(opcional)",
+      "notePlaceholder": "qué hizo la revisión",
+      "markResolved": "Marcar como resuelto",
+      "draftOpenContinueWriting": "Hay un borrador abierto para este capítulo — <link>continúe escribiendo</link>.",
+      "newNextIntro": "Partiendo de la versión activa actual — escríbala hasta convertirla en la siguiente versión. Se guarda como borrador hasta que usted la active.",
+      "activationNote": "Activar finaliza el texto de forma permanente; descartar elimina el borrador. Ninguna de las dos toca las versiones anteriores. Nada se guarda hasta que usted lo guarde.",
+      "audioDraftNote": "Lee el borrador tal como se guardó por última vez.",
+      "unwrittenState": "Sin escribir.",
+      "beginChapter": "Comenzar el capítulo",
+      "previousChapter": "Anterior: {title}",
+      "nextChapter": "Siguiente: {title}",
+      "theRecord": "La Ficha",
+      "concepts": "Conceptos",
+      "conceptDictionaryMeta": "Diccionario de Conceptos · v{number} · solo consulta",
+      "conceptsNotEstablished": "El Diccionario de Conceptos no se ha establecido.",
+      "chapterContext": "Contexto del Capítulo",
+      "chapterContextHint": "el registro exacto que la futura asistencia de IA recibiría para este capítulo — únicamente versiones activas y finalizadas"
+    },
+    "readingCopy": {
+      "title": "Copia de Lectura",
+      "emptyManuscript": "El manuscrito comienza con su primer capítulo."
+    },
+    "progress": {
+      "chapters": "{count, plural, one {# capítulo} other {# capítulos}}",
+      "inParts": "en {count, plural, one {# parte} other {# partes}}",
+      "draftsOpen": "{count, plural, one {# borrador abierto} other {# borradores abiertos}}",
+      "openFindings": "{count, plural, one {# hallazgo abierto} other {# hallazgos abiertos}}",
+      "words": "{count, plural, one {# palabra} other {# palabras}}"
+    },
+    "errors": {
+      "titleRequired": "El título del capítulo es obligatorio.",
+      "coreQuestionRequired": "La Pregunta Central del capítulo es obligatoria — la única pregunta que existe para responder.",
+      "slugUnusable": "No se pudo derivar un slug utilizable a partir del título.",
+      "chapterSlugTaken": "Este manuscrito ya tiene un capítulo en “{slug}” — cambie ligeramente el título.",
+      "chapterCreateFailed": "No se pudo crear el capítulo.",
+      "chapterSaveFailed": "No se pudo guardar el capítulo.",
+      "partTitleRequired": "El título de la parte es obligatorio.",
+      "partCreateFailed": "No se pudo crear la parte.",
+      "chapterMoveFailed": "No se pudo mover el capítulo.",
+      "contentRequired": "Una versión necesita contenido antes de poder guardarse.",
+      "contentRequiredToActivate": "Una versión necesita contenido para poder activarse.",
+      "draftAlreadyOpen": "Ya hay un borrador abierto para este capítulo; continúe escribiéndolo.",
+      "draftCreateFailed": "No se pudo crear el borrador.",
+      "draftSaveFailed": "No se pudo guardar el borrador.",
+      "activateFailed": "No se pudo activar la versión.",
+      "discardFailed": "No se pudo descartar el borrador.",
+      "manuscriptMigrationMissing": "A la base de datos le falta la migración del manuscrito — aplique supabase/migrations/20260708000000_manuscript_foundation.sql (docs/setup.md §2)."
+    }
+  },
+  "memory": {
+    "documentRoom": {
+      "versionsHeading": "Versiones",
+      "noneYet": "Aún ninguna.",
+      "newVersion": "Nueva versión",
+      "version": "Versión {number}",
+      "active": "activa",
+      "draft": "borrador",
+      "superseded": "reemplazada",
+      "finalized": "finalizada el {date}",
+      "draftSaved": "Borrador guardado.",
+      "readingSuperseded": "Está leyendo una versión reemplazada.",
+      "activeVersionIs": "La versión activa es la {number}.",
+      "noActiveVersion": "Ninguna versión está activa actualmente.",
+      "restore": "Restaurar como la versión activa",
+      "draftOpenContinue": "Hay un borrador abierto para este documento — <link>continúe editándolo</link>.",
+      "emptyNothingEstablished": "Aún no se ha establecido nada.",
+      "establishFirst": "Establecer la primera versión",
+      "emptyDraftOpen": "Hay un borrador abierto pero nada está activo todavía — <link>continúe editando el borrador</link>.",
+      "newFirstIntro": "Esta se convertirá en la Versión 1, guardada como borrador hasta que usted la active.",
+      "newNextIntro": "Partiendo de la versión activa actual — edítela hasta convertirla en la siguiente versión. Se guarda como borrador hasta que usted la active.",
+      "saveDraft": "Guardar borrador",
+      "makeActive": "Activar esta versión",
+      "discardDraft": "Descartar este borrador",
+      "draftMeta": "Borrador · Versión {number} · iniciado el {date}",
+      "draftPrivacy": "Un borrador es un espacio de trabajo privado. Nada llega al registro permanente — ni a ningún contexto futuro de IA — hasta que usted lo active.",
+      "activationNote": "Activar finaliza el texto de forma permanente; descartar elimina el borrador. Ninguna de las dos toca las versiones anteriores.",
+      "content": "Contenido",
+      "markdownHint": "Markdown",
+      "changeSummary": "Resumen del cambio",
+      "changeSummaryPlaceholder": "qué cambia esta versión",
+      "source": "Origen",
+      "sourceNote": "Nota de origen",
+      "sourceNotePlaceholder": "p. ej. destilado de una conversación de voz, julio de 2026"
+    },
+    "document": {
+      "writing_philosophy": {
+        "label": "Filosofía de Escritura",
+        "description": "Lo que este autor cree sobre la escritura misma — los principios que gobiernan cada decisión posterior."
+      },
+      "author_bible": {
+        "label": "Biblia del Autor",
+        "description": "El registro permanente de quién es este autor: historia, temas, convicciones y visión del mundo."
+      },
+      "voice_profile": {
+        "label": "Perfil de Voz",
+        "description": "Cómo suena este autor: ritmo, vocabulario, hábitos de frase y tono."
+      },
+      "editorial_decisions": {
+        "label": "Decisiones Editoriales",
+        "description": "Decisiones que el autor ha asumido, registradas una sola vez para no volver a litigarse jamás."
+      }
+    },
+    "source": {
+      "manual": "Escrito directamente",
+      "chatgpt": "Destilado de ChatGPT",
+      "claude": "Destilado de Claude",
+      "file": "Importado de un archivo",
+      "other": "Otro"
+    },
+    "errors": {
+      "fullNameRequired": "El nombre completo del autor es obligatorio.",
+      "slugUnusable": "No se pudo derivar un slug utilizable; proporcione uno.",
+      "slugTaken": "El slug “{slug}” ya está en uso.",
+      "authorCreateFailed": "No se pudo crear el autor.",
+      "recordSaveFailed": "No se pudo guardar la ficha.",
+      "contentRequired": "Una versión necesita contenido antes de poder guardarse.",
+      "contentRequiredToActivate": "Una versión necesita contenido para poder activarse.",
+      "draftAlreadyOpen": "Ya hay un borrador abierto para este documento; continúe editándolo.",
+      "draftCreateFailed": "No se pudo crear el borrador.",
+      "draftSaveFailed": "No se pudo guardar el borrador.",
+      "activateFailed": "No se pudo activar la versión.",
+      "discardFailed": "No se pudo descartar el borrador.",
+      "workflowMigrationMissing": "A la base de datos le faltan las funciones de flujo de la Fase B — aplique supabase/migrations/20260703000000_author_memory_workflow.sql (docs/setup.md §2).",
+      "bookMemoryMigrationMissing": "A la base de datos le falta la migración de la Memoria del Libro — aplique supabase/migrations/20260706000000_book_memory_documents.sql (docs/setup.md §2)."
+    }
+  },
+  "admin": {
+    "shell": {
+      "metaTitle": "Administración",
+      "footer": "© 2026 Huerta Group Publishing · Administración",
+      "nav": {
+        "overview": "Resumen",
+        "authors": "Autores",
+        "books": "Libros",
+        "reviewRuns": "Sesiones de Revisión",
+        "aiUsage": "Uso de IA",
+        "system": "Sistema"
+      }
+    },
+    "overview": {
+      "title": "Las operaciones de la editorial",
+      "intro": "La misma cuenta y sesión que su Estudio, en una vista operativa — para dirigir Huerta Group Publishing en lugar de escribir dentro de ella. Esta área es de solo lectura por ahora, y crecerá a medida que tomen forma las operaciones de la editorial.",
+      "sectionsLabel": "Secciones",
+      "blurbs": {
+        "authors": "El registro de autores tal como lo conserva la editorial, independiente de cualquier libro.",
+        "books": "Todos los libros de todos los autores — el estante completo en un solo lugar.",
+        "reviewRuns": "Las Revisiones de Constitución en toda la plataforma, y cómo terminó cada una.",
+        "aiUsage": "Donde se rinde cuenta del uso que hace la plataforma de los modelos editoriales externos.",
+        "system": "Configuración, migraciones y salud de la plataforma — en términos sencillos."
+      },
+      "statusLabel": "Estado",
+      "statusNote": "Los planes comerciales, la facturación y el acceso público no están configurados. La Administración lee la plataforma; todavía no modifica el contenido de los autores, y nada aquí altera un manuscrito, una revisión ni el registro permanente. Eso sigue perteneciendo al autor, en el <link>Estudio</link>."
+    },
+    "section": {
+      "availableToday": "Disponible hoy",
+      "notYetBuilt": "Aún sin construir"
+    },
+    "filters": {
+      "apply": "Aplicar",
+      "search": "Buscar",
+      "searchByName": "Buscar por nombre",
+      "sort": "Ordenar",
+      "matchingQuery": "que coinciden con “{query}”",
+      "matchingFilters": "que coinciden con sus filtros"
+    },
+    "sort": {
+      "nameAZ": "Nombre (A–Z)",
+      "titleAZ": "Título (A–Z)",
+      "newest": "Más recientes",
+      "oldest": "Más antiguos",
+      "updated": "Actualizados recientemente",
+      "mostFindings": "Más hallazgos",
+      "fewestFindings": "Menos hallazgos"
+    },
+    "flags": {
+      "needsAttention": "Requiere atención",
+      "stalled": "Detenida"
+    },
+    "counts": {
+      "authors": "{count, plural, one {# autor} other {# autores}}",
+      "books": "{count, plural, one {# libro} other {# libros}}",
+      "runs": "{count, plural, one {# sesión} other {# sesiones}}"
+    },
+    "authors": {
+      "intro": "Todos los autores que la plataforma conserva. Solo lectura — el registro refleja la ficha; nunca la edita.",
+      "searchPlaceholder": "Autor o seudónimo",
+      "emptyNone": "Todavía no existen autores en la plataforma.",
+      "emptyNoMatch": "Ningún autor coincide con esta búsqueda.",
+      "active": "Activo",
+      "archived": "Archivado",
+      "bookCount": "{count, plural, one {# libro} other {# libros}}",
+      "inProgress": "{count, number} en curso",
+      "created": "Creado el {date}",
+      "latestBookUpdate": "Última actualización de libro el {date}",
+      "noLinkedAccount": "Sin cuenta vinculada"
+    },
+    "authorDetail": {
+      "metaFallback": "Autor",
+      "status": "Estado",
+      "created": "Creado",
+      "account": "Cuenta",
+      "linked": "Vinculada",
+      "notLinked": "Sin vincular",
+      "booksLabel": "Libros",
+      "openWorkspace": "Abrir este autor en el Estudio →",
+      "booksHeading": "Libros",
+      "emptyBooks": "Este autor aún no tiene libros.",
+      "chaptersOf": "{written, number}/{count, plural, one {# capítulo} other {# capítulos}}",
+      "updated": "Actualizado el {date}"
+    },
+    "books": {
+      "intro": "Todos los libros de todos los autores, con su etapa de vida y su estado editorial actual. Solo lectura.",
+      "searchPlaceholder": "Título o autor",
+      "lifecycleLabel": "Etapa de vida",
+      "allStages": "Todas las etapas",
+      "attentionLabel": "Atención",
+      "flagAll": "Todos los libros",
+      "flagUnfinished": "Revisión inconclusa o fallida",
+      "flagOpenFindings": "Hallazgos abiertos",
+      "emptyNone": "Todavía no existen libros en la plataforma.",
+      "emptyNoMatch": "Ningún libro coincide con estos filtros.",
+      "byAuthor": "de {name}",
+      "chaptersWritten": "{written, number}/{count, plural, one {# capítulo escrito} other {# capítulos escritos}}",
+      "reviewLabel": "Revisión: {status}",
+      "reviewNone": "ninguna todavía",
+      "updated": "Actualizado el {date}"
+    },
+    "bookDetail": {
+      "metaFallback": "Libro",
+      "byLabel": "de",
+      "stage": "Etapa",
+      "manuscriptLanguage": "Idioma del manuscrito",
+      "chapters": "Capítulos",
+      "chaptersValue": "{written, number} escritos de {total, number}",
+      "created": "Creado",
+      "updated": "Actualizado",
+      "workingTitle": "Título de trabajo",
+      "openBook": "Abrir el libro en el Estudio →",
+      "openFindings": "Abrir los Hallazgos en el Estudio →",
+      "inspectionNote": "Estos abren el Estudio del autor para inspección — no un modo de edición administrativa.",
+      "findingsHeading": "Hallazgos",
+      "reviewsHeading": "Sesiones de revisión",
+      "emptyRuns": "Aún no hay sesiones de revisión.",
+      "readingsParen": "({completed, number}/{total, number} lecturas)"
+    },
+    "reviewRuns": {
+      "intro": "Todas las revisiones de la plataforma, y cómo avanza cada una. Solo lectura — la Administración observa el ciclo de revisión; nunca inicia, continúa ni modifica ninguna.",
+      "byLabel": "de",
+      "legendPending": "creada o realizando una lectura en este momento.",
+      "legendIncomplete": "pausada intencionalmente entre tramos y reanudable; no es un fracaso.",
+      "legendComplete": "todas las lecturas planificadas terminaron.",
+      "legendFailed": "la ejecución terminó con una falla; los hallazgos levantados antes se conservan.",
+      "searchPlaceholder": "Libro o autor",
+      "typeLabel": "Tipo de revisión",
+      "allTypes": "Todos los tipos",
+      "statusLabel": "Estado",
+      "allStatuses": "Todos los estados",
+      "findingsLabel": "Hallazgos",
+      "findingsAny": "Cualquiera",
+      "findingsWith": "Con hallazgos",
+      "emptyNone": "Todavía no existen sesiones de revisión en la plataforma.",
+      "emptyNoMatch": "Ninguna sesión de revisión coincide con estos filtros.",
+      "readingsShort": "{completed, number}/{total, number} lecturas",
+      "progressNotRecorded": "progreso no registrado",
+      "created": "Creada el {date}"
+    },
+    "reviewRunDetail": {
+      "metaFallback": "Sesión de revisión",
+      "forLabel": "para",
+      "byLabel": "de",
+      "status": "Estado",
+      "progress": "Progreso",
+      "progressValue": "{completed, number} de {total, number} lecturas",
+      "notRecorded": "Sin registrar",
+      "findingsFromRun": "Hallazgos de esta sesión",
+      "created": "Creada",
+      "incompleteNote": "Esta revisión se pausó entre tramos y el autor puede continuarla desde el Estudio. No es un fracaso.",
+      "countsScoped": "Los conteos corresponden solo a esta sesión. Los hallazgos de sesiones anteriores se conservan por separado.",
+      "coverNote": "Nota de cierre",
+      "provenance": "Procedencia",
+      "reviewer": "Revisor",
+      "model": "Modelo",
+      "promptFingerprint": "Huella del prompt",
+      "plannedPasses": "Pasadas planificadas",
+      "capPerPass": "Tope · por pasada",
+      "capPerRun": "Tope · por sesión",
+      "responseLanguage": "Idioma de respuesta",
+      "openInWorkspace": "Abrir en el Estudio",
+      "bookFindings": "Los Hallazgos de este libro →",
+      "theBook": "El libro →",
+      "inspectionNote": "Estos abren el Estudio del autor para inspección — no un modo de edición administrativa."
+    },
+    "aiUsage": {
+      "intro": "Donde se rendirá cuenta del uso que hace la plataforma de los modelos editoriales externos — leyendo ahora, y algún día escuchando.",
+      "today1": "Aquí todavía no se mide nada; el uso de modelos no está instrumentado.",
+      "today2": "La revisión editorial se ejecuta con las credenciales de modelo configuradas, acotada por topes definidos en el código.",
+      "deferred1": "Contabilidad de uso y costos para la revisión editorial y la síntesis de audio.",
+      "deferred2": "El modelo comercial de la Revisión en Audio — medición, créditos, ubicación en planes y la línea entre la escucha editorial y la producción de audiolibros — una decisión futura deliberada, no de esta fase.",
+      "deferred3": "Aquí no hay controles de gasto ni facturación."
+    },
+    "system": {
+      "intro": "La configuración y la salud de la plataforma, en términos sencillos — cómo está construida Huerta Group Publishing, sin cambiarla desde aquí.",
+      "today1": "La configuración vive en variables de entorno y migraciones de base de datos, con la producción primero.",
+      "today2": "La Seguridad a Nivel de Fila es la frontera de seguridad; la aplicación nunca usa acceso elevado a la base de datos.",
+      "deferred1": "Una vista de solo lectura de las integraciones configuradas y el estado de las migraciones.",
+      "deferred2": "Indicadores de salud tomados de señales reales — nunca un estado inventado.",
+      "deferred3": "En esta fase, ninguna escritura de configuración ni banderas de funciones desde la Administración."
+    }
+  },
+  "account": {
+    "title": "Cuenta",
+    "intro": "La plataforma tal como se presenta ante usted. Las preferencias de aquí dan forma a menús, etiquetas, fechas e instrucciones de la plataforma — nunca a las palabras de ningún manuscrito.",
+    "signedInAs": "Sesión iniciada como",
+    "language": {
+      "label": "Idioma de la interfaz",
+      "explanation": "El idioma de la propia plataforma — menús, etiquetas, fechas e instrucciones. No es el idioma de ningún manuscrito: cada libro declara su propio idioma en su ficha, y las revisiones editoriales siguen al libro, no a esta preferencia.",
+      "onlyEnglish": "Un idioma aparece aquí únicamente cuando su interfaz completa y su flujo editorial merecen confianza. El español está disponible como piloto interno.",
+      "save": "Guardar la preferencia"
+    }
+  },
+  "status": {
+    "book": {
+      "discovery": "Descubrimiento",
+      "writing": "Escritura",
+      "editorial_review": "Revisión Editorial",
+      "revision": "Corrección",
+      "final_manuscript": "Manuscrito Final",
+      "ready_for_publication": "Listo para Publicación",
+      "published": "Publicado",
+      "archived": "Archivado"
+    },
+    "finding": {
+      "open": "Abierto",
+      "resolved": "Resuelto",
+      "dismissed": "Apartado"
+    },
+    "severity": {
+      "note": "Nota",
+      "suggestion": "Sugerencia",
+      "concern": "Inquietud"
+    },
+    "run": {
+      "complete": "Completa",
+      "incomplete": "Incompleta — puede continuar",
+      "failed": "No terminó",
+      "pending": "Leyendo ahora"
+    },
+    "category": {
+      "voice": "Voz",
+      "intent": "Intención",
+      "concepts": "Conceptos",
+      "structure": "Estructura",
+      "pacing": "Ritmo",
+      "continuity": "Continuidad",
+      "repetition": "Repetición",
+      "clarity": "Claridad",
+      "reader_experience": "Experiencia del Lector",
+      "other": "Otra"
+    },
+    "severityMeaning": {
+      "note": "conviene saberlo",
+      "suggestion": "conviene considerarla",
+      "concern": "conviene resolverla antes de cerrar esta etapa"
+    },
+    "reviewType": {
+      "manual": "revisión manual",
+      "constitution": "Revisión de Constitución"
+    },
+    "deliberation": {
+      "draft": "Borrador",
+      "adopted": "Adoptado",
+      "implemented": "Implementado"
+    }
+  },
+  "findings": {
+    "page": {
+      "title": "Los Hallazgos",
+      "intro": "Lo que la revisión ve: observaciones que orientan la corrección sin tocar una sola palabra. El manuscrito mejora mediante las mismas versiones deliberadas con las que fue escrito.",
+      "reviewsHeading": "Revisiones",
+      "requestReview": "Solicitar una Revisión de Constitución",
+      "emptyFirst": "Los hallazgos son lo que la revisión ve: observaciones que orientan la corrección sin tocar una sola palabra. Levante el primero desde la página de un capítulo, o desde aquí.",
+      "emptyStatus": "Nada {status} por el momento.",
+      "manuscriptGroup": "El Manuscrito"
+    },
+    "run": {
+      "readingNow": "Una {reviewType} está leyendo el manuscrito en este momento{progress}. Esto toma unos minutos; actualice la página para ver sus hallazgos cuando se pause o termine.",
+      "readingsDoneSuffix": " — {completed, number} de {total, number} lecturas realizadas",
+      "readingsOf": "{completed, number} de {total, number} lecturas",
+      "findingsSoFar": "{count, plural, one {# hallazgo} other {# hallazgos}} hasta ahora",
+      "findingsCount": "{count, plural, one {# hallazgo} other {# hallazgos}}",
+      "pausedNote": "Esta revisión se pausó antes de terminar. Los hallazgos que ha levantado se conservan abajo; continúe para leer el resto.",
+      "continueReview": "Continuar la revisión",
+      "continueWait": "El revisor lee mientras esta página espera — cuente con un minuto o dos antes de que vuelvan los Hallazgos.",
+      "didNotFinish": "no terminó — los hallazgos levantados antes de la falla se conservan",
+      "earlierNote": "Arriba solo se cuentan los hallazgos de la revisión más reciente. Los hallazgos de lecturas anteriores permanecen abajo, cada uno marcado como «de una revisión anterior»."
+    },
+    "list": {
+      "raisedAgainst": "levantado contra la Versión {number}",
+      "nowAt": "ahora en la Versión {number}",
+      "raisedOn": "levantado el {date}",
+      "fromEarlierReview": "de una revisión anterior",
+      "deliberationLink": "Deliberación — {status}",
+      "resolve": "Resolver",
+      "reviseChapter": "Corregir el capítulo",
+      "deliberate": "Deliberar",
+      "reopen": "Reabrir",
+      "inVersion": "en la Versión {number}"
+    },
+    "form": {
+      "metaTitle": "Levantar un hallazgo",
+      "title": "Levantar un hallazgo",
+      "intro": "Una observación, hecha permanente: qué se vio, y por qué importa. Los hallazgos orientan la corrección; nunca tocan el texto.",
+      "about": "Sobre",
+      "wholeManuscript": "El manuscrito en su conjunto",
+      "anchoredNote": "— anclado a la versión que se está leyendo.",
+      "severity": "Gravedad",
+      "category": "Categoría",
+      "titleField": "Título",
+      "explanation": "Explicación",
+      "explanationHint": "qué se vio, y por qué importa",
+      "excerpt": "Pasaje",
+      "excerptHint": "cite el pasaje textualmente",
+      "submit": "Levantar el hallazgo"
+    },
+    "review": {
+      "metaTitle": "Solicitar una Revisión de Constitución",
+      "title": "Solicitar una Revisión de Constitución",
+      "intro": "Una lectura editorial de fondo con una sola pregunta: ¿el manuscrito terminado sigue honrando la Constitución del Libro? El revisor observa, identifica y explica — nunca toca una palabra. Sus hallazgos llegan junto a los suyos, con el mismo rango, y cada hallazgo debe citar las palabras de la propia Constitución.",
+      "noConstitution": "La Constitución del Libro no se ha establecido — no hay nada contra qué revisar. Establézcala primero; la Constitución es la ley que este revisor verifica.",
+      "willRead": "Leerá",
+      "constitutionV": "Constitución del Libro v{number}",
+      "outlineV": "Esquema Maestro v{number}",
+      "openNow": "Hallazgos abiertos ahora",
+      "disclosureOutbound": "La Constitución, el Esquema y el texto del manuscrito se envían a OpenAI para esta revisión, y para nada más. Los documentos de identidad no se envían.",
+      "disclosureCost": "Una revisión de este tamaño suele costar unos pocos dólares y tomar unos minutos. Cada sesión es una lectura nueva — ejecutarla otra vez puede ver distinto, y las sesiones repetidas pueden reiterar terreno ya cubierto.",
+      "busyReading": "Una revisión ya está leyendo este manuscrito — vuelva a <link>los Hallazgos</link> en unos minutos.",
+      "busyUnfinished": "Una revisión inconclusa espera para continuar — retómela desde <link>los Hallazgos</link>.",
+      "request": "Solicitar la revisión",
+      "requestWait": "El revisor lee mientras esta página espera — cuente con unos minutos antes de que vuelvan los Hallazgos."
+    },
+    "errors": {
+      "severityRequired": "Un hallazgo necesita una gravedad.",
+      "titleRequired": "Un hallazgo necesita un título.",
+      "explanationRequired": "Un hallazgo necesita una explicación — qué se vio, y por qué importa.",
+      "anchorRequired": "Un hallazgo de capítulo debe anclarse a la versión observada.",
+      "raiseFailed": "No se pudo levantar el hallazgo.",
+      "resolveFailed": "No se pudo resolver el hallazgo.",
+      "setAsideFailed": "No se pudo apartar el hallazgo.",
+      "reopenFailed": "No se pudo reabrir el hallazgo.",
+      "findingsMigrationMissing": "A la base de datos le falta la migración de Hallazgos Editoriales — aplique supabase/migrations/20260711000000_editorial_findings.sql (docs/setup.md §2).",
+      "reviewNotConfigured": "La revisión editorial no está configurada: OPENAI_API_KEY no está definida.",
+      "bookNotFound": "No se pudo encontrar el libro.",
+      "nothingToReview": "Todavía no hay nada que revisar — el manuscrito no tiene capítulos escritos.",
+      "alreadyReading": "Una revisión ya está leyendo este manuscrito. Déjela terminar primero.",
+      "unfinishedWaiting": "Una revisión inconclusa espera para continuar. Retómela desde los Hallazgos.",
+      "startFailed": "No se pudo iniciar la revisión. Si esto persiste, puede faltar la migración del revisor.",
+      "alreadyContinuing": "Esta revisión ya se está continuando. Déjela terminar primero.",
+      "nothingToContinue": "No hay ninguna revisión inconclusa que continuar.",
+      "signInRequired": "Inicie sesión para solicitar una revisión.",
+      "reviewMigrationMissing": "A la base de datos le falta una migración de la Revisión de Constitución — aplique supabase/migrations/20260712000000_constitution_review.sql y las migraciones de ejecución por tramos 20260714/20260715 (docs/setup.md §2).",
+      "reviewDidNotFinish": "La revisión no pudo terminar. Los hallazgos levantados antes de la falla se conservan abajo."
+    }
+  },
+  "deliberation": {
+    "page": {
+      "metaTitle": "Deliberación",
+      "title": "Deliberación",
+      "intro": "El juicio, preservado. El hallazgo observó; este memorando decide qué hará el libro al respecto, y por qué. Las correcciones mismas siguen siendo obra de las versiones — una deliberación no edita nada.",
+      "findingLabel": "El hallazgo",
+      "adoptionNote": "Adoptar hace permanente el juicio — como activar una versión. Hasta entonces, el borrador es suyo para darle forma o descartarlo.",
+      "affectedLabel": "Afecta",
+      "implementationLabel": "Implementación",
+      "drafted": "Redactado",
+      "adopted": "Adoptado",
+      "implemented": "Implementado",
+      "standing": "Vigencia",
+      "markImplemented": "Marcar como implementado",
+      "implementedNotePlaceholder": "dónde se llevó a cabo el juicio"
+    },
+    "form": {
+      "question": "Pregunta",
+      "questionHint": "qué se está sopesando",
+      "judgment": "Juicio",
+      "judgmentHint": "qué hará el libro — nunca las palabras que lo harán",
+      "reasoning": "Razonamiento",
+      "reasoningHint": "por qué esta posición",
+      "affected": "Afecta",
+      "affectedHint": "qué toca esto, en sus propias palabras",
+      "saveDraft": "Guardar el borrador",
+      "adopt": "Adoptar el juicio"
+    },
+    "errors": {
+      "questionRequired": "La deliberación necesita su pregunta.",
+      "adoptionRequires": "Adoptar requiere un juicio y su razonamiento.",
+      "saveFailed": "No se pudo guardar la deliberación.",
+      "adoptFailed": "No se pudo adoptar el juicio.",
+      "implementFailed": "No se pudo marcar la deliberación como implementada.",
+      "discardFailed": "No se pudo descartar el borrador.",
+      "deliberationMigrationMissing": "A la base de datos le falta la migración de la Deliberación Editorial — aplique supabase/migrations/20260713000000_editorial_deliberation.sql (docs/setup.md §2)."
+    }
+  },
+  "errors": {
+    "shared": {
+      "somethingWentWrong": "Algo salió mal",
+      "workspaceTitle": "El estudio encontró un error inesperado",
+      "workspaceBody": "Nada del registro permanente se ha perdido. Intente de nuevo; si el error persiste, los registros del servidor guardan los detalles{digest, select, none {} other { (huella {digest})}}.",
+      "adminTitle": "No se pudo cargar esta vista",
+      "adminBody": "La Administración lee datos vivos de la plataforma; una consulta pudo haber fallado. Intente de nuevo; si persiste, los registros del servidor guardan los detalles{digest, select, none {} other { (huella {digest})}}."
+    }
+  },
+  "languages": {
+    "en": "Inglés",
+    "en-US": "Inglés (Estados Unidos)",
+    "en-GB": "Inglés (Reino Unido)",
+    "es": "Español",
+    "es-419": "Español (Latinoamérica)",
+    "es-MX": "Español (México)",
+    "es-ES": "Español (España)",
+    "fr": "Francés",
+    "pt-BR": "Portugués (Brasil)"
+  }
+}

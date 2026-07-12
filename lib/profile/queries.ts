@@ -4,6 +4,7 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import {
   DEFAULT_INTERFACE_LOCALE,
+  INTERFACE_LOCALES,
   normalizeLanguageTag,
 } from "@/lib/languages";
 
@@ -37,10 +38,15 @@ export const resolveInterfaceLocale = cache(async (): Promise<string> => {
       .maybeSingle();
     if (error || !data) return DEFAULT_INTERFACE_LOCALE;
 
-    return (
-      normalizeLanguageTag(data.interface_locale ?? "") ??
-      DEFAULT_INTERFACE_LOCALE
-    );
+    // Exact supported-locale allowlist: only locales with a complete
+    // catalog resolve — a stored tag the platform has no catalog for
+    // (or any unexpected value) falls back to en-US. This also means
+    // no user-influenced value ever reaches the catalog import path
+    // unvetted (i18n/request.ts).
+    const normalized = normalizeLanguageTag(data.interface_locale ?? "");
+    return INTERFACE_LOCALES.some((l) => l.tag === normalized)
+      ? (normalized as string)
+      : DEFAULT_INTERFACE_LOCALE;
   } catch {
     return DEFAULT_INTERFACE_LOCALE;
   }

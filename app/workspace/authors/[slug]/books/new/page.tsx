@@ -52,6 +52,7 @@ export default async function NewBookPage({
   const t = await getTranslations("book.form");
   const tAuthorForm = await getTranslations("author.form");
   const tNav = await getTranslations("navigation");
+  const tLangs = await getTranslations("languages");
 
   return (
     <WorkspaceFrame
@@ -99,7 +100,7 @@ export default async function NewBookPage({
             defaultValue="en"
             options={SELECTABLE_LANGUAGES.map((l) => ({
               value: l.tag,
-              label: l.label,
+              label: tLangs.has(l.tag) ? tLangs(l.tag) : l.label,
             }))}
           />
           <p className="mt-2 font-sans text-xs text-ink-faint">

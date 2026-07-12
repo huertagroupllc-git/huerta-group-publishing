@@ -7,7 +7,10 @@ import {
 } from "@/lib/admin/queries";
 import { getLocale, getTranslations } from "next-intl/server";
 import { REVIEW_TYPE_LABELS, reviewTypeLabel } from "@/lib/findings/types";
-import { languageLabel } from "@/lib/languages";
+import {
+  languageDefinition,
+  normalizeLanguageTag,
+} from "@/lib/languages";
 import { formatDate } from "@/lib/memory/types";
 
 export async function generateMetadata({
@@ -48,6 +51,12 @@ export default async function AdminReviewRunDetailPage({
   const t = await getTranslations("admin.reviewRunDetail");
   const tStatus = await getTranslations("status");
   const tShell = await getTranslations("admin.shell.nav");
+  const tLangs = await getTranslations("languages");
+  const langName = (tag: string) => {
+    const n = normalizeLanguageTag(tag) ?? "en";
+    const name = tLangs.has(n) ? tLangs(n) : languageDefinition(n).label;
+    return n === "en" || n === "es" ? name : `${name} · ${n}`;
+  };
   const runStatusName = (status: string) => {
     const known = ["pending", "incomplete", "complete", "failed"];
     return known.includes(status)
@@ -155,7 +164,7 @@ export default async function AdminReviewRunDetailPage({
             <Fact label={t("model")} value={run.provenance.model ?? "—"} />
             <Fact
               label={t("responseLanguage")}
-              value={languageLabel(run.responseLanguage)}
+              value={langName(run.responseLanguage)}
             />
             <Fact
               label={t("promptFingerprint")}

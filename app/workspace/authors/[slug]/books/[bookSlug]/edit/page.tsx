@@ -10,7 +10,11 @@ import { actionMessageFromQuery } from "@/lib/action-messages";
 import { updateBook } from "@/lib/books/actions";
 import { getBookStudy, type BookStudy } from "@/lib/books/queries";
 import { BOOK_STATUSES } from "@/lib/books/types";
-import { SELECTABLE_LANGUAGES, languageLabel } from "@/lib/languages";
+import {
+  SELECTABLE_LANGUAGES,
+  languageDefinition,
+  normalizeLanguageTag,
+} from "@/lib/languages";
 import { createClient } from "@/lib/supabase/server";
 
 export async function generateMetadata({
@@ -68,18 +72,25 @@ export default async function EditBookPage({
   const tStatus = await getTranslations("status.book");
   const tCommon = await getTranslations("common");
   const tNav = await getTranslations("navigation");
+  const tLangs = await getTranslations("languages");
+  const langName = (tag: string) => {
+    const n = normalizeLanguageTag(tag) ?? "en";
+    const name = tLangs.has(n) ? tLangs(n) : languageDefinition(n).label;
+    return n === "en" || n === "es" ? name : `${name} · ${n}`;
+  };
 
   // The selector offers the platform's languages; a record already
   // holding another valid tag (a regional variant, say) keeps it as a
   // choice rather than being silently converted.
+  const selectable = SELECTABLE_LANGUAGES.map((l) => ({
+    value: l.tag,
+    label: tLangs.has(l.tag) ? tLangs(l.tag) : l.label,
+  }));
   const languageOptions = SELECTABLE_LANGUAGES.some(
     (l) => l.tag === book.language,
   )
-    ? SELECTABLE_LANGUAGES.map((l) => ({ value: l.tag, label: l.label }))
-    : [
-        { value: book.language, label: languageLabel(book.language) },
-        ...SELECTABLE_LANGUAGES.map((l) => ({ value: l.tag, label: l.label })),
-      ];
+    ? selectable
+    : [{ value: book.language, label: langName(book.language) }, ...selectable];
 
   return (
     <WorkspaceFrame

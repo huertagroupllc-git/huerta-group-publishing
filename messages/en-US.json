@@ -641,7 +641,7 @@
     "language": {
       "label": "Interface language",
       "explanation": "The language of the platform's own chrome — menus, labels, dates, and instructions. This is not the language of any manuscript: each book states its own manuscript language on its record, and editorial reviews follow the book, not this setting.",
-      "onlyEnglish": "English is the platform's interface language today. Another language becomes available here only when its complete interface and editorial workflow can be trusted.",
+      "onlyEnglish": "A language appears here only when its complete interface and editorial workflow can be trusted. Spanish is available as an internal pilot.",
       "save": "Save the preference"
     }
   },
@@ -834,5 +834,16 @@
       "adminTitle": "This view could not load",
       "adminBody": "Administration reads live platform data; a query may have failed. Try again; if it persists, the server logs carry the details{digest, select, none {} other { (digest {digest})}}."
     }
+  },
+  "languages": {
+    "en": "English",
+    "en-US": "English (United States)",
+    "en-GB": "English (United Kingdom)",
+    "es": "Spanish",
+    "es-419": "Spanish (Latin America)",
+    "es-MX": "Spanish (Mexico)",
+    "es-ES": "Spanish (Spain)",
+    "fr": "French",
+    "pt-BR": "Portuguese (Brazil)"
   }
 }
