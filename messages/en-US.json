@@ -80,6 +80,60 @@
       "saveRecord": "Save the record"
     }
   },
+  "book": {
+    "study": {
+      "metaFallback": "Book",
+      "memoryHeading": "The Book’s Memory",
+      "chaptersLink": "Chapters",
+      "findingsLink": "Findings",
+      "status": "Status",
+      "begun": "Begun",
+      "workingTitle": "Working Title",
+      "inheritedFrom": "Inherited From",
+      "memoryNotEstablished": "Author Memory not yet established",
+      "assembledMemoryHint": "the exact record future AI assistance will receive — the author’s memory first, then the book’s; active, finalized versions only"
+    },
+    "form": {
+      "addMetaTitle": "Add a book",
+      "addTitle": "Add a book",
+      "addIntro": "This opens the book’s record under this author, together with its three memory documents — Book Constitution, Master Outline, and Concept Dictionary — ready to be established. The record will note which of the author’s memory versions the book begins under.",
+      "editIntro": "The book’s identity, as the imprint keeps it. The record’s address remains <address>/{slug}</address> — it was set when the record was opened and does not change. Why the book exists belongs to its Constitution, not this form.",
+      "editMetaFallback": "Edit",
+      "title": "Title",
+      "subtitle": "Subtitle",
+      "workingTitle": "Internal working title",
+      "slug": "Slug",
+      "slugPlaceholder": "derived from the title if left blank",
+      "status": "Status",
+      "statusHint": "Where the book stands in its life, from Discovery to Archived — a stated fact, not a gate.",
+      "language": "Manuscript language",
+      "languageHintNew": "The language the manuscript is written in. Future editorial reviews will respond in this language. It does not change the language of the platform itself.",
+      "languageHintEdit": "The language the manuscript is written in. Future editorial reviews will respond in this language; reviews already performed keep the language they were performed in. It does not change the language of the platform itself."
+    },
+    "memoryDocuments": {
+      "book_constitution": {
+        "label": "Book Constitution",
+        "description": "Why this book exists and what it is not: premise, purpose, the promise to the reader, audience, and boundaries."
+      },
+      "master_outline": {
+        "label": "Master Outline",
+        "description": "The shape the book takes — parts, chapters, and the order of its argument or story."
+      },
+      "concept_dictionary": {
+        "label": "Concept Dictionary",
+        "description": "What the book's words mean: named ideas, canonical definitions, and distinctions the book depends on."
+      }
+    },
+    "errors": {
+      "titleRequired": "The book's title is required.",
+      "slugUnusable": "A usable slug could not be derived; please provide one.",
+      "languageInvalid": "The manuscript language is not a valid language tag.",
+      "bookSlugTaken": "This author already has a book at “{slug}”.",
+      "bookCreateFailed": "The book could not be created.",
+      "recordSaveFailed": "The record could not be saved.",
+      "recordsMigrationMissing": "The database is missing the Capability 2 migration — apply supabase/migrations/20260705000000_book_records.sql (docs/setup.md §2)."
+    }
+  },
   "manuscript": {
     "overview": {
       "metaFallback": "Manuscript",
@@ -265,7 +319,8 @@
       "draftSaveFailed": "The draft could not be saved.",
       "activateFailed": "The version could not be activated.",
       "discardFailed": "The draft could not be discarded.",
-      "workflowMigrationMissing": "The database is missing the Phase B workflow functions — apply supabase/migrations/20260703000000_author_memory_workflow.sql (docs/setup.md §2)."
+      "workflowMigrationMissing": "The database is missing the Phase B workflow functions — apply supabase/migrations/20260703000000_author_memory_workflow.sql (docs/setup.md §2).",
+      "bookMemoryMigrationMissing": "The database is missing the Book Memory migration — apply supabase/migrations/20260706000000_book_memory_documents.sql (docs/setup.md §2)."
     }
   },
   "admin": {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { DocumentRoomView, type RoomQuery } from "@/components/document-room";
 import { SetupNotice } from "@/components/setup-notice";
 import { WorkspaceFrame } from "@/components/workspace-frame";
@@ -25,11 +26,13 @@ export async function generateMetadata({
   const { slug, bookSlug, doc } = await params;
   const meta = bookDocTypeBySlug(doc);
   if (!meta) return {};
+  const t = await getTranslations("book.memoryDocuments");
+  const label = t(`${meta.type}.label`);
   const room = await getBookDocumentRoom(slug, bookSlug, meta.type).catch(
     () => null,
   );
   return {
-    title: room ? `${meta.label} — ${room.book.title}` : meta.label,
+    title: room ? `${label} — ${room.book.title}` : label,
   };
 }
 
@@ -67,13 +70,15 @@ export default async function BookDocumentRoomPage({
   if (!room) notFound();
 
   const query = await searchParams;
+  const tDoc = await getTranslations("book.memoryDocuments");
+  const tNav = await getTranslations("navigation");
 
   return (
     <WorkspaceFrame
       email={user.email ?? ""}
       wide
       breadcrumbs={[
-        { href: "/workspace", label: "Workspace" },
+        { href: "/workspace", label: tNav("workspace") },
         {
           href: `/workspace/authors/${slug}`,
           label: room.author.full_name,
@@ -86,8 +91,8 @@ export default async function BookDocumentRoomPage({
     >
       <DocumentRoomView
         eyebrow={`${room.author.full_name} · ${room.book.title}`}
-        title={meta.label}
-        description={meta.description}
+        title={tDoc(`${meta.type}.label`)}
+        description={tDoc(`${meta.type}.description`)}
         roomPath={`/workspace/authors/${slug}/books/${bookSlug}/memory/${docSlug}`}
         documentId={room.documentId}
         versions={room.versions}

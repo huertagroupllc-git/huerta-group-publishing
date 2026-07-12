@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { withActionMessage } from "@/lib/action-messages";
 import { createClient } from "@/lib/supabase/server";
 import { BOOK_STATUSES, type BookStatus } from "@/lib/books/types";
 import { normalizeLanguageTag } from "@/lib/languages";
@@ -15,8 +16,17 @@ async function requireUser() {
   return supabase;
 }
 
-function fail(path: string, message: string): never {
-  redirect(`${path}?error=${encodeURIComponent(message)}`);
+/** Failures redirect with STABLE MESSAGE CODES (the Phase 3B pattern).
+ *  Record-level actions use the book.errors namespace; the version
+ *  workflow uses the shared Document Room namespace (memory.errors),
+ *  which the shared room component resolves for both memory levels.
+ *  Raw database and RPC errors never leave the server logs. */
+function fail(
+  path: string,
+  code: string,
+  params?: Record<string, string>,
+): never {
+  redirect(withActionMessage(path, { code, params }));
 }
 
 export async function createBook(formData: FormData) {
@@ -30,19 +40,19 @@ export async function createBook(formData: FormData) {
   const newPath = `/workspace/authors/${authorSlug}/books/new`;
 
   if (!title) {
-    fail(newPath, "The book's title is required.");
+    fail(newPath, "titleRequired");
   }
 
   const slug = slugify(slugInput || title);
   if (!slug) {
-    fail(newPath, "A usable slug could not be derived; please provide one.");
+    fail(newPath, "slugUnusable");
   }
 
   // Manuscript language — a valid BCP 47 tag, casing normalized, never
   // detected and never converted between regional variants.
   const language = normalizeLanguageTag(languageInput);
   if (!language) {
-    fail(newPath, "The manuscript language is not a valid language tag.");
+    fail(newPath, "languageInvalid");
   }
 
   const supabase = await requireUser();
@@ -57,13 +67,14 @@ export async function createBook(formData: FormData) {
 
   if (error) {
     console.error("[books] createBook failed", error);
+    if (error.code === "23505") {
+      fail(newPath, "bookSlugTaken", { slug });
+    }
     fail(
       newPath,
-      error.code === "23505"
-        ? `This author already has a book at “${slug}”.`
-        : error.code === "PGRST202" || error.code === "42883"
-          ? "The database is missing the Capability 2 migration — apply supabase/migrations/20260705000000_book_records.sql (docs/setup.md §2)."
-          : "The book could not be created.",
+      error.code === "PGRST202" || error.code === "42883"
+        ? "recordsMigrationMissing"
+        : "bookCreateFailed",
     );
   }
 
@@ -73,8 +84,7 @@ export async function createBook(formData: FormData) {
 // --- Book Memory version workflow — mirrors lib/memory/actions.ts one
 // --- level down; kept book-specific per the Engineering Constitution §7.
 
-const BOOK_MIGRATION_MESSAGE =
-  "The database is missing the Book Memory migration — apply supabase/migrations/20260706000000_book_memory_documents.sql (docs/setup.md §2).";
+const BOOK_MIGRATION_CODE = "bookMemoryMigrationMissing";
 
 function isMissingFunction(error: { code?: string; message?: string }) {
   return (
@@ -93,7 +103,7 @@ export async function createBookVersion(formData: FormData) {
   const sourceNote = String(formData.get("source_note") ?? "").trim();
 
   if (!content.trim()) {
-    fail(roomPath, "A version needs content before it can be saved.");
+    fail(roomPath, "contentRequired");
   }
 
   const supabase = await requireUser();
@@ -110,10 +120,10 @@ export async function createBookVersion(formData: FormData) {
     fail(
       roomPath,
       error.code === "23505"
-        ? "A draft is already open for this document; continue editing it instead."
+        ? "draftAlreadyOpen"
         : isMissingFunction(error)
-          ? BOOK_MIGRATION_MESSAGE
-          : "The draft could not be created.",
+          ? BOOK_MIGRATION_CODE
+          : "draftCreateFailed",
     );
   }
 
@@ -143,7 +153,7 @@ export async function updateBookDraft(formData: FormData) {
 
   if (error || !data?.length) {
     console.error("[books] updateBookDraft failed", error);
-    fail(`${roomPath}?draft=1`, "The draft could not be saved.");
+    fail(`${roomPath}?draft=1`, "draftSaveFailed");
   }
 
   redirect(`${roomPath}?draft=1&saved=1`);
@@ -160,7 +170,7 @@ export async function saveAndActivateBookDraft(formData: FormData) {
   const sourceNote = String(formData.get("source_note") ?? "").trim();
 
   if (!content.trim()) {
-    fail(`${roomPath}?draft=1`, "A version needs content to be activated.");
+    fail(`${roomPath}?draft=1`, "contentRequiredToActivate");
   }
 
   const supabase = await requireUser();
@@ -178,7 +188,7 @@ export async function saveAndActivateBookDraft(formData: FormData) {
 
   if (error || !data?.length) {
     console.error("[books] saveAndActivateBookDraft save failed", error);
-    fail(`${roomPath}?draft=1`, "The draft could not be saved.");
+    fail(`${roomPath}?draft=1`, "draftSaveFailed");
   }
 
   const { error: activateError } = await supabase.rpc(
@@ -193,9 +203,7 @@ export async function saveAndActivateBookDraft(formData: FormData) {
     );
     fail(
       `${roomPath}?draft=1`,
-      isMissingFunction(activateError)
-        ? BOOK_MIGRATION_MESSAGE
-        : "The version could not be activated.",
+      isMissingFunction(activateError) ? BOOK_MIGRATION_CODE : "activateFailed",
     );
   }
 
@@ -215,9 +223,7 @@ export async function activateBookVersion(formData: FormData) {
     console.error("[books] activateBookVersion failed", error);
     fail(
       roomPath,
-      isMissingFunction(error)
-        ? BOOK_MIGRATION_MESSAGE
-        : "The version could not be activated.",
+      isMissingFunction(error) ? BOOK_MIGRATION_CODE : "activateFailed",
     );
   }
 
@@ -237,7 +243,7 @@ export async function discardBookDraft(formData: FormData) {
 
   if (error) {
     console.error("[books] discardBookDraft failed", error);
-    fail(roomPath, "The draft could not be discarded.");
+    fail(roomPath, "discardFailed");
   }
 
   redirect(roomPath);
@@ -258,7 +264,7 @@ export async function updateBook(formData: FormData) {
   const editPath = `${studyPath}/edit`;
 
   if (!title) {
-    fail(editPath, "The book's title is required.");
+    fail(editPath, "titleRequired");
   }
 
   const status: BookStatus = BOOK_STATUSES.some((s) => s.value === statusInput)
@@ -270,7 +276,7 @@ export async function updateBook(formData: FormData) {
   // response_language frozen when they were created.
   const language = normalizeLanguageTag(languageInput);
   if (!language) {
-    fail(editPath, "The manuscript language is not a valid language tag.");
+    fail(editPath, "languageInvalid");
   }
 
   const supabase = await requireUser();
@@ -288,7 +294,7 @@ export async function updateBook(formData: FormData) {
 
   if (error || !data?.length) {
     console.error("[books] updateBook failed", error);
-    fail(editPath, "The record could not be saved.");
+    fail(editPath, "recordSaveFailed");
   }
 
   redirect(studyPath);

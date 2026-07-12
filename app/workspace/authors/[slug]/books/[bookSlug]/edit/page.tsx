@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { ActionMessage } from "@/components/action-message";
 import { Field, PrimaryButton, SelectField } from "@/components/editorial";
 import { SetupNotice } from "@/components/setup-notice";
-import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
+import { WorkspaceFrame } from "@/components/workspace-frame";
+import { actionMessageFromQuery } from "@/lib/action-messages";
 import { updateBook } from "@/lib/books/actions";
 import { getBookStudy, type BookStudy } from "@/lib/books/queries";
 import { BOOK_STATUSES } from "@/lib/books/types";
@@ -17,8 +20,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug, bookSlug } = await params;
   const study = await getBookStudy(slug, bookSlug).catch(() => null);
+  const t = await getTranslations("author.form");
+  const tBook = await getTranslations("book.form");
   return {
-    title: study ? `Edit the record — ${study.book.title}` : "Edit",
+    title: study
+      ? `${t("editTitle")} — ${study.book.title}`
+      : tBook("editMetaFallback"),
   };
 }
 
@@ -27,7 +34,7 @@ export default async function EditBookPage({
   searchParams,
 }: {
   params: Promise<{ slug: string; bookSlug: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const supabase = await createClient();
   const {
@@ -36,7 +43,7 @@ export default async function EditBookPage({
   if (!user) redirect("/signin");
 
   const { slug, bookSlug } = await params;
-  const { error } = await searchParams;
+  const message = actionMessageFromQuery(await searchParams);
 
   let study: BookStudy | null;
   try {
@@ -56,6 +63,11 @@ export default async function EditBookPage({
 
   const { author, book } = study;
   const studyPath = `/workspace/authors/${author.slug}/books/${book.slug}`;
+  const t = await getTranslations("book.form");
+  const tAuthorForm = await getTranslations("author.form");
+  const tStatus = await getTranslations("status.book");
+  const tCommon = await getTranslations("common");
+  const tNav = await getTranslations("navigation");
 
   // The selector offers the platform's languages; a record already
   // holding another valid tag (a regional variant, say) keeps it as a
@@ -73,18 +85,21 @@ export default async function EditBookPage({
     <WorkspaceFrame
       email={user.email ?? ""}
       breadcrumbs={[
-        { href: "/workspace", label: "Workspace" },
+        { href: "/workspace", label: tNav("workspace") },
         { href: `/workspace/authors/${author.slug}`, label: author.full_name },
         { href: studyPath, label: book.title },
       ]}
     >
-      <h1 className="font-display text-4xl tracking-tight">Edit the record</h1>
+      <h1 className="font-display text-4xl tracking-tight">
+        {tAuthorForm("editTitle")}
+      </h1>
       <p className="mt-6 max-w-prose text-lg leading-relaxed text-ink-soft">
-        The book&rsquo;s identity, as the imprint keeps it. The record&rsquo;s
-        address remains{" "}
-        <span className="font-sans text-sm">/{book.slug}</span> — it was set
-        when the record was opened and does not change. Why the book exists
-        belongs to its Constitution, not this form.
+        {t.rich("editIntro", {
+          slug: book.slug,
+          address: (chunks) => (
+            <span className="font-sans text-sm">{chunks}</span>
+          ),
+        })}
       </p>
 
       <form action={updateBook} className="mt-12 max-w-md space-y-8">
@@ -94,7 +109,7 @@ export default async function EditBookPage({
 
         <Field
           id="title"
-          label="Title"
+          label={t("title")}
           type="text"
           required
           defaultValue={book.title}
@@ -102,7 +117,7 @@ export default async function EditBookPage({
 
         <Field
           id="subtitle"
-          label="Subtitle"
+          label={t("subtitle")}
           optional
           type="text"
           defaultValue={book.subtitle ?? ""}
@@ -110,7 +125,7 @@ export default async function EditBookPage({
 
         <Field
           id="working_title"
-          label="Internal working title"
+          label={t("workingTitle")}
           optional
           type="text"
           defaultValue={book.working_title ?? ""}
@@ -119,43 +134,43 @@ export default async function EditBookPage({
         <div>
           <SelectField
             id="status"
-            label="Status"
+            label={t("status")}
             defaultValue={book.status}
             options={BOOK_STATUSES.map((s) => ({
               value: s.value,
-              label: s.label,
+              label: tStatus(s.value),
             }))}
           />
           <p className="mt-2 font-sans text-xs text-ink-faint">
-            Where the book stands in its life, from Discovery to Archived —
-            a stated fact, not a gate.
+            {t("statusHint")}
           </p>
         </div>
 
         <div>
           <SelectField
             id="language"
-            label="Manuscript language"
+            label={t("language")}
             defaultValue={book.language}
             options={languageOptions}
           />
           <p className="mt-2 font-sans text-xs text-ink-faint">
-            The language the manuscript is written in. Future editorial
-            reviews will respond in this language; reviews already
-            performed keep the language they were performed in. It does
-            not change the language of the platform itself.
+            {t("languageHintEdit")}
           </p>
         </div>
 
-        <ErrorNote message={error} />
+        <ActionMessage
+          code={message?.code}
+          params={message?.params}
+          namespace="book.errors"
+        />
 
         <div className="flex items-baseline gap-8">
-          <PrimaryButton>Save the record</PrimaryButton>
+          <PrimaryButton>{tAuthorForm("saveRecord")}</PrimaryButton>
           <Link
             href={studyPath}
             className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
           >
-            Cancel
+            {tCommon("cancel")}
           </Link>
         </div>
       </form>

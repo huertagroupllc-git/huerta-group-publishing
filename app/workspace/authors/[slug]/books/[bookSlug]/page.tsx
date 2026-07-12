@@ -7,15 +7,17 @@ import {
   OpensGlyph,
   OutlineGlyph,
 } from "@/components/glyphs";
+import { ActionMessage } from "@/components/action-message";
 import { SetupNotice } from "@/components/setup-notice";
-import { ErrorNote, WorkspaceFrame } from "@/components/workspace-frame";
+import { WorkspaceFrame } from "@/components/workspace-frame";
+import { actionMessageFromQuery } from "@/lib/action-messages";
 import Link from "next/link";
 import { assembleBookContext, serializeBookContext } from "@/lib/books/assemble";
 import { openFindingsCount } from "@/lib/findings/queries";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { getManuscriptSummary, type ManuscriptSummary } from "@/lib/manuscript/queries";
 import { getBookStudy, type BookStudy } from "@/lib/books/queries";
-import { BOOK_DOC_TYPES, bookStatusLabel, isWritingStage } from "@/lib/books/types";
+import { BOOK_DOC_TYPES, isWritingStage } from "@/lib/books/types";
 import { assembleAuthorContext } from "@/lib/memory/assemble";
 import { formatDate } from "@/lib/memory/types";
 import { createClient } from "@/lib/supabase/server";
@@ -27,7 +29,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug, bookSlug } = await params;
   const study = await getBookStudy(slug, bookSlug).catch(() => null);
-  return { title: study?.book.title ?? "Book" };
+  if (study) return { title: study.book.title };
+  const t = await getTranslations("book.study");
+  return { title: t("metaFallback") };
 }
 
 export default async function BookStudyPage({
@@ -35,7 +39,7 @@ export default async function BookStudyPage({
   searchParams,
 }: {
   params: Promise<{ slug: string; bookSlug: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const supabase = await createClient();
   const {
@@ -44,7 +48,7 @@ export default async function BookStudyPage({
   if (!user) redirect("/signin");
 
   const { slug, bookSlug } = await params;
-  const { error } = await searchParams;
+  const message = actionMessageFromQuery(await searchParams);
 
   let study: BookStudy | null;
   let memory: string;
@@ -99,14 +103,25 @@ export default async function BookStudyPage({
   const memoryPath = `/workspace/authors/${author.slug}/books/${book.slug}/memory`;
 
   const writingStage = isWritingStage(book.status);
+  const locale = await getLocale();
+  const t = await getTranslations("book.study");
+  const tDoc = await getTranslations("book.memoryDocuments");
+  const tAuthorDoc = await getTranslations("memory.document");
+  const tAuthorStudy = await getTranslations("author.study");
+  const tStatus = await getTranslations("status.book");
+  const tOverview = await getTranslations("manuscript.overview");
+  const tReading = await getTranslations("manuscript.readingCopy");
+  const tRoom = await getTranslations("manuscript.writingRoom");
   const tProgress = await getTranslations("manuscript.progress");
+  const tCommon = await getTranslations("common");
+  const tNav = await getTranslations("navigation");
 
   // Principle XIV made visible: from the Writing stage onward the
   // manuscript leads and memory becomes reference. Emphasis only.
   const memorySection = (
       <section className="mt-14">
         <div className="rule pt-5">
-          <h2 className="eyebrow">The Book&rsquo;s Memory</h2>
+          <h2 className="eyebrow">{t("memoryHeading")}</h2>
         </div>
 
         <ul>
@@ -129,28 +144,32 @@ export default async function BookStudyPage({
                     href={`${memoryPath}/${meta.slug}`}
                     className="font-display text-2xl tracking-tight hover:text-oxblood"
                   >
-                    {meta.label}
+                    {tDoc(`${meta.type}.label`)}
                   </Link>
                   <p className="mt-2 leading-relaxed text-ink-soft">
-                    {meta.description}
+                    {tDoc(`${meta.type}.description`)}
                   </p>
                   <p className="mt-3 font-sans text-xs text-ink-faint">
                     {doc?.activeVersion ? (
                       <span className="text-ink-soft">
-                        Version {doc.activeVersion.versionNumber}
+                        {tAuthorStudy("version", {
+                          number: doc.activeVersion.versionNumber,
+                        })}
                         {doc.activeVersion.finalizedAt
-                          ? ` · finalized ${formatDate(doc.activeVersion.finalizedAt)}`
+                          ? ` · ${tAuthorStudy("finalized", { date: formatDate(doc.activeVersion.finalizedAt, locale) })}`
                           : ""}
                       </span>
                     ) : (
-                      <span className="italic">Not yet established</span>
+                      <span className="italic">
+                        {tAuthorStudy("notEstablished")}
+                      </span>
                     )}
                     {doc?.hasDraft ? (
                       <Link
                         href={`${memoryPath}/${meta.slug}?draft=1`}
                         className="ml-3 not-italic text-oxblood underline-offset-4 hover:underline"
                       >
-                        Draft open
+                        {tAuthorStudy("draftOpen")}
                       </Link>
                     ) : null}
                   </p>
@@ -166,22 +185,22 @@ export default async function BookStudyPage({
   const manuscriptSection = (
       <section className="mt-14">
         <div className="rule flex items-baseline justify-between gap-x-6 pt-5">
-          <h2 className="eyebrow">The Manuscript</h2>
+          <h2 className="eyebrow">{tOverview("title")}</h2>
           <span className="flex items-baseline gap-6">
             <ActionLink
               href={`/workspace/authors/${author.slug}/books/${book.slug}/chapters`}
             >
-              Chapters
+              {t("chaptersLink")}
             </ActionLink>
             <ActionLink
               href={`/workspace/authors/${author.slug}/books/${book.slug}/manuscript`}
             >
-              Reading Copy
+              {tOverview("readingCopy")}
             </ActionLink>
             <ActionLink
               href={`/workspace/authors/${author.slug}/books/${book.slug}/findings`}
             >
-              Findings
+              {t("findingsLink")}
             </ActionLink>
           </span>
         </div>
@@ -215,7 +234,7 @@ export default async function BookStudyPage({
           </p>
         ) : (
           <p className="mt-5 max-w-prose italic text-ink-soft">
-            The manuscript begins with its first chapter.
+            {tReading("emptyManuscript")}
           </p>
         )}
       </section>
@@ -225,7 +244,7 @@ export default async function BookStudyPage({
     <WorkspaceFrame
       email={user.email ?? ""}
       breadcrumbs={[
-        { href: "/workspace", label: "Workspace" },
+        { href: "/workspace", label: tNav("workspace") },
         { href: `/workspace/authors/${author.slug}`, label: author.full_name },
       ]}
     >
@@ -242,22 +261,22 @@ export default async function BookStudyPage({
             of a manuscript folder — stacked labels, never sentences. */}
         <dl className="rule mt-8 flex max-w-3xl flex-wrap gap-x-16 gap-y-6 pt-6">
           <div>
-            <dt className="eyebrow">Status</dt>
+            <dt className="eyebrow">{t("status")}</dt>
             <dd className="mt-1.5 font-serif text-xl leading-snug">
-              {bookStatusLabel(book.status)}
+              {tStatus(book.status)}
             </dd>
           </div>
 
           <div>
-            <dt className="eyebrow">Begun</dt>
+            <dt className="eyebrow">{t("begun")}</dt>
             <dd className="mt-1.5 font-serif text-xl leading-snug">
-              {formatDate(book.created_at)}
+              {formatDate(book.created_at, locale)}
             </dd>
           </div>
 
           {book.working_title ? (
             <div>
-              <dt className="eyebrow">Working Title</dt>
+              <dt className="eyebrow">{t("workingTitle")}</dt>
               <dd className="mt-1.5 font-serif text-xl italic leading-snug">
                 {book.working_title}
               </dd>
@@ -268,22 +287,22 @@ export default async function BookStudyPage({
         {/* The book's creative lineage — provenance, set apart from the
             record's metadata like a colophon's rights line. */}
         <dl className="mt-7 max-w-3xl">
-          <dt className="eyebrow">Inherited From</dt>
+          <dt className="eyebrow">{t("inheritedFrom")}</dt>
           <dd className="mt-2.5 font-serif text-xl leading-snug">
             {origins.length ? (
               <ul className="space-y-1.5">
                 {origins.map((o) => (
                   <li key={o.docType}>
-                    {o.label}{" "}
+                    {tAuthorDoc(`${o.docType}.label`)}{" "}
                     <span className="font-sans text-sm text-ink-faint">
-                      v{o.versionNumber}
+                      {tRoom("versionShort", { number: o.versionNumber })}
                     </span>
                   </li>
                 ))}
               </ul>
             ) : (
               <span className="italic text-ink-soft">
-                Author Memory not yet established
+                {t("memoryNotEstablished")}
               </span>
             )}
           </dd>
@@ -293,13 +312,17 @@ export default async function BookStudyPage({
           <ActionLink
             href={`/workspace/authors/${author.slug}/books/${book.slug}/edit`}
           >
-            Edit the record
+            {tAuthorStudy("editRecord")}
           </ActionLink>
         </div>
       </header>
 
       <div className="mt-4">
-        <ErrorNote message={error} />
+        <ActionMessage
+          code={message?.code}
+          params={message?.params}
+          namespace="book.errors"
+        />
       </div>
 
       {writingStage ? (
@@ -319,17 +342,17 @@ export default async function BookStudyPage({
           <summary className="rule flex cursor-pointer list-none items-baseline justify-between pt-5">
             <span>
               <span className="eyebrow group-open:text-oxblood">
-                Assembled Memory
+                {tAuthorStudy("assembledMemory")}
               </span>
               <span className="ml-3 font-sans text-xs text-ink-faint">
-                the exact record future AI assistance will receive — the
-                author&rsquo;s memory first, then the book&rsquo;s; active,
-                finalized versions only
+                {t("assembledMemoryHint")}
               </span>
             </span>
             <span className="font-sans text-xs text-oxblood">
-              <span className="group-open:hidden">Show</span>
-              <span className="hidden group-open:inline">Hide</span>
+              <span className="group-open:hidden">{tCommon("show")}</span>
+              <span className="hidden group-open:inline">
+                {tCommon("hide")}
+              </span>
             </span>
           </summary>
           <pre className="mt-6 max-w-prose whitespace-pre-wrap border-l border-rule pl-6 font-serif text-sm leading-relaxed text-ink">
