@@ -631,7 +631,15 @@
       "today2": "La Seguridad a Nivel de Fila es la frontera de seguridad; la aplicación nunca usa acceso elevado a la base de datos.",
       "deferred1": "Una vista de solo lectura de las integraciones configuradas y el estado de las migraciones.",
       "deferred2": "Indicadores de salud tomados de señales reales — nunca un estado inventado.",
-      "deferred3": "En esta fase, ninguna escritura de configuración ni banderas de funciones desde la Administración."
+      "deferred3": "En esta fase, ninguna escritura de configuración ni banderas de funciones desde la Administración.",
+      "models": {
+        "heading": "Modelos de revisión editorial",
+        "note": "Leído en vivo de la cuenta de OpenAI configurada en este despliegue. La clave nunca sale del servidor; solo se listan identificadores candidatos para el Motor Editorial de IA.",
+        "configured": "Modelo de revisión configurado",
+        "candidates": "Identificadores candidatos disponibles",
+        "noneFound": "Esta clave no tiene identificadores candidatos disponibles.",
+        "unavailable": "La verificación de disponibilidad no pudo llegar a OpenAI — los detalles están en el registro del servidor."
+      }
     },
     "deletion": {
       "authorMetaTitle": "Eliminar al autor de forma permanente",

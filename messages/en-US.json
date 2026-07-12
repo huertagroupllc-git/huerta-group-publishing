@@ -631,7 +631,15 @@
       "today2": "Row Level Security is the security boundary; the application never uses elevated database access.",
       "deferred1": "A read-only view of configured integrations and migration state.",
       "deferred2": "Health indicators drawn from real signals — never invented status.",
-      "deferred3": "No configuration writes and no feature flags from Administration in this phase."
+      "deferred3": "No configuration writes and no feature flags from Administration in this phase.",
+      "models": {
+        "heading": "Editorial review models",
+        "note": "Read live from the OpenAI account this deployment is configured with. The key never leaves the server; only candidate identifiers for the Editorial AI Engine are listed.",
+        "configured": "Configured review model",
+        "candidates": "Available candidate identifiers",
+        "noneFound": "No candidate identifiers are available to this key.",
+        "unavailable": "The availability check could not reach OpenAI — details are in the server log."
+      }
     },
     "deletion": {
       "authorMetaTitle": "Delete author permanently",
