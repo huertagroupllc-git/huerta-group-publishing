@@ -7,19 +7,19 @@ import "./globals.css";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   axes: ["opsz"],
 });
 
 const newsreader = Newsreader({
   variable: "--font-newsreader",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   style: ["normal", "italic"],
 });
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
 });
 
 export const metadata: Metadata = {

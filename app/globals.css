@@ -11,23 +11,65 @@
   /* Surfaces */
   --color-paper: #f7f2e9;
   --color-parchment: #efe8d9;
+  --color-paper-bright: #fbf8f1;
 
   /* Ink */
   --color-ink: #221d16;
   --color-ink-soft: #6b6153;
   --color-ink-faint: #968b7a;
 
-  /* Accent — used sparingly: active markers, primary actions, links */
+  /* Accent — used sparingly: active markers, primary actions, links.
+     Oxblood is the FUNCTIONAL accent: interactive links, buttons,
+     active navigation, focus states, warnings. Brand gold never
+     replaces it as the ordinary action color. */
   --color-oxblood: #6e2a2e;
   --color-oxblood-deep: #571f23;
 
+  /* Brand metal — DECORATIVE presentation only (logo, select rules,
+     large-scale public-site details). Never ordinary body text, never
+     the default link color, never a button background; small gold text
+     on ivory is prohibited unless contrast is independently verified.
+     Information never relies on the metallic treatment alone.
+     (docs/brand/guidelines.md) */
+  --color-brand-gold: #9a7b2d;
+  --color-brand-gold-muted: #c9b37e;
+  --color-brand-gold-dark: #7a6122;
+  --color-gunmetal: #5a5f66;
+  --color-metallic-gray: #8b8f96;
+
   /* Hairline rules */
   --color-rule: #ddd2bf;
+  --color-gold-rule: #c9b37e;
 
   /* Type */
   --font-display: var(--font-fraunces);
   --font-serif: var(--font-newsreader);
   --font-sans: var(--font-inter);
+
+  /* Type scale — the sizes already in use, named. */
+  --text-display-hero: 3.25rem;
+  --text-display: 2.25rem;
+  --text-heading: 1.5rem;
+  --text-prose-lead: 1.125rem;
+  --text-prose: 1.125rem;
+  --text-ui: 0.875rem;
+  --text-metadata: 0.75rem;
+  --text-eyebrow: 0.6875rem;
+
+  /* Layout — the measures already in use, named. */
+  --width-public: 72rem;
+  --width-authenticated: 48rem;
+  --width-authenticated-wide: 64rem;
+  --width-prose: 65ch;
+
+  /* Structure. The system is square and unshadowed by constitution:
+     hairlines and whitespace, not cards. */
+  --hairline: 1px;
+  --focus-outline: 2px solid var(--color-oxblood);
+
+  /* Motion — reserved for future public-site use only; authenticated
+     surfaces remain still. Honor prefers-reduced-motion wherever used. */
+  --motion-fade: 160ms ease-out;
 }
 
 @layer base {
