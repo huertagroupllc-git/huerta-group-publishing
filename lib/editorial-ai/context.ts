@@ -180,20 +180,34 @@ async function assembleEditorialRecord(
   }
 
   try {
+    type ClosedRow = {
+      id: string;
+      title: string;
+      explanation: string | null;
+      status: string;
+      resolution_note: string | null;
+      chapter: { title: string | null } | null;
+    };
     const { data: findings } = await supabase
       .from("editorial_findings")
-      .select("id, title, explanation, status, resolution_note")
+      .select(
+        "id, title, explanation, status, resolution_note, chapter:chapters(title)",
+      )
       .eq("book_id", bookId)
       .in("status", ["resolved", "dismissed"])
       .order("created_at", { ascending: true });
-    for (const f of findings ?? []) {
+    for (const f of (findings ?? []) as unknown as ClosedRow[]) {
       const entry = {
         id: f.id,
         title: clip(f.title, 160),
         clause: citedClause(f.explanation ?? ""),
       };
       if (f.status === "resolved") {
-        record.resolved.push(entry);
+        record.resolved.push({
+          ...entry,
+          anchor: f.chapter?.title ? clip(f.chapter.title, 80) : null,
+          note: f.resolution_note ? clip(f.resolution_note, 200) : null,
+        });
       } else {
         record.setAside.push({
           ...entry,
@@ -292,7 +306,7 @@ export function editorialRecordBlock(
   if (record.open.length) {
     sections.push(
       [
-        "Open concerns already on the record — do not re-raise the same concern unless the current manuscript has materially changed since it was raised, or your finding is meaningfully distinct:",
+        "Open concerns already on the record — do not re-raise the same concern unless your finding is meaningfully distinct. If the text a concern points at has changed since it was raised, evaluate the CURRENT text first: a revision that repairs the concern is a clean pass, not a new finding.",
         ...record.open.map(
           (f) =>
             `- ${f.title}${f.anchor ? ` — ${f.anchor}` : ""}${f.clause ? ` (cited "${f.clause}")` : ""}${f.source ? ` · ${f.source}` : ""}`,
@@ -304,9 +318,10 @@ export function editorialRecordBlock(
   if (record.resolved.length) {
     sections.push(
       [
-        "Already resolved — do not re-raise unless the text has materially changed since:",
+        "Resolved — the author records each repair below. Verify the CURRENT text honors it; a successful repair is acknowledged by silence. Raise a finding only if the revised text still fails the underlying requirement, and say whether it is partially repaired, displaced elsewhere, or unresolved — quoting the revised text:",
         ...record.resolved.map(
-          (f) => `- ${f.title}${f.clause ? ` (cited "${f.clause}")` : ""}`,
+          (f) =>
+            `- ${f.title}${f.anchor ? ` — ${f.anchor}` : ""}${f.clause ? ` (cited "${f.clause}")` : ""}${f.note ? ` — author's note: ${f.note}` : ""}`,
         ),
       ].join("\n"),
     );

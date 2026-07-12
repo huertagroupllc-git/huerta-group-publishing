@@ -57,8 +57,17 @@ export interface EditorialRecord {
     source: string | null;
     anchor: string | null;
   }[];
-  /** Resolved findings: title + the clause they cited. */
-  resolved: { id: string; title: string; clause: string | null }[];
+  /** Resolved findings: title, the clause they cited, the chapter they
+   *  anchored to, and the author's resolution note — the note is the
+   *  repair signal a returning reviewer verifies against the CURRENT
+   *  text (never full bodies). */
+  resolved: {
+    id: string;
+    title: string;
+    clause: string | null;
+    anchor: string | null;
+    note: string | null;
+  }[];
   /** Set-aside findings: considered and declined by the author. */
   setAside: {
     id: string;
@@ -100,6 +109,12 @@ export interface ReviewerDefinition {
   type: string;
   /** e.g. "Constitution Review" — used in prompts and logging. */
   name: string;
+  /** Reviewer instruction version. Stated in the system prompt's first
+   *  line, so every version bump lands in prompt_sha256 by
+   *  construction — the fingerprint stays the authority; the version
+   *  makes its changes legible. Bump on ANY change to the reviewer's
+   *  instructions or reading plan. */
+  version: number;
   /** One sentence: what this reviewer is for. */
   purpose: string;
   /** The single question every finding must serve. */
