@@ -99,10 +99,105 @@ read-time computation from a versioned pricing table (Phase 2/4). A
 null token value means the provider did not report usage; it is not a
 zero.
 
-## Not in this phase
+## Phase 2 — execution, model policy, and the token budget
 
-Runner persistence, model-policy resolution, model switching, the
-300k-token budget, pricing, the Administration readings display,
-Reviewer v3 prompt changes, and any reviewer-version or prompt-
-fingerprint change. All arrive later; this phase changed no editorial
-behavior and made no API call.
+Phase 2 wires the runner to write these rows and adds the hybrid model
+policy. It changes no reviewer content: reviewer version stays 2,
+prompt fingerprints are unchanged, response-language freezing is
+unchanged, and with no environment override every reading resolves to
+gpt-4o — today's exact production behavior. No hybrid environment
+variable is enabled, and no OpenAI validation call was made in this
+phase (the deterministic tests use mocked provider results only).
+
+### Model policy (`lib/editorial-ai/model-policy.ts`)
+
+The ONE place that reads the model environment and decides a pass's
+model from its role. Precedence:
+
+1. `EDITORIAL_REVIEW_MODEL` — every role (global override).
+2. `EDITORIAL_REVIEW_MODEL_MANUSCRIPT` — manuscript role only.
+3. Code default — `gpt-4o`.
+
+A configured value that fails a conservative identifier shape is
+REJECTED (logged, falls back to the default) — a typo can never select
+an unintended, expensive model. No network call; the staff-only
+Administration availability check stays separate.
+
+### Frozen policy and continuation
+
+At run creation the policy is resolved once and frozen into
+`context_versions.model_policy` (`{ manuscript, chapter, source }`);
+`context_versions.model` stays the manuscript (headline) model for
+backward-compatible readers. **Continue Review reads the frozen policy
+— never the environment** — so changing Vercel config cannot silently
+switch an in-flight run's models. Response language and prompt
+fingerprint remain separately frozen.
+
+**Historical fallback.** A run with no `model_policy` (historical or
+Phase-1-era) synthesizes a compatibility policy from its single stored
+`context_versions.model` (that model for both roles). It is a runtime
+interpretation only — never written back, never re-read from the
+environment.
+
+### Per-reading writes (attempts, usage, latency)
+
+After each pass attempt the runner inserts one terminal reading row
+(Option A):
+
+- **complete** — with the actual model, provider-reported input/output/
+  cached tokens (absent → null, a reported 0 stays 0; never inferred
+  from text length), measured latency (ms), and real start/finish
+  timestamps. Written BEFORE the pass's completed-passes advance, so a
+  pass is never claimed complete while its reading is lost.
+- **failed** — when the provider attempt fails after the existing
+  transient retries. Best-effort (never masks the model error), no
+  fabricated usage; the run then pauses incomplete and Continue re-runs
+  the pass as the next attempt.
+
+Attempt numbering is one past the highest attempt for `(run_id,
+pass_index)` — a re-run after a failure is attempt 2. The run's
+pending-status lock serializes chunks so this does not race; the
+unique constraint is the backstop. Pre-provider failures (planning /
+context) write no attempt row.
+
+### Cached-token arithmetic
+
+OpenAI's `cached_tokens` are a SUBSET of `prompt_tokens` (input), not
+additional. So the run's consumed total = Σ(input + output) across
+readings; cached is stored for provenance but NOT added.
+
+### The 300,000-token soft budget
+
+`EDITORIAL_REVIEW_TOKEN_BUDGET` (positive integer; default 300000).
+Before starting each pass the runner sums KNOWN cumulative tokens from
+persisted readings; if that meets or exceeds the ceiling it pauses the
+run as **Incomplete** (resumable) with a stable localized message
+(`findings.errors.reviewPausedTokenBudget`) and makes no further
+provider call. It is a guardrail, not prepaid billing: one completed
+pass may carry the total past the ceiling, and missing provider usage
+limits enforcement (unknown is never fabricated). The pause is never
+Failed. In production (gpt-4o, a few thousand tokens per pass) it never
+triggers.
+
+### completed_passes consistency
+
+`completed_passes` remains the progress field. A new instrumented pass
+does not advance it without a corresponding complete reading row.
+Historical runs keep `completed_passes > 0` with no reading rows —
+queries tolerate that (absence = uninstrumented), and nothing is
+rewritten.
+
+### Administration → System
+
+The staff-only System page now shows, read-only: the global override,
+the manuscript override, the code default, the resolved manuscript and
+chapter models, and the token-budget ceiling. No keys, no editing. Per-
+run reading display belongs to Hybrid Phase 4.
+
+### Still not in this phase
+
+Reviewer v3 prompt changes, any reviewer-version or fingerprint change,
+pricing/cost estimation, the Administration per-run reading history,
+GPT-5.5 production use, and the paid six-run validation. Production
+after this deploy resolves manuscript=gpt-4o, chapter=gpt-4o, budget
+300000 from code defaults.

@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { AdminSection } from "@/components/admin-section";
+import {
+  resolvePolicyFromEnv,
+  resolveTokenBudget,
+} from "@/lib/editorial-ai/model-policy";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("admin.shell.nav");
@@ -51,7 +55,16 @@ export default async function AdminSystemPage() {
   const tNav = await getTranslations("navigation");
   const tShell = await getTranslations("admin.shell.nav");
   const tModels = await getTranslations("admin.system.models");
+  const locale = await getLocale();
   const models = await editorialModelAvailability();
+
+  // The resolved review-model policy and token ceiling, read-only, from
+  // the same trusted server configuration the runner uses. No keys.
+  const policy = resolvePolicyFromEnv();
+  const tokenBudget = resolveTokenBudget();
+  const globalOverride = process.env.EDITORIAL_REVIEW_MODEL?.trim() || null;
+  const manuscriptOverride =
+    process.env.EDITORIAL_REVIEW_MODEL_MANUSCRIPT?.trim() || null;
 
   return (
     <>
@@ -93,6 +106,50 @@ export default async function AdminSystemPage() {
             </div>
           </dl>
         )}
+      </section>
+
+      <section
+        className="rule mt-12 max-w-3xl pt-6"
+        aria-labelledby="policy-heading"
+      >
+        <h2 id="policy-heading" className="eyebrow">
+          {tModels("policyHeading")}
+        </h2>
+        <p className="mt-3 max-w-prose font-sans text-sm text-ink-soft">
+          {tModels("policyNote")}
+        </p>
+        <dl className="mt-4 grid grid-cols-2 gap-x-10 gap-y-4 sm:grid-cols-3">
+          <div>
+            <dt className="eyebrow">{tModels("globalOverride")}</dt>
+            <dd className="mt-1 font-serif text-base">
+              {globalOverride ?? tModels("unset")}
+            </dd>
+          </div>
+          <div>
+            <dt className="eyebrow">{tModels("manuscriptOverride")}</dt>
+            <dd className="mt-1 font-serif text-base">
+              {manuscriptOverride ?? tModels("unset")}
+            </dd>
+          </div>
+          <div>
+            <dt className="eyebrow">{tModels("codeDefault")}</dt>
+            <dd className="mt-1 font-serif text-base">gpt-4o</dd>
+          </div>
+          <div>
+            <dt className="eyebrow">{tModels("resolvedManuscript")}</dt>
+            <dd className="mt-1 font-serif text-lg">{policy.manuscript}</dd>
+          </div>
+          <div>
+            <dt className="eyebrow">{tModels("resolvedChapter")}</dt>
+            <dd className="mt-1 font-serif text-lg">{policy.chapter}</dd>
+          </div>
+          <div>
+            <dt className="eyebrow">{tModels("tokenBudget")}</dt>
+            <dd className="mt-1 font-serif text-lg">
+              {tokenBudget.toLocaleString(locale)}
+            </dd>
+          </div>
+        </dl>
       </section>
     </>
   );

@@ -24,6 +24,15 @@ import {
   FINDING_SEVERITIES,
 } from "@/lib/findings/types";
 import { normalizeLanguageTag } from "@/lib/languages";
+import {
+  type ModelPolicy,
+  parseStoredPolicy,
+  policyFromLegacyModel,
+  resolveModel,
+  resolvePolicyFromEnv,
+  resolveTokenBudget,
+} from "@/lib/editorial-ai/model-policy";
+import type { ReviewRunReadingInsert } from "@/lib/review/readings";
 
 /**
  * The shared review-run engine. A review is many sequential model calls;
@@ -45,7 +54,9 @@ import { normalizeLanguageTag } from "@/lib/languages";
  * requesting user through RLS. OPENAI_API_KEY never leaves the server.
  */
 
-const DEFAULT_MODEL = "gpt-4o";
+// The model each pass runs on is resolved from the run's frozen policy
+// (lib/editorial-ai/model-policy.ts) by reading role — not a constant
+// here. The default (gpt-4o) lives in that module.
 
 // A pending run older than this was killed mid-chunk, not still running:
 // comfortably past the request's own maxDuration (300s).
@@ -84,9 +95,18 @@ interface ReviewSetup {
   supabase: Supa;
   userId: string;
   apiKey: string;
-  model: string;
   material: ReviewMaterial;
   recordBlock: string | null;
+}
+
+/** Provider-reported usage for one attempt, normalized. Absent values
+ *  stay null (never fabricated from text length); a reported 0 stays 0.
+ *  cached_tokens are a SUBSET of input_tokens (OpenAI semantics) — kept
+ *  for provenance, never added to the budget total. */
+interface NormalizedUsage {
+  inputTokens: number | null;
+  outputTokens: number | null;
+  cachedTokens: number | null;
 }
 
 /** Shared guards and assembly for both starting and continuing a review. */
@@ -136,7 +156,6 @@ async function prepareReview(
     supabase,
     userId: user.id,
     apiKey,
-    model: def.model ?? process.env.EDITORIAL_REVIEW_MODEL ?? DEFAULT_MODEL,
     material,
     recordBlock: editorialRecordBlock(material.editorialRecord),
   };
@@ -152,7 +171,16 @@ export async function startReview(
   bookSlug: string,
 ): Promise<ReviewRunResult> {
   const setup = await prepareReview(def, authorSlug, bookSlug);
-  const { supabase, userId, material, model } = setup;
+  const { supabase, userId, material } = setup;
+
+  // The model policy, resolved ONCE from the environment and frozen into
+  // this run's provenance below. Continue Review reads the frozen policy,
+  // never the environment, so a later config change cannot rewrite an
+  // existing run. With no override set, every role is gpt-4o.
+  const policy = resolvePolicyFromEnv();
+  console.log(
+    `[editorial-ai] ${def.type} run policy frozen: manuscript=${policy.manuscript} chapter=${policy.chapter} (${policy.source})`,
+  );
 
   // The editorial response language, frozen for this run's whole life:
   // the book's manuscript language as it stands at this moment. A later
@@ -190,7 +218,11 @@ export async function startReview(
   // this run was shown, answerable forever — including which editorial
   // memory it carried. Frozen at creation and never rewritten by resumes.
   const contextVersions = {
-    model,
+    // The frozen per-run model policy (Phase 2). `model` stays the
+    // manuscript (headline) model for backward-compatible provenance
+    // readers; per-reading truth lives in review_run_readings.
+    model_policy: policy,
+    model: policy.manuscript,
     reviewer: def.type,
     response_language: responseLanguage,
     author_memory: Object.fromEntries(
@@ -246,6 +278,7 @@ export async function startReview(
     startAtPass: 0,
     storedTotalPasses: passes.length,
     systemPrompt,
+    policy,
   });
 }
 
@@ -290,7 +323,9 @@ export async function continueReview(
     })
     .eq("id", resumable.id)
     .eq("status", "incomplete")
-    .select("id, completed_passes, total_passes, response_language")
+    .select(
+      "id, completed_passes, total_passes, response_language, context_versions",
+    )
     .maybeSingle();
   if (!claimed) {
     throw new ReviewNotPossibleError(
@@ -308,11 +343,28 @@ export async function continueReview(
     "en";
   const systemPrompt = buildSystemPrompt(def, responseLanguage);
 
+  // The model policy is read from the run's FROZEN provenance — never
+  // re-resolved from the current environment, so a config change since
+  // this run began cannot silently switch its models. A historical /
+  // Phase-1-era run with no model_policy synthesizes a compatibility
+  // policy from its single stored model (both roles), never from the env.
+  const cv = (claimed.context_versions ?? {}) as Record<string, unknown>;
+  const stored = parseStoredPolicy(cv.model_policy);
+  const policy =
+    stored ??
+    policyFromLegacyModel(typeof cv.model === "string" ? cv.model : null);
+  if (!stored) {
+    console.warn(
+      `[editorial-ai] ${def.type} continuation: run ${claimed.id} has no frozen model_policy; using compatibility policy from stored model=${policy.manuscript}`,
+    );
+  }
+
   return runChunk(setup, def, {
     runId: claimed.id,
     startAtPass: claimed.completed_passes ?? 0,
     storedTotalPasses: claimed.total_passes ?? null,
     systemPrompt,
+    policy,
   });
 }
 
@@ -362,10 +414,15 @@ async function runChunk(
     storedTotalPasses: number | null;
     /** Composed by the caller from the run's frozen response language. */
     systemPrompt: string;
+    /** The run's FROZEN model policy — each pass's model is resolved
+     *  from it by role; the environment is never read here. */
+    policy: ModelPolicy;
   },
 ): Promise<ReviewRunResult> {
-  const { supabase, userId, apiKey, model, material, recordBlock } = setup;
-  const { runId, startAtPass, storedTotalPasses, systemPrompt } = cursor;
+  const { supabase, userId, apiKey, material, recordBlock } = setup;
+  const { runId, startAtPass, storedTotalPasses, systemPrompt, policy } =
+    cursor;
+  const tokenBudget = resolveTokenBudget();
 
   const passes = def.buildPasses(material);
   const totalPasses = passes.length;
@@ -412,7 +469,40 @@ async function runChunk(
         break;
       }
 
+      // Soft token budget: a guardrail, not prepaid billing. If the KNOWN
+      // cumulative provider-reported tokens for this run (from persisted
+      // readings, across all chunks) have reached the ceiling, pause
+      // before starting another pass — do NOT make another provider call.
+      // The run stays Incomplete and resumable; it is never Failed. One
+      // completed pass may carry the total past the ceiling, and missing
+      // provider usage limits enforcement (unknown is never fabricated).
+      const consumed = await consumedTokens(supabase, runId);
+      if (consumed >= tokenBudget) {
+        console.warn(
+          `[editorial-ai] ${def.type} run ${runId} paused at pass ${i}: token budget reached (${consumed} >= ${tokenBudget})`,
+        );
+        await supabase
+          .from("review_runs")
+          .update({
+            status: "incomplete",
+            chunk_started_at: null,
+            completed_passes: i,
+            summary: coverNote || null,
+          })
+          .eq("id", runId);
+        return {
+          runId,
+          status: "incomplete",
+          findingsInserted: inserted,
+          completedPasses: i,
+          totalPasses,
+          summary: null,
+          pauseReason: "tokenBudget",
+        };
+      }
+
       const pass = passes[i];
+      const passModel = resolveModel(policy, pass.role);
       const prefixBlocks: string[] = [];
       if (recordBlock) prefixBlocks.push(recordBlock);
       if (pass.includeRunFindings && raisedThisRun.length) {
@@ -428,13 +518,82 @@ async function runChunk(
         ? { ...pass, contextBlocks: [...prefixBlocks, ...pass.contextBlocks] }
         : pass;
 
-      const { findings, summary } = await runPass(
-        apiKey,
-        model,
-        def,
-        systemPrompt,
-        passWithMemory,
+      // One terminal reading row per pass attempt (Phase 1 Option A).
+      const attempt = await nextAttempt(supabase, runId, i);
+      const startedAt = new Date().toISOString();
+      const t0 = Date.now();
+
+      let passOutput: {
+        findings: ValidatedFinding[];
+        summary: string | null;
+        usage: NormalizedUsage;
+      };
+      try {
+        passOutput = await runPass(
+          apiKey,
+          passModel,
+          def,
+          systemPrompt,
+          passWithMemory,
+        );
+      } catch (passError) {
+        // A provider attempt was made and failed (after transient
+        // retries). Record a FAILED reading row — best-effort, never
+        // masking the model error — then re-throw so the run pauses
+        // incomplete and Continue re-runs this pass as the next attempt.
+        const { error: readErr } = await writeReading(supabase, {
+          run_id: runId,
+          pass_index: i,
+          role: pass.role,
+          chapter_id: pass.chapterId,
+          model: passModel,
+          attempt,
+          status: "failed",
+          latency_ms: Date.now() - t0,
+          started_at: startedAt,
+          finished_at: new Date().toISOString(),
+        });
+        if (readErr) {
+          console.error(
+            "[editorial-ai] failed-reading provenance write failed",
+            readErr,
+          );
+        }
+        throw passError;
+      }
+
+      const { findings, summary, usage } = passOutput;
+
+      // Reading provenance FIRST — a pass is never claimed complete while
+      // its reading is silently lost. If this write fails, throw so the
+      // run pauses incomplete (no complete row exists yet → the re-run is
+      // attempt 1 again, no duplicate).
+      const { error: readErr } = await writeReading(supabase, {
+        run_id: runId,
+        pass_index: i,
+        role: pass.role,
+        chapter_id: pass.chapterId,
+        model: passModel,
+        attempt,
+        status: "complete",
+        input_tokens: usage.inputTokens,
+        output_tokens: usage.outputTokens,
+        cached_tokens: usage.cachedTokens,
+        latency_ms: Date.now() - t0,
+        started_at: startedAt,
+        finished_at: new Date().toISOString(),
+      });
+      if (readErr) {
+        console.error(
+          "[editorial-ai] complete-reading provenance write failed",
+          readErr,
+        );
+        throw new Error("reading provenance write failed");
+      }
+      console.log(
+        `[editorial-ai] ${def.type} reading: pass ${i} role=${pass.role} model=${passModel} attempt=${attempt} tokens(in/out/cached)=${usage.inputTokens ?? "?"}/${usage.outputTokens ?? "?"}/${usage.cachedTokens ?? "?"} latency=${Date.now() - t0}ms`,
       );
+
       if (summary) coverNote = coverNote ? `${coverNote}\n\n${summary}` : summary;
 
       const accepted = def.validateFinding
@@ -581,7 +740,7 @@ async function runPass(
 ): Promise<{
   findings: ValidatedFinding[];
   summary: string | null;
-  usage: number | null;
+  usage: NormalizedUsage;
 }> {
   const body = JSON.stringify({
     model,
@@ -605,7 +764,11 @@ async function runPass(
 
   const payload = (await response.json()) as {
     choices?: { message?: { content?: string } }[];
-    usage?: { total_tokens?: number };
+    usage?: {
+      prompt_tokens?: number;
+      completion_tokens?: number;
+      prompt_tokens_details?: { cached_tokens?: number };
+    };
   };
   const content = payload.choices?.[0]?.message?.content;
   if (!content) {
@@ -624,11 +787,79 @@ async function runPass(
     .filter((f): f is ValidatedFinding => f !== null)
     .slice(0, def.maxFindingsPerPass);
 
+  // Normalize only what the provider reported. `?? null` preserves a
+  // reported 0 (nullish, not falsy) and never fabricates from text
+  // length. cached_tokens are a subset of prompt (input) tokens.
+  const u = payload.usage;
+  const usage: NormalizedUsage = {
+    inputTokens: u?.prompt_tokens ?? null,
+    outputTokens: u?.completion_tokens ?? null,
+    cachedTokens: u?.prompt_tokens_details?.cached_tokens ?? null,
+  };
+
   return {
     findings,
     summary: parsed.summary?.trim() || null,
-    usage: payload.usage?.total_tokens ?? null,
+    usage,
   };
+}
+
+/** Insert one terminal reading-provenance row (append-only). Returns the
+ *  Supabase error (or null) so the caller decides: a COMPLETE write must
+ *  not be lost silently (caller throws → the pass re-runs), while a
+ *  FAILED write is best-effort (caller logs, never masks the model
+ *  error). */
+async function writeReading(
+  supabase: Supa,
+  row: ReviewRunReadingInsert,
+): Promise<{ error: unknown }> {
+  const { error } = await supabase
+    .from("review_run_readings")
+    .insert(row);
+  return { error };
+}
+
+/** The next attempt number for a pass: one past the highest attempt
+ *  already recorded for (run_id, pass_index). 1 on the first execution;
+ *  a re-run after a failed attempt is attempt 2, and so on. The run's
+ *  pending-status lock serializes chunks, so this read-then-insert does
+ *  not race; the unique(run_id, pass_index, attempt) constraint is the
+ *  backstop. */
+async function nextAttempt(
+  supabase: Supa,
+  runId: string,
+  passIndex: number,
+): Promise<number> {
+  const { data } = await supabase
+    .from("review_run_readings")
+    .select("attempt")
+    .eq("run_id", runId)
+    .eq("pass_index", passIndex)
+    .order("attempt", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return ((data?.attempt as number | undefined) ?? 0) + 1;
+}
+
+/** Known cumulative provider-reported tokens for a run, summed from its
+ *  persisted readings across all chunks. input + output only; cached is
+ *  a subset of input (not added). A null token value is unknown and
+ *  contributes nothing — the ceiling can only act on what is known. */
+async function consumedTokens(
+  supabase: Supa,
+  runId: string,
+): Promise<number> {
+  const { data } = await supabase
+    .from("review_run_readings")
+    .select("input_tokens, output_tokens")
+    .eq("run_id", runId);
+  let total = 0;
+  for (const r of data ?? []) {
+    total +=
+      ((r.input_tokens as number | null) ?? 0) +
+      ((r.output_tokens as number | null) ?? 0);
+  }
+  return total;
 }
 
 /** POST to the model, retrying only transient failures (a dropped

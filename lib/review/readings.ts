@@ -54,5 +54,9 @@ export interface ReviewRunReadingInsert {
   output_tokens?: number | null;
   cached_tokens?: number | null;
   latency_ms?: number | null;
+  /** The attempt's real start; the column defaults to now() but the
+   *  runner passes the measured start so latency and timestamps are
+   *  truthful even though the row is inserted after the attempt finishes. */
+  started_at?: string;
   finished_at?: string | null;
 }

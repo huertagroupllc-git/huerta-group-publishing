@@ -638,7 +638,16 @@
         "configured": "Configured review model",
         "candidates": "Available candidate identifiers",
         "noneFound": "No candidate identifiers are available to this key.",
-        "unavailable": "The availability check could not reach OpenAI — details are in the server log."
+        "unavailable": "The availability check could not reach OpenAI — details are in the server log.",
+        "policyHeading": "Resolved review-model policy",
+        "policyNote": "How the Editorial AI Engine resolves a model for each reading, from trusted server configuration. Read-only; no keys are shown.",
+        "globalOverride": "Global override (EDITORIAL_REVIEW_MODEL)",
+        "manuscriptOverride": "Manuscript override (EDITORIAL_REVIEW_MODEL_MANUSCRIPT)",
+        "codeDefault": "Code default",
+        "resolvedManuscript": "Resolved manuscript-reading model",
+        "resolvedChapter": "Resolved chapter-reading model",
+        "tokenBudget": "Per-run token budget",
+        "unset": "not set"
       }
     },
     "deletion": {
@@ -843,7 +852,8 @@
       "nothingToContinue": "There is no unfinished review to continue.",
       "signInRequired": "Sign in to request a review.",
       "reviewMigrationMissing": "The database is missing a Constitution Review migration — apply supabase/migrations/20260712000000_constitution_review.sql and the chunked-execution migrations 20260714/20260715 (docs/setup.md §2).",
-      "reviewDidNotFinish": "The review could not finish. Findings raised before the failure are preserved below."
+      "reviewDidNotFinish": "The review could not finish. Findings raised before the failure are preserved below.",
+      "reviewPausedTokenBudget": "The review paused after reaching its configured usage limit. Everything read so far is preserved — the review is incomplete, not failed, and can be continued once the usage policy or available credit is addressed."
     }
   },
   "deliberation": {

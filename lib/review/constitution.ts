@@ -116,6 +116,7 @@ export const constitutionReview: ReviewerDefinition = {
 
     const manuscriptPass: ReviewPass = {
       label: "The Manuscript",
+      role: "manuscript",
       contextBlocks: manuscriptBlocks,
       chapterId: null,
       chapterVersionId: null,
@@ -128,6 +129,7 @@ export const constitutionReview: ReviewerDefinition = {
 
     const chapterPasses: ReviewPass[] = material.chapters.map((chapter) => ({
       label: `${chapter.positionLabel} — ${chapter.title}`,
+      role: "chapter",
       contextBlocks: [
         `=== THIS PASS ===\n\nYou are reading one chapter. The manuscript-wide patterns are already on the record above. Raise only what is LOCAL to this chapter: materially distinct from the systemic findings, unique to this chapter, or chapter-specific evidence a systemic finding cannot carry. A chapter that merely exemplifies an already-raised pattern is a clean pass.`,
         ...shared,

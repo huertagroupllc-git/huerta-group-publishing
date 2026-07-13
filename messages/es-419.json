@@ -638,7 +638,16 @@
         "configured": "Modelo de revisión configurado",
         "candidates": "Identificadores candidatos disponibles",
         "noneFound": "Esta clave no tiene identificadores candidatos disponibles.",
-        "unavailable": "La verificación de disponibilidad no pudo llegar a OpenAI — los detalles están en el registro del servidor."
+        "unavailable": "La verificación de disponibilidad no pudo llegar a OpenAI — los detalles están en el registro del servidor.",
+        "policyHeading": "Política de modelos de revisión resuelta",
+        "policyNote": "Cómo el Motor Editorial de IA resuelve un modelo para cada lectura, según la configuración confiable del servidor. Solo lectura; no se muestran claves.",
+        "globalOverride": "Anulación global (EDITORIAL_REVIEW_MODEL)",
+        "manuscriptOverride": "Anulación del manuscrito (EDITORIAL_REVIEW_MODEL_MANUSCRIPT)",
+        "codeDefault": "Valor por defecto del código",
+        "resolvedManuscript": "Modelo resuelto para la lectura del manuscrito",
+        "resolvedChapter": "Modelo resuelto para la lectura de capítulos",
+        "tokenBudget": "Presupuesto de tokens por sesión",
+        "unset": "sin definir"
       }
     },
     "deletion": {
@@ -843,7 +852,8 @@
       "nothingToContinue": "No hay ninguna revisión inconclusa que continuar.",
       "signInRequired": "Inicie sesión para solicitar una revisión.",
       "reviewMigrationMissing": "A la base de datos le falta una migración de la Revisión de Constitución — aplique supabase/migrations/20260712000000_constitution_review.sql y las migraciones de ejecución por tramos 20260714/20260715 (docs/setup.md §2).",
-      "reviewDidNotFinish": "La revisión no pudo terminar. Los hallazgos levantados antes de la falla se conservan abajo."
+      "reviewDidNotFinish": "La revisión no pudo terminar. Los hallazgos levantados antes de la falla se conservan abajo.",
+      "reviewPausedTokenBudget": "La revisión se pausó al alcanzar su límite de uso configurado. Todo lo leído hasta ahora se conserva — la revisión está incompleta, no fallida, y puede continuarse una vez que se ajuste la política de uso o el crédito disponible."
     }
   },
   "deliberation": {

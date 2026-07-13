@@ -58,6 +58,11 @@ export async function requestConstitutionReview(formData: FormData) {
         withActionMessage(findingsPath, { code: "reviewDidNotFinish" }),
       );
     }
+    if (result.pauseReason === "tokenBudget") {
+      redirect(
+        withActionMessage(findingsPath, { code: "reviewPausedTokenBudget" }),
+      );
+    }
     // complete or incomplete: the Findings page shows the outcome and, if
     // more remains, the Continue action.
     redirect(findingsPath);
@@ -90,6 +95,11 @@ export async function continueConstitutionReview(formData: FormData) {
     if (result.status === "failed") {
       redirect(
         withActionMessage(findingsPath, { code: "reviewDidNotFinish" }),
+      );
+    }
+    if (result.pauseReason === "tokenBudget") {
+      redirect(
+        withActionMessage(findingsPath, { code: "reviewPausedTokenBudget" }),
       );
     }
     redirect(findingsPath);

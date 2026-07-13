@@ -6,6 +6,7 @@ import type { AuthorContext } from "@/lib/memory/assemble";
 import type { BookContext } from "@/lib/books/assemble";
 import type { AuthorRecord } from "@/lib/memory/types";
 import type { BookRecord } from "@/lib/books/types";
+import type { ReadingRole } from "@/lib/review/readings";
 
 /**
  * Editorial AI infrastructure — the engine every reviewer shares.
@@ -92,6 +93,11 @@ export interface ReviewMaterial {
 /** One model call: its context and, when chapter-scoped, its anchor. */
 export interface ReviewPass {
   label: string;
+  /** The semantic reading role — the manuscript-wide pass vs a chapter
+   *  pass. Authoritative and provider-neutral: the hybrid model policy
+   *  resolves a model from this, never inferred later from the label or
+   *  chapter presence. */
+  role: ReadingRole;
   contextBlocks: string[];
   chapterId: string | null;
   chapterVersionId: string | null;
@@ -165,4 +171,8 @@ export interface ReviewRunResult {
   completedPasses: number;
   totalPasses: number;
   summary: string | null;
+  /** Why an `incomplete` chunk paused, when the reason is not simply the
+   *  time budget. `tokenBudget` = the soft per-run token ceiling was
+   *  reached before this pass; the run is resumable, never failed. */
+  pauseReason?: "tokenBudget";
 }
