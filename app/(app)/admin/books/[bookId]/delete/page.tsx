@@ -48,6 +48,7 @@ export default async function AdminBookDeletePage({
     "chapters",
     "chapterVersions",
     "reviewRuns",
+    "reviewReadings",
     "findings",
     "deliberations",
   ].map((key) => ({ key, value: counts[key] ?? 0 }));

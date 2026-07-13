@@ -52,6 +52,7 @@ export default async function AdminAuthorDeletePage({
     "chapters",
     "chapterVersions",
     "reviewRuns",
+    "reviewReadings",
     "findings",
     "deliberations",
   ].map((key) => ({ key, value: counts[key] ?? 0 }));
