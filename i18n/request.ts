@@ -1,19 +1,35 @@
 import { getRequestConfig } from "next-intl/server";
 import { resolveInterfaceLocale } from "@/lib/profile/queries";
 import { DEFAULT_INTERFACE_LOCALE } from "@/lib/languages";
+import { localeByCode } from "@/lib/locales";
 
 /**
- * next-intl request configuration — WITHOUT locale routing. The
- * platform's authenticated routes stay unprefixed (/workspace, /admin,
- * /signin); the locale comes from the one server-side resolver
- * (profiles.interface_locale → en-US), never from a URL segment.
+ * next-intl request configuration — WITHOUT locale routing.
+ *
+ * Two callers, two behaviors, one config:
+ *
+ *   1. AUTHENTICATED tree — server components call getLocale()/
+ *      getMessages()/getTranslations(ns) with no explicit locale, so
+ *      `locale` here is undefined and the interface locale is resolved
+ *      from profiles.interface_locale (→ en-US fallback). Unchanged.
+ *
+ *   2. PUBLIC tree — server components pass an explicit locale, e.g.
+ *      getTranslations({ locale: "en-US", namespace: "home" }), which
+ *      arrives here as `locale`. It is honored directly: public
+ *      rendering is deterministic by URL and never consults a private
+ *      profile. Only a registry-known code is accepted; anything else
+ *      falls back to the resolver, so no unvetted value reaches the
+ *      catalog import.
  *
  * Messages fall back to the en-US catalog for any locale without a
- * complete catalog of its own — a missing message must never render
- * blank content or a raw key.
+ * complete catalog — a missing message must never render blank content
+ * or a raw key.
  */
-export default getRequestConfig(async () => {
-  const locale = await resolveInterfaceLocale();
+export default getRequestConfig(async ({ locale: requested }) => {
+  const locale =
+    requested && localeByCode(requested)
+      ? requested
+      : await resolveInterfaceLocale();
 
   let messages;
   try {

@@ -18,6 +18,8 @@
  * silently rewrite one regional variant into another.
  */
 
+import { accountLocaleCodes, DEFAULT_LOCALE } from "@/lib/locales";
+
 export interface LanguageDefinition {
   /** The stored BCP 47 tag — the identifier, never displayed alone. */
   tag: string;
@@ -44,20 +46,42 @@ export const SELECTABLE_LANGUAGES: LanguageDefinition[] = [
   { tag: "es", label: "Spanish", instructionName: "Spanish" },
 ];
 
-/** Interface locales a user may choose for the platform chrome.
- *  A language appears here only when its complete, ratified catalog
- *  exists (docs/globalization/). Labels are endonyms — a language
- *  selector names each language in itself, by convention. es-419 is an
- *  INTERNAL PILOT: selectable on the Account page, not publicly
- *  marketed. Distinct from SELECTABLE_LANGUAGES (manuscript
- *  languages): a manuscript may be in Spanish while the interface
- *  remains English, and vice versa. */
-export const INTERFACE_LOCALES: LanguageDefinition[] = [
-  { tag: "en-US", label: "English (United States)", instructionName: "English" },
-  { tag: "es-419", label: "Español (Latinoamérica)", instructionName: "Latin American Spanish" },
-];
+/** Model-facing and selector metadata for each interface locale. The
+ *  SET of interface locales is owned by lib/locales.ts (the central
+ *  registry); this map only adds what the registry does not carry —
+ *  the account-selector label (kept as-is to avoid a visual change to
+ *  the Account page) and the instructionName used inside model
+ *  prompts. A registry locale without an entry here is a programming
+ *  error surfaced by the interface-locale verification. */
+const INTERFACE_LOCALE_META: Record<
+  string,
+  { label: string; instructionName: string }
+> = {
+  "en-US": { label: "English (United States)", instructionName: "English" },
+  "es-419": {
+    label: "Español (Latinoamérica)",
+    instructionName: "Latin American Spanish",
+  },
+};
 
-export const DEFAULT_INTERFACE_LOCALE = "en-US";
+/** Interface locales a user may choose for the platform chrome.
+ *  DERIVED from the central locale registry (accountLocaleCodes) so
+ *  there is one source of truth for which locales exist; this module
+ *  contributes only the model-facing instructionName and the selector
+ *  label. es-419 is an INTERNAL PILOT (authenticated-pilot in the
+ *  registry): selectable on the Account page, not publicly marketed.
+ *  Distinct from SELECTABLE_LANGUAGES (manuscript languages). */
+export const INTERFACE_LOCALES: LanguageDefinition[] = accountLocaleCodes().map(
+  (tag) => {
+    const meta = INTERFACE_LOCALE_META[tag] ?? {
+      label: tag,
+      instructionName: tag,
+    };
+    return { tag, label: meta.label, instructionName: meta.instructionName };
+  },
+);
+
+export const DEFAULT_INTERFACE_LOCALE = DEFAULT_LOCALE.code;
 
 /** Tags the platform can already name precisely when it meets them
  *  (stored via variants, historical data, future selectors). */

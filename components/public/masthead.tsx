@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Logo } from "@/components/brand/logo";
 import { MobileNav } from "@/components/public/mobile-nav";
+import { PUBLIC_LOCALE } from "@/lib/locales";
 
 /**
  * The public masthead: the production horizontal lockup, honest
@@ -10,7 +11,10 @@ import { MobileNav } from "@/components/public/mobile-nav";
  * signed-in. Deliberately separate from WorkspaceFrame/AdminFrame.
  */
 export async function PublicMasthead({ signedIn }: { signedIn: boolean }) {
-  const t = await getTranslations("home.nav");
+  const t = await getTranslations({
+    locale: PUBLIC_LOCALE,
+    namespace: "home.nav",
+  });
 
   const items = [
     { href: "/#workshop", label: t("workshop") },

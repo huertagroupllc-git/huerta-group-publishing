@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Logo } from "@/components/brand/logo";
 import { isAuthenticated } from "@/lib/auth/session";
+import { PUBLIC_LOCALE } from "@/lib/locales";
 import { SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/lib/site";
 
 const PROMISE = "Develop books, not just manuscripts.";
@@ -130,7 +131,8 @@ const PRINCIPLE_KEYS = ["authorship", "complete", "deliberate"] as const;
 
 export default async function HomePage() {
   const signedIn = await isAuthenticated();
-  const t = await getTranslations("home");
+  // Bound to the public locale, never the signed-in account locale.
+  const t = await getTranslations({ locale: PUBLIC_LOCALE, namespace: "home" });
 
   const primaryHref = signedIn ? "/workspace" : "/signin";
   const primaryLabel = signedIn ? t("hero.enterWorkshop") : t("hero.signIn");

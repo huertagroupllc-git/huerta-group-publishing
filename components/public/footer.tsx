@@ -1,13 +1,23 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Logo } from "@/components/brand/logo";
+import { PUBLIC_LOCALE } from "@/lib/locales";
 
 /** The public footer: identity, the page's real destinations, one brand
  *  statement, the imprint line. Nothing dead. */
 export async function PublicFooter({ signedIn }: { signedIn: boolean }) {
-  const t = await getTranslations("home.nav");
-  const tFooter = await getTranslations("home.footer");
-  const tCommon = await getTranslations("common");
+  const t = await getTranslations({
+    locale: PUBLIC_LOCALE,
+    namespace: "home.nav",
+  });
+  const tFooter = await getTranslations({
+    locale: PUBLIC_LOCALE,
+    namespace: "home.footer",
+  });
+  const tCommon = await getTranslations({
+    locale: PUBLIC_LOCALE,
+    namespace: "common",
+  });
 
   const link =
     "font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline focus-visible:text-oxblood focus-visible:underline focus-visible:outline-none";
