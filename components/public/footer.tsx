@@ -5,19 +5,20 @@ import { PUBLIC_LOCALE } from "@/lib/locales";
 
 /** The public footer: identity, the page's real destinations, one brand
  *  statement, the imprint line. Nothing dead. */
-export async function PublicFooter({ signedIn }: { signedIn: boolean }) {
-  const t = await getTranslations({
-    locale: PUBLIC_LOCALE,
-    namespace: "home.nav",
-  });
-  const tFooter = await getTranslations({
-    locale: PUBLIC_LOCALE,
-    namespace: "home.footer",
-  });
-  const tCommon = await getTranslations({
-    locale: PUBLIC_LOCALE,
-    namespace: "common",
-  });
+export async function PublicFooter({
+  signedIn,
+  locale = PUBLIC_LOCALE,
+  basePath = "",
+}: {
+  signedIn: boolean;
+  locale?: string;
+  /** Current public root prefix; keeps anchors on the same root. */
+  basePath?: string;
+}) {
+  const t = await getTranslations({ locale, namespace: "home.nav" });
+  const tFooter = await getTranslations({ locale, namespace: "home.footer" });
+  const tCommon = await getTranslations({ locale, namespace: "common" });
+  const home = basePath || "/";
 
   const link =
     "font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline focus-visible:text-oxblood focus-visible:underline focus-visible:outline-none";
@@ -33,13 +34,13 @@ export async function PublicFooter({ signedIn }: { signedIn: boolean }) {
             </p>
           </div>
           <nav aria-label={t("primary")} className="flex flex-col gap-3 pt-1">
-            <Link href="/#workshop" className={link}>
+            <Link href={`${home}#workshop`} className={link}>
               {t("workshop")}
             </Link>
-            <Link href="/#how-it-works" className={link}>
+            <Link href={`${home}#how-it-works`} className={link}>
               {t("howItWorks")}
             </Link>
-            <Link href="/#about" className={link}>
+            <Link href={`${home}#about`} className={link}>
               {t("about")}
             </Link>
             <Link

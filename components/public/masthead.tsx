@@ -10,16 +10,30 @@ import { PUBLIC_LOCALE } from "@/lib/locales";
  * session-aware action — Sign in for visitors, Workspace for the
  * signed-in. Deliberately separate from WorkspaceFrame/AdminFrame.
  */
-export async function PublicMasthead({ signedIn }: { signedIn: boolean }) {
+export async function PublicMasthead({
+  signedIn,
+  locale = PUBLIC_LOCALE,
+  basePath = "",
+}: {
+  signedIn: boolean;
+  /** The public locale this masthead renders in. */
+  locale?: string;
+  /** URL prefix of the current public root ("" for /, "/es" for the
+   *  Spanish preview) — keeps in-page anchors on the SAME root, never
+   *  leaking to another locale's homepage. */
+  basePath?: string;
+}) {
   const t = await getTranslations({
-    locale: PUBLIC_LOCALE,
+    locale,
     namespace: "home.nav",
   });
 
+  // Anchor base: the current root's home path. "" → "/", "/es" → "/es".
+  const home = basePath || "/";
   const items = [
-    { href: "/#workshop", label: t("workshop") },
-    { href: "/#how-it-works", label: t("howItWorks") },
-    { href: "/#about", label: t("about") },
+    { href: `${home}#workshop`, label: t("workshop") },
+    { href: `${home}#how-it-works`, label: t("howItWorks") },
+    { href: `${home}#about`, label: t("about") },
   ];
   const authHref = signedIn ? "/workspace" : "/signin";
   const authLabel = signedIn ? t("workspace") : t("signIn");
@@ -28,7 +42,7 @@ export async function PublicMasthead({ signedIn }: { signedIn: boolean }) {
     <header className="border-b border-rule bg-paper-bright">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-4 sm:px-8">
         <Link
-          href="/"
+          href={home}
           className="shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-oxblood"
         >
           {/* The lockup names the company; the link needs no extra text. */}

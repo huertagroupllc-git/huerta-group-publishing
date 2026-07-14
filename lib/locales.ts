@@ -115,7 +115,11 @@ export const LOCALE_REGISTRY: readonly LocaleDefinition[] = [
     dir: "ltr",
     catalog: () => import("@/messages/es-419.json"),
     intlLocale: "es-419",
-    releaseState: "authenticated-pilot",
+    // Phase M2: a public PREVIEW — /es renders in Spanish, noindex, kept
+    // out of the sitemap, hreflang, and the public language selector, while
+    // still selectable on the Account page. A public launch is not
+    // approved; M3 flips this to public-launched.
+    releaseState: "public-preview",
   },
 ] as const;
 

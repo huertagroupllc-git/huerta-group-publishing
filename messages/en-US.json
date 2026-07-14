@@ -173,6 +173,12 @@
     },
     "footer": {
       "statement": "An editorial house with a memory — a dedicated space where books are developed, refined, and kept."
+    },
+    "meta": {
+      "promise": "Develop books, not just manuscripts.",
+      "ogSubtitle": "An Author Operating System",
+      "description": "Huerta Group Publishing is an Author Operating System — an editorial environment for developing a book from discovery through review and revision, with the author's voice preserved and every version kept. Not an AI writer: an editorial house with a memory.",
+      "ogAlt": "Huerta Group Publishing — Develop books, not just manuscripts."
     }
   },
   "author": {

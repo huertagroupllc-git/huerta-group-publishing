@@ -173,6 +173,12 @@
     },
     "footer": {
       "statement": "Una casa editorial con memoria — un espacio dedicado donde los libros se desarrollan, se refinan y se conservan."
+    },
+    "meta": {
+      "promise": "Desarrolle libros, no solo manuscritos.",
+      "ogSubtitle": "Un sistema operativo para autores",
+      "description": "Huerta Group Publishing es un sistema operativo para autores — un entorno editorial para desarrollar un libro desde el descubrimiento hasta la revisión y la corrección, conservando la voz del autor y cada versión. No es un escritor de IA: es una casa editorial con memoria.",
+      "ogAlt": "Huerta Group Publishing — Desarrolle libros, no solo manuscritos."
     }
   },
   "author": {
