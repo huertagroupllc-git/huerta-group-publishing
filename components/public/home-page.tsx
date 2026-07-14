@@ -160,9 +160,11 @@ export async function PublicHomePage({ locale }: { locale: string }) {
   return (
     <div>
       {/* ---- Editorial hero: text beside the approved still-life ---- */}
-      <section
-        aria-labelledby="hero-heading"
-        className="mx-auto grid max-w-6xl items-center gap-x-14 gap-y-12 px-6 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1fr_1.15fr] lg:gap-x-16 lg:py-24"
+      {/* overflow-hidden clips the image's right-edge bleed (below) so the
+          page never scrolls horizontally. */}
+      <section aria-labelledby="hero-heading" className="overflow-hidden">
+      <div
+        className="mx-auto grid max-w-6xl items-center gap-x-12 gap-y-12 px-6 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1fr_1.2fr] lg:gap-x-12 lg:py-24"
       >
         <div>
           <GoldEyebrow>{t("hero.eyebrow")}</GoldEyebrow>
@@ -203,16 +205,23 @@ export async function PublicHomePage({ locale }: { locale: string }) {
             The LCP element: `priority`, and the container's min-heights
             reserve space so there is no CLS. A higher-resolution photograph
             can replace the file with no structural change. */}
-        <div className="hero-fade relative min-h-[20rem] w-full overflow-hidden sm:min-h-[26rem] lg:min-h-[34rem]">
+        {/* Larger, more immersive photographic field: on desktop the image
+            column is wider AND extends past the container's right edge to
+            the viewport edge — `calc(100% + right-padding + half the
+            centered outer margin)`, guarded by `max(0px, …)` so it never
+            overflows at ≤1152px. Height and the left-edge ivory fade are
+            unchanged. */}
+        <div className="hero-fade relative min-h-[20rem] w-full overflow-hidden sm:min-h-[26rem] lg:min-h-[34rem] lg:w-[calc(100%_+_2rem_+_max(0px,(100vw_-_72rem)/2))]">
           <Image
             src="/brand/hero-desk.jpg"
             alt={t("hero.imageAlt")}
             fill
             priority
-            sizes="(min-width: 1024px) 44rem, 100vw"
+            sizes="(min-width: 1024px) 54rem, 100vw"
             className="object-cover object-center"
           />
         </div>
+      </div>
       </section>
 
       {/* ---- The life of a book ---- */}
