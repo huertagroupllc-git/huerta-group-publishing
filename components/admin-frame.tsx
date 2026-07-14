@@ -8,6 +8,11 @@ import { AdminNav } from "@/components/admin-nav";
  * Related to the Workspace, operationally distinct — denser navigation,
  * the same paper, ink, oxblood, and hairline rules.
  *
+ * On mobile the closed masthead is just the full logo + MENU: the section
+ * links move into the shared mobile menu (AdminNav is desktop-only), and
+ * the page's own eyebrow + title identify Administration — so no redundant
+ * "Administration" label is stacked beside the logo.
+ *
  * This is presentational only; access to every admin route is enforced
  * server-side in app/admin/layout.tsx and the middleware.
  */
@@ -18,20 +23,15 @@ export function AdminFrame({
   email: string;
   children: React.ReactNode;
 }) {
-  const tNav = useTranslations("navigation");
   const tShell = useTranslations("admin.shell");
   return (
     <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-10 sm:px-8">
       <header className="pt-5">
         <AuthMasthead
           email={email}
+          accountHref="/workspace/account"
           mode="admin"
           showModeSwitch
-          context={
-            <span className="font-sans text-xs text-ink-faint">
-              {tNav("administration")}
-            </span>
-          }
         />
         <AdminNav />
       </header>

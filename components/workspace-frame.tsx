@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { AuthMasthead } from "@/components/auth-masthead";
+import { AuthBreadcrumbs } from "@/components/auth-breadcrumbs";
 import { sessionIsStaff } from "@/lib/auth/session";
 
 interface Crumb {
@@ -8,9 +8,10 @@ interface Crumb {
   label: string;
 }
 
-/** Shared editorial frame for every workspace page: masthead, hairline
- *  rules, sign-out, imprint footer. Staff also see the Workspace ⁄
- *  Administration mode switch. */
+/** Shared editorial frame for every workspace page: masthead, contextual
+ *  breadcrumbs (a subordinate row below the masthead, never inside it),
+ *  sign-out, imprint footer. Staff also see the Workspace ⁄ Administration
+ *  mode switch. */
 export async function WorkspaceFrame({
   email,
   breadcrumbs = [],
@@ -24,22 +25,6 @@ export async function WorkspaceFrame({
 }) {
   const staff = await sessionIsStaff();
   const t = await getTranslations("common");
-  const crumbs =
-    breadcrumbs.length > 0 ? (
-      <>
-        {breadcrumbs.map((crumb) => (
-          <span key={crumb.href} className="font-sans text-xs text-ink-faint">
-            /{" "}
-            <Link
-              href={crumb.href}
-              className="underline-offset-4 hover:text-oxblood hover:underline"
-            >
-              {crumb.label}
-            </Link>
-          </span>
-        ))}
-      </>
-    ) : null;
   return (
     <div
       className={`mx-auto flex min-h-screen ${wide ? "max-w-5xl" : "max-w-3xl"} flex-col px-6 py-10 sm:px-8`}
@@ -48,10 +33,11 @@ export async function WorkspaceFrame({
         <AuthMasthead
           email={email}
           emailHref="/workspace/account"
+          accountHref="/workspace/account"
           mode="workspace"
           showModeSwitch={staff}
-          context={crumbs}
         />
+        <AuthBreadcrumbs crumbs={breadcrumbs} />
       </header>
 
       <main className="flex-1 py-14">{children}</main>

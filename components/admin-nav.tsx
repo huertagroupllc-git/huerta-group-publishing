@@ -28,7 +28,7 @@ export function AdminNav() {
   return (
     <nav
       aria-label={tNav("adminSections")}
-      className="rule -mx-1 mt-4 flex flex-wrap gap-x-5 gap-y-1 overflow-x-auto pt-3"
+      className="rule -mx-1 mt-4 hidden flex-wrap gap-x-5 gap-y-1 overflow-x-auto pt-3 sm:flex"
     >
       {ADMIN_SECTIONS.map((s) => {
         const active =

@@ -21,6 +21,13 @@
     "administration": "Administration",
     "account": "Account",
     "adminSections": "Administration sections",
+    "menu": "Menu",
+    "closeMenu": "Close menu",
+    "menuLabel": "Application menu",
+    "breadcrumb": "Breadcrumb",
+    "backTo": "Back to {label}",
+    "areaHeading": "Area",
+    "accountHeading": "Account",
     "pagination": "Pagination"
   },
   "auth": {
