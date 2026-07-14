@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { ErrorNote } from "@/components/workspace-frame";
+import { ErrorNote, NoticeNote } from "@/components/workspace-frame";
 
 /**
  * Presentation boundary for server-action messages: resolves a stable
@@ -34,4 +34,25 @@ export async function ActionMessage({
 
   const tShared = await getTranslations("errors.shared");
   return <ErrorNote message={tShared("somethingWentWrong")} />;
+}
+
+/**
+ * Presentation boundary for a success notice: resolves a stable notice
+ * code against one catalog namespace and renders a calm confirmation. An
+ * unknown code renders nothing (a confirmation is never surfaced as raw
+ * text), so a stray query value can't fabricate a success message.
+ */
+export async function ActionNotice({
+  code,
+  params,
+  namespace,
+}: {
+  code?: string;
+  params?: Record<string, string>;
+  namespace: string;
+}) {
+  if (!code) return null;
+  const t = await getTranslations(namespace);
+  if (!t.has(code)) return null;
+  return <NoticeNote message={t(code, params ?? {})} />;
 }

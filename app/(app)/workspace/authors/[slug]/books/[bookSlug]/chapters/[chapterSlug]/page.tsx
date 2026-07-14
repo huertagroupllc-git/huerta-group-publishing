@@ -38,6 +38,7 @@ import {
 } from "@/lib/findings/queries";
 import { severityLabel } from "@/lib/findings/types";
 import { getChapterRoom, type ChapterRoom } from "@/lib/manuscript/queries";
+import { resolveAuthorSettings } from "@/lib/settings/resolve";
 import { assembleAuthorContext } from "@/lib/memory/assemble";
 import { countWords } from "@/lib/manuscript/types";
 import {
@@ -164,6 +165,12 @@ export default async function ChapterRoomPage({
   const libraryPath = `/workspace/authors/${author.slug}/books/${book.slug}/chapters`;
   const roomPath = `${libraryPath}/${chapter.slug}`;
 
+  // Author manuscript-display defaults (no Book override in S2). The
+  // default triplet is a CSS no-op, so the room renders pixel-identically.
+  // Display only — stored manuscript text is never modified.
+  const md = (await resolveAuthorSettings(author.id)).effective
+    .manuscriptDisplay;
+
   const draft = versions.find((v) => v.status === "draft") ?? null;
   const active =
     versions.find((v) => v.id === chapter.active_version_id) ?? null;
@@ -199,7 +206,11 @@ export default async function ChapterRoomPage({
     >
       <div className="grid gap-12 md:grid-cols-[minmax(0,1fr)_230px]">
         {/* The manuscript */}
-        <div>
+        <div
+          data-manuscript-font={md.manuscript_font}
+          data-editor-text-scale={md.editor_text_scale}
+          data-writing-measure={md.writing_measure}
+        >
           <p className="eyebrow">{book.title}</p>
           <h1 className="mt-2 font-display text-4xl tracking-tight">
             {chapter.title}

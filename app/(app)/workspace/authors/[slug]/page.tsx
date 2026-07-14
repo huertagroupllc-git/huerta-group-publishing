@@ -80,6 +80,7 @@ export default async function AuthorStudyPage({
   const locale = await getLocale();
   const t = await getTranslations("author.study");
   const tAuthor = await getTranslations("author");
+  const tSettings = await getTranslations("settings.author");
   const tCommon = await getTranslations("common");
   const tDoc = await getTranslations("memory.document");
   const tRoster = await getTranslations("workspace.authors");
@@ -108,9 +109,12 @@ export default async function AuthorStudyPage({
             {author.bio}
           </p>
         ) : null}
-        <div className="mt-5">
+        <div className="mt-5 flex items-baseline gap-6">
           <ActionLink href={`/workspace/authors/${author.slug}/edit`}>
             {t("editRecord")}
+          </ActionLink>
+          <ActionLink href={`/workspace/authors/${author.slug}/settings`}>
+            {tSettings("link")}
           </ActionLink>
         </div>
       </header>

@@ -913,5 +913,143 @@
     "es-ES": "Spanish (Spain)",
     "fr": "French",
     "pt-BR": "Portuguese (Brazil)"
+  },
+  "settings": {
+    "common": {
+      "intro": "These values are the defaults for this author's books. A book may later override them. Review-affecting settings apply only to future reviews — past reviews are never changed.",
+      "inEffect": "In effect",
+      "save": "Save",
+      "reset": "Reset to default"
+    },
+    "source": {
+      "system": "Using system default",
+      "author": "Author override"
+    },
+    "account": {
+      "heading": "Display & comfort",
+      "note": "How the platform itself appears to you. These preferences affect the interface only — never a manuscript's typeface, size, or measure, and never editorial review.",
+      "save": "Save display preferences",
+      "reducedMotion": {
+        "label": "Reduce motion",
+        "description": "Shorten or remove non-essential interface transitions. Functional loading feedback is always kept."
+      },
+      "interfaceTextScale": {
+        "label": "Interface text size",
+        "description": "The size of the platform's own menus, labels, and instructions. This never changes any manuscript."
+      }
+    },
+    "author": {
+      "title": "Author Settings",
+      "metaTitle": "Settings",
+      "link": "Settings",
+      "intro": "Editorial and manuscript-display defaults for {name}. These become the defaults for this author's books; a book may later override them.",
+      "editorialHeading": "Editorial defaults",
+      "editorialNote": "How future reviews of this author's books read by default. Tone changes phrasing, not truth or severity; optional observations affect only optional Notes; emphasis asks for extra attention without disabling any area. Current reviews and past findings never change.",
+      "displayHeading": "Manuscript display",
+      "displayNote": "How manuscript prose is presented while reading and drafting. Display only — the stored text is never changed.",
+      "saveEditorial": "Save editorial defaults",
+      "saveDisplay": "Save manuscript display"
+    },
+    "editorial": {
+      "tone": {
+        "label": "Editorial tone",
+        "description": "Tone changes the phrasing of feedback — never the facts, the severity, or which issues are raised."
+      },
+      "observations": {
+        "label": "Optional observations",
+        "description": "“Omit” hides only optional Note-level observations. Suggestions and Concerns are always included when valid."
+      },
+      "emphasis": {
+        "label": "Editorial emphasis",
+        "description": "Ask for extra attention in up to two areas. Emphasis never disables any other review area.",
+        "max": "Choose up to two."
+      },
+      "regionalConvention": {
+        "label": "Regional convention",
+        "description": "A regional editorial style for spelling and usage. This does not change the manuscript's language."
+      },
+      "includeAuthorMemory": {
+        "label": "Include Author Memory in reviews",
+        "description": "When on, eligible future reviews consider the Author Memory. Current reviews and past findings never change."
+      }
+    },
+    "display": {
+      "manuscriptFont": {
+        "label": "Manuscript typeface",
+        "description": "The typeface for reading and drafting manuscript prose. Display only — the stored text never changes."
+      },
+      "editorTextScale": {
+        "label": "Editor text size",
+        "description": "The size of manuscript text while drafting. Display only."
+      },
+      "writingMeasure": {
+        "label": "Writing measure",
+        "description": "The line length of manuscript prose. Display only."
+      }
+    },
+    "values": {
+      "interface_text_scale": {
+        "default": "Standard",
+        "large": "Large"
+      },
+      "editorial_tone": {
+        "gentle": "Gentle",
+        "balanced": "Balanced",
+        "direct": "Direct"
+      },
+      "optional_observations": {
+        "include": "Include",
+        "omit": "Omit"
+      },
+      "editorial_emphasis": {
+        "structure": "Structure",
+        "continuity": "Continuity",
+        "pacing": "Pacing",
+        "prose_clarity": "Prose clarity",
+        "repetition": "Repetition",
+        "subject_consistency": "Subject consistency",
+        "thematic_coherence": "Thematic coherence",
+        "reader_promise": "Reader promise"
+      },
+      "regional_convention": {
+        "neutral": "Neutral",
+        "en-US": "English (United States)",
+        "en-GB": "English (United Kingdom)",
+        "es-419": "Spanish (Latin America)",
+        "es-MX": "Spanish (Mexico)",
+        "es-ES": "Spanish (Spain)"
+      },
+      "manuscript_font": {
+        "serif": "Serif",
+        "sans": "Sans-serif"
+      },
+      "editor_text_scale": {
+        "s": "Small",
+        "m": "Medium",
+        "l": "Large"
+      },
+      "writing_measure": {
+        "narrow": "Narrow",
+        "standard": "Standard",
+        "wide": "Wide"
+      },
+      "include_author_memory": {
+        "true": "Include",
+        "false": "Omit"
+      }
+    },
+    "notices": {
+      "accountSettingsSaved": "Display preferences saved.",
+      "authorEditorialSettingsSaved": "Editorial defaults saved.",
+      "authorDisplaySettingsSaved": "Manuscript display saved.",
+      "settingReset": "Reset to the default."
+    },
+    "errors": {
+      "invalidSettingValue": "That value isn't allowed.",
+      "invalidEditorialEmphasis": "That emphasis selection isn't valid.",
+      "tooManyEmphasisAreas": "Choose at most two emphasis areas.",
+      "settingsSaveFailed": "The settings could not be saved. Please try again.",
+      "settingsNotAuthorized": "You don't have access to these settings."
+    }
   }
 }

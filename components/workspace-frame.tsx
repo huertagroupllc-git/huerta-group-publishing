@@ -92,3 +92,18 @@ export function ErrorNote({ message }: { message?: string }) {
     </p>
   );
 }
+
+/** Calm confirmation line for a successful save, fed by the ?notice=
+ *  search param. Announced politely (role="status"); never the error
+ *  accent — a quiet ink line with a hairline marker. */
+export function NoticeNote({ message }: { message?: string }) {
+  if (!message) return null;
+  return (
+    <p
+      className="border-l-2 border-oxblood pl-3 font-sans text-sm text-ink-soft"
+      role="status"
+    >
+      {message}
+    </p>
+  );
+}

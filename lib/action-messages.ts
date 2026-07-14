@@ -58,3 +58,39 @@ export function actionMessageFromQuery(
   const field = typeof query[FIELD_KEY] === "string" ? query[FIELD_KEY] : undefined;
   return { code, params, field };
 }
+
+/**
+ * Success confirmations travel the same way as error messages but on a
+ * SEPARATE query key (`notice`), so a page can surface a calm confirmation
+ * without ever colliding with — or being styled as — an error. Same stable-
+ * code discipline: the code is the translation key; only plain params ride
+ * along.
+ */
+const NOTICE_KEY = "notice";
+const NOTICE_PARAM_PREFIX = "n_";
+
+/** Serialize a success notice onto a redirect path's query string. */
+export function withActionNotice(path: string, msg: ActionMessage): string {
+  const [base, existing] = path.split("?");
+  const sp = new URLSearchParams(existing ?? "");
+  sp.set(NOTICE_KEY, msg.code);
+  for (const [k, v] of Object.entries(msg.params ?? {})) {
+    sp.set(`${NOTICE_PARAM_PREFIX}${k}`, v);
+  }
+  return `${base}?${sp.toString()}`;
+}
+
+/** Recover a success notice from a page's resolved searchParams. */
+export function actionNoticeFromQuery(
+  query: Record<string, string | string[] | undefined>,
+): ActionMessage | null {
+  const code = query[NOTICE_KEY];
+  if (typeof code !== "string" || !code) return null;
+  const params: Record<string, string> = {};
+  for (const [k, v] of Object.entries(query)) {
+    if (k.startsWith(NOTICE_PARAM_PREFIX) && typeof v === "string") {
+      params[k.slice(NOTICE_PARAM_PREFIX.length)] = v;
+    }
+  }
+  return { code, params };
+}

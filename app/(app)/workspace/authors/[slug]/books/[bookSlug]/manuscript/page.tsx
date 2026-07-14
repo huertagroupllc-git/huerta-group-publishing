@@ -10,6 +10,7 @@ import {
   assembleManuscript,
   type AssembledManuscript,
 } from "@/lib/manuscript/assemble";
+import { resolveAuthorSettings } from "@/lib/settings/resolve";
 import { createClient } from "@/lib/supabase/server";
 
 export async function generateMetadata({
@@ -67,6 +68,11 @@ export default async function ReadingCopyPage({
   const { author, book } = study;
   const bookPath = `/workspace/authors/${author.slug}/books/${book.slug}`;
 
+  // Author manuscript-display defaults, resolved server-side (no Book
+  // override in S2). The default triplet is a CSS no-op, so the reading
+  // copy renders pixel-identically. Display only — content never changes.
+  const md = (await resolveAuthorSettings(author.id)).effective.manuscriptDisplay;
+
   let chapterNumber = 0;
   const t = await getTranslations("manuscript.readingCopy");
   const tOverview = await getTranslations("manuscript.overview");
@@ -75,7 +81,11 @@ export default async function ReadingCopyPage({
   const tCommon = await getTranslations("common");
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-6 py-10 sm:px-8">
+    <div
+      className="mx-auto flex min-h-screen max-w-2xl flex-col px-6 py-10 sm:px-8"
+      data-manuscript-font={md.manuscript_font}
+      data-writing-measure={md.writing_measure}
+    >
       {/* Running information: one quiet line, nothing more. */}
       <header className="rule flex items-baseline justify-between pt-5">
         <p className="eyebrow">{t("title")}</p>

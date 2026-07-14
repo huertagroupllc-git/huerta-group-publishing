@@ -85,6 +85,40 @@
     background-color: var(--color-oxblood);
     color: var(--color-paper);
   }
+
+  /* --- Account chrome display preferences (Author Settings S2) ---------
+     Applied as data attributes on the authenticated <html> from the
+     resolved Account settings. The DEFAULT values (reduced motion off,
+     "default" text scale) emit NO rule, so the default appearance is
+     pixel-identical. These affect the CHROME only — never a manuscript. */
+
+  /* Reduce motion: shorten non-essential TRANSITIONS only. Animations are
+     left intact so functional loading feedback is never removed. We also
+     honor the OS-level preference regardless of the account setting. */
+  html[data-reduced-motion="true"] *,
+  html[data-reduced-motion="true"] *::before,
+  html[data-reduced-motion="true"] *::after {
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.001ms !important;
+      transition-delay: 0ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Interface text size: one bounded, gentle enlargement of the chrome.
+     A modest root bump (17px) keeps every rem-based size proportional
+     without damaging Administration density, clipping layout, or shrinking
+     touch targets. "default" emits no rule. */
+  html[data-interface-text-scale="large"] {
+    font-size: 106.25%;
+  }
 }
 
 @layer components {
@@ -101,6 +135,29 @@
   /* Hairline rule, the structural device of the whole interface */
   .rule {
     border-top: 1px solid var(--color-rule);
+  }
+
+  /* --- Author manuscript-display preferences (Author Settings S2) ------
+     Applied as data attributes on the nearest stable manuscript container
+     from the resolved Author settings. Values come ONLY from the validated
+     resolver. The DEFAULT triplet (serif / m / standard) emits NO rule, so
+     manuscript rendering is pixel-identical to before. Display only — the
+     stored manuscript text is never modified. */
+  [data-manuscript-font="sans"] .doc-prose,
+  [data-manuscript-font="sans"] textarea#content {
+    font-family: var(--font-sans);
+  }
+  [data-writing-measure="narrow"] .doc-prose {
+    max-width: 52ch;
+  }
+  [data-writing-measure="wide"] .doc-prose {
+    max-width: 80ch;
+  }
+  [data-editor-text-scale="s"] textarea#content {
+    font-size: 1rem;
+  }
+  [data-editor-text-scale="l"] textarea#content {
+    font-size: 1.3125rem;
   }
 
   /* Typeset prose for rendered memory documents (Markdown output).

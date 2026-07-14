@@ -913,5 +913,143 @@
     "es-ES": "Español (España)",
     "fr": "Francés",
     "pt-BR": "Portugués (Brasil)"
+  },
+  "settings": {
+    "common": {
+      "intro": "Estos valores son los predeterminados para los libros de este autor. Un libro podrá anularlos más adelante. Los ajustes que afectan la revisión se aplican solo a revisiones futuras; las revisiones anteriores nunca cambian.",
+      "inEffect": "En uso",
+      "save": "Guardar",
+      "reset": "Restablecer al predeterminado"
+    },
+    "source": {
+      "system": "Usando el predeterminado del sistema",
+      "author": "Anulación del autor"
+    },
+    "account": {
+      "heading": "Visualización y comodidad",
+      "note": "Cómo se te presenta la plataforma. Estas preferencias afectan solo a la interfaz; nunca la tipografía, el tamaño ni la medida de un manuscrito, y nunca la revisión editorial.",
+      "save": "Guardar preferencias de visualización",
+      "reducedMotion": {
+        "label": "Reducir el movimiento",
+        "description": "Acorta o elimina las transiciones no esenciales de la interfaz. La señal funcional de carga siempre se mantiene."
+      },
+      "interfaceTextScale": {
+        "label": "Tamaño del texto de la interfaz",
+        "description": "El tamaño de los menús, las etiquetas y las instrucciones de la plataforma. Nunca cambia ningún manuscrito."
+      }
+    },
+    "author": {
+      "title": "Ajustes del autor",
+      "metaTitle": "Ajustes",
+      "link": "Ajustes",
+      "intro": "Valores predeterminados editoriales y de visualización del manuscrito para {name}. Se convierten en los predeterminados de los libros de este autor; un libro podrá anularlos más adelante.",
+      "editorialHeading": "Predeterminados editoriales",
+      "editorialNote": "Cómo se leen de forma predeterminada las revisiones futuras de los libros de este autor. El tono cambia la redacción, no la verdad ni la gravedad; las observaciones opcionales afectan solo a las Notas opcionales; el énfasis pide atención adicional sin desactivar ningún área. Las revisiones actuales y los hallazgos anteriores nunca cambian.",
+      "displayHeading": "Visualización del manuscrito",
+      "displayNote": "Cómo se presenta la prosa del manuscrito al leer y redactar. Solo visualización: el texto almacenado nunca se modifica.",
+      "saveEditorial": "Guardar predeterminados editoriales",
+      "saveDisplay": "Guardar visualización del manuscrito"
+    },
+    "editorial": {
+      "tone": {
+        "label": "Tono editorial",
+        "description": "El tono cambia la redacción de los comentarios, nunca los hechos, la gravedad ni los problemas que se señalan."
+      },
+      "observations": {
+        "label": "Observaciones opcionales",
+        "description": "«Omitir» oculta solo las observaciones opcionales a nivel de Nota. Las Sugerencias y las Inquietudes siempre se incluyen cuando corresponden."
+      },
+      "emphasis": {
+        "label": "Énfasis editorial",
+        "description": "Pide atención adicional en hasta dos áreas. El énfasis nunca desactiva ninguna otra área de revisión.",
+        "max": "Elige hasta dos."
+      },
+      "regionalConvention": {
+        "label": "Convención regional",
+        "description": "Un estilo editorial regional de ortografía y uso. No cambia el idioma del manuscrito."
+      },
+      "includeAuthorMemory": {
+        "label": "Incluir la Memoria del Autor en las revisiones",
+        "description": "Cuando está activo, las revisiones futuras que correspondan consideran la Memoria del Autor. Las revisiones actuales y los hallazgos anteriores nunca cambian."
+      }
+    },
+    "display": {
+      "manuscriptFont": {
+        "label": "Tipografía del manuscrito",
+        "description": "La tipografía para leer y redactar la prosa del manuscrito. Solo visualización: el texto almacenado nunca cambia."
+      },
+      "editorTextScale": {
+        "label": "Tamaño del texto del editor",
+        "description": "El tamaño del texto del manuscrito al redactar. Solo visualización."
+      },
+      "writingMeasure": {
+        "label": "Medida de escritura",
+        "description": "El largo de línea de la prosa del manuscrito. Solo visualización."
+      }
+    },
+    "values": {
+      "interface_text_scale": {
+        "default": "Estándar",
+        "large": "Grande"
+      },
+      "editorial_tone": {
+        "gentle": "Suave",
+        "balanced": "Equilibrado",
+        "direct": "Directo"
+      },
+      "optional_observations": {
+        "include": "Incluir",
+        "omit": "Omitir"
+      },
+      "editorial_emphasis": {
+        "structure": "Estructura",
+        "continuity": "Continuidad",
+        "pacing": "Ritmo",
+        "prose_clarity": "Claridad de la prosa",
+        "repetition": "Repetición",
+        "subject_consistency": "Coherencia temática de los sujetos",
+        "thematic_coherence": "Coherencia temática",
+        "reader_promise": "Promesa al lector"
+      },
+      "regional_convention": {
+        "neutral": "Neutral",
+        "en-US": "Inglés (Estados Unidos)",
+        "en-GB": "Inglés (Reino Unido)",
+        "es-419": "Español (Latinoamérica)",
+        "es-MX": "Español (México)",
+        "es-ES": "Español (España)"
+      },
+      "manuscript_font": {
+        "serif": "Con serifa",
+        "sans": "Sin serifa"
+      },
+      "editor_text_scale": {
+        "s": "Pequeño",
+        "m": "Mediano",
+        "l": "Grande"
+      },
+      "writing_measure": {
+        "narrow": "Estrecha",
+        "standard": "Estándar",
+        "wide": "Ancha"
+      },
+      "include_author_memory": {
+        "true": "Incluir",
+        "false": "Omitir"
+      }
+    },
+    "notices": {
+      "accountSettingsSaved": "Preferencias de visualización guardadas.",
+      "authorEditorialSettingsSaved": "Predeterminados editoriales guardados.",
+      "authorDisplaySettingsSaved": "Visualización del manuscrito guardada.",
+      "settingReset": "Restablecido al predeterminado."
+    },
+    "errors": {
+      "invalidSettingValue": "Ese valor no está permitido.",
+      "invalidEditorialEmphasis": "Esa selección de énfasis no es válida.",
+      "tooManyEmphasisAreas": "Elige como máximo dos áreas de énfasis.",
+      "settingsSaveFailed": "No se pudieron guardar los ajustes. Inténtalo de nuevo.",
+      "settingsNotAuthorized": "No tienes acceso a estos ajustes."
+    }
   }
 }

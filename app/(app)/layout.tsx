@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { FONT_VARIABLE_CLASS } from "@/lib/root/fonts";
 import { dirForLocale } from "@/lib/locales";
+import { currentAccountDisplay } from "@/lib/settings/account-display";
 import { siteUrl, SITE_NAME } from "@/lib/site";
 import "../globals.css";
 
@@ -34,8 +35,18 @@ export default async function AppRootLayout({
 }) {
   const locale = await getLocale();
   const messages = await getMessages();
+  // Account chrome display, resolved server-side so assistive tech and
+  // first paint receive the correct comfort settings with no flash. These
+  // attributes govern the CHROME only; the default triplet is a no-op, so
+  // the default appearance is unchanged. Never editorial, never manuscript.
+  const account = await currentAccountDisplay();
   return (
-    <html lang={locale} dir={dirForLocale(locale)}>
+    <html
+      lang={locale}
+      dir={dirForLocale(locale)}
+      data-reduced-motion={String(account.reduced_motion)}
+      data-interface-text-scale={account.interface_text_scale}
+    >
       <body className={FONT_VARIABLE_CLASS}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
