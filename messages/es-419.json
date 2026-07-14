@@ -1082,6 +1082,27 @@
         "label": "Diccionario de Conceptos en las revisiones",
         "description": "Cuando se incluye, las revisiones futuras que correspondan consideran el Diccionario de Conceptos de este libro. Solo visualización y contexto de revisión: la Constitución del Libro y el Esquema Maestro siguen siendo obligatorios."
       }
+    },
+    "reviewSummary": {
+      "heading": "Preferencias editoriales para esta revisión",
+      "note": "Estas preferencias efectivas se congelan cuando comienza la revisión y se aplican solo a esta sesión. Cambiar los ajustes más adelante afecta a las revisiones futuras; nunca cambia esta sesión ni los hallazgos anteriores.",
+      "responseLanguage": "Idioma de respuesta",
+      "tone": "Tono editorial",
+      "observations": "Observaciones opcionales",
+      "emphasis": "Atención adicional",
+      "regionalConvention": "Convención regional",
+      "authorMemory": "Memoria del Autor",
+      "conceptDictionary": "Diccionario de Conceptos",
+      "alwaysIncluded": "Siempre incluido",
+      "alwaysIncludedValue": "la Constitución del Libro, el Esquema Maestro, el manuscrito actual y el Registro Editorial obligatorio",
+      "none": "Ninguna",
+      "included": "Incluida",
+      "omitted": "Omitida",
+      "schemaVersion": "Versión de ajustes",
+      "historicalDefault": "Comportamiento predeterminado histórico: esta sesión es anterior a las preferencias editoriales.",
+      "source": "Origen",
+      "bookSettingsLink": "Ajustes del libro",
+      "adminHeading": "Preferencias editoriales (congeladas)"
     }
   }
 }

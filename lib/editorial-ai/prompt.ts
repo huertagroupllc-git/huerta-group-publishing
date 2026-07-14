@@ -4,6 +4,11 @@ import {
   FINDING_SEVERITIES,
 } from "@/lib/findings/types";
 import { languageDefinition } from "@/lib/languages";
+import {
+  DEFAULT_REVIEW_SETTINGS,
+  reviewSettingsPromptSection,
+  type ReviewSettingsSnapshot,
+} from "@/lib/editorial-ai/review-settings";
 
 /**
  * Prompt assembly — one consistent shape for every reviewer. The
@@ -12,15 +17,23 @@ import { languageDefinition } from "@/lib/languages";
  * its own rules.
  *
  * Prompt language and OUTPUT language are separate concepts: the laws
- * and reviewer rules are authored in English, and law 9 — composed
+ * and reviewer rules are authored in English, and law 10 — composed
  * from the run's frozen response_language — names the language the
  * response must be written in. Every reviewer inherits it; no reviewer
  * states its own language rule.
+ *
+ * Reviewer v3 / Settings S4: the frozen effective settings snapshot
+ * contributes fixed, versioned EDITORIAL PREFERENCES blocks (tone,
+ * optional observations, emphasis, regional convention) plus a canonical
+ * disclosure. Those blocks are part of the fingerprint, so equal effective
+ * settings yield an identical prompt while a provenance-only difference
+ * does not. Passing no snapshot uses the system-default (v3 baseline).
  */
 
 export function buildSystemPrompt(
   def: ReviewerDefinition,
   responseLanguage = "en",
+  settings: ReviewSettingsSnapshot = DEFAULT_REVIEW_SETTINGS,
 ): string {
   const severities = FINDING_SEVERITIES.map(
     (s) => `- "${s.value}" (${s.label}): ${s.meaning}`,
@@ -42,12 +55,15 @@ export function buildSystemPrompt(
     `4. Severities, exactly these values:\n${severities}`,
     `5. Categories, exactly one of: ${categories}.`,
     `6. Write in a calm publishing register: no scores, no grades, no exclamation marks, no praise padding. Titles are short; explanations are a few clear sentences.`,
-    `7. Raise at most ${def.maxFindingsPerPass} findings in this pass.`,
-    `8. When a block titled THE EDITORIAL RECORD is provided, you are the same editor returning for another pass: treat its adopted judgments as settled editorial positions extending the governing documents; the concerns it lists as open are already on the record; do not re-raise what is listed as open, resolved, or set aside unless the text has materially changed since, or your finding is meaningfully distinct. The record never forbids genuinely new findings. When text a recorded concern pointed at HAS changed since, evaluate the CURRENT text against the underlying requirement before writing anything: if the revision repairs the concern, that is a clean pass — a successful repair is acknowledged by silence, never re-raised; raise a finding only when the current text still fails, and then say plainly which of these it is — partially repaired, displaced elsewhere, or unresolved — explaining the residue in terms of the revised text (quote the revised text, not the old). A repair that answers the recorded concern is never re-raised merely because you would have revised it differently.`,
-    `9. Write your response in ${language}: every finding title, every explanation, and the summary. The exception is quotations — law 3 stands in every language: excerpts and quoted constitution clauses are copied verbatim in the language they were written in, never translated. Keep proper nouns as the author wrote them unless the finding specifically discusses them. Editorial history provided in context may be in another language; read it as it stands, and still write your response in ${language}.`,
+    `7. Speech inside quotation marks of any convention — dialogue, quoted remarks, testimony, cited speech — belongs to its speaker, never to the book's narrative voice. A quoted person may address anyone in any register; that is their voice, not the manuscript's. Evaluate register, address, and tone conventions only against the narration itself, and flag a voice violation only where the governing narrative voice breaks the convention the governing documents establish. Deliberate code-switching and character voice are the author's craft.`,
+    `8. Raise at most ${def.maxFindingsPerPass} findings in this pass.`,
+    `9. When a block titled THE EDITORIAL RECORD is provided, you are the same editor returning for another pass: treat its adopted judgments as settled editorial positions extending the governing documents; the concerns it lists as open are already on the record; do not re-raise what is listed as open, resolved, or set aside unless the text has materially changed since, or your finding is meaningfully distinct. The record never forbids genuinely new findings. When text a recorded concern pointed at HAS changed since, evaluate the CURRENT text against the underlying requirement before writing anything: if the revision repairs the concern, that is a clean pass — a successful repair is acknowledged by silence, never re-raised; raise a finding only when the current text still fails, and then say plainly which of these it is — repaired (then silence, not a finding), partially repaired, residual (the requirement still fails in the revised text), displaced elsewhere (the defect moved, cite the new location), unresolved (the text did not materially change), or newly introduced — and quote the CURRENT text in every non-silent case. Re-raising the original wording of a repaired passage is an error: the old text no longer exists. A repair that answers the recorded concern is never re-raised merely because you would have revised it differently.`,
+    `10. Write your response in ${language}: every finding title, every explanation, and the summary. The exception is quotations — law 3 stands in every language: excerpts and quoted constitution clauses are copied verbatim in the language they were written in, never translated. Keep proper nouns as the author wrote them unless the finding specifically discusses them. Editorial history provided in context may be in another language; read it as it stands, and still write your response in ${language}.`,
     ``,
     `${def.name} rules:`,
     ...def.instructions.map((rule, i) => `${i + 1}. ${rule}`),
+    ``,
+    reviewSettingsPromptSection(settings),
     ``,
     `Respond with JSON matching the provided schema. The optional "summary" is one short paragraph — your editorial cover note for this pass, in the same calm register.`,
   ].join("\n");

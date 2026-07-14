@@ -33,6 +33,11 @@ import {
   resolveTokenBudget,
 } from "@/lib/editorial-ai/model-policy";
 import type { ReviewRunReadingInsert } from "@/lib/review/readings";
+import { resolveBookSettings } from "@/lib/settings/resolve";
+import {
+  HISTORICAL_DEFAULT_REVIEW_SETTINGS,
+  parseStoredReviewSettings,
+} from "@/lib/editorial-ai/review-settings";
 
 /**
  * The shared review-run engine. A review is many sequential model calls;
@@ -187,7 +192,26 @@ export async function startReview(
   // change to the book affects future runs only.
   const responseLanguage =
     normalizeLanguageTag(material.book.language ?? "en") ?? "en";
-  const systemPrompt = buildSystemPrompt(def, responseLanguage);
+
+  // The effective editorial settings (Reviewer v3 / Settings S4), resolved
+  // ONCE through the centralized resolver (system → author → book) and
+  // frozen into this run's provenance below. Continue Review reads the
+  // frozen snapshot, never the live settings, so a later preference change
+  // cannot rewrite an existing run. The snapshot steers the editorial-
+  // preferences prompt blocks and optional-context inclusion; it carries
+  // effective VALUES only, no display or account settings.
+  const reviewSettings = (
+    await resolveBookSettings(material.book.id)
+  ).reviewSnapshot();
+  // Defensive: a malformed snapshot must never be frozen into a run.
+  if (!parseStoredReviewSettings(reviewSettings)) {
+    throw new ReviewNotPossibleError(
+      "startFailed",
+      "The review could not be started: the effective settings snapshot was malformed.",
+    );
+  }
+  material.reviewSettings = reviewSettings;
+  const systemPrompt = buildSystemPrompt(def, responseLanguage, reviewSettings);
 
   // A killed chunk leaves the run pending; recover any such corpse first
   // so it neither blocks a fresh review nor is mistaken for one running.
@@ -225,6 +249,10 @@ export async function startReview(
     model: policy.manuscript,
     reviewer: def.type,
     response_language: responseLanguage,
+    // The frozen effective editorial settings (Reviewer v3 / Settings S4).
+    // Effective values + provenance; reused verbatim on continuation and
+    // displayed read-only in Administration — never re-resolved live.
+    settings: reviewSettings,
     author_memory: Object.fromEntries(
       material.authorMemory.documents.map((d) => [d.docType, d.versionId]),
     ),
@@ -341,7 +369,26 @@ export async function continueReview(
   const responseLanguage =
     normalizeLanguageTag((claimed.response_language as string | null) ?? "en") ??
     "en";
-  const systemPrompt = buildSystemPrompt(def, responseLanguage);
+
+  // The editorial settings are read from the run's FROZEN provenance —
+  // never re-resolved from live Author/Book settings, so a preference
+  // change since this run began cannot alter its continuation. A historical
+  // run created before S4 has no frozen settings; it uses the historical-
+  // default compatibility snapshot (pre-settings behavior: system-default
+  // register, and NO optional Author Memory or Concept Dictionary), never a
+  // synthetic snapshot written back and never today's live values. The same
+  // applies if a stored snapshot is somehow malformed.
+  const cvEarly = (claimed.context_versions ?? {}) as Record<string, unknown>;
+  const frozenSettings =
+    parseStoredReviewSettings(cvEarly.settings) ??
+    HISTORICAL_DEFAULT_REVIEW_SETTINGS;
+  if (!parseStoredReviewSettings(cvEarly.settings)) {
+    console.warn(
+      `[editorial-ai] ${def.type} continuation: run ${claimed.id} has no valid frozen settings; using historical-default compatibility (pre-settings behavior)`,
+    );
+  }
+  material.reviewSettings = frozenSettings;
+  const systemPrompt = buildSystemPrompt(def, responseLanguage, frozenSettings);
 
   // The model policy is read from the run's FROZEN provenance — never
   // re-resolved from the current environment, so a config change since

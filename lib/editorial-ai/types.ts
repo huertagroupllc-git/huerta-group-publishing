@@ -7,6 +7,7 @@ import type { BookContext } from "@/lib/books/assemble";
 import type { AuthorRecord } from "@/lib/memory/types";
 import type { BookRecord } from "@/lib/books/types";
 import type { ReadingRole } from "@/lib/review/readings";
+import type { ReviewSettingsSnapshot } from "@/lib/settings/types";
 
 /**
  * Editorial AI infrastructure — the engine every reviewer shares.
@@ -88,6 +89,13 @@ export interface ReviewMaterial {
   chapters: ChapterMaterial[];
   /** The editorial history every reviewer returns to. */
   editorialRecord: EditorialRecord;
+  /** The FROZEN effective editorial settings for this run (Reviewer v3 /
+   *  Settings S4): resolved once at creation, reused verbatim on
+   *  continuation, never re-resolved from live settings. Governs the
+   *  editorial-preferences prompt blocks and optional-context inclusion.
+   *  Optional so pure fixtures may omit it (buildPasses defaults to the
+   *  system baseline). */
+  reviewSettings?: ReviewSettingsSnapshot;
 }
 
 /** One model call: its context and, when chapter-scoped, its anchor. */

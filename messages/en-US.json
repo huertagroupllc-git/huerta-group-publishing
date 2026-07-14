@@ -1082,6 +1082,27 @@
         "label": "Concept Dictionary in reviews",
         "description": "When included, eligible future reviews consider this book's Concept Dictionary. Display and review context only — the Book Constitution and Master Outline remain required."
       }
+    },
+    "reviewSummary": {
+      "heading": "Editorial preferences for this review",
+      "note": "These effective preferences are frozen when the review begins and apply to this run only. Changing settings later affects future reviews; it never changes this run or any past findings.",
+      "responseLanguage": "Response language",
+      "tone": "Editorial tone",
+      "observations": "Optional observations",
+      "emphasis": "Additional attention",
+      "regionalConvention": "Regional convention",
+      "authorMemory": "Author Memory",
+      "conceptDictionary": "Concept Dictionary",
+      "alwaysIncluded": "Always included",
+      "alwaysIncludedValue": "Book Constitution, Master Outline, the current manuscript, and the required Editorial Record",
+      "none": "None",
+      "included": "Included",
+      "omitted": "Omitted",
+      "schemaVersion": "Settings version",
+      "historicalDefault": "Historical default behavior — this run predates editorial preferences.",
+      "source": "Source",
+      "bookSettingsLink": "Book Settings",
+      "adminHeading": "Editorial preferences (frozen)"
     }
   }
 }

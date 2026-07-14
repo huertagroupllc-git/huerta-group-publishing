@@ -6,6 +6,7 @@ import {
   reviewRunStatusLabel,
 } from "@/lib/admin/queries";
 import { getLocale, getTranslations } from "next-intl/server";
+import { ReviewPreferences } from "@/components/review-preferences";
 import { REVIEW_TYPE_LABELS, reviewTypeLabel } from "@/lib/findings/types";
 import {
   languageDefinition,
@@ -57,6 +58,7 @@ export default async function AdminReviewRunDetailPage({
   const tStatus = await getTranslations("status");
   const tShell = await getTranslations("admin.shell.nav");
   const tLangs = await getTranslations("languages");
+  const tSummary = await getTranslations("settings.reviewSummary");
   const langName = (tag: string) => {
     const n = normalizeLanguageTag(tag) ?? "en";
     const name = tLangs.has(n) ? tLangs(n) : languageDefinition(n).label;
@@ -188,6 +190,25 @@ export default async function AdminReviewRunDetailPage({
               value={run.provenance.perRunCap ?? "—"}
             />
           </dl>
+
+          {/* Frozen editorial preferences (Reviewer v3 / Settings S4),
+              read-only from context_versions.settings — never re-resolved
+              from live settings. A run created before S4 shows the
+              historical-default label instead of fabricated values. */}
+          <div className="mt-8">
+            <h3 className="eyebrow">{tSummary("adminHeading")}</h3>
+            {run.provenance.settings ? (
+              <ReviewPreferences
+                snapshot={run.provenance.settings}
+                responseLanguage={run.responseLanguage}
+                showProvenance
+              />
+            ) : (
+              <p className="mt-3 max-w-prose font-sans text-sm italic text-ink-soft">
+                {tSummary("historicalDefault")}
+              </p>
+            )}
+          </div>
         </section>
       ) : null}
 

@@ -5,10 +5,12 @@ import type {
   ValidatedFinding,
 } from "@/lib/editorial-ai/types";
 import {
+  authorMemoryBlock,
   bookMemoryBlock,
   chapterSummariesBlock,
   chapterTextBlock,
 } from "@/lib/editorial-ai/context";
+import { DEFAULT_REVIEW_SETTINGS } from "@/lib/editorial-ai/review-settings";
 
 /**
  * Constitution Review — the first editorial reviewer.
@@ -37,7 +39,7 @@ const TRACEABILITY = `Every finding must quote, inside quotation marks within it
 
 const CONTINUITY_CHECK = `Manuscript integrity — continuity (manuscript pass only, category "continuity", severity at most "suggestion"): compare the chapters against each other for statements that are individually plausible but collectively incompatible — facts, chronology, sequence, promises, stated outcomes, or how a person, subject, or concept behaves from one chapter to the next. Quote both conflicting passages verbatim when practical, naming the chapters they come from, and raise ONE consolidated finding per contradiction — never one fragment per chapter. Use the Constitution or Master Outline as supporting context when they establish the expectation. A true contradiction is two claims that cannot both hold; intentional development, deepening nuance, or mere variation in wording is not a contradiction and is not a finding.`;
 
-const REPETITION_CHECK = `Manuscript integrity — repetition (manuscript pass only, category "repetition", severity at most "suggestion"): notice substantially repeated claims, examples serving the same purpose, repeated conclusions, or metaphors and explanations that recur across chapters without deepening meaning — recurrence a reader of the whole feels even though each chapter alone reads cleanly. Protect the deliberate: thematic motifs, purposeful refrains, structural callbacks, necessary terminology, and pedagogical repetition that advances understanding are the author's craft, not defects. Raise redundancy ONCE at manuscript scope, quote representative recurrences with their chapters, and explain why the recurrence is redundant rather than merely repeated. If you cannot say what the repetition fails to add, do not raise it.`;
+const REPETITION_CHECK = `Manuscript integrity — repetition (manuscript pass only, category "repetition", severity at most "suggestion"): notice substantially repeated claims, examples serving the same purpose, repeated conclusions, or metaphors and explanations that recur across chapters without deepening meaning — recurrence a reader of the whole feels even though each chapter alone reads cleanly. Protect the deliberate: thematic motifs, purposeful refrains, structural callbacks, necessary terminology, and pedagogical repetition that advances understanding are the author's craft, not defects. Raise redundancy ONCE at manuscript scope, quote representative recurrences with their chapters, and explain why the recurrence is redundant rather than merely repeated. If you cannot say what the repetition fails to add, do not raise it. A recurrence that performs the same argumentative work in the same words on each appearance is redundancy even when it looks like a motif; a motif earns its repetitions by carrying the thought forward. When the recurrences are verbatim or near-verbatim and the surrounding purpose does not change, raise the single manuscript-level finding rather than staying silent. When in doubt about authorial intent, raise it once as a Note and say what the recurrence fails to add.`;
 
 /** The manuscript-wide pass reads every chapter in full up to this
  *  budget (~100k tokens of text); beyond it, the pass falls back to
@@ -49,7 +51,7 @@ const FULL_TEXT_BUDGET_CHARS = 400_000;
 export const constitutionReview: ReviewerDefinition = {
   type: "constitution",
   name: "Constitution Review",
-  version: 2,
+  version: 3,
   purpose:
     "To read the completed manuscript against the book's own stated intent — the Book Constitution — and say, in writing, where the manuscript honors it and where it has drifted.",
   governingQuestion:
@@ -72,6 +74,27 @@ export const constitutionReview: ReviewerDefinition = {
     if (!constitution) return []; // guarded upstream; defensive here
     const outline = bookMemoryBlock(material, "master_outline");
     const shared = [constitution, ...(outline ? [outline] : [])];
+
+    // Reviewer v3 / Settings S4 — OPTIONAL context, gated by the run's
+    // FROZEN effective settings (defaulting to the v3 baseline for pure
+    // fixtures). The Book Constitution and Master Outline above are always
+    // required and can never be gated here. Omission happens during
+    // assembly: when a flag is false the block is simply absent — no
+    // placeholder implies it was included. These blocks join the whole-
+    // manuscript pass; the disclosure of these decisions lives in the
+    // system prompt (and thus the fingerprint).
+    const settings = material.reviewSettings ?? DEFAULT_REVIEW_SETTINGS;
+    const optionalContext: string[] = [];
+    if (settings.include_author_memory) {
+      for (const doc of material.authorMemory.documents) {
+        const block = authorMemoryBlock(material, doc.docType);
+        if (block) optionalContext.push(block);
+      }
+    }
+    if (settings.include_concept_dictionary) {
+      const conceptDictionary = bookMemoryBlock(material, "concept_dictionary");
+      if (conceptDictionary) optionalContext.push(conceptDictionary);
+    }
 
     // The manuscript pass runs FIRST: one editorial letter begins with
     // the whole, and its systemic findings become already-noted
@@ -96,7 +119,12 @@ export const constitutionReview: ReviewerDefinition = {
     const opening = material.chapters[0];
     const closing = material.chapters[material.chapters.length - 1];
 
-    const manuscriptBlocks = [passIntro, ...shared, chapterSummariesBlock(material)];
+    const manuscriptBlocks = [
+      passIntro,
+      ...shared,
+      ...optionalContext,
+      chapterSummariesBlock(material),
+    ];
     if (fullText) {
       for (const chapter of material.chapters) {
         manuscriptBlocks.push(
@@ -131,7 +159,7 @@ export const constitutionReview: ReviewerDefinition = {
       label: `${chapter.positionLabel} — ${chapter.title}`,
       role: "chapter",
       contextBlocks: [
-        `=== THIS PASS ===\n\nYou are reading one chapter. The manuscript-wide patterns are already on the record above. Raise only what is LOCAL to this chapter: materially distinct from the systemic findings, unique to this chapter, or chapter-specific evidence a systemic finding cannot carry. A chapter that merely exemplifies an already-raised pattern is a clean pass.`,
+        `=== THIS PASS ===\n\nYou are reading one chapter. The manuscript-wide patterns are already on the record above. Raise only what is LOCAL to this chapter: materially distinct from the systemic findings, unique to this chapter, or chapter-specific evidence a systemic finding cannot carry. A chapter that merely exemplifies an already-raised pattern is a clean pass. If a manuscript-wide finding already names this chapter's instance of a pattern, this chapter contributes nothing new by restating it — a clean pass is the correct result. Raise a chapter finding only for a defect that exists independently of every manuscript-wide finding on the record; never split one book-wide issue into chapter copies.`,
         ...shared,
         chapter.frameBlock,
         chapterTextBlock(chapter),

@@ -2,6 +2,8 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import type { BookStatus } from "@/lib/books/types";
+import { parseStoredReviewSettings } from "@/lib/editorial-ai/review-settings";
+import type { ReviewSettingsSnapshot } from "@/lib/settings/types";
 
 /**
  * Read-only operational queries for Administration. Every query runs as
@@ -538,6 +540,13 @@ export interface AdminRunDetail {
     perPassCap: number | null;
     perRunCap: number | null;
     passCount: number | null;
+    /** The FROZEN editorial settings snapshot (Reviewer v3 / Settings S4),
+     *  read from context_versions.settings — never re-resolved from live
+     *  settings. Null for a historical run created before S4. */
+    settings: ReviewSettingsSnapshot | null;
+    /** True when this run predates S4 (no frozen settings): Administration
+     *  shows "Historical default behavior" rather than fabricated values. */
+    settingsHistorical: boolean;
   } | null;
 }
 
@@ -584,6 +593,10 @@ export async function getAdminReviewRun(
   const cv = (run.context_versions as Row | null) ?? null;
   const caps = cv ? (cv.caps as Row | null) : null;
   const sha = cv ? (cv.prompt_sha256 as string | null) : null;
+  // The frozen settings snapshot, parsed from what the run recorded — never
+  // re-resolved from today's live Author/Book settings. A run created
+  // before S4 has no snapshot: settingsHistorical marks it so.
+  const settings = cv ? parseStoredReviewSettings(cv.settings) : null;
   const provenance = cv
     ? {
         reviewer: (cv.reviewer as string) ?? null,
@@ -592,6 +605,8 @@ export async function getAdminReviewRun(
         perPassCap: (caps?.per_pass as number) ?? null,
         perRunCap: (caps?.per_run as number) ?? null,
         passCount: (cv.pass_count as number) ?? null,
+        settings,
+        settingsHistorical: settings === null,
       }
     : null;
 
