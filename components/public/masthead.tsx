@@ -54,11 +54,23 @@ export async function PublicMasthead({
           className="shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-oxblood"
         >
           {/* The lockup names the company; the link needs no extra text.
-              The full horizontal lockup on every width — merely scaled down
-              on mobile (not swapped for the compact mark) — so the public
-              masthead reads as one brand treatment from phone to desktop. */}
-          <Logo variant="horizontal" height={44} className="hidden sm:block" />
-          <Logo variant="horizontal" height={36} className="sm:hidden" />
+              The full horizontal lockup on every width — never swapped for
+              the compact mark — so the public masthead reads as one brand
+              treatment from phone to desktop.
+
+              Desktop: a prominent brand anchor. `w-auto` preserves the
+              intrinsic aspect while the height steps UP at large/xl widths
+              (54 → 60 → 64px, up to ~+45%) and holds the approved 44px at
+              laptop/tablet so the nav and action never crowd.
+
+              Mobile: only a slight lift (36 → 39px, ~+8%) — the approved
+              one-row balance with MENU is preserved. */}
+          <Logo
+            variant="horizontal"
+            height={64}
+            className="hidden w-auto sm:block sm:h-11 lg:h-[3.375rem] xl:h-[3.75rem] 2xl:h-16"
+          />
+          <Logo variant="horizontal" height={39} className="sm:hidden" />
         </Link>
 
         <nav

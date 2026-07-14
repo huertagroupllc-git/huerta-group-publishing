@@ -47,7 +47,10 @@ export async function PublicFooter({
               href={signedIn ? "/workspace" : "/signin"}
               className={`${link} text-oxblood`}
             >
-              {signedIn ? t("workspace") : t("signIn")}
+              {/* Public-facing invitation (same session-aware destination as
+                  the masthead action): a signed-in visitor enters the
+                  Workshop → /workspace; a visitor signs in → /signin. */}
+              {signedIn ? t("enterWorkshop") : t("signIn")}
             </Link>
           </nav>
         </div>

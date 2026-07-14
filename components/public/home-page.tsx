@@ -376,15 +376,24 @@ export async function PublicHomePage({ locale }: { locale: string }) {
         className="border-t border-rule"
       >
         <div className="mx-auto max-w-6xl px-6 py-24 text-center sm:px-8 sm:py-28">
-          {/* A small decorative brand mark — the wordmark elsewhere names
-              the company, so the mark here is decorative to assistive tech.
+          {/* The section emblem — a deliberate standalone HG monogram, not a
+              tiny icon: enlarged to a brand signature (~1.9× the prior size
+              on desktop, proportionally on mobile) and drawn closer to the
+              heading so it reads as connected. The wordmark elsewhere names
+              the company, so the mark is decorative to assistive tech.
+              Frameless — no card, circle, border, shadow, or background.
               Replaceable via the Logo component when final artwork lands. */}
           <div className="flex justify-center">
-            <Logo variant="mark" height={44} decorative />
+            <Logo
+              variant="mark"
+              height={84}
+              decorative
+              className="h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem] lg:h-[5.25rem] lg:w-[5.25rem]"
+            />
           </div>
           <h2
             id="cta-heading"
-            className="mx-auto mt-8 max-w-2xl font-display text-3xl tracking-tight text-ink sm:text-4xl lg:text-5xl"
+            className="mx-auto mt-6 max-w-2xl font-display text-3xl tracking-tight text-ink sm:text-4xl lg:text-5xl"
           >
             {t("cta.heading")}
           </h2>
