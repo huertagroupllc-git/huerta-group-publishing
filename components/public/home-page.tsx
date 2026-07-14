@@ -191,11 +191,14 @@ export async function PublicHomePage({ locale }: { locale: string }) {
               on the right and sits INSIDE the container's right gutter, never
               the browser edge. `overflow-hidden` guards horizontal scroll. --- */}
       <section aria-labelledby="hero-heading" className="overflow-hidden">
-        <div className="mx-auto grid max-w-[86rem] items-stretch gap-y-12 px-6 py-16 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,43fr)_minmax(0,57fr)] lg:gap-x-12 lg:py-20 2xl:max-w-[100rem]">
-          {/* Left editorial content — vertically centered; capped so its
-              width and wrapping are unchanged. */}
+        <div className="mx-auto grid max-w-[86rem] items-stretch gap-y-12 px-6 py-16 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,45fr)_minmax(0,55fr)] lg:gap-x-12 lg:py-20 2xl:max-w-[100rem]">
+          {/* Left editorial content — vertically centered. The wrapper cap
+              is a generous editorial measure (not a narrow sidebar): the
+              headline gets room to wrap deliberately (e.g. "Every book
+              begins" / "somewhere.") where the viewport allows, while the
+              lead keeps its own comfortable max-w-xl reading measure. */}
           <div className="flex flex-col justify-center">
-            <div className="lg:max-w-[30rem]">
+            <div className="lg:max-w-[40rem]">
               <GoldEyebrow>{t("hero.eyebrow")}</GoldEyebrow>
               <h1
                 id="hero-heading"
