@@ -95,7 +95,7 @@ function QuillGlyph() {
  *  reads on its own. */
 function HeroDivider({ statement }: { statement: string }) {
   return (
-    <div className="mt-12 inline-block max-w-full">
+    <div className="mt-10 inline-block max-w-full lg:mt-12">
       <div aria-hidden className="flex items-center gap-5">
         <span className="h-px flex-1 bg-gold-rule" />
         <QuillGlyph />
@@ -191,55 +191,53 @@ export async function PublicHomePage({ locale }: { locale: string }) {
               on the right and sits INSIDE the container's right gutter, never
               the browser edge. `overflow-hidden` guards horizontal scroll. --- */}
       <section aria-labelledby="hero-heading" className="overflow-hidden">
-        <div className="mx-auto grid max-w-[86rem] items-stretch gap-y-12 px-6 sm:px-8 lg:grid-cols-[minmax(0,45fr)_minmax(0,55fr)] lg:gap-x-12 2xl:max-w-[100rem]">
-          {/* Left editorial content — vertically centered. The wrapper cap
-              is a generous editorial measure (not a narrow sidebar): the
-              headline gets room to wrap deliberately (e.g. "Every book
-              begins" / "somewhere.") where the viewport allows, while the
-              lead keeps its own comfortable max-w-xl reading measure.
-              This column OWNS the hero's vertical rhythm: its padding gives
-              the text breathing room AND sets the hero's height, so the
-              image column can stretch to fill the full field between the
-              top and bottom rules (no ivory gap above/below the photo). */}
-          <div className="flex flex-col justify-center py-16 sm:py-20 lg:py-20">
-            <div className="lg:max-w-[40rem]">
-              <GoldEyebrow>{t("hero.eyebrow")}</GoldEyebrow>
-              <h1
-                id="hero-heading"
-                className="mt-6 font-display text-[2.75rem] leading-[1.05] tracking-tight text-ink sm:text-6xl lg:text-[4.25rem]"
-              >
-                {t("hero.headline1")}
-                <span className="mt-2 block font-serif italic text-brand-gold">
-                  {t("hero.headline2")}
-                </span>
-              </h1>
-              <p className="mt-8 max-w-xl font-serif text-lg leading-relaxed text-ink-soft sm:text-xl">
-                {t("hero.lead")}
-              </p>
-              <div className="mt-10 flex flex-wrap items-center gap-5">
-                <PrimaryLink href={primaryHref}>{primaryLabel}</PrimaryLink>
-                <QuietLink href="#how-it-works">{t("hero.seeHow")}</QuietLink>
-              </div>
-              {!signedIn ? (
-                <p className="mt-4 font-sans text-xs text-ink-faint">
-                  {t("hero.accessNote")}
-                </p>
-              ) : null}
-              <HeroDivider statement={t("hero.fromIdea")} />
+        {/* Mobile: ONE stacked editorial column — copy → CTAs → photograph →
+            ornament/positioning statement — with moderate, deliberate gaps
+            (no large empty band; the photo reads as part of the hero).
+            Desktop (lg+): the approved two-column spread — the editorial copy
+            and the closing ornament stack in the left column while the
+            photograph fills the right column's full height between the hero's
+            top and bottom rules. The ornament is a SEPARATE grid child (not
+            nested in the copy) so, with responsive order alone, it can close
+            the stacked hero AFTER the photo on mobile yet still sit beneath
+            the CTAs on desktop — one shared composition, no duplicated copy. */}
+        <div className="mx-auto flex max-w-[86rem] flex-col px-6 sm:px-8 lg:grid lg:grid-cols-[minmax(0,45fr)_minmax(0,55fr)] lg:items-stretch lg:gap-x-12 2xl:max-w-[100rem]">
+          {/* 1 — editorial copy + CTAs. Its top padding sets the hero's upper
+              breathing room; the max-w cap is a generous editorial measure so
+              the headline wraps deliberately where the viewport allows. */}
+          <div className="pt-12 sm:pt-16 lg:col-start-1 lg:row-start-1 lg:max-w-[40rem] lg:pt-20">
+            <GoldEyebrow>{t("hero.eyebrow")}</GoldEyebrow>
+            <h1
+              id="hero-heading"
+              className="mt-6 font-display text-[2.75rem] leading-[1.05] tracking-tight text-ink sm:text-6xl lg:text-[4.25rem]"
+            >
+              {t("hero.headline1")}
+              <span className="mt-2 block font-serif italic text-brand-gold">
+                {t("hero.headline2")}
+              </span>
+            </h1>
+            <p className="mt-8 max-w-xl font-serif text-lg leading-relaxed text-ink-soft sm:text-xl">
+              {t("hero.lead")}
+            </p>
+            <div className="mt-10 flex flex-wrap items-center gap-5">
+              <PrimaryLink href={primaryHref}>{primaryLabel}</PrimaryLink>
+              <QuietLink href="#how-it-works">{t("hero.seeHow")}</QuietLink>
             </div>
+            {!signedIn ? (
+              <p className="mt-4 font-sans text-xs text-ink-faint">
+                {t("hero.accessNote")}
+              </p>
+            ) : null}
           </div>
 
-          {/* The large still-life field: a grid cell within the container's
-              right gutter (never the viewport edge). Frameless; its left edge
-              fades into the ivory (`.hero-fade`, desktop-only). On desktop it
-              `self-stretch`es to the full hero height (set by the text column)
-              so its top and bottom edges meet the hero's rules — the top rule
-              (masthead hairline) and the bottom rule (the next section's
-              border) read as the structural edges of the photographic field,
-              with no inner vertical padding and no frame. `lg:min-h-0` drops
-              the fixed floor so the fill is purely structural; the mobile
-              min-heights keep a safe stacked height below the text. */}
-          <div className="hero-fade relative min-h-[20rem] w-full self-stretch overflow-hidden sm:min-h-[26rem] lg:min-h-0">
+          {/* 2 — the still-life. Mobile: a clean full-width editorial photo at
+              the asset's natural aspect ratio (no forced crop, no fade — the
+              `.hero-fade` mask is desktop-only) that follows the CTAs with a
+              moderate gap. Desktop: frameless, inside the container's right
+              gutter (never the viewport edge); `self-stretch` across both left
+              rows fills the full hero height so its top and bottom edges meet
+              the hero's rules, its left edge fading into the ivory. */}
+          <div className="hero-fade relative mt-10 aspect-[846/874] w-full overflow-hidden sm:mt-12 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:mt-0 lg:aspect-auto lg:min-h-0 lg:self-stretch">
             <Image
               src="/brand/hero-desk.jpg"
               alt={t("hero.imageAlt")}
@@ -248,6 +246,17 @@ export async function PublicHomePage({ locale }: { locale: string }) {
               sizes="(min-width: 1536px) 52rem, (min-width: 1024px) 44rem, 100vw"
               className="object-cover object-center"
             />
+          </div>
+
+          {/* 3 — the closing line–quill–line ornament + positioning statement.
+              Mobile: closes the hero directly beneath the photo (a bottom pad
+              gives a clear, proportionate transition into the next section).
+              Desktop: sits at the foot of the left column; its bottom padding
+              sets the hero's lower breathing room — reproducing the approved
+              composition exactly (the copy fills the column, so nothing here
+              shifts the desktop layout). */}
+          <div className="pb-14 sm:pb-16 lg:col-start-1 lg:row-start-2 lg:max-w-[40rem] lg:pb-20">
+            <HeroDivider statement={t("hero.fromIdea")} />
           </div>
         </div>
       </section>

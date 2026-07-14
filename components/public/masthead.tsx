@@ -53,9 +53,12 @@ export async function PublicMasthead({
           href={home}
           className="shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-oxblood"
         >
-          {/* The lockup names the company; the link needs no extra text. */}
+          {/* The lockup names the company; the link needs no extra text.
+              The full horizontal lockup on every width — merely scaled down
+              on mobile (not swapped for the compact mark) — so the public
+              masthead reads as one brand treatment from phone to desktop. */}
           <Logo variant="horizontal" height={44} className="hidden sm:block" />
-          <Logo variant="mark" height={40} className="sm:hidden" />
+          <Logo variant="horizontal" height={36} className="sm:hidden" />
         </Link>
 
         <nav
