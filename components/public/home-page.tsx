@@ -68,19 +68,42 @@ function GoldEyebrow({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** A quill divider: two gold hairlines meeting a small decorative nib. */
-function QuillRule() {
+/** The small decorative gold quill nib (kept modest — the divider's width
+ *  comes from the rules, not the glyph). */
+function QuillGlyph() {
   return (
-    <div aria-hidden className="flex items-center gap-4">
-      <span className="h-px w-16 bg-gold-rule" />
-      <svg width="16" height="16" viewBox="0 0 16 16" className="text-brand-gold">
-        <path
-          d="M13.5 2.5C10 3 6.5 5.5 4.5 9l-2 4.5 4.5-2c3.5-2 6-5.5 6.5-9z"
-          fill="currentColor"
-        />
-        <path d="M5 11l-2.5 2.5" stroke="currentColor" strokeWidth="1" fill="none" />
-      </svg>
-      <span className="h-px w-16 bg-gold-rule" />
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 16 16"
+      aria-hidden
+      className="shrink-0 text-brand-gold"
+    >
+      <path
+        d="M13.5 2.5C10 3 6.5 5.5 4.5 9l-2 4.5 4.5-2c3.5-2 6-5.5 6.5-9z"
+        fill="currentColor"
+      />
+      <path d="M5 11l-2.5 2.5" stroke="currentColor" strokeWidth="1" fill="none" />
+    </svg>
+  );
+}
+
+/** The centered editorial lockup: a line–quill–line ornament sized to the
+ *  positioning statement beneath it (inline-block shrink-wraps to the
+ *  line's width per locale), with the quill precisely centered between two
+ *  equal, flexible gold rules. Decorative to assistive tech; the statement
+ *  reads on its own. */
+function HeroDivider({ statement }: { statement: string }) {
+  return (
+    <div className="mt-12 inline-block max-w-full">
+      <div aria-hidden className="flex items-center gap-5">
+        <span className="h-px flex-1 bg-gold-rule" />
+        <QuillGlyph />
+        <span className="h-px flex-1 bg-gold-rule" />
+      </div>
+      <p className="mt-5 text-center font-sans text-[0.6875rem] uppercase tracking-[0.22em] text-ink-soft">
+        {statement}
+      </p>
     </div>
   );
 }
@@ -189,12 +212,7 @@ export async function PublicHomePage({ locale }: { locale: string }) {
               {t("hero.accessNote")}
             </p>
           ) : null}
-          <div className="mt-12">
-            <QuillRule />
-            <p className="mt-5 font-sans text-[0.6875rem] uppercase tracking-[0.22em] text-ink-soft">
-              {t("hero.fromIdea")}
-            </p>
-          </div>
+          <HeroDivider statement={t("hero.fromIdea")} />
         </div>
 
         {/* The approved writing-desk still-life, larger and frameless: it
