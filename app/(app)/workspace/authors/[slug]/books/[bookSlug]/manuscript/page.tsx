@@ -10,7 +10,7 @@ import {
   assembleManuscript,
   type AssembledManuscript,
 } from "@/lib/manuscript/assemble";
-import { resolveAuthorSettings } from "@/lib/settings/resolve";
+import { resolveBookSettings } from "@/lib/settings/resolve";
 import { createClient } from "@/lib/supabase/server";
 
 export async function generateMetadata({
@@ -68,10 +68,11 @@ export default async function ReadingCopyPage({
   const { author, book } = study;
   const bookPath = `/workspace/authors/${author.slug}/books/${book.slug}`;
 
-  // Author manuscript-display defaults, resolved server-side (no Book
-  // override in S2). The default triplet is a CSS no-op, so the reading
-  // copy renders pixel-identically. Display only — content never changes.
-  const md = (await resolveAuthorSettings(author.id)).effective.manuscriptDisplay;
+  // Effective manuscript display (system → author → book), resolved
+  // server-side so a book override wins. The default triplet is a CSS
+  // no-op, so the reading copy renders pixel-identically. Display only —
+  // content never changes.
+  const md = (await resolveBookSettings(book.id)).effective.manuscriptDisplay;
 
   let chapterNumber = 0;
   const t = await getTranslations("manuscript.readingCopy");

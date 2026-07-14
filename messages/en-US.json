@@ -1036,20 +1036,52 @@
       "include_author_memory": {
         "true": "Include",
         "false": "Omit"
+      },
+      "include_concept_dictionary": {
+        "true": "Include",
+        "false": "Omit"
       }
     },
     "notices": {
       "accountSettingsSaved": "Display preferences saved.",
       "authorEditorialSettingsSaved": "Editorial defaults saved.",
       "authorDisplaySettingsSaved": "Manuscript display saved.",
-      "settingReset": "Reset to the default."
+      "settingReset": "Reset to the default.",
+      "bookEditorialSettingsSaved": "Editorial overrides saved.",
+      "bookDisplaySettingsSaved": "Manuscript display saved.",
+      "bookSettingReset": "Reset to the inherited value."
     },
     "errors": {
       "invalidSettingValue": "That value isn't allowed.",
       "invalidEditorialEmphasis": "That emphasis selection isn't valid.",
       "tooManyEmphasisAreas": "Choose at most two emphasis areas.",
       "settingsSaveFailed": "The settings could not be saved. Please try again.",
-      "settingsNotAuthorized": "You don't have access to these settings."
+      "settingsNotAuthorized": "You don't have access to these settings.",
+      "invalidBookSetting": "That value isn't allowed.",
+      "bookSettingsSaveFailed": "The settings could not be saved. Please try again.",
+      "bookSettingsNotAuthorized": "You don't have access to these settings."
+    },
+    "book": {
+      "title": "Book Settings",
+      "metaTitle": "Settings",
+      "link": "Settings",
+      "intro": "Overrides of {author}'s defaults for {book}. An unset value keeps using the author default.",
+      "editorialHeading": "Editorial overrides",
+      "editorialNote": "How future reviews of this book read, overriding the author defaults. Tone changes phrasing, not truth or severity; optional observations affect only optional Notes; emphasis asks for extra attention without disabling any area. Current reviews and past findings never change.",
+      "reviewContextHeading": "Review context",
+      "reviewContextNote": "Which optional context eligible future reviews consider for this book. The Book Constitution and Master Outline are always required and can never be disabled here; prior findings and repair context are never optional.",
+      "displayHeading": "Manuscript display",
+      "displayNote": "How this book's manuscript prose is presented while reading and drafting. Display only — the stored text is never changed. A book override takes effect immediately on the manuscript surfaces.",
+      "saveEditorial": "Save editorial overrides",
+      "saveDisplay": "Save manuscript display",
+      "inheritOption": "Use the author default",
+      "sourceBook": "Book override",
+      "sourceAuthor": "Using author default",
+      "sourceSystem": "Using system default",
+      "conceptDictionary": {
+        "label": "Concept Dictionary in reviews",
+        "description": "When included, eligible future reviews consider this book's Concept Dictionary. Display and review context only — the Book Constitution and Master Outline remain required."
+      }
     }
   }
 }

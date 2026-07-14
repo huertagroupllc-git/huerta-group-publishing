@@ -1036,20 +1036,52 @@
       "include_author_memory": {
         "true": "Incluir",
         "false": "Omitir"
+      },
+      "include_concept_dictionary": {
+        "true": "Incluir",
+        "false": "Omitir"
       }
     },
     "notices": {
       "accountSettingsSaved": "Preferencias de visualización guardadas.",
       "authorEditorialSettingsSaved": "Predeterminados editoriales guardados.",
       "authorDisplaySettingsSaved": "Visualización del manuscrito guardada.",
-      "settingReset": "Restablecido al predeterminado."
+      "settingReset": "Restablecido al predeterminado.",
+      "bookEditorialSettingsSaved": "Anulaciones editoriales guardadas.",
+      "bookDisplaySettingsSaved": "Visualización del manuscrito guardada.",
+      "bookSettingReset": "Restablecido al valor heredado."
     },
     "errors": {
       "invalidSettingValue": "Ese valor no está permitido.",
       "invalidEditorialEmphasis": "Esa selección de énfasis no es válida.",
       "tooManyEmphasisAreas": "Elige como máximo dos áreas de énfasis.",
       "settingsSaveFailed": "No se pudieron guardar los ajustes. Inténtalo de nuevo.",
-      "settingsNotAuthorized": "No tienes acceso a estos ajustes."
+      "settingsNotAuthorized": "No tienes acceso a estos ajustes.",
+      "invalidBookSetting": "Ese valor no está permitido.",
+      "bookSettingsSaveFailed": "No se pudieron guardar los ajustes. Inténtalo de nuevo.",
+      "bookSettingsNotAuthorized": "No tienes acceso a estos ajustes."
+    },
+    "book": {
+      "title": "Ajustes del libro",
+      "metaTitle": "Ajustes",
+      "link": "Ajustes",
+      "intro": "Anulaciones de los valores predeterminados de {author} para {book}. Un valor sin definir sigue usando el predeterminado del autor.",
+      "editorialHeading": "Anulaciones editoriales",
+      "editorialNote": "Cómo se leen las revisiones futuras de este libro, anulando los valores predeterminados del autor. El tono cambia la redacción, no la verdad ni la gravedad; las observaciones opcionales afectan solo a las Notas opcionales; el énfasis pide atención adicional sin desactivar ningún área. Las revisiones actuales y los hallazgos anteriores nunca cambian.",
+      "reviewContextHeading": "Contexto de revisión",
+      "reviewContextNote": "Qué contexto opcional consideran las revisiones futuras que correspondan para este libro. La Constitución del Libro y el Esquema Maestro siempre son obligatorios y nunca pueden desactivarse aquí; los hallazgos anteriores y el contexto de corrección nunca son opcionales.",
+      "displayHeading": "Visualización del manuscrito",
+      "displayNote": "Cómo se presenta la prosa del manuscrito de este libro al leer y redactar. Solo visualización: el texto almacenado nunca se modifica. Una anulación del libro surte efecto de inmediato en las superficies del manuscrito.",
+      "saveEditorial": "Guardar anulaciones editoriales",
+      "saveDisplay": "Guardar visualización del manuscrito",
+      "inheritOption": "Usar el predeterminado del autor",
+      "sourceBook": "Anulación del libro",
+      "sourceAuthor": "Usando el predeterminado del autor",
+      "sourceSystem": "Usando el predeterminado del sistema",
+      "conceptDictionary": {
+        "label": "Diccionario de Conceptos en las revisiones",
+        "description": "Cuando se incluye, las revisiones futuras que correspondan consideran el Diccionario de Conceptos de este libro. Solo visualización y contexto de revisión: la Constitución del Libro y el Esquema Maestro siguen siendo obligatorios."
+      }
     }
   }
 }

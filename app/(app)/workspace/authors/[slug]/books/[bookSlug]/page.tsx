@@ -113,6 +113,7 @@ export default async function BookStudyPage({
   const tDoc = await getTranslations("book.memoryDocuments");
   const tAuthorDoc = await getTranslations("memory.document");
   const tAuthorStudy = await getTranslations("author.study");
+  const tSettings = await getTranslations("settings.book");
   const tStatus = await getTranslations("status.book");
   const tOverview = await getTranslations("manuscript.overview");
   const tReading = await getTranslations("manuscript.readingCopy");
@@ -315,11 +316,16 @@ export default async function BookStudyPage({
           </dd>
         </dl>
 
-        <div className="mt-6">
+        <div className="mt-6 flex items-baseline gap-6">
           <ActionLink
             href={`/workspace/authors/${author.slug}/books/${book.slug}/edit`}
           >
             {tAuthorStudy("editRecord")}
+          </ActionLink>
+          <ActionLink
+            href={`/workspace/authors/${author.slug}/books/${book.slug}/settings`}
+          >
+            {tSettings("link")}
           </ActionLink>
         </div>
       </header>

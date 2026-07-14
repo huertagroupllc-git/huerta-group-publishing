@@ -350,3 +350,267 @@ export async function resetAuthorSettingsSection(formData: FormData) {
 
   redirect(withActionNotice(path, { code: "settingReset" }));
 }
+
+// =========================================================================
+// Book settings (S3) — explicit OVERRIDES of the author defaults. Same
+// discipline as the author actions; ownership is owns_book (RLS). A book
+// row also carries the book-only include_concept_dictionary. Book actions
+// NEVER touch the author row.
+// =========================================================================
+
+interface BookSettingsState {
+  editorial_tone: string | null;
+  optional_observations: string | null;
+  editorial_emphasis: string[] | null;
+  regional_convention: string | null;
+  include_author_memory: boolean | null;
+  include_concept_dictionary: boolean | null;
+  display: Record<string, unknown>;
+}
+
+/** Resolve a book id through RLS — null means the caller does not own it
+ *  (or it does not exist). The page passes the id; RLS is the boundary. */
+async function ownedBookId(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  bookId: string,
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("books")
+    .select("id")
+    .eq("id", bookId)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.id ?? null;
+}
+
+async function currentBookState(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  bookId: string,
+): Promise<BookSettingsState> {
+  const { data, error } = await supabase
+    .from("book_settings")
+    .select(
+      "editorial_tone, optional_observations, editorial_emphasis, regional_convention, include_author_memory, include_concept_dictionary, display",
+    )
+    .eq("book_id", bookId)
+    .maybeSingle();
+  if (error) throw error;
+  return {
+    editorial_tone: data?.editorial_tone ?? null,
+    optional_observations: data?.optional_observations ?? null,
+    editorial_emphasis: data?.editorial_emphasis ?? null,
+    regional_convention: data?.regional_convention ?? null,
+    include_author_memory: data?.include_author_memory ?? null,
+    include_concept_dictionary: data?.include_concept_dictionary ?? null,
+    display: (data?.display as Record<string, unknown> | null) ?? {},
+  };
+}
+
+function isBookFullyInherited(s: BookSettingsState): boolean {
+  return (
+    s.editorial_tone === null &&
+    s.optional_observations === null &&
+    s.editorial_emphasis === null &&
+    s.regional_convention === null &&
+    s.include_author_memory === null &&
+    s.include_concept_dictionary === null &&
+    Object.keys(s.display).length === 0
+  );
+}
+
+async function writeBookState(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  bookId: string,
+  next: BookSettingsState,
+): Promise<void> {
+  if (isBookFullyInherited(next)) {
+    const { error } = await supabase
+      .from("book_settings")
+      .delete()
+      .eq("book_id", bookId);
+    if (error) throw error;
+    return;
+  }
+  const { error } = await supabase.from("book_settings").upsert(
+    {
+      book_id: bookId,
+      editorial_tone: next.editorial_tone,
+      optional_observations: next.optional_observations,
+      editorial_emphasis: next.editorial_emphasis,
+      regional_convention: next.regional_convention,
+      include_author_memory: next.include_author_memory,
+      include_concept_dictionary: next.include_concept_dictionary,
+      display: next.display,
+      settings_version: SETTINGS_SCHEMA_VERSION,
+    },
+    { onConflict: "book_id" },
+  );
+  if (error) throw error;
+}
+
+function bookSettingsPathFor(slug: string, bookSlug: string): string {
+  return `/workspace/authors/${slug}/books/${bookSlug}/settings`;
+}
+
+/** Parse the include/omit boolean select ("" = inherit → null). */
+function parseTriBoolean(raw: string): boolean | null | "invalid" {
+  if (raw === "") return null;
+  if (raw === "true") return true;
+  if (raw === "false") return false;
+  return "invalid";
+}
+
+export async function saveBookEditorialSettings(formData: FormData) {
+  const slug = String(formData.get("author_slug") ?? "");
+  const bookSlug = String(formData.get("book_slug") ?? "");
+  const bookId = String(formData.get("book_id") ?? "");
+  const path = bookSettingsPathFor(slug, bookSlug);
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/signin");
+
+  const nullable = (name: string): string | null => {
+    const v = String(formData.get(name) ?? "");
+    return v === "" ? null : v;
+  };
+  const tone = nullable("editorial_tone");
+  const observations = nullable("optional_observations");
+  const convention = nullable("regional_convention");
+
+  const memory = parseTriBoolean(String(formData.get("include_author_memory") ?? ""));
+  const concept = parseTriBoolean(
+    String(formData.get("include_concept_dictionary") ?? ""),
+  );
+
+  let emphasis: string[] | null;
+  if (formData.get("emphasis_inherit") != null) {
+    emphasis = null;
+  } else {
+    const arr = formData.getAll("emphasis").map(String);
+    if (arr.length > 2) fail(path, "tooManyEmphasisAreas");
+    const v = validateEmphasis(arr);
+    if (!v.ok) fail(path, "invalidEditorialEmphasis");
+    emphasis = v.value;
+  }
+
+  if (memory === "invalid" || concept === "invalid") {
+    fail(path, "invalidBookSetting");
+  }
+  for (const [key, value] of [
+    ["editorial_tone", tone],
+    ["optional_observations", observations],
+    ["regional_convention", convention],
+    ["include_author_memory", memory],
+    ["include_concept_dictionary", concept],
+  ] as const) {
+    if (!validateSettingWrite("book", key, value).ok) {
+      fail(path, "invalidBookSetting");
+    }
+  }
+
+  try {
+    const owned = await ownedBookId(supabase, bookId);
+    if (!owned) fail(path, "bookSettingsNotAuthorized");
+
+    const state = await currentBookState(supabase, bookId);
+    state.editorial_tone = tone;
+    state.optional_observations = observations;
+    state.regional_convention = convention;
+    state.include_author_memory = memory as boolean | null;
+    state.include_concept_dictionary = concept as boolean | null;
+    state.editorial_emphasis = emphasis;
+    await writeBookState(supabase, bookId, state);
+  } catch (error) {
+    if (isRedirect(error)) throw error;
+    console.error("[settings] saveBookEditorialSettings failed", error);
+    fail(path, "bookSettingsSaveFailed");
+  }
+
+  redirect(withActionNotice(path, { code: "bookEditorialSettingsSaved" }));
+}
+
+export async function saveBookDisplaySettings(formData: FormData) {
+  const slug = String(formData.get("author_slug") ?? "");
+  const bookSlug = String(formData.get("book_slug") ?? "");
+  const bookId = String(formData.get("book_id") ?? "");
+  const path = bookSettingsPathFor(slug, bookSlug);
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/signin");
+
+  const submitted: Record<string, unknown> = {};
+  for (const key of AUTHOR_DISPLAY_KEYS) {
+    const v = String(formData.get(key) ?? "");
+    if (v !== "") submitted[key] = v;
+  }
+  const validated = validateDisplayWrite("book", submitted);
+  if (!validated.ok) fail(path, "invalidBookSetting");
+
+  try {
+    const owned = await ownedBookId(supabase, bookId);
+    if (!owned) fail(path, "bookSettingsNotAuthorized");
+
+    const state = await currentBookState(supabase, bookId);
+    const display = { ...state.display };
+    for (const key of AUTHOR_DISPLAY_KEYS) delete display[key];
+    Object.assign(display, validated.value);
+    state.display = display;
+    await writeBookState(supabase, bookId, state);
+  } catch (error) {
+    if (isRedirect(error)) throw error;
+    console.error("[settings] saveBookDisplaySettings failed", error);
+    fail(path, "bookSettingsSaveFailed");
+  }
+
+  redirect(withActionNotice(path, { code: "bookDisplaySettingsSaved" }));
+}
+
+export async function resetBookSettingsSection(formData: FormData) {
+  const slug = String(formData.get("author_slug") ?? "");
+  const bookSlug = String(formData.get("book_slug") ?? "");
+  const bookId = String(formData.get("book_id") ?? "");
+  const section = String(formData.get("section") ?? "");
+  const path = bookSettingsPathFor(slug, bookSlug);
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/signin");
+
+  if (section !== "editorial" && section !== "display") {
+    fail(path, "invalidBookSetting");
+  }
+
+  try {
+    const owned = await ownedBookId(supabase, bookId);
+    if (!owned) fail(path, "bookSettingsNotAuthorized");
+
+    const state = await currentBookState(supabase, bookId);
+    if (section === "editorial") {
+      state.editorial_tone = null;
+      state.optional_observations = null;
+      state.editorial_emphasis = null;
+      state.regional_convention = null;
+      state.include_author_memory = null;
+      state.include_concept_dictionary = null;
+    } else {
+      const display = { ...state.display };
+      for (const key of AUTHOR_DISPLAY_KEYS) delete display[key];
+      state.display = display;
+    }
+    await writeBookState(supabase, bookId, state);
+  } catch (error) {
+    if (isRedirect(error)) throw error;
+    console.error("[settings] resetBookSettingsSection failed", error);
+    fail(path, "bookSettingsSaveFailed");
+  }
+
+  redirect(withActionNotice(path, { code: "bookSettingReset" }));
+}
