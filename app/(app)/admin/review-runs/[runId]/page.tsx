@@ -168,7 +168,24 @@ export default async function AdminReviewRunDetailPage({
           </h2>
           <dl className="mt-4 grid max-w-2xl grid-cols-2 gap-x-10 gap-y-6 sm:grid-cols-3">
             <Fact label={t("reviewer")} value={run.provenance.reviewer ?? "—"} />
-            <Fact label={t("model")} value={run.provenance.model ?? "—"} />
+            {/* Both role models — a hybrid run is never shown as
+                single-model. A single-model run shows the same value twice. */}
+            <Fact
+              label={t("manuscriptModel")}
+              value={
+                run.provenance.modelPolicy?.manuscript ??
+                run.provenance.model ??
+                "—"
+              }
+            />
+            <Fact
+              label={t("chapterModel")}
+              value={
+                run.provenance.modelPolicy?.chapter ??
+                run.provenance.model ??
+                "—"
+              }
+            />
             <Fact
               label={t("responseLanguage")}
               value={langName(run.responseLanguage)}
@@ -211,6 +228,104 @@ export default async function AdminReviewRunDetailPage({
           </div>
         </section>
       ) : null}
+
+      {/* Per-reading provenance (Hybrid Phase 1/2) — the append-only
+          readings this run recorded, read through the staff SELECT policy.
+          A pure read: no model is invoked. Historical runs (before
+          instrumentation) show the note instead of a fabricated table. */}
+      <section className="rule mt-12 pt-6" aria-labelledby="readings-heading">
+        <h2 id="readings-heading" className="eyebrow">
+          {t("readings")}
+        </h2>
+        {run.readings.length === 0 ? (
+          <p className="mt-3 max-w-prose font-sans text-sm italic text-ink-soft">
+            {t("noReadings")}
+          </p>
+        ) : (
+          <>
+            <p className="mt-3 max-w-prose font-sans text-xs leading-relaxed text-ink-faint">
+              {t("readingsNote")}
+            </p>
+            <div className="mt-5 overflow-x-auto">
+              <table className="w-full min-w-[46rem] border-collapse font-sans text-xs">
+                <thead>
+                  <tr className="border-b border-rule text-left text-ink-soft">
+                    <th className="py-2 pr-4 font-medium">{t("pass")}</th>
+                    <th className="py-2 pr-4 font-medium">{t("role")}</th>
+                    <th className="py-2 pr-4 font-medium">{t("model")}</th>
+                    <th className="py-2 pr-4 font-medium">{t("attempt")}</th>
+                    <th className="py-2 pr-4 font-medium">{t("readingStatus")}</th>
+                    <th className="py-2 pr-4 text-right font-medium">{t("inputTokens")}</th>
+                    <th className="py-2 pr-4 text-right font-medium">{t("outputTokens")}</th>
+                    <th className="py-2 pr-4 text-right font-medium">{t("cachedTokens")}</th>
+                    <th className="py-2 text-right font-medium">{t("latency")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {run.readings.map((r, i) => (
+                    <tr key={`${r.passIndex}-${r.attempt}-${i}`} className="border-b border-rule/60">
+                      <td className="py-2 pr-4 text-ink">{r.passIndex}</td>
+                      <td className="py-2 pr-4 text-ink">
+                        {r.role === "manuscript" ? t("roleManuscript") : t("roleChapter")}
+                      </td>
+                      <td className="py-2 pr-4 font-serif text-ink">{r.model}</td>
+                      <td className="py-2 pr-4 text-ink">{r.attempt}</td>
+                      <td
+                        className={`py-2 pr-4 ${r.status === "failed" ? "text-oxblood" : "text-ink"}`}
+                      >
+                        {r.status === "complete"
+                          ? t("statusComplete")
+                          : r.status === "failed"
+                            ? t("statusFailed")
+                            : t("statusRunning")}
+                      </td>
+                      <td className="py-2 pr-4 text-right tabular-nums text-ink">
+                        {r.inputTokens?.toLocaleString(locale) ?? "—"}
+                      </td>
+                      <td className="py-2 pr-4 text-right tabular-nums text-ink">
+                        {r.outputTokens?.toLocaleString(locale) ?? "—"}
+                      </td>
+                      <td className="py-2 pr-4 text-right tabular-nums text-ink-faint">
+                        {r.cachedTokens?.toLocaleString(locale) ?? "—"}
+                      </td>
+                      <td className="py-2 text-right tabular-nums text-ink">
+                        {r.latencyMs != null ? t("ms", { ms: r.latencyMs }) : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t border-gold-rule font-medium text-ink">
+                    <td className="py-2 pr-4" colSpan={5}>
+                      {t("totals")}
+                    </td>
+                    <td className="py-2 pr-4 text-right tabular-nums">
+                      {run.readingTotals.inputTokens.toLocaleString(locale)}
+                    </td>
+                    <td className="py-2 pr-4 text-right tabular-nums">
+                      {run.readingTotals.outputTokens.toLocaleString(locale)}
+                    </td>
+                    <td className="py-2 pr-4 text-right tabular-nums text-ink-faint">
+                      {run.readingTotals.cachedTokens.toLocaleString(locale)}
+                    </td>
+                    <td className="py-2 text-right tabular-nums">
+                      {t("ms", { ms: run.readingTotals.latencyMs })}
+                    </td>
+                  </tr>
+                  <tr className="text-ink-soft">
+                    <td className="pt-2 pr-4" colSpan={5}>
+                      {t("totalTokens")}
+                    </td>
+                    <td className="pt-2 text-right font-serif text-base text-ink" colSpan={4}>
+                      {run.readingTotals.totalTokens.toLocaleString(locale)}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </>
+        )}
+      </section>
 
       <section className="rule mt-12 pt-6" aria-labelledby="open-heading">
         <h2 id="open-heading" className="eyebrow">

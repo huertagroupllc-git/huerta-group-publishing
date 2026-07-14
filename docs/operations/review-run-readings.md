@@ -191,13 +191,24 @@ rewritten.
 
 The staff-only System page now shows, read-only: the global override,
 the manuscript override, the code default, the resolved manuscript and
-chapter models, and the token-budget ceiling. No keys, no editing. Per-
-run reading display belongs to Hybrid Phase 4.
+chapter models, and the token-budget ceiling. No keys, no editing.
+
+### Administration → Review Run detail (per-reading display)
+
+**Implemented (readiness audit, zero-cost).** The staff Review Run detail
+now reads `review_run_readings` through the staff SELECT policy — a pure
+read, no model call — and shows, read-only: both role models (manuscript
+and chapter, so a hybrid run is never shown as single-model), and a
+per-reading table (pass, role, model, attempt, status, provider-reported
+input/output/cached tokens, latency) with run token totals. The total is
+input + output only; cached is shown separately and never added. A
+historical run created before per-reading instrumentation shows a
+"no per-reading provenance" note rather than a fabricated table. This makes
+the future paid six-run matrix observable without any spend.
 
 ### Still not in this phase
 
 Reviewer v3 prompt changes, any reviewer-version or fingerprint change,
-pricing/cost estimation, the Administration per-run reading history,
-GPT-5.5 production use, and the paid six-run validation. Production
-after this deploy resolves manuscript=gpt-4o, chapter=gpt-4o, budget
-300000 from code defaults.
+pricing/cost estimation, GPT-5.5 production use, and the paid six-run
+validation. Production after this deploy resolves manuscript=gpt-4o,
+chapter=gpt-4o, budget 300000 from code defaults.

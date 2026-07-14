@@ -3,7 +3,9 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { BookStatus } from "@/lib/books/types";
 import { parseStoredReviewSettings } from "@/lib/editorial-ai/review-settings";
+import { parseStoredPolicy } from "@/lib/editorial-ai/model-policy";
 import type { ReviewSettingsSnapshot } from "@/lib/settings/types";
+import type { ReadingRole, ReadingStatus } from "@/lib/review/readings";
 
 /**
  * Read-only operational queries for Administration. Every query runs as
@@ -547,7 +549,40 @@ export interface AdminRunDetail {
     /** True when this run predates S4 (no frozen settings): Administration
      *  shows "Historical default behavior" rather than fabricated values. */
     settingsHistorical: boolean;
+    /** The FROZEN per-run model policy (Hybrid Phase 2): the manuscript and
+     *  chapter models this run actually used, so a hybrid run is never
+     *  shown as single-model. Synthesized from the single stored `model`
+     *  for a historical run that predates the policy. */
+    modelPolicy: { manuscript: string; chapter: string } | null;
   } | null;
+  /** Per-reading provenance (Hybrid Phase 1/2), read append-only from
+   *  review_run_readings through the staff SELECT policy — never a model
+   *  call. Empty for a historical run created before per-reading
+   *  instrumentation. */
+  readings: AdminReading[];
+  /** Known cumulative provider-reported usage summed from the readings.
+   *  input + output only; cached is a SUBSET of input and is reported
+   *  separately, never added to the total. Nulls contribute nothing. */
+  readingTotals: {
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    cachedTokens: number;
+    latencyMs: number;
+  };
+}
+
+export interface AdminReading {
+  passIndex: number;
+  role: ReadingRole;
+  chapterId: string | null;
+  model: string;
+  attempt: number;
+  status: ReadingStatus;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  cachedTokens: number | null;
+  latencyMs: number | null;
 }
 
 export async function getAdminReviewRun(
@@ -597,6 +632,16 @@ export async function getAdminReviewRun(
   // re-resolved from today's live Author/Book settings. A run created
   // before S4 has no snapshot: settingsHistorical marks it so.
   const settings = cv ? parseStoredReviewSettings(cv.settings) : null;
+  // The frozen per-run model policy. parseStoredPolicy reads the typed
+  // model_policy; a run that predates it synthesizes both roles from the
+  // single stored model — so a hybrid run is shown truthfully and a
+  // historical run is not misread as hybrid.
+  const storedPolicy = cv ? parseStoredPolicy(cv.model_policy) : null;
+  const modelPolicy = storedPolicy
+    ? { manuscript: storedPolicy.manuscript, chapter: storedPolicy.chapter }
+    : cv && typeof cv.model === "string"
+      ? { manuscript: cv.model, chapter: cv.model }
+      : null;
   const provenance = cv
     ? {
         reviewer: (cv.reviewer as string) ?? null,
@@ -607,8 +652,47 @@ export async function getAdminReviewRun(
         passCount: (cv.pass_count as number) ?? null,
         settings,
         settingsHistorical: settings === null,
+        modelPolicy,
       }
     : null;
+
+  // Per-reading provenance, read append-only through the staff SELECT
+  // policy on review_run_readings. No model is invoked and no run is
+  // created — this is a pure read of what the run already recorded.
+  const { data: readingRows } = await supabase
+    .from("review_run_readings")
+    .select(
+      "pass_index, role, chapter_id, model, attempt, status, input_tokens, output_tokens, cached_tokens, latency_ms",
+    )
+    .eq("run_id", runId)
+    .order("pass_index", { ascending: true })
+    .order("attempt", { ascending: true });
+
+  const readings: AdminReading[] = ((readingRows ?? []) as Row[]).map((r) => ({
+    passIndex: (r.pass_index as number) ?? 0,
+    role: r.role as ReadingRole,
+    chapterId: (r.chapter_id as string | null) ?? null,
+    model: (r.model as string) ?? "—",
+    attempt: (r.attempt as number) ?? 1,
+    status: r.status as ReadingStatus,
+    inputTokens: (r.input_tokens as number | null) ?? null,
+    outputTokens: (r.output_tokens as number | null) ?? null,
+    cachedTokens: (r.cached_tokens as number | null) ?? null,
+    latencyMs: (r.latency_ms as number | null) ?? null,
+  }));
+
+  const readingTotals = readings.reduce(
+    (acc, r) => {
+      acc.inputTokens += r.inputTokens ?? 0;
+      acc.outputTokens += r.outputTokens ?? 0;
+      acc.cachedTokens += r.cachedTokens ?? 0;
+      acc.latencyMs += r.latencyMs ?? 0;
+      return acc;
+    },
+    { inputTokens: 0, outputTokens: 0, totalTokens: 0, cachedTokens: 0, latencyMs: 0 },
+  );
+  // Total = input + output only; cached is a subset of input, never added.
+  readingTotals.totalTokens = readingTotals.inputTokens + readingTotals.outputTokens;
 
   return {
     id: run.id as string,
@@ -635,5 +719,7 @@ export async function getAdminReviewRun(
     progressKnown: Boolean(prog),
     findings,
     provenance,
+    readings,
+    readingTotals,
   };
 }
