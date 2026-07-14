@@ -191,13 +191,17 @@ export async function PublicHomePage({ locale }: { locale: string }) {
               on the right and sits INSIDE the container's right gutter, never
               the browser edge. `overflow-hidden` guards horizontal scroll. --- */}
       <section aria-labelledby="hero-heading" className="overflow-hidden">
-        <div className="mx-auto grid max-w-[86rem] items-stretch gap-y-12 px-6 py-16 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,45fr)_minmax(0,55fr)] lg:gap-x-12 lg:py-20 2xl:max-w-[100rem]">
+        <div className="mx-auto grid max-w-[86rem] items-stretch gap-y-12 px-6 sm:px-8 lg:grid-cols-[minmax(0,45fr)_minmax(0,55fr)] lg:gap-x-12 2xl:max-w-[100rem]">
           {/* Left editorial content — vertically centered. The wrapper cap
               is a generous editorial measure (not a narrow sidebar): the
               headline gets room to wrap deliberately (e.g. "Every book
               begins" / "somewhere.") where the viewport allows, while the
-              lead keeps its own comfortable max-w-xl reading measure. */}
-          <div className="flex flex-col justify-center">
+              lead keeps its own comfortable max-w-xl reading measure.
+              This column OWNS the hero's vertical rhythm: its padding gives
+              the text breathing room AND sets the hero's height, so the
+              image column can stretch to fill the full field between the
+              top and bottom rules (no ivory gap above/below the photo). */}
+          <div className="flex flex-col justify-center py-16 sm:py-20 lg:py-20">
             <div className="lg:max-w-[40rem]">
               <GoldEyebrow>{t("hero.eyebrow")}</GoldEyebrow>
               <h1
@@ -227,10 +231,15 @@ export async function PublicHomePage({ locale }: { locale: string }) {
 
           {/* The large still-life field: a grid cell within the container's
               right gutter (never the viewport edge). Frameless; its left edge
-              fades into the ivory (`.hero-fade`, desktop-only). On tablet/
-              mobile the grid stacks and the full image sits below the text —
-              no clipping, no overflow. */}
-          <div className="hero-fade relative min-h-[20rem] w-full overflow-hidden sm:min-h-[26rem] lg:min-h-[36rem] 2xl:min-h-[40rem]">
+              fades into the ivory (`.hero-fade`, desktop-only). On desktop it
+              `self-stretch`es to the full hero height (set by the text column)
+              so its top and bottom edges meet the hero's rules — the top rule
+              (masthead hairline) and the bottom rule (the next section's
+              border) read as the structural edges of the photographic field,
+              with no inner vertical padding and no frame. `lg:min-h-0` drops
+              the fixed floor so the fill is purely structural; the mobile
+              min-heights keep a safe stacked height below the text. */}
+          <div className="hero-fade relative min-h-[20rem] w-full self-stretch overflow-hidden sm:min-h-[26rem] lg:min-h-0">
             <Image
               src="/brand/hero-desk.jpg"
               alt={t("hero.imageAlt")}
