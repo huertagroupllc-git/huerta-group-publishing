@@ -182,64 +182,70 @@ export async function PublicHomePage({ locale }: { locale: string }) {
 
   return (
     <div>
-      {/* ---- Editorial hero: text beside the approved still-life ---- */}
-      {/* overflow-hidden clips the image's right-edge bleed (below) so the
-          page never scrolls horizontally. */}
-      <section aria-labelledby="hero-heading" className="overflow-hidden">
-      <div
-        className="mx-auto grid max-w-6xl items-center gap-x-12 gap-y-12 px-6 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1fr_1.2fr] lg:gap-x-12 lg:py-24"
-      >
-        <div>
-          <GoldEyebrow>{t("hero.eyebrow")}</GoldEyebrow>
-          <h1
-            id="hero-heading"
-            className="mt-6 font-display text-[2.75rem] leading-[1.05] tracking-tight text-ink sm:text-6xl lg:text-[4.25rem]"
-          >
-            {t("hero.headline1")}
-            <span className="mt-2 block font-serif italic text-brand-gold">
-              {t("hero.headline2")}
-            </span>
-          </h1>
-          <p className="mt-8 max-w-xl font-serif text-lg leading-relaxed text-ink-soft sm:text-xl">
-            {t("hero.lead")}
-          </p>
-          <div className="mt-10 flex flex-wrap items-center gap-5">
-            <PrimaryLink href={primaryHref}>{primaryLabel}</PrimaryLink>
-            <QuietLink href="#how-it-works">{t("hero.seeHow")}</QuietLink>
-          </div>
-          {!signedIn ? (
-            <p className="mt-4 font-sans text-xs text-ink-faint">
-              {t("hero.accessNote")}
-            </p>
-          ) : null}
-          <HeroDivider statement={t("hero.fromIdea")} />
-        </div>
-
-        {/* The approved writing-desk still-life, larger and frameless: it
-            fills its column (object-cover) and — on desktop — its left edge
-            fades into the ivory hero background via a CSS mask (`.hero-fade`,
-            a non-destructive treatment that degrades gracefully and never
-            obscures text; disabled below lg so mobile shows the full image).
-            The LCP element: `priority`, and the container's min-heights
-            reserve space so there is no CLS. A higher-resolution photograph
-            can replace the file with no structural change. */}
-        {/* Larger, more immersive photographic field: on desktop the image
-            column is wider AND extends past the container's right edge to
-            the viewport edge — `calc(100% + right-padding + half the
-            centered outer margin)`, guarded by `max(0px, …)` so it never
-            overflows at ≤1152px. Height and the left-edge ivory fade are
-            unchanged. */}
-        <div className="hero-fade relative min-h-[20rem] w-full overflow-hidden sm:min-h-[26rem] lg:min-h-[34rem] lg:w-[calc(100%_+_2rem_+_max(0px,(100vw_-_72rem)/2))]">
+      {/* ---- Editorial hero: the text column stays anchored to the site
+              content grid; the still-life BREAKS OUT of the max-width
+              container to the right viewport edge as an immersive field.
+              `overflow-hidden` guards against any horizontal scroll. ---- */}
+      <section aria-labelledby="hero-heading" className="relative overflow-hidden">
+        {/* Desktop/large: the photograph is pinned to the RIGHT VIEWPORT
+            EDGE (not the content container) and takes a viewport-based share
+            of the width that GROWS with the screen — eliminating the wide-
+            screen ivory gutter. Its left edge fades into the ivory behind
+            the text (`.hero-fade`), so the copy is never obscured. Hidden on
+            tablet/mobile, where the full image renders stacked in flow. */}
+        <div className="hero-fade absolute inset-y-0 right-0 hidden lg:block lg:w-[52vw] xl:w-[56vw] 2xl:w-[58vw]">
           <Image
             src="/brand/hero-desk.jpg"
             alt={t("hero.imageAlt")}
             fill
             priority
-            sizes="(min-width: 1024px) 54rem, 100vw"
+            sizes="(min-width: 1536px) 58vw, (min-width: 1024px) 54vw, 100vw"
             className="object-cover object-center"
           />
         </div>
-      </div>
+
+        <div className="mx-auto flex max-w-6xl flex-col justify-center px-6 py-16 sm:px-8 sm:py-20 lg:min-h-[38rem] lg:py-24 xl:min-h-[42rem]">
+          {/* Text anchored to the content grid, capped so it never collides
+              with the breakout image (its current width/wrapping preserved). */}
+          <div className="relative lg:max-w-[30rem]">
+            <GoldEyebrow>{t("hero.eyebrow")}</GoldEyebrow>
+            <h1
+              id="hero-heading"
+              className="mt-6 font-display text-[2.75rem] leading-[1.05] tracking-tight text-ink sm:text-6xl lg:text-[4.25rem]"
+            >
+              {t("hero.headline1")}
+              <span className="mt-2 block font-serif italic text-brand-gold">
+                {t("hero.headline2")}
+              </span>
+            </h1>
+            <p className="mt-8 max-w-xl font-serif text-lg leading-relaxed text-ink-soft sm:text-xl">
+              {t("hero.lead")}
+            </p>
+            <div className="mt-10 flex flex-wrap items-center gap-5">
+              <PrimaryLink href={primaryHref}>{primaryLabel}</PrimaryLink>
+              <QuietLink href="#how-it-works">{t("hero.seeHow")}</QuietLink>
+            </div>
+            {!signedIn ? (
+              <p className="mt-4 font-sans text-xs text-ink-faint">
+                {t("hero.accessNote")}
+              </p>
+            ) : null}
+            <HeroDivider statement={t("hero.fromIdea")} />
+          </div>
+
+          {/* Tablet/mobile: the full still-life, stacked below the text
+              (unmasked — the fade is desktop-only); no overflow, no clipping. */}
+          <div className="hero-fade relative mt-12 min-h-[20rem] w-full overflow-hidden sm:min-h-[26rem] lg:hidden">
+            <Image
+              src="/brand/hero-desk.jpg"
+              alt={t("hero.imageAlt")}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center"
+            />
+          </div>
+        </div>
       </section>
 
       {/* ---- The life of a book ---- */}
