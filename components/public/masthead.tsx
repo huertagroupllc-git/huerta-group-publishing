@@ -46,7 +46,9 @@ export async function PublicMasthead({
     <header className="border-b border-rule bg-paper-bright">
       {/* A restrained gold hairline seats the masthead above the hero. */}
       <div aria-hidden className="h-px w-full bg-gold-rule/70" />
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-5 sm:px-8">
+      {/* Same WIDE container as the hero spread, so the logo's left edge and
+          the action's right edge align with the hero's text and image. */}
+      <div className="mx-auto flex max-w-[86rem] items-center justify-between gap-6 px-6 py-5 sm:px-8 2xl:max-w-[100rem]">
         <Link
           href={home}
           className="shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-oxblood"

@@ -182,66 +182,58 @@ export async function PublicHomePage({ locale }: { locale: string }) {
 
   return (
     <div>
-      {/* ---- Editorial hero: the text column stays anchored to the site
-              content grid; the still-life BREAKS OUT of the max-width
-              container to the right viewport edge as an immersive field.
-              `overflow-hidden` guards against any horizontal scroll. ---- */}
-      <section aria-labelledby="hero-heading" className="relative overflow-hidden">
-        {/* Desktop/large: the photograph is pinned to the RIGHT VIEWPORT
-            EDGE (not the content container) and takes a viewport-based share
-            of the width that GROWS with the screen — eliminating the wide-
-            screen ivory gutter. Its left edge fades into the ivory behind
-            the text (`.hero-fade`), so the copy is never obscured. Hidden on
-            tablet/mobile, where the full image renders stacked in flow. */}
-        <div className="hero-fade absolute inset-y-0 right-0 hidden lg:block lg:w-[52vw] xl:w-[56vw] 2xl:w-[58vw]">
-          <Image
-            src="/brand/hero-desk.jpg"
-            alt={t("hero.imageAlt")}
-            fill
-            priority
-            sizes="(min-width: 1536px) 58vw, (min-width: 1024px) 54vw, 100vw"
-            className="object-cover object-center"
-          />
-        </div>
-
-        <div className="mx-auto flex max-w-6xl flex-col justify-center px-6 py-16 sm:px-8 sm:py-20 lg:min-h-[38rem] lg:py-24 xl:min-h-[42rem]">
-          {/* Text anchored to the content grid, capped so it never collides
-              with the breakout image (its current width/wrapping preserved). */}
-          <div className="relative lg:max-w-[30rem]">
-            <GoldEyebrow>{t("hero.eyebrow")}</GoldEyebrow>
-            <h1
-              id="hero-heading"
-              className="mt-6 font-display text-[2.75rem] leading-[1.05] tracking-tight text-ink sm:text-6xl lg:text-[4.25rem]"
-            >
-              {t("hero.headline1")}
-              <span className="mt-2 block font-serif italic text-brand-gold">
-                {t("hero.headline2")}
-              </span>
-            </h1>
-            <p className="mt-8 max-w-xl font-serif text-lg leading-relaxed text-ink-soft sm:text-xl">
-              {t("hero.lead")}
-            </p>
-            <div className="mt-10 flex flex-wrap items-center gap-5">
-              <PrimaryLink href={primaryHref}>{primaryLabel}</PrimaryLink>
-              <QuietLink href="#how-it-works">{t("hero.seeHow")}</QuietLink>
-            </div>
-            {!signedIn ? (
-              <p className="mt-4 font-sans text-xs text-ink-faint">
-                {t("hero.accessNote")}
+      {/* ---- Editorial hero: ONE broad, centered composition. The hero
+              (and the public masthead) use a WIDER container than the body
+              content sections, centered with equal outer gutters. Two
+              proportional columns — editorial text ~43%, photographic field
+              ~57% — so the copy is anchored to the left of the spread (in the
+              masthead's logo rhythm) while the photograph carries more weight
+              on the right and sits INSIDE the container's right gutter, never
+              the browser edge. `overflow-hidden` guards horizontal scroll. --- */}
+      <section aria-labelledby="hero-heading" className="overflow-hidden">
+        <div className="mx-auto grid max-w-[86rem] items-stretch gap-y-12 px-6 py-16 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,43fr)_minmax(0,57fr)] lg:gap-x-12 lg:py-20 2xl:max-w-[100rem]">
+          {/* Left editorial content — vertically centered; capped so its
+              width and wrapping are unchanged. */}
+          <div className="flex flex-col justify-center">
+            <div className="lg:max-w-[30rem]">
+              <GoldEyebrow>{t("hero.eyebrow")}</GoldEyebrow>
+              <h1
+                id="hero-heading"
+                className="mt-6 font-display text-[2.75rem] leading-[1.05] tracking-tight text-ink sm:text-6xl lg:text-[4.25rem]"
+              >
+                {t("hero.headline1")}
+                <span className="mt-2 block font-serif italic text-brand-gold">
+                  {t("hero.headline2")}
+                </span>
+              </h1>
+              <p className="mt-8 max-w-xl font-serif text-lg leading-relaxed text-ink-soft sm:text-xl">
+                {t("hero.lead")}
               </p>
-            ) : null}
-            <HeroDivider statement={t("hero.fromIdea")} />
+              <div className="mt-10 flex flex-wrap items-center gap-5">
+                <PrimaryLink href={primaryHref}>{primaryLabel}</PrimaryLink>
+                <QuietLink href="#how-it-works">{t("hero.seeHow")}</QuietLink>
+              </div>
+              {!signedIn ? (
+                <p className="mt-4 font-sans text-xs text-ink-faint">
+                  {t("hero.accessNote")}
+                </p>
+              ) : null}
+              <HeroDivider statement={t("hero.fromIdea")} />
+            </div>
           </div>
 
-          {/* Tablet/mobile: the full still-life, stacked below the text
-              (unmasked — the fade is desktop-only); no overflow, no clipping. */}
-          <div className="hero-fade relative mt-12 min-h-[20rem] w-full overflow-hidden sm:min-h-[26rem] lg:hidden">
+          {/* The large still-life field: a grid cell within the container's
+              right gutter (never the viewport edge). Frameless; its left edge
+              fades into the ivory (`.hero-fade`, desktop-only). On tablet/
+              mobile the grid stacks and the full image sits below the text —
+              no clipping, no overflow. */}
+          <div className="hero-fade relative min-h-[20rem] w-full overflow-hidden sm:min-h-[26rem] lg:min-h-[36rem] 2xl:min-h-[40rem]">
             <Image
               src="/brand/hero-desk.jpg"
               alt={t("hero.imageAlt")}
               fill
               priority
-              sizes="100vw"
+              sizes="(min-width: 1536px) 52rem, (min-width: 1024px) 44rem, 100vw"
               className="object-cover object-center"
             />
           </div>
