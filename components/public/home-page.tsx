@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Logo } from "@/components/brand/logo";
@@ -9,15 +10,22 @@ import { SITE_NAME, siteUrl } from "@/lib/site";
  * THE public homepage — ONE implementation shared by every public locale
  * root (English at /, Spanish preview at /es). All copy comes from the
  * `home.*` catalog for the bound locale; nothing is hardcoded per locale
- * and no page file duplicates the JOURNEY / Workshop / authorship /
- * publication / CTA content. Locale-bound METADATA stays in each route's
- * page/layout (Next requires it there); this component owns only the
- * rendered body and its JSON-LD.
+ * and no page file duplicates the section content. Locale-bound METADATA
+ * stays in each route's page/layout; this component owns the rendered body
+ * and its JSON-LD.
+ *
+ * Brand Phase 3: an editorial recomposition toward the approved homepage
+ * concept — a warm ivory surface, a dark Fraunces hero (black + gold
+ * italic), the approved writing-desk still-life photograph, restrained
+ * gold rules, and publication-inspired ruled sections. Gold stays
+ * DECORATIVE (rules, the display-scale headline line, the small-caps
+ * eyebrow in the contrast-verified dark-gold token ≈ 5.2:1 on paper);
+ * OXBLOOD remains the single interactive/action color. No cards, no
+ * shadows.
  *
  * In-page anchors are RELATIVE (`#how-it-works`), so they stay on the
- * current URL — `/` on English, `/es` on Spanish — with no cross-root
- * leakage. The session-aware CTA points at the unprefixed `/workspace` or
- * `/signin`, identical for both locales.
+ * current URL — `/` on English, `/es` on Spanish. The session-aware CTA
+ * points at the unprefixed `/workspace` or `/signin`, identical for both.
  */
 
 const focusRing =
@@ -27,9 +35,10 @@ function PrimaryLink({ href, children }: { href: string; children: React.ReactNo
   return (
     <Link
       href={href}
-      className={`inline-block bg-oxblood px-6 py-3 font-sans text-sm tracking-wide text-paper hover:bg-oxblood-deep ${focusRing} focus-visible:outline-ink`}
+      className={`inline-flex items-center gap-2 bg-oxblood px-7 py-3.5 font-sans text-sm tracking-wide text-paper hover:bg-oxblood-deep ${focusRing} focus-visible:outline-ink`}
     >
       {children}
+      <span aria-hidden>→</span>
     </Link>
   );
 }
@@ -38,20 +47,47 @@ function QuietLink({ href, children }: { href: string; children: React.ReactNode
   return (
     <Link
       href={href}
-      className={`inline-block border border-rule px-6 py-3 font-sans text-sm tracking-wide text-ink hover:border-oxblood hover:text-oxblood ${focusRing} focus-visible:outline-oxblood`}
+      className={`inline-block border border-rule px-7 py-3.5 font-sans text-sm tracking-wide text-ink hover:border-oxblood hover:text-oxblood ${focusRing} focus-visible:outline-oxblood`}
     >
       {children}
     </Link>
   );
 }
 
+/** A gold small-caps eyebrow at brand-gold-dark — contrast-verified
+ *  (≈ 5.2:1 on paper), the vetted small-gold color per the brand guide. */
+function GoldEyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="font-sans text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-brand-gold-dark">
+      {children}
+    </p>
+  );
+}
+
+/** A quill divider: two gold hairlines meeting a small decorative nib. */
+function QuillRule() {
+  return (
+    <div aria-hidden className="flex items-center gap-4">
+      <span className="h-px w-16 bg-gold-rule" />
+      <svg width="16" height="16" viewBox="0 0 16 16" className="text-brand-gold">
+        <path
+          d="M13.5 2.5C10 3 6.5 5.5 4.5 9l-2 4.5 4.5-2c3.5-2 6-5.5 6.5-9z"
+          fill="currentColor"
+        />
+        <path d="M5 11l-2.5 2.5" stroke="currentColor" strokeWidth="1" fill="none" />
+      </svg>
+      <span className="h-px w-16 bg-gold-rule" />
+    </div>
+  );
+}
+
 function SectionHeader({ eyebrow, heading, id }: { eyebrow: string; heading: string; id: string }) {
   return (
     <div className="max-w-3xl">
-      <p className="eyebrow">{eyebrow}</p>
+      <GoldEyebrow>{eyebrow}</GoldEyebrow>
       <h2
         id={id}
-        className="mt-3 font-display text-3xl tracking-tight text-ink sm:text-4xl"
+        className="mt-4 font-display text-3xl leading-tight tracking-tight text-ink sm:text-4xl"
       >
         {heading}
       </h2>
@@ -118,26 +154,191 @@ export async function PublicHomePage({ locale }: { locale: string }) {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-6 sm:px-8">
+    <div>
+      {/* ---- Editorial hero: text beside the approved still-life ---- */}
       <section
         aria-labelledby="hero-heading"
-        className="grid items-center gap-12 py-16 sm:py-20 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-16 lg:py-24"
+        className="mx-auto grid max-w-6xl items-center gap-x-14 gap-y-12 px-6 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.05fr_1fr] lg:gap-x-20 lg:py-24"
       >
         <div>
-          <p className="eyebrow">{t("hero.eyebrow")}</p>
+          <GoldEyebrow>{t("hero.eyebrow")}</GoldEyebrow>
           <h1
             id="hero-heading"
-            className="mt-5 font-display text-[2.5rem] leading-[1.08] tracking-tight text-ink sm:text-5xl lg:text-6xl"
+            className="mt-6 font-display text-[2.75rem] leading-[1.05] tracking-tight text-ink sm:text-6xl lg:text-[4.25rem]"
           >
             {t("hero.headline1")}
-            <span className="mt-1 block font-serif italic text-brand-gold">
+            <span className="mt-2 block font-serif italic text-brand-gold">
               {t("hero.headline2")}
             </span>
           </h1>
-          <p className="mt-7 max-w-prose font-serif text-lg leading-relaxed text-ink-soft">
+          <p className="mt-8 max-w-xl font-serif text-lg leading-relaxed text-ink-soft sm:text-xl">
             {t("hero.lead")}
           </p>
-          <div className="mt-9 flex flex-wrap items-center gap-5">
+          <div className="mt-10 flex flex-wrap items-center gap-5">
+            <PrimaryLink href={primaryHref}>{primaryLabel}</PrimaryLink>
+            <QuietLink href="#how-it-works">{t("hero.seeHow")}</QuietLink>
+          </div>
+          {!signedIn ? (
+            <p className="mt-4 font-sans text-xs text-ink-faint">
+              {t("hero.accessNote")}
+            </p>
+          ) : null}
+          <div className="mt-12">
+            <QuillRule />
+            <p className="mt-5 font-sans text-[0.6875rem] uppercase tracking-[0.22em] text-ink-soft">
+              {t("hero.fromIdea")}
+            </p>
+          </div>
+        </div>
+
+        {/* The approved writing-desk still-life. A thin gold frame; the
+            image is the LCP element (priority, explicit dimensions → no
+            CLS). Production photography from a designer can replace the
+            file without touching this markup. */}
+        <div className="border border-gold-rule bg-parchment p-2 lg:p-2.5">
+          <Image
+            src="/brand/hero-desk.jpg"
+            alt={t("hero.imageAlt")}
+            width={846}
+            height={874}
+            priority
+            sizes="(min-width: 1024px) 34rem, 100vw"
+            className="h-auto w-full object-cover"
+          />
+        </div>
+      </section>
+
+      {/* ---- The life of a book ---- */}
+      <section
+        id="how-it-works"
+        aria-labelledby="journey-heading"
+        className="scroll-mt-24 border-t border-rule bg-paper"
+      >
+        <div className="mx-auto max-w-6xl px-6 py-20 sm:px-8 sm:py-24">
+          <SectionHeader
+            eyebrow={t("journey.eyebrow")}
+            heading={t("journey.heading")}
+            id="journey-heading"
+          />
+          <p className="mt-6 max-w-prose font-serif text-lg leading-relaxed text-ink-soft">
+            {t("journey.intro")}
+          </p>
+          <ol className="mt-12 border-t border-gold-rule">
+            {JOURNEY_KEYS.map((key, i) => (
+              <li
+                key={key}
+                className="grid gap-x-8 gap-y-1 border-b border-rule py-7 sm:grid-cols-[3.5rem_15rem_minmax(0,1fr)]"
+              >
+                <span
+                  aria-hidden
+                  className="font-display text-2xl italic text-brand-gold"
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3 className="font-display text-xl tracking-tight text-ink">
+                  {t(`journey.stages.${key}.title`)}
+                </h3>
+                <p className="max-w-prose font-serif leading-relaxed text-ink-soft">
+                  {t(`journey.stages.${key}.body`)}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* ---- Inside the Workshop: ruled editorial rows ---- */}
+      <section
+        id="workshop"
+        aria-labelledby="workshop-heading"
+        className="scroll-mt-24 border-t border-rule"
+      >
+        <div className="mx-auto max-w-6xl px-6 py-20 sm:px-8 sm:py-24">
+          <SectionHeader
+            eyebrow={t("workshop.eyebrow")}
+            heading={t("workshop.heading")}
+            id="workshop-heading"
+          />
+          <p className="mt-6 max-w-prose font-serif text-lg leading-relaxed text-ink-soft">
+            {t("workshop.intro")}
+          </p>
+          <div className="mt-12 border-t border-gold-rule">
+            {ROOM_KEYS.map((key) => (
+              <div
+                key={key}
+                className="grid items-baseline gap-x-10 gap-y-2 border-b border-rule py-7 sm:grid-cols-[16rem_minmax(0,1fr)]"
+              >
+                <h3 className="font-display text-xl tracking-tight text-ink">
+                  {t(`workshop.rooms.${key}.name`)}
+                </h3>
+                <p className="max-w-prose font-serif leading-relaxed text-ink-soft">
+                  {t(`workshop.rooms.${key}.body`)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ---- Authorship, and the road toward publication ---- */}
+      <section
+        id="about"
+        aria-labelledby="about-heading"
+        className="scroll-mt-24 border-t border-rule bg-paper"
+      >
+        <div className="mx-auto max-w-6xl px-6 py-20 sm:px-8 sm:py-24">
+          <SectionHeader
+            eyebrow={t("authorship.eyebrow")}
+            heading={t("authorship.heading")}
+            id="about-heading"
+          />
+          <ul className="mt-12 grid gap-x-14 gap-y-2 lg:grid-cols-3">
+            {PRINCIPLE_KEYS.map((key) => (
+              <li key={key} className="border-t border-gold-rule py-7">
+                <h3 className="font-display text-xl tracking-tight text-ink">
+                  {t(`authorship.principles.${key}.title`)}
+                </h3>
+                <p className="mt-3 font-serif leading-relaxed text-ink-soft">
+                  {t(`authorship.principles.${key}.body`)}
+                </p>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-16 max-w-3xl border-t border-gold-rule pt-10">
+            <GoldEyebrow>{t("publication.eyebrow")}</GoldEyebrow>
+            <h3 className="mt-4 font-display text-2xl tracking-tight text-ink sm:text-3xl">
+              {t("publication.heading")}
+            </h3>
+            <p className="mt-5 max-w-prose font-serif text-lg leading-relaxed text-ink-soft">
+              {t("publication.body")}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ---- Final invitation ---- */}
+      <section
+        aria-labelledby="cta-heading"
+        className="border-t border-rule"
+      >
+        <div className="mx-auto max-w-6xl px-6 py-24 text-center sm:px-8 sm:py-28">
+          {/* A small decorative brand mark — the wordmark elsewhere names
+              the company, so the mark here is decorative to assistive tech.
+              Replaceable via the Logo component when final artwork lands. */}
+          <div className="flex justify-center">
+            <Logo variant="mark" height={44} decorative />
+          </div>
+          <h2
+            id="cta-heading"
+            className="mx-auto mt-8 max-w-2xl font-display text-3xl tracking-tight text-ink sm:text-4xl lg:text-5xl"
+          >
+            {t("cta.heading")}
+          </h2>
+          <p className="mx-auto mt-6 max-w-prose font-serif text-lg leading-relaxed text-ink-soft">
+            {t("cta.body")}
+          </p>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-5">
             <PrimaryLink href={primaryHref}>{primaryLabel}</PrimaryLink>
             <QuietLink href="#how-it-works">{t("hero.seeHow")}</QuietLink>
           </div>
@@ -147,139 +348,6 @@ export async function PublicHomePage({ locale }: { locale: string }) {
             </p>
           ) : null}
         </div>
-
-        <div className="relative hidden border border-gold-rule bg-parchment p-10 lg:block">
-          <div aria-hidden className="absolute inset-x-10 top-6 h-px bg-gold-rule" />
-          <div className="flex flex-col items-center py-10">
-            <Logo variant="mark" height={220} decorative />
-            <p className="mt-10 max-w-56 text-center font-serif text-sm italic leading-relaxed text-ink-soft">
-              {t("hero.fromIdea")}
-            </p>
-          </div>
-          <div aria-hidden className="absolute inset-x-10 bottom-6 h-px bg-gold-rule" />
-        </div>
-      </section>
-
-      <p className="border-t border-gold-rule pt-5 text-center font-sans text-[0.6875rem] uppercase tracking-[0.22em] text-ink-soft lg:hidden">
-        {t("hero.fromIdea")}
-      </p>
-
-      <section
-        id="how-it-works"
-        aria-labelledby="journey-heading"
-        className="scroll-mt-24 py-16 sm:py-20"
-      >
-        <SectionHeader
-          eyebrow={t("journey.eyebrow")}
-          heading={t("journey.heading")}
-          id="journey-heading"
-        />
-        <p className="mt-5 max-w-prose font-serif text-lg leading-relaxed text-ink-soft">
-          {t("journey.intro")}
-        </p>
-        <ol className="mt-10 border-t border-rule">
-          {JOURNEY_KEYS.map((key, i) => (
-            <li
-              key={key}
-              className="grid gap-x-8 gap-y-1 border-b border-rule py-6 sm:grid-cols-[4rem_14rem_minmax(0,1fr)]"
-            >
-              <span aria-hidden className="font-display text-xl text-brand-gold">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <h3 className="font-display text-xl tracking-tight text-ink">
-                {t(`journey.stages.${key}.title`)}
-              </h3>
-              <p className="max-w-prose font-serif leading-relaxed text-ink-soft">
-                {t(`journey.stages.${key}.body`)}
-              </p>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section
-        id="workshop"
-        aria-labelledby="workshop-heading"
-        className="scroll-mt-24 py-16 sm:py-20"
-      >
-        <SectionHeader
-          eyebrow={t("workshop.eyebrow")}
-          heading={t("workshop.heading")}
-          id="workshop-heading"
-        />
-        <p className="mt-5 max-w-prose font-serif text-lg leading-relaxed text-ink-soft">
-          {t("workshop.intro")}
-        </p>
-        <ul className="mt-10 grid gap-x-14 sm:grid-cols-2">
-          {ROOM_KEYS.map((key) => (
-            <li key={key} className="border-t border-rule py-6">
-              <h3 className="font-display text-xl tracking-tight text-ink">
-                {t(`workshop.rooms.${key}.name`)}
-              </h3>
-              <p className="mt-2 max-w-prose font-serif leading-relaxed text-ink-soft">
-                {t(`workshop.rooms.${key}.body`)}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section
-        id="about"
-        aria-labelledby="about-heading"
-        className="scroll-mt-24 py-16 sm:py-20"
-      >
-        <SectionHeader
-          eyebrow={t("authorship.eyebrow")}
-          heading={t("authorship.heading")}
-          id="about-heading"
-        />
-        <ul className="mt-10 grid gap-x-14 gap-y-2 lg:grid-cols-3">
-          {PRINCIPLE_KEYS.map((key) => (
-            <li key={key} className="border-t border-rule py-6">
-              <h3 className="font-display text-xl tracking-tight text-ink">
-                {t(`authorship.principles.${key}.title`)}
-              </h3>
-              <p className="mt-2 font-serif leading-relaxed text-ink-soft">
-                {t(`authorship.principles.${key}.body`)}
-              </p>
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-14 max-w-3xl border-t border-gold-rule pt-8">
-          <p className="eyebrow">{t("publication.eyebrow")}</p>
-          <h3 className="mt-3 font-display text-2xl tracking-tight text-ink">
-            {t("publication.heading")}
-          </h3>
-          <p className="mt-4 max-w-prose font-serif text-lg leading-relaxed text-ink-soft">
-            {t("publication.body")}
-          </p>
-        </div>
-      </section>
-
-      <section
-        aria-labelledby="cta-heading"
-        className="border-t border-rule py-20 text-center sm:py-24"
-      >
-        <h2
-          id="cta-heading"
-          className="mx-auto max-w-2xl font-display text-3xl tracking-tight text-ink sm:text-4xl"
-        >
-          {t("cta.heading")}
-        </h2>
-        <p className="mx-auto mt-5 max-w-prose font-serif text-lg leading-relaxed text-ink-soft">
-          {t("cta.body")}
-        </p>
-        <div className="mt-9 flex flex-wrap items-center justify-center gap-5">
-          <PrimaryLink href={primaryHref}>{primaryLabel}</PrimaryLink>
-          <QuietLink href="#how-it-works">{t("hero.seeHow")}</QuietLink>
-        </div>
-        {!signedIn ? (
-          <p className="mt-4 font-sans text-xs text-ink-faint">
-            {t("hero.accessNote")}
-          </p>
-        ) : null}
       </section>
 
       <script

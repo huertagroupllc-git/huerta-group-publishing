@@ -60,7 +60,7 @@
       "primary": "Principal"
     },
     "hero": {
-      "eyebrow": "Un sistema operativo para autores",
+      "eyebrow": "Su libro. Su voz. Su travesía.",
       "headline1": "Todo libro comienza en alguna parte.",
       "headline2": "Aquí es donde el suyo toma forma.",
       "lead": "El Taller es un espacio dedicado para que los autores desarrollen ideas, escriban con concentración, refinen su trabajo y den vida a un manuscrito — un capítulo a la vez.",
@@ -68,7 +68,8 @@
       "signIn": "Iniciar sesión",
       "seeHow": "Vea cómo funciona",
       "accessNote": "El acceso lo proporciona la editorial.",
-      "fromIdea": "De la idea al manuscrito. Del manuscrito hacia la publicación."
+      "fromIdea": "De la idea al manuscrito. Del manuscrito al impacto.",
+      "imageAlt": "Un escritorio de escritura con luz cálida: un cuaderno abierto con una pluma apoyada sobre las páginas, una pila de libros encuadernados en tela y una taza que dice Write, Refine, Finish."
     },
     "journey": {
       "eyebrow": "Cómo funciona",

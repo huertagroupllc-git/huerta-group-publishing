@@ -60,7 +60,7 @@
       "primary": "Primary"
     },
     "hero": {
-      "eyebrow": "An Author Operating System",
+      "eyebrow": "Your book. Your voice. Your journey.",
       "headline1": "Every book begins somewhere.",
       "headline2": "This is where yours takes shape.",
       "lead": "The Workshop is a dedicated space for authors to develop ideas, write with focus, refine their work, and bring a manuscript to life — one chapter at a time.",
@@ -68,7 +68,8 @@
       "signIn": "Sign in",
       "seeHow": "See how it works",
       "accessNote": "Access is provided by the publisher.",
-      "fromIdea": "From idea to manuscript. From manuscript toward publication."
+      "fromIdea": "From idea to manuscript. From manuscript to impact.",
+      "imageAlt": "A warm writing desk in soft light: an open journal with a fountain pen resting across the pages, a stack of cloth-bound books, and a mug reading Write, Refine, Finish."
     },
     "journey": {
       "eyebrow": "How it works",
