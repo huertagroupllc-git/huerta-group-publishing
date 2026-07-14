@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Logo } from "@/components/brand/logo";
-import { signOut } from "@/lib/auth/actions";
-import { ModeSwitch } from "@/components/mode-switch";
+import { AuthMasthead } from "@/components/auth-masthead";
 import { sessionIsStaff } from "@/lib/auth/session";
 
 interface Crumb {
@@ -26,52 +24,34 @@ export async function WorkspaceFrame({
 }) {
   const staff = await sessionIsStaff();
   const t = await getTranslations("common");
-  const tNav = await getTranslations("navigation");
+  const crumbs =
+    breadcrumbs.length > 0 ? (
+      <>
+        {breadcrumbs.map((crumb) => (
+          <span key={crumb.href} className="font-sans text-xs text-ink-faint">
+            /{" "}
+            <Link
+              href={crumb.href}
+              className="underline-offset-4 hover:text-oxblood hover:underline"
+            >
+              {crumb.label}
+            </Link>
+          </span>
+        ))}
+      </>
+    ) : null;
   return (
     <div
       className={`mx-auto flex min-h-screen ${wide ? "max-w-5xl" : "max-w-3xl"} flex-col px-6 py-10 sm:px-8`}
     >
-      <header className="rule flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 pt-5">
-        <div className="flex items-baseline gap-4">
-          {/* The compact mark beside the text identity — the text names
-              the company, so the mark is decorative to assistive tech. */}
-          <Link
-            href="/"
-            className="eyebrow flex items-center gap-2.5 hover:text-oxblood focus-visible:text-oxblood focus-visible:underline focus-visible:outline-none"
-          >
-            <Logo variant="mark" height={26} decorative />
-            {t("brand")}
-          </Link>
-          {breadcrumbs.map((crumb) => (
-            <span key={crumb.href} className="font-sans text-xs text-ink-faint">
-              /{" "}
-              <Link
-                href={crumb.href}
-                className="underline-offset-4 hover:text-oxblood hover:underline"
-              >
-                {crumb.label}
-              </Link>
-            </span>
-          ))}
-        </div>
-        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
-          {staff ? <ModeSwitch active="workspace" /> : null}
-          <Link
-            href="/workspace/account"
-            className="font-sans text-xs text-ink-faint underline-offset-4 hover:text-oxblood hover:underline focus-visible:text-oxblood focus-visible:underline focus-visible:outline-none"
-            title={tNav("account")}
-          >
-            {email}
-          </Link>
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline focus-visible:text-oxblood focus-visible:underline focus-visible:outline-none"
-            >
-              {t("signOut")}
-            </button>
-          </form>
-        </div>
+      <header className="pt-5">
+        <AuthMasthead
+          email={email}
+          emailHref="/workspace/account"
+          mode="workspace"
+          showModeSwitch={staff}
+          context={crumbs}
+        />
       </header>
 
       <main className="flex-1 py-14">{children}</main>

@@ -112,6 +112,29 @@
     }
   }
 
+  /* Hero still-life fade (Brand Phase 3A): on desktop, soft-blend the
+     image's LEFT edge into the ivory hero background, so the photography
+     reads as immersive rather than a framed photo. Non-destructive (a CSS
+     mask over the untouched asset) and gracefully degrading — a browser
+     without mask-image simply shows the full image. Disabled below lg so
+     the mobile (stacked) image is never cut. */
+  @media (min-width: 1024px) {
+    .hero-fade {
+      -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        #000 26%,
+        #000 100%
+      );
+      mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        #000 26%,
+        #000 100%
+      );
+    }
+  }
+
   /* Interface text size: one bounded, gentle enlargement of the chrome.
      A modest root bump (17px) keeps every rem-based size proportional
      without damaging Administration density, clipping layout, or shrinking

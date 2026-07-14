@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Logo } from "@/components/brand/logo";
+import { CHARCOAL_ACTION } from "@/components/public/brand-cta";
 import { isAuthenticated } from "@/lib/auth/session";
 import { localeByCode } from "@/lib/locales";
 import { SITE_NAME, siteUrl } from "@/lib/site";
@@ -31,11 +32,14 @@ import { SITE_NAME, siteUrl } from "@/lib/site";
 const focusRing =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
 
+/** The primary public action — the approved concept's charcoal + gold
+ *  family (shared with the masthead action). Not oxblood; gold on charcoal,
+ *  never a gold fill. */
 function PrimaryLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <Link
       href={href}
-      className={`inline-flex items-center gap-2 bg-oxblood px-7 py-3.5 font-sans text-sm tracking-wide text-paper hover:bg-oxblood-deep ${focusRing} focus-visible:outline-ink`}
+      className={`inline-flex items-center gap-2 px-7 py-3.5 font-sans text-sm tracking-wide ${CHARCOAL_ACTION}`}
     >
       {children}
       <span aria-hidden>→</span>
@@ -158,7 +162,7 @@ export async function PublicHomePage({ locale }: { locale: string }) {
       {/* ---- Editorial hero: text beside the approved still-life ---- */}
       <section
         aria-labelledby="hero-heading"
-        className="mx-auto grid max-w-6xl items-center gap-x-14 gap-y-12 px-6 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.05fr_1fr] lg:gap-x-20 lg:py-24"
+        className="mx-auto grid max-w-6xl items-center gap-x-14 gap-y-12 px-6 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1fr_1.15fr] lg:gap-x-16 lg:py-24"
       >
         <div>
           <GoldEyebrow>{t("hero.eyebrow")}</GoldEyebrow>
@@ -191,19 +195,22 @@ export async function PublicHomePage({ locale }: { locale: string }) {
           </div>
         </div>
 
-        {/* The approved writing-desk still-life. A thin gold frame; the
-            image is the LCP element (priority, explicit dimensions → no
-            CLS). Production photography from a designer can replace the
-            file without touching this markup. */}
-        <div className="border border-gold-rule bg-parchment p-2 lg:p-2.5">
+        {/* The approved writing-desk still-life, larger and frameless: it
+            fills its column (object-cover) and — on desktop — its left edge
+            fades into the ivory hero background via a CSS mask (`.hero-fade`,
+            a non-destructive treatment that degrades gracefully and never
+            obscures text; disabled below lg so mobile shows the full image).
+            The LCP element: `priority`, and the container's min-heights
+            reserve space so there is no CLS. A higher-resolution photograph
+            can replace the file with no structural change. */}
+        <div className="hero-fade relative min-h-[20rem] w-full overflow-hidden sm:min-h-[26rem] lg:min-h-[34rem]">
           <Image
             src="/brand/hero-desk.jpg"
             alt={t("hero.imageAlt")}
-            width={846}
-            height={874}
+            fill
             priority
-            sizes="(min-width: 1024px) 34rem, 100vw"
-            className="h-auto w-full object-cover"
+            sizes="(min-width: 1024px) 44rem, 100vw"
+            className="object-cover object-center"
           />
         </div>
       </section>

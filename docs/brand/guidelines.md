@@ -78,6 +78,15 @@ functional accent everywhere: links, buttons, active navigation, focus,
 warnings. Status meaning never moves to gold, and no information may rely
 on the metallic treatment alone.
 
+*Exception (Brand Phase 3A).* The single PRIMARY public action — the hero
+CTA and the public masthead's top-right action — uses the approved
+concept's **charcoal + gold** family: a near-black `ink` surface with
+gold-muted text/arrow (≈8.3:1, AAA). This is gold TEXT on charcoal, not a
+gold background and not gold on ivory, so it honors both rules above;
+oxblood stays the accent for every other control (outlined secondary
+actions, links, hovers, focus). It is a targeted public-brand treatment,
+not a global change (`components/public/brand-cta.ts`).
+
 **Flat vs dimensional.** Everything ships flat. A dimensional/metallic
 treatment (CSS gradient over the flat vector) is permitted **only** as an
 optional large-format marketing variant (hero-scale, ≥ ~200px) and must

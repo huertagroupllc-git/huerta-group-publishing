@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Logo } from "@/components/brand/logo";
 import { MobileNav } from "@/components/public/mobile-nav";
+import { CHARCOAL_ACTION } from "@/components/public/brand-cta";
 import { PUBLIC_LOCALE } from "@/lib/locales";
 
 /**
@@ -35,8 +36,11 @@ export async function PublicMasthead({
     { href: `${home}#how-it-works`, label: t("howItWorks") },
     { href: `${home}#about`, label: t("about") },
   ];
+  // The top-right action, in the approved concept's charcoal + gold family.
+  // Truthful destination: a signed-in visitor enters the Workshop; a
+  // signed-out visitor goes to the existing sign-in flow. No new auth route.
   const authHref = signedIn ? "/workspace" : "/signin";
-  const authLabel = signedIn ? t("workspace") : t("signIn");
+  const authLabel = signedIn ? t("enterWorkshop") : t("signIn");
 
   return (
     <header className="border-b border-rule bg-paper-bright">
@@ -67,9 +71,10 @@ export async function PublicMasthead({
           ))}
           <Link
             href={authHref}
-            className="border border-rule px-4 py-2 font-sans text-xs uppercase tracking-[0.18em] text-oxblood hover:border-oxblood focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oxblood"
+            className={`inline-flex items-center gap-1.5 px-4 py-2 font-sans text-xs uppercase tracking-[0.18em] ${CHARCOAL_ACTION}`}
           >
             {authLabel}
+            <span aria-hidden>→</span>
           </Link>
         </nav>
 
