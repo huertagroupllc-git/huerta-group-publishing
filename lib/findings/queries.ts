@@ -297,14 +297,20 @@ export async function getRevisionBrief(
 export async function getCurrentReviewRunId(
   bookId: string,
 ): Promise<string | null> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("books")
-    .select("current_review_run_id")
-    .eq("id", bookId)
-    .maybeSingle();
-  if (error) return null; // column not present yet → no current review
-  return (data?.current_review_run_id as string | null) ?? null;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("books")
+      .select("current_review_run_id")
+      .eq("id", bookId)
+      .maybeSingle();
+    if (error) return null; // column not present yet → no current review
+    return (data?.current_review_run_id as string | null) ?? null;
+  } catch {
+    // The column may not exist before this feature's migration is applied;
+    // treat any failure as "no current review" — never break the page.
+    return null;
+  }
 }
 
 /** Database-derived preview of what "make this review current" would do.

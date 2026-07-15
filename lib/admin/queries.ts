@@ -701,15 +701,21 @@ export async function getAdminReviewRun(
   // renders before this feature's migration is applied (a missing column
   // yields no current marker, never a thrown error).
   let isCurrentRun = false;
-  {
-    const { data: bk } = await supabase
+  try {
+    const { data: bk, error: bkErr } = await supabase
       .from("books")
       .select("current_review_run_id")
       .eq("id", book.id as string)
       .maybeSingle();
-    isCurrentRun =
-      ((bk?.current_review_run_id as string | null) ?? null) ===
-      (run.id as string);
+    if (!bkErr) {
+      isCurrentRun =
+        ((bk?.current_review_run_id as string | null) ?? null) ===
+        (run.id as string);
+    }
+  } catch {
+    // Column may not exist before this feature's migration — no marker,
+    // never a thrown 500.
+    isCurrentRun = false;
   }
 
   return {
