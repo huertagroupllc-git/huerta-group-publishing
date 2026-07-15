@@ -21,6 +21,18 @@ import { DEFAULT_REVIEW_SETTINGS } from "@/lib/editorial-ai/review-settings";
  * (citesConstitution rejects findings whose explanations do not quote
  * the Constitution verbatim).
  *
+ * VERSION 4 (human sign-off correction of the v3 hybrid validation):
+ * two issue-selection corrections confirmed by human editorial review of
+ * the six-run matrix — (a) the shared quoted-voice law now requires
+ * speaker attribution BEFORE any register/address judgment, so quoted
+ * dialogue is no longer mistaken for narrator-to-reader voice (prompt.ts
+ * law 7); (b) the continuity check now demands a demonstrated semantic
+ * incompatibility before calling multiple metaphors/frames for one
+ * concept inconsistent (multiplicity is not inconsistency). The version
+ * bump re-fingerprints every prompt; historical v2/v3 runs keep their
+ * frozen versions and fingerprints, untouched. See
+ * docs/globalization/editorial-recall-engineering/reviewer-v4-human-signoff-corrections.md.
+ *
  * VERSION 2 (Phase 3J — editorial recall engineering). The reviewer
  * additionally reads for MANUSCRIPT INTEGRITY at manuscript scope:
  * cross-chapter continuity and accidental repetition. These two
@@ -37,7 +49,7 @@ import { DEFAULT_REVIEW_SETTINGS } from "@/lib/editorial-ai/review-settings";
 
 const TRACEABILITY = `Every finding must quote, inside quotation marks within its explanation, the exact words of the Book Constitution clause it is evaluating — a verbatim cited passage, copied character for character. If you cannot cite a specific clause of the Constitution, do not raise the finding. The only exceptions are findings in the "continuity" and "repetition" categories, which cite the manuscript against itself: quote the manuscript's own conflicting or recurring words verbatim instead.`;
 
-const CONTINUITY_CHECK = `Manuscript integrity — continuity (manuscript pass only, category "continuity", severity at most "suggestion"): compare the chapters against each other for statements that are individually plausible but collectively incompatible — facts, chronology, sequence, promises, stated outcomes, or how a person, subject, or concept behaves from one chapter to the next. Quote both conflicting passages verbatim when practical, naming the chapters they come from, and raise ONE consolidated finding per contradiction — never one fragment per chapter. Use the Constitution or Master Outline as supporting context when they establish the expectation. A true contradiction is two claims that cannot both hold; intentional development, deepening nuance, or mere variation in wording is not a contradiction and is not a finding.`;
+const CONTINUITY_CHECK = `Manuscript integrity — continuity (manuscript pass only, category "continuity", severity at most "suggestion"): compare the chapters against each other for statements that are individually plausible but collectively incompatible — facts, chronology, sequence, promises, stated outcomes, or how a person, subject, or concept behaves from one chapter to the next. Quote both conflicting passages verbatim when practical, naming the chapters they come from, and raise ONE consolidated finding per contradiction — never one fragment per chapter. Use the Constitution or Master Outline as supporting context when they establish the expectation. A true contradiction is two claims that cannot both hold; intentional development, deepening nuance, or mere variation in wording is not a contradiction and is not a finding. Multiplicity is not inconsistency: multiple metaphors, analogies, images, or explanatory frames for one concept are not a contradiction merely because they differ. Raise a concept-consistency finding only when the manuscript assigns the same concept meanings, functions, causes, facts, or implications that cannot reasonably coexist — name the exact incompatibility and explain what the reader cannot reconcile. Complementary metaphors, layered analogies, pedagogical reframing, motif development, and perspective shifts are protected; describing different dimensions of one concept that can coexist is not a finding.`;
 
 const REPETITION_CHECK = `Manuscript integrity — repetition (manuscript pass only, category "repetition", severity at most "suggestion"): notice substantially repeated claims, examples serving the same purpose, repeated conclusions, or metaphors and explanations that recur across chapters without deepening meaning — recurrence a reader of the whole feels even though each chapter alone reads cleanly. Protect the deliberate: thematic motifs, purposeful refrains, structural callbacks, necessary terminology, and pedagogical repetition that advances understanding are the author's craft, not defects. Raise redundancy ONCE at manuscript scope, quote representative recurrences with their chapters, and explain why the recurrence is redundant rather than merely repeated. If you cannot say what the repetition fails to add, do not raise it. A recurrence that performs the same argumentative work in the same words on each appearance is redundancy even when it looks like a motif; a motif earns its repetitions by carrying the thought forward. When the recurrences are verbatim or near-verbatim and the surrounding purpose does not change, raise the single manuscript-level finding rather than staying silent. When in doubt about authorial intent, raise it once as a Note and say what the recurrence fails to add.`;
 
@@ -51,7 +63,7 @@ const FULL_TEXT_BUDGET_CHARS = 400_000;
 export const constitutionReview: ReviewerDefinition = {
   type: "constitution",
   name: "Constitution Review",
-  version: 3,
+  version: 4,
   purpose:
     "To read the completed manuscript against the book's own stated intent — the Book Constitution — and say, in writing, where the manuscript honors it and where it has drifted.",
   governingQuestion:
