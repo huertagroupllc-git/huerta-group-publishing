@@ -56,13 +56,18 @@ export function AuthMasthead({
       <div aria-hidden className="h-px w-full bg-gold-rule/70" />
       <div className="mt-5 flex items-center justify-between gap-4">
         {/* The full lockup names the company; the link needs no extra text
-            and is decorative to assistive tech beyond its label. */}
+            and is decorative to assistive tech beyond its label. Mobile
+            matches the approved PUBLIC mobile masthead (height 36, ~175×53)
+            so the brand doesn't shrink crossing from the public site into
+            the app; desktop keeps its compact 34. Only one instance renders
+            per breakpoint. */}
         <Link
           href="/"
           aria-label={t("brand")}
           className="shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-oxblood"
         >
-          <Logo variant="horizontal" height={34} decorative />
+          <Logo variant="horizontal" height={34} decorative className="hidden sm:block" />
+          <Logo variant="horizontal" height={36} decorative className="sm:hidden" />
         </Link>
 
         {/* Desktop: the information-rich global cluster. */}
