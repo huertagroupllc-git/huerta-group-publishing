@@ -652,7 +652,9 @@
       "statusComplete": "Complete",
       "statusFailed": "Failed",
       "statusRunning": "Running",
-      "ms": "{ms, number} ms"
+      "ms": "{ms, number} ms",
+      "currentReview": "Current editorial review",
+      "historicalReview": "Historical review"
     },
     "aiUsage": {
       "intro": "Where the platform's use of external editorial models will be accounted for — reading now, and one day listening.",
@@ -890,7 +892,30 @@
       "signInRequired": "Sign in to request a review.",
       "reviewMigrationMissing": "The database is missing a Constitution Review migration — apply supabase/migrations/20260712000000_constitution_review.sql and the chunked-execution migrations 20260714/20260715 (docs/setup.md §2).",
       "reviewDidNotFinish": "The review could not finish. Findings raised before the failure are preserved below.",
-      "reviewPausedTokenBudget": "The review paused after reaching its configured usage limit. Everything read so far is preserved — the review is incomplete, not failed, and can be continued once the usage policy or available credit is addressed."
+      "reviewPausedTokenBudget": "The review paused after reaching its configured usage limit. Everything read so far is preserved — the review is incomplete, not failed, and can be continued once the usage policy or available credit is addressed.",
+      "makeCurrentFailed": "The current review could not be set. Please try again.",
+      "makeCurrentUnauthorized": "You do not have permission to change this book's current review.",
+      "makeCurrentRunNotFound": "That review run could not be found.",
+      "makeCurrentWrongBook": "That review belongs to a different book.",
+      "makeCurrentNotComplete": "Only a completed review can be made the current review.",
+      "makeCurrentMigrationMissing": "The current-review feature isn't available yet. Its migration may not be applied."
+    },
+    "currentReview": {
+      "makeCurrent": "Make this the current review",
+      "currentReview": "Current editorial review",
+      "confirmTitle": "Make this the current review?",
+      "confirmBody": "This review becomes the active editorial source for the book. Older open findings that have not been deliberated will be set aside. Deliberated and resolved findings remain preserved. No review run or finding is deleted — older findings can still be viewed historically, and set-aside findings may be reopened later.",
+      "confirmAction": "Make current",
+      "cancel": "Cancel",
+      "previewActive": "Findings in this review (stay active)",
+      "previewSetAside": "Older open findings to set aside",
+      "previewDeliberated": "Deliberated findings (kept)",
+      "previewResolved": "Resolved findings (kept)",
+      "previewAlreadySetAside": "Already set aside (kept)",
+      "previewManual": "Findings you raised yourself (kept)",
+      "previewUnavailable": "The preview could not be read right now.",
+      "setAsideReason": "Set aside when the {review} of {date} became the current editorial review.",
+      "madeCurrentNotice": "This review is now the book's current editorial review. {count, plural, =0 {No older findings were set aside} one {# older finding was set aside} other {# older findings were set aside}}."
     }
   },
   "deliberation": {

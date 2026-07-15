@@ -1,7 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { withActionMessage } from "@/lib/action-messages";
+import { getLocale, getTranslations } from "next-intl/server";
+import { withActionMessage, withActionNotice } from "@/lib/action-messages";
 import { createClient } from "@/lib/supabase/server";
 import {
   ReviewNotPossibleError,
@@ -9,6 +10,7 @@ import {
   startReview,
 } from "@/lib/editorial-ai/runner";
 import { constitutionReview } from "@/lib/review/constitution";
+import { formatDate } from "@/lib/memory/types";
 
 /** Failures redirect with STABLE MESSAGE CODES from the findings.errors
  *  namespace (the Phase 3B pattern); raw exception, model, and database
@@ -70,6 +72,85 @@ export async function requestConstitutionReview(formData: FormData) {
     if (isRedirect(error)) throw error;
     console.error("[review] constitution request failed", error);
     redirect(withActionMessage(requestPath, { code: codeFor(error) }));
+  }
+}
+
+/** Map a make_review_current RPC exception to a stable message code. The
+ *  RPC raises bare tokens; raw text is never shown. */
+function makeCurrentCode(message: string): string {
+  if (/not_authorized/.test(message)) return "makeCurrentUnauthorized";
+  if (/run_not_found/.test(message)) return "makeCurrentRunNotFound";
+  if (/run_wrong_book/.test(message)) return "makeCurrentWrongBook";
+  if (/run_not_complete/.test(message)) return "makeCurrentNotComplete";
+  if (/does not exist|current_review_run_id|make_review_current/i.test(message))
+    return "makeCurrentMigrationMissing";
+  return "makeCurrentFailed";
+}
+
+/**
+ * Make a completed review the book's current editorial review: point the
+ * book at it and sweep the older, still-open, undeliberated review findings
+ * into Set aside so the active workflow works from today's review. One
+ * atomic RPC (owner-gated, RLS-enforced); nothing is deleted. The set-aside
+ * reason is composed here, in the request locale, from the run's own type
+ * and date — never hardcoded.
+ */
+export async function makeCurrentReview(formData: FormData) {
+  const authorSlug = String(formData.get("author_slug") ?? "");
+  const bookSlug = String(formData.get("book_slug") ?? "");
+  const bookId = String(formData.get("book_id") ?? "");
+  const runId = String(formData.get("run_id") ?? "");
+  const findingsPath = `/workspace/authors/${authorSlug}/books/${bookSlug}/findings`;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/signin");
+
+  try {
+    const { data: run } = await supabase
+      .from("review_runs")
+      .select("created_at, review_type")
+      .eq("id", runId)
+      .maybeSingle();
+
+    const locale = await getLocale();
+    const tReason = await getTranslations({
+      locale,
+      namespace: "findings.currentReview",
+    });
+    const tType = await getTranslations({ locale, namespace: "status.reviewType" });
+    const reviewLabel = tType(
+      (run?.review_type as "manual" | "constitution") ?? "constitution",
+    );
+    const reason = tReason("setAsideReason", {
+      review: reviewLabel,
+      date: formatDate(run?.created_at ?? new Date().toISOString(), locale),
+    });
+
+    const { data, error } = await supabase.rpc("make_review_current", {
+      p_book_id: bookId,
+      p_run_id: runId,
+      p_reason: reason,
+    });
+    if (error) {
+      console.error("[review] make current failed", error);
+      redirect(withActionMessage(findingsPath, { code: makeCurrentCode(error.message) }));
+    }
+    const setAside = Number(
+      (data as { set_aside?: number } | null)?.set_aside ?? 0,
+    );
+    redirect(
+      withActionNotice(findingsPath, {
+        code: "reviewMadeCurrent",
+        params: { count: String(setAside) },
+      }),
+    );
+  } catch (error) {
+    if (isRedirect(error)) throw error;
+    console.error("[review] make current failed", error);
+    redirect(withActionMessage(findingsPath, { code: "makeCurrentFailed" }));
   }
 }
 

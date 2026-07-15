@@ -10,8 +10,11 @@ import {
 import { getLocale, getTranslations } from "next-intl/server";
 import { ActionMessage } from "@/components/action-message";
 import { SetupNotice } from "@/components/setup-notice";
-import { WorkspaceFrame } from "@/components/workspace-frame";
-import { actionMessageFromQuery } from "@/lib/action-messages";
+import { WorkspaceFrame, NoticeNote } from "@/components/workspace-frame";
+import {
+  actionMessageFromQuery,
+  actionNoticeFromQuery,
+} from "@/lib/action-messages";
 import {
   reopenFinding,
   resolveFinding,
@@ -19,7 +22,13 @@ import {
 } from "@/lib/findings/actions";
 import { deliberationStatesForBook } from "@/lib/deliberations/queries";
 import type { DeliberationStatus } from "@/lib/deliberations/types";
-import { getFindingsRoom, type FindingsRoom } from "@/lib/findings/queries";
+import {
+  getCurrentReviewRunId,
+  getFindingsRoom,
+  previewMakeCurrentReview,
+  type CurrentReviewPreview,
+  type FindingsRoom,
+} from "@/lib/findings/queries";
 import {
   FINDING_STATUSES,
   REVIEW_TYPE_LABELS,
@@ -27,7 +36,10 @@ import {
   type FindingListEntry,
   type FindingStatus,
 } from "@/lib/findings/types";
-import { continueConstitutionReview } from "@/lib/review/actions";
+import {
+  continueConstitutionReview,
+  makeCurrentReview,
+} from "@/lib/review/actions";
 import { formatDate } from "@/lib/memory/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -116,14 +128,34 @@ export default async function FindingsPage({
     : "open";
   const shown = findings.filter((f) => f.status === shownStatus);
 
-  // The Reviews block above counts only the most recent review run; the
-  // list below shows every finding ever raised. Mark AI findings that
-  // belong to an earlier run so the two never appear to disagree.
-  const latestRunId = latestReview?.id ?? null;
+  // The active editorial review is the book's CURRENT review when one has
+  // been chosen (books.current_review_run_id), never inferred from the
+  // newest date. Backward compatible: with no current review, fall back to
+  // the latest run so existing books behave exactly as before.
+  const tCurrent = await getTranslations("findings.currentReview");
+  const notice = actionNoticeFromQuery(query);
+  const currentReviewRunId = await getCurrentReviewRunId(book.id);
+  const latestIsCurrent =
+    latestReview != null && latestReview.id === currentReviewRunId;
+  const canMakeCurrent =
+    latestReview != null &&
+    latestReview.status === "complete" &&
+    !latestIsCurrent;
+  const confirmingCurrent = canMakeCurrent && query.confirm === "current";
+  // A live, database-derived preview of the sweep — never fabricated.
+  const preview: CurrentReviewPreview | null = confirmingCurrent
+    ? await previewMakeCurrentReview(book.id, latestReview!.id).catch(
+        () => null,
+      )
+    : null;
+
+  // Findings that belong to a review other than the active one are marked
+  // so the active working set and the full history never appear to disagree.
+  const activeRunId = currentReviewRunId ?? latestReview?.id ?? null;
   const isFromEarlierReview = (f: FindingListEntry): boolean =>
     f.review_run_id != null &&
     f.reviewType !== "manual" &&
-    f.review_run_id !== latestRunId;
+    f.review_run_id !== activeRunId;
   const hasEarlierReviewFindings = findings.some(isFromEarlierReview);
 
   // Book-level findings first (The Manuscript), then by chapter.
@@ -161,12 +193,19 @@ export default async function FindingsPage({
         {t("intro")}
       </p>
 
-      <div className="mt-4">
+      <div className="mt-4 space-y-3">
         <ActionMessage
           code={message?.code}
           params={message?.params}
           namespace="findings.errors"
         />
+        {notice?.code === "reviewMadeCurrent" ? (
+          <NoticeNote
+            message={tCurrent("madeCurrentNotice", {
+              count: Number(notice.params?.count ?? 0),
+            })}
+          />
+        ) : null}
       </div>
 
       <div className="rule mt-10 pt-5">
@@ -224,6 +263,11 @@ export default async function FindingsPage({
             </div>
           ) : (
             <div className="mt-4 max-w-prose">
+              {latestIsCurrent ? (
+                <p className="eyebrow text-brand-gold-dark">
+                  {tCurrent("currentReview")}
+                </p>
+              ) : null}
               <p className="font-sans text-xs text-ink-soft">
                 {reviewTypeName(latestReview.reviewType)} ·{" "}
                 {formatDate(latestReview.createdAt, locale)} ·{" "}
@@ -236,6 +280,75 @@ export default async function FindingsPage({
                 <p className="mt-2 border-l-2 border-rule pl-4 text-sm italic leading-relaxed text-ink-soft">
                   {latestReview.summary}
                 </p>
+              ) : null}
+
+              {/* Make this completed review the book's current editorial
+                  review. Two steps: an explicit confirm that shows a live,
+                  database-derived preview of exactly what will be set aside
+                  (and what is preserved) before anything changes. */}
+              {canMakeCurrent && !confirmingCurrent ? (
+                <ActionLink href={`${findingsPath}?confirm=current`}>
+                  {tCurrent("makeCurrent")}
+                </ActionLink>
+              ) : null}
+              {confirmingCurrent ? (
+                <div className="rule mt-5 max-w-prose pt-5">
+                  <p className="eyebrow">{tCurrent("confirmTitle")}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+                    {tCurrent("confirmBody")}
+                  </p>
+                  {preview ? (
+                    <dl className="mt-4 space-y-1.5 font-sans text-xs text-ink-soft">
+                      <div className="flex justify-between gap-6">
+                        <dt>{tCurrent("previewActive")}</dt>
+                        <dd className="text-ink">{preview.runFindingsCount}</dd>
+                      </div>
+                      <div className="flex justify-between gap-6">
+                        <dt>{tCurrent("previewSetAside")}</dt>
+                        <dd className="text-ink">{preview.willSetAside}</dd>
+                      </div>
+                      <div className="flex justify-between gap-6">
+                        <dt>{tCurrent("previewDeliberated")}</dt>
+                        <dd className="text-ink">
+                          {preview.deliberatedPreserved}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between gap-6">
+                        <dt>{tCurrent("previewResolved")}</dt>
+                        <dd className="text-ink">{preview.resolvedPreserved}</dd>
+                      </div>
+                      <div className="flex justify-between gap-6">
+                        <dt>{tCurrent("previewAlreadySetAside")}</dt>
+                        <dd className="text-ink">{preview.alreadySetAside}</dd>
+                      </div>
+                      <div className="flex justify-between gap-6">
+                        <dt>{tCurrent("previewManual")}</dt>
+                        <dd className="text-ink">{preview.manualPreserved}</dd>
+                      </div>
+                    </dl>
+                  ) : (
+                    <p className="mt-4 font-sans text-xs text-oxblood">
+                      {tCurrent("previewUnavailable")}
+                    </p>
+                  )}
+                  <div className="mt-5 flex items-baseline gap-6">
+                    <form action={makeCurrentReview}>
+                      <input type="hidden" name="author_slug" value={author.slug} />
+                      <input type="hidden" name="book_slug" value={book.slug} />
+                      <input type="hidden" name="book_id" value={book.id} />
+                      <input type="hidden" name="run_id" value={latestReview.id} />
+                      <PrimaryButton className="px-4 py-2 text-xs">
+                        {tCurrent("confirmAction")}
+                      </PrimaryButton>
+                    </form>
+                    <Link
+                      href={findingsPath}
+                      className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
+                    >
+                      {tCurrent("cancel")}
+                    </Link>
+                  </div>
+                </div>
               ) : null}
             </div>
           )

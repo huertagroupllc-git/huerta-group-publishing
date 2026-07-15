@@ -290,6 +290,109 @@ export async function getRevisionBrief(
   };
 }
 
+/** The book's current editorial review run id, read on its own so the
+ *  page still works before this feature's migration is applied — a missing
+ *  column yields null, never a thrown error (the same backward-compatible
+ *  pattern the progress columns use). Never inferred from date. */
+export async function getCurrentReviewRunId(
+  bookId: string,
+): Promise<string | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("books")
+    .select("current_review_run_id")
+    .eq("id", bookId)
+    .maybeSingle();
+  if (error) return null; // column not present yet → no current review
+  return (data?.current_review_run_id as string | null) ?? null;
+}
+
+/** Database-derived preview of what "make this review current" would do.
+ *  Every count is read live (never fabricated); it mirrors the eligibility
+ *  the make_review_current RPC enforces exactly, so the confirmation is
+ *  truthful. */
+export interface CurrentReviewPreview {
+  runId: string;
+  runCreatedAt: string | null;
+  reviewTypeCode: string | null;
+  /** Findings in the run being made current (they stay active, untouched). */
+  runFindingsCount: number;
+  /** Older, non-manual, Open, undeliberated findings that WILL be set aside. */
+  willSetAside: number;
+  /** Older findings connected to a deliberation — preserved untouched. */
+  deliberatedPreserved: number;
+  /** Older resolved findings — preserved untouched. */
+  resolvedPreserved: number;
+  /** Older findings already Set aside — preserved untouched. */
+  alreadySetAside: number;
+  /** The author's own manual findings — preserved untouched. */
+  manualPreserved: number;
+}
+
+export async function previewMakeCurrentReview(
+  bookId: string,
+  runId: string,
+): Promise<CurrentReviewPreview> {
+  const supabase = await createClient();
+
+  const [{ data: findings, error }, { data: delibs }, { data: runs }] =
+    await Promise.all([
+      supabase
+        .from("editorial_findings")
+        .select("id, review_run_id, status")
+        .eq("book_id", bookId),
+      supabase
+        .from("editorial_deliberations")
+        .select("finding_id")
+        .eq("book_id", bookId),
+      supabase
+        .from("review_runs")
+        .select("id, review_type, created_at")
+        .eq("book_id", bookId),
+    ]);
+
+  if (error)
+    throw new Error(`Could not preview the current review: ${error.message}`);
+
+  const deliberated = new Set((delibs ?? []).map((d) => d.finding_id));
+  const manualRunIds = new Set(
+    (runs ?? []).filter((r) => r.review_type === "manual").map((r) => r.id),
+  );
+  const selectedRun = (runs ?? []).find((r) => r.id === runId) ?? null;
+
+  const p: CurrentReviewPreview = {
+    runId,
+    runCreatedAt: selectedRun?.created_at ?? null,
+    reviewTypeCode: selectedRun?.review_type ?? null,
+    runFindingsCount: 0,
+    willSetAside: 0,
+    deliberatedPreserved: 0,
+    resolvedPreserved: 0,
+    alreadySetAside: 0,
+    manualPreserved: 0,
+  };
+
+  for (const f of findings ?? []) {
+    if (f.review_run_id === runId) {
+      p.runFindingsCount++;
+      continue;
+    }
+    if (f.review_run_id != null && manualRunIds.has(f.review_run_id)) {
+      p.manualPreserved++;
+      continue;
+    }
+    if (deliberated.has(f.id)) {
+      p.deliberatedPreserved++;
+      continue;
+    }
+    if (f.status === "resolved") p.resolvedPreserved++;
+    else if (f.status === "dismissed") p.alreadySetAside++;
+    else if (f.status === "open") p.willSetAside++;
+  }
+
+  return p;
+}
+
 /** The Book Study's one quiet number. */
 export async function openFindingsCount(bookId: string): Promise<number> {
   const supabase = await createClient();
