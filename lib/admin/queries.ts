@@ -529,6 +529,9 @@ export interface AdminRunDetail {
    *  requested in — frozen provenance, recorded at creation. */
   responseLanguage: string;
   summary: string | null;
+  /** True when this run IS the book's current editorial review
+   *  (books.current_review_run_id). Read-only marker; not inferred by date. */
+  isCurrent: boolean;
   book: { id: string; slug: string; title: string };
   author: { id: string; slug: string; fullName: string };
   totalPasses: number | null;
@@ -694,6 +697,24 @@ export async function getAdminReviewRun(
   // Total = input + output only; cached is a subset of input, never added.
   readingTotals.totalTokens = readingTotals.inputTokens + readingTotals.outputTokens;
 
+  // The current-review pointer, read on its own (a plain column select, never
+  // an ambiguous embed) and defensively, so a run detail never 500s.
+  let isCurrentRun = false;
+  try {
+    const { data: bk, error: bkErr } = await supabase
+      .from("books")
+      .select("current_review_run_id")
+      .eq("id", book.id as string)
+      .maybeSingle();
+    if (!bkErr) {
+      isCurrentRun =
+        ((bk?.current_review_run_id as string | null) ?? null) ===
+        (run.id as string);
+    }
+  } catch {
+    isCurrentRun = false;
+  }
+
   return {
     id: run.id as string,
     reviewType: run.review_type as string,
@@ -704,6 +725,7 @@ export async function getAdminReviewRun(
     // and remain readable as they are.
     responseLanguage: (run.response_language as string) ?? "en",
     summary: (run.summary as string) ?? null,
+    isCurrent: isCurrentRun,
     book: {
       id: (book.id as string) ?? "",
       slug: (book.slug as string) ?? "",
