@@ -103,11 +103,6 @@ export default async function AdminReviewRunDetailPage({
           {run.author.fullName}
         </Link>
       </p>
-      <p
-        className={`mt-2 eyebrow ${run.isCurrent ? "text-brand-gold-dark" : "text-ink-faint"}`}
-      >
-        {run.isCurrent ? t("currentReview") : t("historicalReview")}
-      </p>
 
       <dl className="rule mt-8 grid max-w-3xl grid-cols-2 gap-x-10 gap-y-6 pt-6 sm:grid-cols-4">
         <Fact label={t("status")} value={runStatusName(run.status)} />
