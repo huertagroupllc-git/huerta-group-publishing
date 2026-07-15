@@ -459,7 +459,7 @@ export async function listAdminReviewRuns(): Promise<AdminRunRow[]> {
     supabase
       .from("review_runs")
       .select(
-        "id, review_type, status, created_at, book_id, books!inner(id, slug, title, authors!inner(id, slug, full_name))",
+        "id, review_type, status, created_at, book_id, books!review_runs_book_id_fkey!inner(id, slug, title, authors!inner(id, slug, full_name))",
       )
       .neq("review_type", "manual")
       .limit(20000),
@@ -593,7 +593,7 @@ export async function getAdminReviewRun(
   const { data: run, error } = await supabase
     .from("review_runs")
     .select(
-      "id, review_type, status, summary, response_language, context_versions, created_at, books!inner(id, slug, title, authors!inner(id, slug, full_name))",
+      "id, review_type, status, summary, response_language, context_versions, created_at, books!review_runs_book_id_fkey!inner(id, slug, title, authors!inner(id, slug, full_name))",
     )
     .eq("id", runId)
     .maybeSingle();
