@@ -376,24 +376,28 @@ export async function PublicHomePage({ locale }: { locale: string }) {
         className="border-t border-rule"
       >
         <div className="mx-auto max-w-6xl px-6 py-24 text-center sm:px-8 sm:py-28">
-          {/* The section emblem — a deliberate standalone HG monogram, not a
-              tiny icon: enlarged to a brand signature (~1.9× the prior size
-              on desktop, proportionally on mobile) and drawn closer to the
-              heading so it reads as connected. The wordmark elsewhere names
-              the company, so the mark is decorative to assistive tech.
-              Frameless — no card, circle, border, shadow, or background.
-              Replaceable via the Logo component when final artwork lands. */}
+          {/* The section emblem — a deliberate standalone HG monogram sized
+              to genuinely anchor this final invitation, not a small icon in
+              empty space: 112px on mobile, 128 at sm, 160 on desktop
+              (~1.75–1.9× the prior size). The mark is square (natural
+              150×150); BOTH the h- and w- utilities are pinned so the global
+              `img{height:auto}` cannot distort it and the aspect stays 1:1.
+              Centered above the headline with comfortable breathing room
+              (mt-8). The wordmark elsewhere names the company, so the mark is
+              decorative to assistive tech. Frameless — no card, circle,
+              border, shadow, or background. Replaceable via the Logo
+              component when final artwork lands. */}
           <div className="flex justify-center">
             <Logo
               variant="mark"
-              height={84}
+              height={160}
               decorative
-              className="h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem] lg:h-[5.25rem] lg:w-[5.25rem]"
+              className="h-28 w-28 sm:h-32 sm:w-32 lg:h-40 lg:w-40"
             />
           </div>
           <h2
             id="cta-heading"
-            className="mx-auto mt-6 max-w-2xl font-display text-3xl tracking-tight text-ink sm:text-4xl lg:text-5xl"
+            className="mx-auto mt-8 max-w-2xl font-display text-3xl tracking-tight text-ink sm:text-4xl lg:text-5xl"
           >
             {t("cta.heading")}
           </h2>
