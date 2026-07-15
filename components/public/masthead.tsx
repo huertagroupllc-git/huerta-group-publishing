@@ -59,19 +59,25 @@ export async function PublicMasthead({
               treatment from phone to desktop.
 
               Desktop: a prominent brand anchor. The SAME Logo component,
-              scaled purely by height (so the lockup's proportions match the
-              rest of the app exactly), stepped by breakpoint — 60px at
-              large/xl desktop (~+36%) and 66px on wide screens (~+50%) —
-              while holding the approved 44px at laptop/tablet so the nav and
+              scaled purely by its `height` prop (a global `img{height:auto}`
+              from Tailwind's preflight makes the WIDTH attribute drive the
+              rendered size, so height follows the lockup's natural aspect —
+              proportions match the rest of the app). Stepped UP by
+              breakpoint, always well above the approved 44 baseline:
+                • laptop  (lg):  60  → ~292×89  (~+37%)
+                • desktop (xl):  64  → ~312×95  (~+46%)
+                • wide   (2xl):  66  → ~321×98  (~+50%)
+              while holding the approved 44 at tablet/small so the nav and
               action never crowd. Only one instance renders per width, so
               assistive tech announces the brand once.
 
-              Mobile: only a slight lift (36 → 39px, ~+8%) — the approved
-              one-row balance with MENU is preserved. */}
+              Mobile: reverted to the approved 36 (175×53) — the balanced
+              one-row layout with MENU, clearly smaller than desktop. */}
           <Logo variant="horizontal" height={44} className="hidden sm:block lg:hidden" />
-          <Logo variant="horizontal" height={60} className="hidden lg:block 2xl:hidden" />
+          <Logo variant="horizontal" height={60} className="hidden lg:block xl:hidden" />
+          <Logo variant="horizontal" height={64} className="hidden xl:block 2xl:hidden" />
           <Logo variant="horizontal" height={66} className="hidden 2xl:block" />
-          <Logo variant="horizontal" height={39} className="sm:hidden" />
+          <Logo variant="horizontal" height={36} className="sm:hidden" />
         </Link>
 
         <nav
