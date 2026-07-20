@@ -65,7 +65,9 @@
       "closeMenu": "Cerrar menú",
       "skip": "Ir al contenido",
       "primary": "Principal",
-      "enterWorkshop": "Entrar al Taller"
+      "enterWorkshop": "Entrar al Taller",
+      "pricing": "Precios",
+      "support": "Soporte"
     },
     "hero": {
       "eyebrow": "Su libro. Su voz. Su travesía.",
@@ -181,7 +183,25 @@
       "body": "El Taller es donde se guardan los autores y sus libros — deliberadamente, permanentemente, en la propia voz del autor."
     },
     "footer": {
-      "statement": "Una casa editorial con memoria — un espacio dedicado donde los libros se desarrollan, se refinan y se conservan."
+      "statement": "Una casa editorial con memoria — un espacio dedicado donde los libros se desarrollan, se refinan y se conservan.",
+      "groups": {
+        "product": "Producto",
+        "company": "Compañía",
+        "legal": "Legal"
+      },
+      "links": {
+        "howItWorks": "Cómo funciona",
+        "workshop": "Dentro del Taller",
+        "pricing": "Precios",
+        "about": "Acerca de",
+        "faq": "Preguntas frecuentes",
+        "support": "Soporte",
+        "contact": "Contacto",
+        "terms": "Términos del servicio",
+        "privacy": "Política de privacidad",
+        "aiDisclaimer": "Aviso sobre IA y edición",
+        "copyright": "Derechos de autor y PI"
+      }
     },
     "meta": {
       "promise": "Desarrolle libros, no solo manuscritos.",
@@ -476,7 +496,8 @@
         "books": "Libros",
         "reviewRuns": "Sesiones de Revisión",
         "aiUsage": "Uso de IA",
-        "system": "Sistema"
+        "system": "Sistema",
+        "support": "Soporte"
       }
     },
     "overview": {
@@ -737,6 +758,46 @@
         "deletionNotAuthorized": "La eliminación permanente está restringida al personal.",
         "authorDeleted": "{name} y todos sus registros dependientes se eliminaron de forma permanente.",
         "bookDeleted": "«{title}» y todos sus registros dependientes se eliminaron de forma permanente."
+      }
+    },
+    "support": {
+      "intro": "Preguntas, comentarios y reportes de error de miembros y visitantes. Asigna un estado y deja una nota interna a medida que atiendes cada uno.",
+      "filterLabel": "Filtrar envíos por estado",
+      "filters": {
+        "all": "Todos",
+        "new": "Nuevos",
+        "open": "Abiertos",
+        "resolved": "Resueltos",
+        "archived": "Archivados"
+      },
+      "empty": "No hay envíos en esta vista.",
+      "categories": {
+        "question": "Pregunta",
+        "feedback": "Comentario",
+        "bug": "Error",
+        "account": "Cuenta",
+        "legal": "Legal",
+        "other": "Otro"
+      },
+      "statuses": {
+        "new": "Nuevo",
+        "open": "Abierto",
+        "resolved": "Resuelto",
+        "archived": "Archivado"
+      },
+      "statusLabel": "Estado",
+      "staffNoteLabel": "Nota interna",
+      "save": "Guardar",
+      "noEmail": "Sin correo",
+      "member": "Miembro",
+      "anonymous": "Anónimo",
+      "notices": {
+        "submissionUpdated": "Envío actualizado."
+      },
+      "errors": {
+        "notFound": "No se encontró ese envío.",
+        "invalidStatus": "Ese estado no es válido.",
+        "updateFailed": "No se pudo actualizar el envío. Inténtalo de nuevo."
       }
     }
   },
@@ -1165,6 +1226,470 @@
       "source": "Origen",
       "bookSettingsLink": "Ajustes del libro",
       "adminHeading": "Preferencias editoriales (congeladas)"
+    }
+  },
+  "publicPages": {
+    "ui": {
+      "lastUpdated": "Última actualización:",
+      "draftBannerTitle": "Borrador en lenguaje claro — no es asesoría legal",
+      "draftBannerBody": "Esta página es un borrador en lenguaje claro ofrecido por transparencia. No ha sido revisado por un abogado y no constituye asesoría legal. Los elementos entre [[dobles corchetes]] son marcadores de datos específicos de la empresa que el asesor legal completará antes de que sea vinculante."
+    },
+    "pricing": {
+      "eyebrow": "Membresía",
+      "title": "Qué incluye la membresía",
+      "lead": "Huerta Group Publishing es un taller por membresía para autores que quieren desarrollar un libro con su propia voz. Esto es lo que ofrece una membresía — y cómo pensamos en su costo.",
+      "highlights": [
+        "El Taller completo: descubrimiento guiado, Memoria del Libro, la sala de escritura y copias de lectura.",
+        "Revisión editorial basada en una constitución que respeta tu voz, con hallazgos que tú decides.",
+        "Tu manuscrito versionado y preservado en cada paso — nada se sobrescribe.",
+        "Tu autoría y tus derechos siguen siendo tuyos (ver Derechos de autor y PI)."
+      ],
+      "sections": [
+        {
+          "heading": "Cómo funciona la membresía",
+          "body": [
+            "La membresía te da acceso al Taller y sus herramientas editoriales mientras tu membresía esté activa. Tú escribes; la plataforma preserva y revisa; tú sigues siendo el autor de cada decisión.",
+            "No hay compromisos a largo plazo. Puedes cancelar cuando quieras desde tu página de Cuenta, y tu trabajo entra en un período de retención para que puedas volver a él."
+          ]
+        },
+        {
+          "heading": "Cuánto cuesta",
+          "body": [
+            "Los precios se están definiendo. Aún no indicamos un precio en esta página, y no se requiere pago para explorar el sitio público. Cuando se publiquen los precios, aparecerán aquí y en tu página de Cuenta antes de cualquier cobro.",
+            "Si tienes una pregunta sobre precios o quieres que te avisemos cuando se definan, escríbenos por Soporte."
+          ]
+        },
+        {
+          "heading": "Si decides irte",
+          "body": [
+            "Cancelar no elimina tu trabajo de inmediato. Tu espacio de trabajo se archiva y se conserva por un período de retención (doce meses por defecto) para que puedas volver, exportar o pedirnos más tiempo. También puedes solicitar la eliminación permanente cuando lo desees."
+          ]
+        }
+      ],
+      "footnote": "Nada en esta página es una oferta de precios específicos ni un contrato. Los términos de la membresía se rigen por los Términos del servicio."
+    },
+    "faq": {
+      "eyebrow": "Preguntas",
+      "title": "Preguntas frecuentes",
+      "lead": "Las preguntas que los autores hacen con más frecuencia sobre el Taller, la revisión editorial, la propiedad y qué pasa con tu trabajo.",
+      "sections": [
+        {
+          "heading": "¿Qué es Huerta Group Publishing?",
+          "body": [
+            "Un taller por membresía que ayuda a los autores a desarrollar un libro mediante conversación y una revisión editorial cuidadosa — uno que suene más como tú, no más como una máquina."
+          ]
+        },
+        {
+          "heading": "¿Cómo funciona la revisión editorial?",
+          "body": [
+            "Las revisiones son deliberadas: tú las solicitas, nunca se ejecutan automáticamente. Una revisión lee tu manuscrito frente a una constitución editorial estable y devuelve hallazgos. Tú decides qué hacer — la revisión aconseja, no sobrescribe tu trabajo."
+          ]
+        },
+        {
+          "heading": "¿Usan IA, y cómo?",
+          "body": [
+            "Sí, como herramienta. La IA ayuda con las conversaciones de descubrimiento y con la revisión editorial. No escribe tu libro por ti ni toma decisiones finales. Consulta el Aviso sobre IA y edición."
+          ]
+        },
+        {
+          "heading": "¿Se usa mi escritura para entrenar modelos de IA?",
+          "body": [
+            "No vendemos tu manuscrito, y nuestra intención es que tu trabajo no se use para entrenar modelos de terceros más allá de lo necesario para procesar una solicitud que tú pediste. La Política de privacidad describe cómo se maneja tu contenido."
+          ]
+        },
+        {
+          "heading": "¿Quién posee los derechos de mi libro?",
+          "body": [
+            "Tú. Conservas la autoría y los derechos de propiedad intelectual de tu obra. Nosotros recibimos solo la licencia limitada necesaria para operar el servicio. Consulta Derechos de autor y PI."
+          ]
+        },
+        {
+          "heading": "¿Puedo cancelar mi membresía?",
+          "body": [
+            "Sí, cuando quieras, desde tu página de Cuenta. Cancelar programa el archivado de tu espacio de trabajo; por sí mismo no cobra ni elimina nada."
+          ]
+        },
+        {
+          "heading": "¿Qué pasa con mi trabajo si cancelo?",
+          "body": [
+            "Tu espacio de trabajo se archiva y se conserva por un período de retención — doce meses por defecto. Durante ese tiempo puedes volver, reactivar o pedirnos más tiempo antes de que se elimine algo."
+          ]
+        },
+        {
+          "heading": "¿Cuánto conservan el trabajo archivado y puedo recuperarlo?",
+          "body": [
+            "Por defecto conservamos un espacio de trabajo archivado durante doce meses, y enviamos avisos con antelación antes de que se cierre la ventana. Puedes reactivar en cualquier momento de ese período, o solicitar una extensión. También puedes solicitar la eliminación permanente antes si lo prefieres."
+          ]
+        },
+        {
+          "heading": "¿Cómo obtengo ayuda?",
+          "body": [
+            "Usa la página de Soporte para enviarnos una pregunta, comentarios o un reporte de error. Si has iniciado sesión, tendremos el contexto de tu cuenta; si no, deja un correo para responderte."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "eyebrow": "Legal",
+      "title": "Términos del servicio",
+      "lead": "Estos términos rigen tu uso de Huerta Group Publishing. Este es un borrador en lenguaje claro; la versión vinculante será completada por un asesor legal.",
+      "updated": "[[fecha de vigencia por definir]]",
+      "draft": true,
+      "sections": [
+        {
+          "heading": "1. Aceptación",
+          "body": [
+            "Al crear una cuenta o usar el servicio, aceptas estos términos. Si no estás de acuerdo, no uses el servicio."
+          ]
+        },
+        {
+          "heading": "2. El servicio",
+          "body": [
+            "Huerta Group Publishing ofrece un taller por membresía y herramientas editoriales para desarrollar manuscritos. Las funciones pueden cambiar a medida que la plataforma evoluciona."
+          ]
+        },
+        {
+          "heading": "3. Tu cuenta",
+          "body": [
+            "Eres responsable de las credenciales de tu cuenta y de la actividad realizada con ella. Mantén tus datos de acceso en privado; nunca te pediremos tu contraseña."
+          ]
+        },
+        {
+          "heading": "4. Tu contenido y su propiedad",
+          "body": [
+            "Conservas todos los derechos sobre los manuscritos y materiales que creas. Nos concedes una licencia limitada y revocable para almacenar, procesar y mostrar tu contenido únicamente para operar el servicio. Consulta Derechos de autor y PI."
+          ]
+        },
+        {
+          "heading": "5. Edición asistida por IA",
+          "body": [
+            "El servicio usa IA como herramienta de descubrimiento y revisión. El resultado editorial es orientativo y puede contener errores; tú sigues siendo el autor y quien decide. Consulta el Aviso sobre IA y edición."
+          ]
+        },
+        {
+          "heading": "6. Uso aceptable",
+          "body": [
+            "No uses el servicio para infringir los derechos de terceros, subir contenido ilícito o intentar interrumpir la plataforma u obtener acceso no autorizado."
+          ]
+        },
+        {
+          "heading": "7. Membresía y tarifas",
+          "body": [
+            "Los términos de la membresía y cualquier tarifa se presentarán antes de cualquier cobro. Este borrador no fija precios; no se procesan pagos a través del sitio público."
+          ]
+        },
+        {
+          "heading": "8. Cancelación, archivado y retención",
+          "body": [
+            "Puedes cancelar cuando quieras. Al cancelar, tu espacio de trabajo se archiva y se conserva por un período de retención (doce meses por defecto), tras el cual puede eliminarse permanentemente previo aviso. Puedes solicitar una extensión o la eliminación permanente anticipada."
+          ]
+        },
+        {
+          "heading": "9. Terminación",
+          "body": [
+            "Podemos suspender o cerrar cuentas que incumplan estos términos. Cuando sea posible daremos aviso y preservaremos tu capacidad de recuperar tu trabajo."
+          ]
+        },
+        {
+          "heading": "10. Renuncias y limitación de responsabilidad",
+          "body": [
+            "El servicio se ofrece “tal cual”, sin garantías, en la máxima medida permitida por la ley. [[Cláusula de limitación de responsabilidad por completar por el asesor legal.]]"
+          ]
+        },
+        {
+          "heading": "11. Cambios",
+          "body": [
+            "Podemos actualizar estos términos. Los cambios importantes se comunicarán y se actualizará la fecha de vigencia anterior."
+          ]
+        },
+        {
+          "heading": "12. Ley aplicable y contacto",
+          "body": [
+            "Estos términos se rigen por las leyes de [[jurisdicción aplicable por definir]]. La entidad legal es [[nombre y dirección de la entidad legal por definir]]. Consultas: usa la página de Soporte o la de Contacto."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "Legal",
+      "title": "Política de privacidad",
+      "lead": "Cómo manejamos tu información. Este es un borrador en lenguaje claro; la versión vinculante será completada por un asesor legal.",
+      "updated": "[[fecha de vigencia por definir]]",
+      "draft": true,
+      "sections": [
+        {
+          "heading": "Quiénes somos",
+          "body": [
+            "El responsable del tratamiento es [[nombre y dirección de la entidad legal por definir]]. Para consultas de privacidad, contacta a [[contacto de privacidad / DPO por definir]] o usa la página de Soporte."
+          ]
+        },
+        {
+          "heading": "Qué recopilamos",
+          "body": [
+            "Información de la cuenta (como tu correo), los manuscritos y materiales que creas, los resultados de la revisión editorial y datos técnicos básicos necesarios para operar el servicio."
+          ]
+        },
+        {
+          "heading": "Cómo la usamos",
+          "body": [
+            "Para ofrecer el Taller y las herramientas editoriales, preservar y versionar tu trabajo, responder a tus solicitudes de soporte y operar y proteger la plataforma."
+          ]
+        },
+        {
+          "heading": "Procesamiento con IA y terceros",
+          "body": [
+            "Para ofrecer el descubrimiento y la revisión editorial, partes de tu contenido pueden ser procesadas por proveedores de IA de terceros (por ejemplo, OpenAI) únicamente para cumplir una solicitud que hiciste. No vendemos tu contenido. [[Lista de encargados del tratamiento y salvaguardas por completar por el asesor legal.]]"
+          ]
+        },
+        {
+          "heading": "Almacenamiento, seguridad y retención",
+          "body": [
+            "Tus datos se almacenan con controles de acceso y seguridad a nivel de fila. Cuando cancelas, tu espacio de trabajo se archiva y se conserva (doce meses por defecto) con avisos de eliminación anticipados antes de su remoción. Puedes solicitar la eliminación anticipada o una extensión."
+          ]
+        },
+        {
+          "heading": "Tus derechos",
+          "body": [
+            "Según tu ubicación, puedes tener derecho a acceder, corregir, exportar o eliminar tus datos. Puedes ejercerlos desde tu página de Cuenta o contactándonos. [[Derechos específicos por jurisdicción por completar por el asesor legal.]]"
+          ]
+        },
+        {
+          "heading": "Cookies y menores",
+          "body": [
+            "Usamos solo las cookies necesarias para operar el servicio y mantener tu sesión. El servicio no está dirigido a menores. [[Detalles de cookies y privacidad de menores por completar por el asesor legal.]]"
+          ]
+        },
+        {
+          "heading": "Cambios y contacto",
+          "body": [
+            "Podemos actualizar esta política; la fecha de vigencia anterior cambiará. Para cualquier solicitud de privacidad, usa la página de Soporte o Contacto."
+          ]
+        }
+      ]
+    },
+    "aiDisclaimer": {
+      "eyebrow": "Cómo trabajamos",
+      "title": "Aviso sobre IA y edición",
+      "lead": "Una descripción honesta de cómo se usa la inteligencia artificial en el Taller — y dónde la autoría humana sigue firmemente al mando.",
+      "sections": [
+        {
+          "heading": "La IA es una herramienta, no el autor",
+          "body": [
+            "La plataforma usa IA para ayudarte a descubrir ideas mediante la conversación y para revisar tu manuscrito. No escribe tu libro por ti y nunca toma una decisión editorial final. Tú eres el autor."
+          ]
+        },
+        {
+          "heading": "La revisión editorial es orientativa",
+          "body": [
+            "Una revisión lee tu manuscrito frente a una constitución editorial estable y devuelve hallazgos para que los consideres. Los hallazgos son sugerencias. Tú decides qué aceptar, revisar o descartar — nada cambia en tu manuscrito sin tu acción."
+          ]
+        },
+        {
+          "heading": "La IA puede equivocarse",
+          "body": [
+            "Las observaciones generadas por IA pueden ser incompletas o erróneas. Trátalas como un segundo lector cuidadoso, no como una autoridad. No garantizamos la exactitud, integridad ni idoneidad del resultado de la IA para ningún fin."
+          ]
+        },
+        {
+          "heading": "Sin garantía de publicación ni resultado",
+          "body": [
+            "Usar el Taller no garantiza que un manuscrito se publique ni que logre un resultado concreto. Las decisiones de publicación y los resultados dependen de muchos factores ajenos a la plataforma."
+          ]
+        },
+        {
+          "heading": "Supervisión humana",
+          "body": [
+            "El juicio humano — el tuyo — es central en cada etapa. La plataforma está diseñada para que siga siendo así: para que tu libro suene más como tú, no más como una máquina."
+          ]
+        }
+      ]
+    },
+    "copyright": {
+      "eyebrow": "Legal",
+      "title": "Derechos de autor y propiedad intelectual",
+      "lead": "Quién posee qué, la licencia limitada que nos concedes y cómo reportar infracciones. Este es un borrador en lenguaje claro; la versión vinculante será completada por un asesor legal.",
+      "updated": "[[fecha de vigencia por definir]]",
+      "draft": true,
+      "sections": [
+        {
+          "heading": "Tu obra es tuya",
+          "body": [
+            "Conservas todos los derechos de autor y de propiedad intelectual sobre los manuscritos y materiales que creas en la plataforma. La membresía no transfiere la propiedad de tu obra."
+          ]
+        },
+        {
+          "heading": "La licencia que nos concedes",
+          "body": [
+            "Concedes a Huerta Group Publishing una licencia limitada, no exclusiva y revocable para almacenar, procesar, mostrar y respaldar tu contenido únicamente para operar el servicio. Esta licencia termina cuando tu contenido se elimina, sujeto a copias de seguridad rutinarias."
+          ]
+        },
+        {
+          "heading": "Nuestras marcas y materiales",
+          "body": [
+            "El nombre, el logotipo y los materiales del sitio de Huerta Group Publishing son nuestra propiedad intelectual y no pueden usarse sin permiso."
+          ]
+        },
+        {
+          "heading": "Reportar infracciones",
+          "body": [
+            "Si crees que un contenido de la plataforma infringe tus derechos, contáctanos con suficiente detalle para identificar la obra y la supuesta infracción. [[Nombre del agente designado y dirección de notificación por definir]]. Responderemos conforme a la ley aplicable."
+          ]
+        }
+      ]
+    },
+    "contact": {
+      "eyebrow": "Contacto",
+      "title": "Contáctanos",
+      "lead": "La mejor forma de comunicarte con nosotros depende de lo que necesites.",
+      "sections": [
+        {
+          "heading": "Preguntas generales y ayuda",
+          "body": [
+            "Para preguntas sobre el Taller, tu cuenta, comentarios o un problema que hayas encontrado, usa la página de Soporte. Si has iniciado sesión tendremos el contexto de tu cuenta; si no, deja un correo para responderte."
+          ]
+        },
+        {
+          "heading": "Avisos legales y de privacidad",
+          "body": [
+            "Para avisos legales o de privacidad formales, usa la página de Soporte y elige la categoría adecuada, o escribe a [[dirección de contacto legal por definir]]."
+          ]
+        },
+        {
+          "heading": "Tiempos de respuesta",
+          "body": [
+            "Leemos cada mensaje y respondemos tan pronto como razonablemente podemos. Por favor no incluyas contraseñas ni otros secretos en tu mensaje."
+          ]
+        }
+      ],
+      "supportPointer": "La forma más rápida de comunicarte con nosotros es la",
+      "supportLink": "página de Soporte."
+    },
+    "support": {
+      "eyebrow": "Soporte",
+      "title": "Comentarios y soporte",
+      "lead": "Haz una pregunta, comparte comentarios o reporta un problema. Leemos todo.",
+      "sections": [
+        {
+          "heading": "Qué esperar",
+          "body": [
+            "Cuéntanos qué sucede con tus propias palabras. Si reportas un error, unos pasos para reproducirlo ayudan mucho. Te responderemos por correo."
+          ]
+        },
+        {
+          "heading": "Cuídate, por favor",
+          "body": [
+            "Nunca incluyas contraseñas, datos de pago u otros secretos en un mensaje de soporte. Nunca te pediremos tu contraseña."
+          ]
+        }
+      ]
+    }
+  },
+  "support": {
+    "categories": {
+      "question": "Una pregunta",
+      "feedback": "Comentarios",
+      "bug": "Un problema o error",
+      "account": "Mi cuenta",
+      "legal": "Legal o privacidad",
+      "other": "Algo más"
+    },
+    "form": {
+      "category": "¿De qué se trata?",
+      "email": "Tu correo",
+      "emailOptional": "Tu correo (opcional)",
+      "subject": "Asunto",
+      "message": "Tu mensaje",
+      "submit": "Enviar",
+      "privacyNote": "Por favor no incluyas contraseñas ni otros secretos. Respondemos por correo. Consulta la Política de privacidad sobre cómo se maneja tu mensaje."
+    },
+    "errors": {
+      "invalidCategory": "Elige de qué trata tu mensaje.",
+      "subjectRequired": "Agrega un asunto.",
+      "messageRequired": "Escribe tu mensaje.",
+      "emailRequired": "Ingresa un correo válido para poder responderte.",
+      "rateLimited": "Has enviado varios mensajes recientemente. Espera un momento antes de enviar otro.",
+      "unavailable": "El soporte no está disponible temporalmente. Inténtalo de nuevo en un momento."
+    },
+    "notices": {
+      "supportReceived": "Gracias — hemos recibido tu mensaje. Te responderemos por correo."
+    }
+  },
+  "membership": {
+    "heading": "Membresía y espacio de trabajo",
+    "note": "El estado de tu membresía, cuánto tiempo se conserva tu trabajo si te vas y las acciones disponibles. Nada aquí te cobra, y nada se elimina sin tu solicitud.",
+    "statusLabel": "Estado",
+    "status": {
+      "active": "Activa",
+      "cancellation_scheduled": "Cancelación programada",
+      "archived_free": "Archivada",
+      "archived_paid": "Archivada (extendida)",
+      "pending_deletion": "Programada para eliminación",
+      "deletion_requested": "Eliminación solicitada",
+      "deleted": "Eliminada"
+    },
+    "retentionLabel": "Se conserva hasta",
+    "retentionValue": "Tu espacio de trabajo archivado se conserva hasta el {date}.",
+    "deletionScheduledLabel": "Eliminación programada",
+    "deletionScheduledValue": "La eliminación permanente está programada para el {date}. Aún puedes cancelar esta solicitud hasta entonces.",
+    "reactivate": {
+      "description": "Devuelve tu cuenta a activa y sigue trabajando.",
+      "action": "Reactivar membresía"
+    },
+    "extension": {
+      "description": "¿Necesitas más tiempo antes de que se elimine tu espacio archivado? Solicita una extensión — sin costo.",
+      "action": "Solicitar más tiempo"
+    },
+    "cancel": {
+      "description": "Cancelar programa el archivado de tu espacio de trabajo. No elimina nada, y puedes reactivar después.",
+      "action": "Cancelar membresía"
+    },
+    "rescindDeletion": {
+      "description": "Has solicitado la eliminación permanente. Aún puedes cambiar de opinión.",
+      "action": "Cancelar solicitud de eliminación"
+    },
+    "requestDeletion": {
+      "description": "Solicita la eliminación permanente de tu cuenta y de todo tu trabajo. Es reversible hasta la fecha programada, tras la cual no se puede deshacer.",
+      "confirmLabel": "Escribe DELETE para confirmar",
+      "action": "Solicitar eliminación permanente"
+    },
+    "errors": {
+      "membershipUnavailable": "Ese cambio no se pudo guardar ahora. Inténtalo de nuevo en un momento.",
+      "deletionConfirmMismatch": "Escribe DELETE exactamente para confirmar tu solicitud."
+    },
+    "notices": {
+      "cancellationScheduled": "La cancelación de tu membresía está programada. Tu espacio de trabajo se archivará, y puedes reactivar en cualquier momento antes de esa fecha.",
+      "membershipReactivated": "Bienvenido de nuevo — tu membresía está activa otra vez.",
+      "deletionRequested": "Tu solicitud de eliminación permanente ha sido registrada. Aún puedes cancelarla hasta la fecha programada.",
+      "deletionRescinded": "Tu solicitud de eliminación ha sido cancelada. Tu espacio de trabajo está archivado y a salvo.",
+      "extensionRequested": "Tu solicitud de más tiempo ha sido enviada. Estaremos en contacto."
+    }
+  },
+  "retention": {
+    "email": {
+      "archived_notice": {
+        "subject": "Tu espacio de trabajo ha sido archivado",
+        "body": "Tu espacio de trabajo en Huerta Group Publishing ahora está archivado. Lo conservaremos hasta el {expiresOn}. Puedes reactivar o solicitar más tiempo en cualquier momento antes de esa fecha."
+      },
+      "t_minus_90": {
+        "subject": "90 días para que se elimine tu espacio archivado",
+        "body": "Tu espacio de trabajo archivado está programado para eliminarse permanentemente el {expiresOn} — dentro de unos 90 días. Reactiva o solicita más tiempo si deseas conservarlo."
+      },
+      "t_minus_30": {
+        "subject": "30 días para que se elimine tu espacio archivado",
+        "body": "Tu espacio de trabajo archivado está programado para eliminarse permanentemente el {expiresOn} — dentro de unos 30 días. Reactiva o solicita más tiempo si deseas conservarlo."
+      },
+      "t_minus_7": {
+        "subject": "7 días para que se elimine tu espacio archivado",
+        "body": "Tu espacio de trabajo archivado está programado para eliminarse permanentemente el {expiresOn} — dentro de una semana. Este es uno de tus últimos recordatorios."
+      },
+      "t_minus_1": {
+        "subject": "Mañana: se eliminará tu espacio archivado",
+        "body": "Tu espacio de trabajo archivado está programado para eliminarse permanentemente el {expiresOn}. Si deseas conservarlo, reactiva o solicita más tiempo hoy."
+      },
+      "deleted_notice": {
+        "subject": "Tu espacio de trabajo ha sido eliminado",
+        "body": "Según lo programado para el {expiresOn}, tu espacio de trabajo archivado ha sido eliminado permanentemente. Gracias por haber escrito con nosotros."
+      }
     }
   }
 }

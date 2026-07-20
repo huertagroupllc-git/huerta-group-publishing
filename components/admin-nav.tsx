@@ -12,6 +12,7 @@ export const ADMIN_SECTIONS: { href: string; key: string }[] = [
   { href: "/admin/authors", key: "authors" },
   { href: "/admin/books", key: "books" },
   { href: "/admin/review-runs", key: "reviewRuns" },
+  { href: "/admin/support", key: "support" },
   { href: "/admin/ai-usage", key: "aiUsage" },
   { href: "/admin/system", key: "system" },
 ];

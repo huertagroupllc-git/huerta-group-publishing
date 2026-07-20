@@ -1,0 +1,49 @@
+import type { Metadata } from "next";
+import { PublicContentPage } from "@/components/public/content-page";
+import { SupportForm } from "@/components/public/support-form";
+import { contentPageMetadata } from "@/lib/public/content-metadata";
+import { actionMessageFromQuery, actionNoticeFromQuery } from "@/lib/action-messages";
+import { isAuthenticated } from "@/lib/auth/session";
+import { createClient } from "@/lib/supabase/server";
+import { PUBLIC_LOCALE } from "@/lib/locales";
+
+export const dynamic = "force-dynamic";
+
+export function generateMetadata(): Promise<Metadata> {
+  return contentPageMetadata({
+    locale: PUBLIC_LOCALE,
+    pageKey: "support",
+    canonicalPath: "/support",
+  });
+}
+
+export default async function SupportPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const query = await searchParams;
+  const signedIn = await isAuthenticated();
+  let defaultEmail: string | undefined;
+  if (signedIn) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    defaultEmail = user?.email ?? undefined;
+  }
+
+  return (
+    <PublicContentPage locale={PUBLIC_LOCALE} page="support">
+      <SupportForm
+        locale={PUBLIC_LOCALE}
+        basePath=""
+        pagePath="/support"
+        signedIn={signedIn}
+        defaultEmail={defaultEmail}
+        notice={actionNoticeFromQuery(query)}
+        error={actionMessageFromQuery(query)}
+      />
+    </PublicContentPage>
+  );
+}

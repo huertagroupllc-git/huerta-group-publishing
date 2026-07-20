@@ -65,7 +65,9 @@
       "closeMenu": "Close menu",
       "skip": "Skip to content",
       "primary": "Primary",
-      "enterWorkshop": "Enter the Workshop"
+      "enterWorkshop": "Enter the Workshop",
+      "pricing": "Pricing",
+      "support": "Support"
     },
     "hero": {
       "eyebrow": "Your book. Your voice. Your journey.",
@@ -181,7 +183,25 @@
       "body": "The Workshop is where authors and their books are kept — deliberately, permanently, in the author's own voice."
     },
     "footer": {
-      "statement": "An editorial house with a memory — a dedicated space where books are developed, refined, and kept."
+      "statement": "An editorial house with a memory — a dedicated space where books are developed, refined, and kept.",
+      "groups": {
+        "product": "Product",
+        "company": "Company",
+        "legal": "Legal"
+      },
+      "links": {
+        "howItWorks": "How it works",
+        "workshop": "Inside the Workshop",
+        "pricing": "Pricing",
+        "about": "About",
+        "faq": "FAQ",
+        "support": "Support",
+        "contact": "Contact",
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy",
+        "aiDisclaimer": "AI & Editorial Disclaimer",
+        "copyright": "Copyright & IP"
+      }
     },
     "meta": {
       "promise": "Develop books, not just manuscripts.",
@@ -476,7 +496,8 @@
         "books": "Books",
         "reviewRuns": "Review Runs",
         "aiUsage": "AI Usage",
-        "system": "System"
+        "system": "System",
+        "support": "Support"
       }
     },
     "overview": {
@@ -737,6 +758,46 @@
         "deletionNotAuthorized": "Permanent deletion is restricted to staff.",
         "authorDeleted": "{name} and every dependent record were permanently deleted.",
         "bookDeleted": "“{title}” and every dependent record were permanently deleted."
+      }
+    },
+    "support": {
+      "intro": "Questions, feedback, and bug reports from members and visitors. Set a status and leave an internal note as you work each one.",
+      "filterLabel": "Filter submissions by status",
+      "filters": {
+        "all": "All",
+        "new": "New",
+        "open": "Open",
+        "resolved": "Resolved",
+        "archived": "Archived"
+      },
+      "empty": "No submissions in this view.",
+      "categories": {
+        "question": "Question",
+        "feedback": "Feedback",
+        "bug": "Bug",
+        "account": "Account",
+        "legal": "Legal",
+        "other": "Other"
+      },
+      "statuses": {
+        "new": "New",
+        "open": "Open",
+        "resolved": "Resolved",
+        "archived": "Archived"
+      },
+      "statusLabel": "Status",
+      "staffNoteLabel": "Internal note",
+      "save": "Save",
+      "noEmail": "No email",
+      "member": "Member",
+      "anonymous": "Anonymous",
+      "notices": {
+        "submissionUpdated": "Submission updated."
+      },
+      "errors": {
+        "notFound": "That submission could not be found.",
+        "invalidStatus": "That status is not valid.",
+        "updateFailed": "The submission could not be updated. Please try again."
       }
     }
   },
@@ -1165,6 +1226,470 @@
       "source": "Source",
       "bookSettingsLink": "Book Settings",
       "adminHeading": "Editorial preferences (frozen)"
+    }
+  },
+  "publicPages": {
+    "ui": {
+      "lastUpdated": "Last updated:",
+      "draftBannerTitle": "Plain-language draft — not legal advice",
+      "draftBannerBody": "This page is a plain-language draft provided for transparency. It has not been reviewed by an attorney and is not legal advice. Items in [[double brackets]] are placeholders for company-specific facts that counsel will complete before this becomes binding."
+    },
+    "pricing": {
+      "eyebrow": "Membership",
+      "title": "What membership includes",
+      "lead": "Huerta Group Publishing is a membership workshop for authors who want to develop a book that sounds like themselves. Here is what a membership gives you — and how we think about what it costs.",
+      "highlights": [
+        "The full Workshop: guided discovery, Book Memory, the writing room, and reading copies.",
+        "Constitution-based editorial review that respects your voice, with findings you decide on.",
+        "Your manuscript versioned and preserved at every step — nothing is overwritten.",
+        "Your authorship and your rights stay yours (see Copyright & IP)."
+      ],
+      "sections": [
+        {
+          "heading": "How membership works",
+          "body": [
+            "Membership gives you access to the Workshop and its editorial tools for as long as your membership is active. You write; the platform preserves and reviews; you remain the author of every decision.",
+            "There are no long-term lock-ins. You can cancel at any time from your Account page, and your work enters a retention period so you can return to it."
+          ]
+        },
+        {
+          "heading": "What it costs",
+          "body": [
+            "Pricing is being finalized. We are not quoting a price on this page yet, and no payment is required to explore the public site. When pricing is published, it will appear here and on your Account page before anything is ever charged.",
+            "If you have a question about pricing or want to be told when it is set, please reach out through Support."
+          ]
+        },
+        {
+          "heading": "If you decide to leave",
+          "body": [
+            "Cancelling does not delete your work immediately. Your workspace is archived and kept for a retention period (by default twelve months) so you can return, export, or ask us for more time. You can also request permanent deletion when you are ready."
+          ]
+        }
+      ],
+      "footnote": "Nothing on this page is an offer of specific pricing or a contract. Membership terms are governed by the Terms of Service."
+    },
+    "faq": {
+      "eyebrow": "Questions",
+      "title": "Frequently asked questions",
+      "lead": "The questions authors ask most often about the Workshop, editorial review, ownership, and what happens to your work.",
+      "sections": [
+        {
+          "heading": "What is Huerta Group Publishing?",
+          "body": [
+            "A membership workshop that helps authors develop a book through conversation and careful editorial review — one that sounds more like you, not more like a machine."
+          ]
+        },
+        {
+          "heading": "How does editorial review work?",
+          "body": [
+            "Reviews are deliberate: you request them, they are never run automatically. A review reads your manuscript against a stable editorial constitution and returns findings. You decide what to act on — the review advises, it does not overwrite your work."
+          ]
+        },
+        {
+          "heading": "Do you use AI, and how?",
+          "body": [
+            "Yes, as a tool. AI assists with discovery conversations and with editorial review. It does not write your book for you and it does not make final decisions. See the AI & Editorial Disclaimer for the full picture."
+          ]
+        },
+        {
+          "heading": "Is my writing used to train AI models?",
+          "body": [
+            "We do not sell your manuscript, and our intent is that your work is not used to train third-party models beyond what is required to process a request you asked for. The Privacy Policy describes how your content is handled."
+          ]
+        },
+        {
+          "heading": "Who owns the rights to my book?",
+          "body": [
+            "You do. You retain authorship and the intellectual-property rights in your work. We receive only the limited license needed to operate the service for you. See Copyright & IP."
+          ]
+        },
+        {
+          "heading": "Can I cancel my membership?",
+          "body": [
+            "Yes, at any time, from your Account page. Cancelling schedules your workspace to be archived; it does not charge or delete anything by itself."
+          ]
+        },
+        {
+          "heading": "What happens to my work if I cancel?",
+          "body": [
+            "Your workspace is archived and kept for a retention period — twelve months by default. During that time you can return, reactivate, or ask us for more time before anything is removed."
+          ]
+        },
+        {
+          "heading": "How long do you keep archived work, and can I get it back?",
+          "body": [
+            "By default we keep an archived workspace for twelve months, and we send advance warnings before the window closes. You can reactivate at any point in that window, or request an extension. You can also request permanent deletion sooner if you prefer."
+          ]
+        },
+        {
+          "heading": "How do I get help?",
+          "body": [
+            "Use the Support page to send us a question, feedback, or a bug report. If you are signed in, we will have your account context; if not, leave an email so we can reply."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "eyebrow": "Legal",
+      "title": "Terms of Service",
+      "lead": "These terms govern your use of Huerta Group Publishing. This is a plain-language draft; the binding version will be completed by counsel.",
+      "updated": "[[effective date to be set]]",
+      "draft": true,
+      "sections": [
+        {
+          "heading": "1. Acceptance",
+          "body": [
+            "By creating an account or using the service, you agree to these terms. If you do not agree, do not use the service."
+          ]
+        },
+        {
+          "heading": "2. The service",
+          "body": [
+            "Huerta Group Publishing provides a membership workshop and editorial tools for developing manuscripts. Features may change as the platform evolves."
+          ]
+        },
+        {
+          "heading": "3. Your account",
+          "body": [
+            "You are responsible for your account credentials and for activity under your account. Keep your sign-in details private; we will never ask for your password."
+          ]
+        },
+        {
+          "heading": "4. Your content and ownership",
+          "body": [
+            "You retain all rights to the manuscripts and materials you create. You grant us a limited, revocable license to store, process, and display your content solely to operate the service for you. See Copyright & IP for detail."
+          ]
+        },
+        {
+          "heading": "5. AI-assisted editorial",
+          "body": [
+            "The service uses AI as a tool for discovery and review. Editorial output is advisory and may contain errors; you remain the author and the decision-maker. See the AI & Editorial Disclaimer."
+          ]
+        },
+        {
+          "heading": "6. Acceptable use",
+          "body": [
+            "Do not use the service to infringe others' rights, to upload unlawful content, or to attempt to disrupt or gain unauthorized access to the platform."
+          ]
+        },
+        {
+          "heading": "7. Membership and fees",
+          "body": [
+            "Membership terms and any fees will be presented before you are charged. This draft does not set prices; no payment is processed through the public site."
+          ]
+        },
+        {
+          "heading": "8. Cancellation, archival, and retention",
+          "body": [
+            "You may cancel at any time. On cancellation your workspace is archived and retained for a retention period (twelve months by default), after which it may be permanently deleted following advance notice. You may request an extension or request earlier permanent deletion."
+          ]
+        },
+        {
+          "heading": "9. Termination",
+          "body": [
+            "We may suspend or terminate accounts that violate these terms. Where practical we will give notice and preserve your ability to retrieve your work."
+          ]
+        },
+        {
+          "heading": "10. Disclaimers and limitation of liability",
+          "body": [
+            "The service is provided “as is” without warranties to the fullest extent permitted by law. [[Limitation-of-liability clause to be completed by counsel.]]"
+          ]
+        },
+        {
+          "heading": "11. Changes",
+          "body": [
+            "We may update these terms. Material changes will be communicated, and the effective date above will be updated."
+          ]
+        },
+        {
+          "heading": "12. Governing law and contact",
+          "body": [
+            "These terms are governed by the laws of [[governing jurisdiction to be set]]. The legal entity is [[legal entity name and address to be set]]. Questions: use the Support page or the Contact page."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "Legal",
+      "title": "Privacy Policy",
+      "lead": "How we handle your information. This is a plain-language draft; the binding version will be completed by counsel.",
+      "updated": "[[effective date to be set]]",
+      "draft": true,
+      "sections": [
+        {
+          "heading": "Who we are",
+          "body": [
+            "The data controller is [[legal entity name and address to be set]]. For privacy questions, contact [[privacy contact / DPO to be set]] or use the Support page."
+          ]
+        },
+        {
+          "heading": "What we collect",
+          "body": [
+            "Account information (such as your email), the manuscripts and materials you create, editorial review results, and basic technical data needed to run the service."
+          ]
+        },
+        {
+          "heading": "How we use it",
+          "body": [
+            "To provide the Workshop and editorial tools, to preserve and version your work, to respond to your support requests, and to operate and secure the platform."
+          ]
+        },
+        {
+          "heading": "AI processing and third parties",
+          "body": [
+            "To provide discovery and editorial review, portions of your content may be processed by third-party AI providers (for example, OpenAI) solely to fulfill a request you made. We do not sell your content. [[List of processors and safeguards to be completed by counsel.]]"
+          ]
+        },
+        {
+          "heading": "Storage, security, and retention",
+          "body": [
+            "Your data is stored with access controls and row-level security. When you cancel, your workspace is archived and retained (twelve months by default) with advance deletion warnings before removal. You can request earlier deletion or an extension."
+          ]
+        },
+        {
+          "heading": "Your rights",
+          "body": [
+            "Depending on your location you may have rights to access, correct, export, or delete your data. You can exercise these through your Account page or by contacting us. [[Jurisdiction-specific rights to be completed by counsel.]]"
+          ]
+        },
+        {
+          "heading": "Cookies and children",
+          "body": [
+            "We use only the cookies necessary to operate the service and keep you signed in. The service is not directed to children. [[Cookie and children's-privacy specifics to be completed by counsel.]]"
+          ]
+        },
+        {
+          "heading": "Changes and contact",
+          "body": [
+            "We may update this policy; the effective date above will change. For any privacy request, use the Support or Contact page."
+          ]
+        }
+      ]
+    },
+    "aiDisclaimer": {
+      "eyebrow": "How we work",
+      "title": "AI & Editorial Disclaimer",
+      "lead": "An honest description of how artificial intelligence is used in the Workshop — and where human authorship stays firmly in charge.",
+      "sections": [
+        {
+          "heading": "AI is a tool, not the author",
+          "body": [
+            "The platform uses AI to help you discover ideas through conversation and to review your manuscript. It does not write your book for you, and it never makes a final editorial decision. You are the author."
+          ]
+        },
+        {
+          "heading": "Editorial review is advisory",
+          "body": [
+            "A review reads your manuscript against a stable editorial constitution and returns findings for you to consider. Findings are suggestions. You decide what to accept, revise, or dismiss — nothing is changed in your manuscript without your action."
+          ]
+        },
+        {
+          "heading": "AI can be wrong",
+          "body": [
+            "AI-generated observations may be incomplete or mistaken. Treat them as a careful second reader, not as an authority. We do not guarantee the accuracy, completeness, or fitness of AI output for any purpose."
+          ]
+        },
+        {
+          "heading": "No guarantee of publication or outcome",
+          "body": [
+            "Using the Workshop does not guarantee that a manuscript will be published or achieve any particular result. Publication decisions and outcomes depend on many factors outside the platform."
+          ]
+        },
+        {
+          "heading": "Human oversight",
+          "body": [
+            "Human judgment — yours — is central to every stage. The platform is designed to keep it that way: to help your book sound more like you, not more like a machine."
+          ]
+        }
+      ]
+    },
+    "copyright": {
+      "eyebrow": "Legal",
+      "title": "Copyright & Intellectual Property",
+      "lead": "Who owns what, the limited license you grant us, and how to report infringement. This is a plain-language draft; the binding version will be completed by counsel.",
+      "updated": "[[effective date to be set]]",
+      "draft": true,
+      "sections": [
+        {
+          "heading": "You own your work",
+          "body": [
+            "You retain all copyright and intellectual-property rights in the manuscripts and materials you create on the platform. Membership does not transfer ownership of your work to us."
+          ]
+        },
+        {
+          "heading": "The license you grant us",
+          "body": [
+            "You grant Huerta Group Publishing a limited, non-exclusive, revocable license to store, process, display, and back up your content solely to operate the service for you. This license ends when your content is deleted, subject to routine backups."
+          ]
+        },
+        {
+          "heading": "Our marks and materials",
+          "body": [
+            "The Huerta Group Publishing name, logo, and site materials are our intellectual property and may not be used without permission."
+          ]
+        },
+        {
+          "heading": "Reporting infringement",
+          "body": [
+            "If you believe content on the platform infringes your rights, contact us with enough detail to identify the work and the alleged infringement. [[Designated agent name and notice address to be set]]. We will respond in accordance with applicable law."
+          ]
+        }
+      ]
+    },
+    "contact": {
+      "eyebrow": "Contact",
+      "title": "Contact us",
+      "lead": "The best way to reach us depends on what you need.",
+      "sections": [
+        {
+          "heading": "General questions and help",
+          "body": [
+            "For questions about the Workshop, your account, feedback, or a problem you have hit, use the Support page. If you are signed in we will have your account context; if not, leave an email so we can reply."
+          ]
+        },
+        {
+          "heading": "Legal and privacy notices",
+          "body": [
+            "For formal legal or privacy notices, use the Support page and choose the appropriate category, or write to [[legal contact address to be set]]."
+          ]
+        },
+        {
+          "heading": "Response times",
+          "body": [
+            "We read every message and reply as quickly as we reasonably can. Please do not include passwords or other secrets in your message."
+          ]
+        }
+      ],
+      "supportPointer": "The fastest way to reach us is the",
+      "supportLink": "Support page."
+    },
+    "support": {
+      "eyebrow": "Support",
+      "title": "Feedback & Support",
+      "lead": "Ask a question, share feedback, or report a problem. We read everything.",
+      "sections": [
+        {
+          "heading": "What to expect",
+          "body": [
+            "Tell us what is going on in your own words. If you are reporting a bug, a few steps to reproduce it help a lot. We will reply by email."
+          ]
+        },
+        {
+          "heading": "Please keep it safe",
+          "body": [
+            "Never include passwords, payment details, or other secrets in a support message. We will never ask you for your password."
+          ]
+        }
+      ]
+    }
+  },
+  "support": {
+    "categories": {
+      "question": "A question",
+      "feedback": "Feedback",
+      "bug": "A problem or bug",
+      "account": "My account",
+      "legal": "Legal or privacy",
+      "other": "Something else"
+    },
+    "form": {
+      "category": "What is this about?",
+      "email": "Your email",
+      "emailOptional": "Your email (optional)",
+      "subject": "Subject",
+      "message": "Your message",
+      "submit": "Send",
+      "privacyNote": "Please do not include passwords or other secrets. We reply by email. See the Privacy Policy for how your message is handled."
+    },
+    "errors": {
+      "invalidCategory": "Please choose what your message is about.",
+      "subjectRequired": "Please add a subject.",
+      "messageRequired": "Please write your message.",
+      "emailRequired": "Please enter a valid email so we can reply.",
+      "rateLimited": "You have sent several messages recently. Please wait a little while before sending another.",
+      "unavailable": "Support is temporarily unavailable. Please try again shortly."
+    },
+    "notices": {
+      "supportReceived": "Thank you — your message has been received. We will reply by email."
+    }
+  },
+  "membership": {
+    "heading": "Membership & workspace",
+    "note": "Your membership status, how long your work is kept if you leave, and the actions available to you. Nothing here charges you, and nothing is deleted without your request.",
+    "statusLabel": "Status",
+    "status": {
+      "active": "Active",
+      "cancellation_scheduled": "Cancellation scheduled",
+      "archived_free": "Archived",
+      "archived_paid": "Archived (extended)",
+      "pending_deletion": "Scheduled for deletion",
+      "deletion_requested": "Deletion requested",
+      "deleted": "Deleted"
+    },
+    "retentionLabel": "Kept until",
+    "retentionValue": "Your archived workspace is kept until {date}.",
+    "deletionScheduledLabel": "Deletion scheduled",
+    "deletionScheduledValue": "Permanent deletion is scheduled for {date}. You can still cancel this request until then.",
+    "reactivate": {
+      "description": "Return your account to active and keep working.",
+      "action": "Reactivate membership"
+    },
+    "extension": {
+      "description": "Need more time before your archived workspace is removed? Request an extension — there is no charge.",
+      "action": "Request more time"
+    },
+    "cancel": {
+      "description": "Cancelling schedules your workspace to be archived. It does not delete anything, and you can reactivate later.",
+      "action": "Cancel membership"
+    },
+    "rescindDeletion": {
+      "description": "You have requested permanent deletion. You can still change your mind.",
+      "action": "Cancel deletion request"
+    },
+    "requestDeletion": {
+      "description": "Request permanent deletion of your account and all your work. This is reversible until the scheduled date, after which it cannot be undone.",
+      "confirmLabel": "Type DELETE to confirm",
+      "action": "Request permanent deletion"
+    },
+    "errors": {
+      "membershipUnavailable": "That change could not be saved right now. Please try again shortly.",
+      "deletionConfirmMismatch": "Please type DELETE exactly to confirm your request."
+    },
+    "notices": {
+      "cancellationScheduled": "Your membership cancellation is scheduled. Your workspace will be archived, and you can reactivate any time before then.",
+      "membershipReactivated": "Welcome back — your membership is active again.",
+      "deletionRequested": "Your permanent-deletion request has been recorded. You can still cancel it until the scheduled date.",
+      "deletionRescinded": "Your deletion request has been cancelled. Your workspace is archived and safe.",
+      "extensionRequested": "Your request for more time has been sent. We will be in touch."
+    }
+  },
+  "retention": {
+    "email": {
+      "archived_notice": {
+        "subject": "Your workspace has been archived",
+        "body": "Your Huerta Group Publishing workspace is now archived. We will keep it until {expiresOn}. You can reactivate or request more time any time before then."
+      },
+      "t_minus_90": {
+        "subject": "90 days until your archived workspace is removed",
+        "body": "Your archived workspace is scheduled to be permanently deleted on {expiresOn} — about 90 days from now. Reactivate or request more time if you would like to keep it."
+      },
+      "t_minus_30": {
+        "subject": "30 days until your archived workspace is removed",
+        "body": "Your archived workspace is scheduled to be permanently deleted on {expiresOn} — about 30 days from now. Reactivate or request more time if you would like to keep it."
+      },
+      "t_minus_7": {
+        "subject": "7 days until your archived workspace is removed",
+        "body": "Your archived workspace is scheduled to be permanently deleted on {expiresOn} — one week from now. This is one of your final reminders."
+      },
+      "t_minus_1": {
+        "subject": "Tomorrow: your archived workspace will be removed",
+        "body": "Your archived workspace is scheduled to be permanently deleted on {expiresOn}. If you want to keep it, please reactivate or request more time today."
+      },
+      "deleted_notice": {
+        "subject": "Your workspace has been removed",
+        "body": "As scheduled on {expiresOn}, your archived workspace has been permanently removed. Thank you for having written with us."
+      }
     }
   }
 }

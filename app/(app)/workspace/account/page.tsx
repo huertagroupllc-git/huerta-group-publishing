@@ -11,6 +11,17 @@ import { resolveInterfaceLocale } from "@/lib/profile/queries";
 import { INTERFACE_TEXT_SCALES } from "@/lib/settings/definitions";
 import { currentAccountDisplay } from "@/lib/settings/account-display";
 import { saveAccountDisplaySettings } from "@/lib/settings/actions";
+import {
+  getMembership,
+  membershipCapabilities,
+} from "@/lib/membership/queries";
+import {
+  reactivateMembership,
+  requestAccountDeletion,
+  requestArchiveExtension,
+  rescindDeletionRequest,
+  scheduleCancellation,
+} from "@/lib/membership/actions";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -51,10 +62,36 @@ export default async function AccountPage({
   const tErrors = await getTranslations("settings.errors");
   const settingsError =
     rawError && tErrors.has(rawError) ? tErrors(rawError) : undefined;
-  const localeError = rawError && !settingsError ? rawError : undefined;
+  // Membership errors (own namespace) must not fall through to the locale
+  // form as raw prose — recognize them here and route to the membership
+  // section instead.
+  const tMembershipErrors = await getTranslations("membership.errors");
+  const membershipError =
+    rawError && tMembershipErrors.has(rawError)
+      ? tMembershipErrors(rawError)
+      : undefined;
+  const localeError =
+    rawError && !settingsError && !membershipError ? rawError : undefined;
 
   const locale = await resolveInterfaceLocale();
   const display = await currentAccountDisplay();
+  const tM = await getTranslations("membership");
+  const membership = await getMembership(user.id);
+  const caps = membershipCapabilities(membership);
+  const retentionDate = membership.retention_expires_at
+    ? new Date(membership.retention_expires_at).toLocaleDateString(locale, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : null;
+  const deletionDate = membership.deletion_scheduled_at
+    ? new Date(membership.deletion_scheduled_at).toLocaleDateString(locale, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : null;
 
   return (
     <WorkspaceFrame
@@ -153,6 +190,124 @@ export default async function AccountPage({
 
           <PrimaryButton>{tS("account.save")}</PrimaryButton>
         </form>
+      </section>
+
+      {/* --- Membership & workspace lifecycle -------------------------------
+          Status, retention, and the lifecycle requests. Every action is a
+          REQUEST or a reversible state change — no billing is touched, and
+          nothing here permanently deletes data. Which forms appear is driven
+          by the state machine's allowed transitions (membershipCapabilities),
+          so the UI never offers a move the database guard would reject. */}
+      <section
+        className="rule mt-16 max-w-md pt-6"
+        aria-labelledby="membership-heading"
+      >
+        <h2 id="membership-heading" className="eyebrow">
+          {tM("heading")}
+        </h2>
+        <p className="mt-3 font-sans text-sm leading-relaxed text-ink-soft">
+          {tM("note")}
+        </p>
+
+        <dl className="mt-8">
+          <dt className="eyebrow">{tM("statusLabel")}</dt>
+          <dd className="mt-1 font-serif text-lg text-ink">
+            {tM(`status.${membership.status}`)}
+          </dd>
+          {retentionDate ? (
+            <>
+              <dt className="eyebrow mt-6">{tM("retentionLabel")}</dt>
+              <dd className="mt-1 font-serif text-base text-ink-soft">
+                {tM("retentionValue", { date: retentionDate })}
+              </dd>
+            </>
+          ) : null}
+          {deletionDate ? (
+            <>
+              <dt className="eyebrow mt-6">{tM("deletionScheduledLabel")}</dt>
+              <dd className="mt-1 font-serif text-base text-oxblood">
+                {tM("deletionScheduledValue", { date: deletionDate })}
+              </dd>
+            </>
+          ) : null}
+        </dl>
+
+        <ActionNotice
+          code={notice?.code}
+          params={notice?.params}
+          namespace="membership.notices"
+        />
+        {membershipError ? <ErrorNote message={membershipError} /> : null}
+
+        <div className="mt-8 space-y-6">
+          {caps.canReactivate ? (
+            <form action={reactivateMembership}>
+              <p className="mb-2 font-sans text-sm text-ink-soft">
+                {tM("reactivate.description")}
+              </p>
+              <PrimaryButton>{tM("reactivate.action")}</PrimaryButton>
+            </form>
+          ) : null}
+
+          {caps.canRequestExtension ? (
+            <form action={requestArchiveExtension} className="rule pt-6">
+              <p className="mb-2 font-sans text-sm text-ink-soft">
+                {tM("extension.description")}
+              </p>
+              <PrimaryButton>{tM("extension.action")}</PrimaryButton>
+            </form>
+          ) : null}
+
+          {caps.canCancel ? (
+            <form action={scheduleCancellation} className="rule pt-6">
+              <p className="mb-2 font-sans text-sm text-ink-soft">
+                {tM("cancel.description")}
+              </p>
+              <button
+                type="submit"
+                className="border border-rule px-5 py-2.5 font-sans text-sm text-ink hover:border-oxblood hover:text-oxblood focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oxblood"
+              >
+                {tM("cancel.action")}
+              </button>
+            </form>
+          ) : null}
+
+          {caps.canRescindDeletion ? (
+            <form action={rescindDeletionRequest} className="rule pt-6">
+              <p className="mb-2 font-sans text-sm text-ink-soft">
+                {tM("rescindDeletion.description")}
+              </p>
+              <PrimaryButton>{tM("rescindDeletion.action")}</PrimaryButton>
+            </form>
+          ) : null}
+
+          {caps.canRequestDeletion ? (
+            <form action={requestAccountDeletion} className="rule pt-6">
+              <p className="mb-2 font-sans text-sm text-ink-soft">
+                {tM("requestDeletion.description")}
+              </p>
+              <label
+                htmlFor="delete-confirm"
+                className="block font-sans text-xs uppercase tracking-[0.14em] text-ink-faint"
+              >
+                {tM("requestDeletion.confirmLabel")}
+              </label>
+              <input
+                id="delete-confirm"
+                name="confirm"
+                type="text"
+                autoComplete="off"
+                className="mt-2 w-full border border-rule bg-paper-bright px-3 py-2.5 font-serif text-base text-ink focus:border-oxblood focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="mt-4 border border-oxblood px-5 py-2.5 font-sans text-sm text-oxblood hover:bg-oxblood hover:text-paper-bright focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oxblood"
+              >
+                {tM("requestDeletion.action")}
+              </button>
+            </form>
+          ) : null}
+        </div>
       </section>
     </WorkspaceFrame>
   );

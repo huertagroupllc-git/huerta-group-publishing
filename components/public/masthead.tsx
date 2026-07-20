@@ -31,10 +31,13 @@ export async function PublicMasthead({
 
   // Anchor base: the current root's home path. "" → "/", "/es" → "/es".
   const home = basePath || "/";
+  // In-page anchors stay on the current root; Pricing and Support are real
+  // pages, prefixed by basePath so they stay within the current locale root.
   const items = [
-    { href: `${home}#workshop`, label: t("workshop") },
     { href: `${home}#how-it-works`, label: t("howItWorks") },
+    { href: `${basePath}/pricing`, label: t("pricing") },
     { href: `${home}#about`, label: t("about") },
+    { href: `${basePath}/support`, label: t("support") },
   ];
   // The top-right action, in the approved concept's charcoal + gold family.
   // Truthful destination: a signed-in visitor enters the Workshop; a
