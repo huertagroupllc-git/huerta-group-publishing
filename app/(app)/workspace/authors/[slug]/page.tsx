@@ -182,11 +182,16 @@ export default async function AuthorStudyPage({
       </section>
 
       <section className="mt-14">
-        <div className="rule flex items-baseline justify-between pt-5">
+        <div className="rule flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 pt-5">
           <h2 className="eyebrow">{t("booksHeading")}</h2>
-          <ActionLink href={`/workspace/authors/${author.slug}/books/new`}>
-            {t("addBook")}
-          </ActionLink>
+          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+            <ActionLink href={`/workspace/authors/${author.slug}/books/import`}>
+              {t("importBook")}
+            </ActionLink>
+            <ActionLink href={`/workspace/authors/${author.slug}/books/new`}>
+              {t("addBook")}
+            </ActionLink>
+          </div>
         </div>
 
         {books.length === 0 ? (

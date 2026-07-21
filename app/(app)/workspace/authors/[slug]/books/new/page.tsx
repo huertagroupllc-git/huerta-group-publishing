@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ActionMessage } from "@/components/action-message";
@@ -68,6 +69,15 @@ export default async function NewBookPage({
       </h1>
       <p className="mt-6 max-w-prose text-lg leading-relaxed text-ink-soft">
         {t("addIntro")}
+      </p>
+      <p className="mt-4 max-w-prose font-sans text-sm text-ink-soft">
+        {t("orImportPrefix")}{" "}
+        <Link
+          href={`/workspace/authors/${author.slug}/books/import`}
+          className="text-oxblood underline underline-offset-4 hover:text-ink focus-visible:outline-none focus-visible:text-ink"
+        >
+          {t("startFromPdf")}
+        </Link>
       </p>
 
       <form action={createBook} className="mt-12 max-w-md space-y-8">

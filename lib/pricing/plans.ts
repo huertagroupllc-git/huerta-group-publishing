@@ -114,6 +114,7 @@ export const PRICING_FEATURES: readonly PricingFeature[] = [
   { key: "masterOutline", group: "writing", tiers: ALL, status: "available" },
   { key: "manuscriptWorkspace", group: "writing", tiers: ALL, status: "available" },
   { key: "versionHistory", group: "writing", tiers: ALL, status: "available" },
+  { key: "pdfImport", group: "writing", tiers: ALL, status: "in_development" },
   // Editorial intelligence
   { key: "editorialFindings", group: "editorial", tiers: ALL, status: "available" },
   { key: "editorialDeliberations", group: "editorial", tiers: ALL, status: "available" },

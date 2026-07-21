@@ -237,7 +237,8 @@
       "emptyBooks": "Aún no hay libros. Todo libro que se abre aquí comienza bajo la memoria establecida de este autor.",
       "theRecord": "la ficha",
       "assembledMemory": "Memoria Ensamblada",
-      "assembledMemoryHint": "el registro exacto que recibirá la futura asistencia de IA — únicamente versiones activas y finalizadas"
+      "assembledMemoryHint": "el registro exacto que recibirá la futura asistencia de IA — únicamente versiones activas y finalizadas",
+      "importBook": "Importar desde PDF"
     },
     "form": {
       "addMetaTitle": "Agregar un autor",
@@ -283,7 +284,9 @@
       "statusHint": "Dónde se encuentra el libro en su vida, del Descubrimiento al Archivo — un hecho declarado, no una barrera.",
       "language": "Idioma del manuscrito",
       "languageHintNew": "El idioma en que está escrito el manuscrito. Las futuras revisiones editoriales responderán en este idioma. No cambia el idioma de la plataforma.",
-      "languageHintEdit": "El idioma en que está escrito el manuscrito. Las futuras revisiones editoriales responderán en este idioma; las revisiones ya realizadas conservan el idioma en que se realizaron. No cambia el idioma de la plataforma."
+      "languageHintEdit": "El idioma en que está escrito el manuscrito. Las futuras revisiones editoriales responderán en este idioma; las revisiones ya realizadas conservan el idioma en que se realizaron. No cambia el idioma de la plataforma.",
+      "orImportPrefix": "¿Ya tienes un manuscrito?",
+      "startFromPdf": "Empezar desde un PDF"
     },
     "memoryDocuments": {
       "book_constitution": {
@@ -1856,7 +1859,8 @@
       "storageAllowance": "Asignación de almacenamiento",
       "archiveTwelveMonths": "Protección de archivo por doce meses",
       "extendedArchive": "Opción de Archivo Extendido",
-      "catalogManagement": "Gestión de series y catálogo"
+      "catalogManagement": "Gestión de series y catálogo",
+      "pdfImport": "Importar un manuscrito existente desde PDF"
     },
     "archive": {
       "heading": "Si te ausentas",
@@ -1904,6 +1908,144 @@
       "enterWorkshop": "Entrar al Taller",
       "signIn": "Comenzar en el Taller",
       "contact": "Contáctanos"
+    }
+  },
+  "import": {
+    "upload": {
+      "metaTitle": "Importar un manuscrito",
+      "title": "Importar un manuscrito existente",
+      "intro": "Trae un PDF con texto a tu espacio de trabajo. Lo leeremos, propondremos una estructura de capítulos y te dejaremos revisar y corregir todo antes de que forme parte de tu libro.",
+      "note": "Tu PDF original siempre se conserva. Nada entra en tu manuscrito hasta que confirmes.",
+      "dropLabel": "Elige un PDF o arrástralo aquí",
+      "limits": "Solo PDF · hasta {mb} MB",
+      "working": "Leyendo tu PDF…",
+      "done": "Listo — abriendo la vista previa…",
+      "submit": "Subir y leer"
+    },
+    "errors": {
+      "not_pdf": "Ese archivo no es un PDF legible. Sube un archivo PDF.",
+      "too_large": "Ese archivo supera el tamaño permitido.",
+      "too_many_pages": "Ese PDF tiene más páginas de las que podemos importar por ahora.",
+      "encrypted": "Ese PDF está cifrado y no se pudo leer su texto.",
+      "password_protected": "Ese PDF está protegido con contraseña. Sube un PDF sin protección.",
+      "no_text": "No se encontró texto seleccionable en ese PDF.",
+      "low_text_density": "Se encontró muy poco texto seleccionable — puede ser un documento escaneado.",
+      "scanned_image_only": "Esto parece un PDF escaneado o solo de imágenes. No fue posible extraer el texto de forma fiable. Tu PDF original se conserva; puedes subir un PDF con texto. (La lectura de documentos escaneados es una capacidad futura.)",
+      "malformed": "No se pudo leer ese PDF — puede estar dañado.",
+      "extraction_timeout": "Leer ese PDF tardó demasiado. Intenta con un archivo más pequeño.",
+      "too_much_text": "Ese PDF generó más texto del que podemos importar por ahora.",
+      "unknown": "No se pudo procesar el PDF. Tu archivo original se conserva.",
+      "unauthenticated": "Inicia sesión e inténtalo de nuevo.",
+      "bad_request": "La subida quedó incompleta. Inténtalo de nuevo.",
+      "not_authorized": "No tienes acceso a ese autor.",
+      "upload_failed": "No se pudo almacenar el archivo. Inténtalo de nuevo.",
+      "import_unavailable": "La importación de manuscritos no está disponible temporalmente. Inténtalo en un momento.",
+      "membership_unavailable": "No pudimos verificar el acceso a tu espacio de trabajo. Inténtalo en un momento.",
+      "membership_inactive": "Tu espacio de trabajo está archivado, así que la importación está en pausa. Reactívalo para continuar.",
+      "sectionUpdateFailed": "No se pudo guardar el cambio. Inténtalo de nuevo.",
+      "invalidSectionType": "Ese tipo de sección no es válido.",
+      "sectionNotFound": "No se encontró esa sección.",
+      "cannotMerge": "Esta sección no se puede combinar hacia arriba.",
+      "invalidSplit": "Elige un párrafo dentro de la sección para dividir.",
+      "abandonFailed": "No se pudo descartar la importación. Inténtalo de nuevo.",
+      "importNotReady": "Esta importación aún no está lista para confirmar.",
+      "importNotFound": "No se encontró esa importación.",
+      "confirmFailed": "No se pudo crear el manuscrito. Tu vista previa de importación se conserva."
+    },
+    "notices": {
+      "sectionUpdated": "Sección actualizada.",
+      "sectionReordered": "Sección movida.",
+      "sectionMerged": "Secciones combinadas.",
+      "sectionSplit": "Sección dividida.",
+      "sectionReset": "Sección restaurada a la estructura propuesta.",
+      "importAbandoned": "La importación se descartó. Tu PDF original se conservó.",
+      "importConfirmed": "Tu manuscrito se importó. Bienvenido a tu nuevo libro."
+    },
+    "status": {
+      "uploaded": "Subido",
+      "extracting": "Leyendo",
+      "preview_ready": "Listo para revisar",
+      "needs_attention": "Requiere atención",
+      "confirmed": "Importado",
+      "failed": "No se pudo leer",
+      "abandoned": "Descartado"
+    },
+    "failure": {
+      "not_pdf": "Ese archivo no es un PDF legible. Sube un archivo PDF.",
+      "too_large": "Ese archivo supera el tamaño permitido.",
+      "too_many_pages": "Ese PDF tiene más páginas de las que podemos importar por ahora.",
+      "encrypted": "Ese PDF está cifrado y no se pudo leer su texto.",
+      "password_protected": "Ese PDF está protegido con contraseña. Sube un PDF sin protección.",
+      "no_text": "No se encontró texto seleccionable en ese PDF.",
+      "low_text_density": "Se encontró muy poco texto seleccionable — puede ser un documento escaneado.",
+      "scanned_image_only": "Esto parece un PDF escaneado o solo de imágenes. No fue posible extraer el texto de forma fiable. Tu PDF original se conserva; puedes subir un PDF con texto. (La lectura de documentos escaneados es una capacidad futura.)",
+      "malformed": "No se pudo leer ese PDF — puede estar dañado.",
+      "extraction_timeout": "Leer ese PDF tardó demasiado. Intenta con un archivo más pequeño.",
+      "too_much_text": "Ese PDF generó más texto del que podemos importar por ahora.",
+      "unknown": "No se pudo procesar el PDF. Tu archivo original se conserva."
+    },
+    "warning": {
+      "no_sections_detected": "No se detectó una estructura de capítulos clara — el texto se conserva como una o varias secciones genéricas para que las organices.",
+      "artifacts_detected": "Se detectaron algunos elementos de página repetidos (encabezados, pies o números de página) y se excluyeron del texto propuesto."
+    },
+    "sectionType": {
+      "title_page": "Portada",
+      "copyright": "Derechos de autor",
+      "dedication": "Dedicatoria",
+      "epigraph": "Epígrafe",
+      "contents": "Índice",
+      "foreword": "Prólogo del editor",
+      "preface": "Prefacio",
+      "introduction": "Introducción",
+      "prologue": "Prólogo",
+      "part": "Parte",
+      "chapter": "Capítulo",
+      "interlude": "Interludio",
+      "conclusion": "Conclusión",
+      "epilogue": "Epílogo",
+      "acknowledgments": "Agradecimientos",
+      "appendix": "Apéndice",
+      "notes": "Notas",
+      "bibliography": "Bibliografía",
+      "author_bio": "Sobre el autor",
+      "other": "Otra / desconocida"
+    },
+    "preview": {
+      "metaTitle": "Revisar importación",
+      "title": "Revisa tu manuscrito importado",
+      "intro": "Revisa la estructura propuesta a continuación. Renombra, cambia el tipo, reordena, combina, divide, incluye o excluye cualquier sección. Nada se agrega a tu libro hasta que confirmes.",
+      "alreadyConfirmed": "Esta importación ya se agregó a un libro.",
+      "backToAuthor": "Volver al autor",
+      "pdfPreserved": "Tu PDF original se conserva y puede volver a importarse tras cualquier ajuste.",
+      "abandon": "Descartar esta importación",
+      "tryAnother": "Subir un PDF diferente",
+      "pages": "Páginas",
+      "characters": "Caracteres",
+      "sections": "Secciones (incluidas / total)",
+      "detectedAuthor": "Autor detectado",
+      "warningsHeading": "Notas de la lectura de tu PDF",
+      "artifactLine": "Elemento repetido excluido: «{text}» (en {count} páginas)",
+      "structureHeading": "Estructura propuesta",
+      "sectionTitle": "Título de la sección",
+      "sectionType": "Tipo",
+      "save": "Guardar",
+      "set": "Aplicar",
+      "include": "Incluir",
+      "exclude": "Excluir",
+      "moveUp": "Subir",
+      "moveDown": "Bajar",
+      "mergeUp": "Combinar con la anterior",
+      "reset": "Restablecer",
+      "pagesRange": "Páginas {start}–{end}",
+      "inspectText": "Inspeccionar el texto extraído",
+      "emptyContent": "(Sin texto en esta sección.)",
+      "splitAt": "Dividir en el párrafo n.º",
+      "split": "Dividir",
+      "confirmHeading": "Crear el libro",
+      "confirmNote": "Esto crea un nuevo libro con las secciones incluidas como capítulos ordenados, cada uno preservado como una versión importada. Puedes editar todo después.",
+      "bookTitle": "Título del libro",
+      "language": "Idioma del manuscrito",
+      "confirm": "Crear libro desde la importación"
     }
   }
 }

@@ -7,7 +7,10 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // unpdf (PDF text extraction) is a server-only Node package used by the
+  // manuscript-import route; keep it external so it is required at runtime
+  // rather than bundled, which is the supported serverless usage.
+  serverExternalPackages: ["unpdf"],
 };
 
 export default withNextIntl(nextConfig);

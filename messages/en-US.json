@@ -237,7 +237,8 @@
       "emptyBooks": "No books yet. Every book opened here begins under this author’s established memory.",
       "theRecord": "the record",
       "assembledMemory": "Assembled Memory",
-      "assembledMemoryHint": "the exact record future AI assistance will receive — active, finalized versions only"
+      "assembledMemoryHint": "the exact record future AI assistance will receive — active, finalized versions only",
+      "importBook": "Import from PDF"
     },
     "form": {
       "addMetaTitle": "Add an author",
@@ -283,7 +284,9 @@
       "statusHint": "Where the book stands in its life, from Discovery to Archived — a stated fact, not a gate.",
       "language": "Manuscript language",
       "languageHintNew": "The language the manuscript is written in. Future editorial reviews will respond in this language. It does not change the language of the platform itself.",
-      "languageHintEdit": "The language the manuscript is written in. Future editorial reviews will respond in this language; reviews already performed keep the language they were performed in. It does not change the language of the platform itself."
+      "languageHintEdit": "The language the manuscript is written in. Future editorial reviews will respond in this language; reviews already performed keep the language they were performed in. It does not change the language of the platform itself.",
+      "orImportPrefix": "Already have a manuscript?",
+      "startFromPdf": "Start from a PDF"
     },
     "memoryDocuments": {
       "book_constitution": {
@@ -1856,7 +1859,8 @@
       "storageAllowance": "Storage allowance",
       "archiveTwelveMonths": "Twelve-month archive protection",
       "extendedArchive": "Extended Archive option",
-      "catalogManagement": "Series and catalog management"
+      "catalogManagement": "Series and catalog management",
+      "pdfImport": "Import an existing manuscript from PDF"
     },
     "archive": {
       "heading": "If you step away",
@@ -1904,6 +1908,144 @@
       "enterWorkshop": "Enter the Workshop",
       "signIn": "Start in the Workshop",
       "contact": "Contact us"
+    }
+  },
+  "import": {
+    "upload": {
+      "metaTitle": "Import a manuscript",
+      "title": "Import an existing manuscript",
+      "intro": "Bring an existing text-based PDF into your workspace. We'll read it, propose a chapter structure, and let you review and correct everything before it becomes part of your book.",
+      "note": "Your original PDF is always preserved. Nothing enters your manuscript until you confirm.",
+      "dropLabel": "Choose a PDF, or drag it here",
+      "limits": "PDF only · up to {mb} MB",
+      "working": "Reading your PDF…",
+      "done": "Ready — opening preview…",
+      "submit": "Upload and read"
+    },
+    "errors": {
+      "not_pdf": "That file is not a readable PDF. Please upload a PDF file.",
+      "too_large": "That file is larger than the allowed size.",
+      "too_many_pages": "That PDF has more pages than we can import right now.",
+      "encrypted": "That PDF is encrypted and its text could not be read.",
+      "password_protected": "That PDF is password-protected. Please upload an unprotected PDF.",
+      "no_text": "No selectable text could be found in that PDF.",
+      "low_text_density": "Very little selectable text was found — this may be a scanned document.",
+      "scanned_image_only": "This looks like a scanned or image-only PDF. Reliable text extraction was not possible. Your original PDF is preserved; you can upload a text-based PDF instead. (Scanned-document reading is a future capability.)",
+      "malformed": "That PDF could not be read — it may be damaged.",
+      "extraction_timeout": "Reading that PDF took too long. Please try a smaller file.",
+      "too_much_text": "That PDF produced more text than we can import right now.",
+      "unknown": "The PDF could not be processed. Your original file is preserved.",
+      "unauthenticated": "Please sign in and try again.",
+      "bad_request": "The upload was incomplete. Please try again.",
+      "not_authorized": "You do not have access to that author.",
+      "upload_failed": "The file could not be stored. Please try again.",
+      "import_unavailable": "Manuscript import is temporarily unavailable. Please try again shortly.",
+      "membership_unavailable": "We could not verify workspace access right now. Please try again shortly.",
+      "membership_inactive": "Your workspace is archived, so importing is paused. Reactivate to continue.",
+      "sectionUpdateFailed": "That change could not be saved. Please try again.",
+      "invalidSectionType": "That section type is not valid.",
+      "sectionNotFound": "That section could not be found.",
+      "cannotMerge": "This section cannot be merged upward.",
+      "invalidSplit": "Choose a paragraph within the section to split at.",
+      "abandonFailed": "The import could not be discarded. Please try again.",
+      "importNotReady": "This import is not ready to confirm yet.",
+      "importNotFound": "That import could not be found.",
+      "confirmFailed": "The manuscript could not be created. Your import preview is preserved."
+    },
+    "notices": {
+      "sectionUpdated": "Section updated.",
+      "sectionReordered": "Section moved.",
+      "sectionMerged": "Sections merged.",
+      "sectionSplit": "Section split.",
+      "sectionReset": "Section restored to the proposed structure.",
+      "importAbandoned": "The import was discarded. Your original PDF was kept.",
+      "importConfirmed": "Your manuscript was imported. Welcome to your new book."
+    },
+    "status": {
+      "uploaded": "Uploaded",
+      "extracting": "Reading",
+      "preview_ready": "Ready to review",
+      "needs_attention": "Needs attention",
+      "confirmed": "Imported",
+      "failed": "Could not read",
+      "abandoned": "Discarded"
+    },
+    "failure": {
+      "not_pdf": "That file is not a readable PDF. Please upload a PDF file.",
+      "too_large": "That file is larger than the allowed size.",
+      "too_many_pages": "That PDF has more pages than we can import right now.",
+      "encrypted": "That PDF is encrypted and its text could not be read.",
+      "password_protected": "That PDF is password-protected. Please upload an unprotected PDF.",
+      "no_text": "No selectable text could be found in that PDF.",
+      "low_text_density": "Very little selectable text was found — this may be a scanned document.",
+      "scanned_image_only": "This looks like a scanned or image-only PDF. Reliable text extraction was not possible. Your original PDF is preserved; you can upload a text-based PDF instead. (Scanned-document reading is a future capability.)",
+      "malformed": "That PDF could not be read — it may be damaged.",
+      "extraction_timeout": "Reading that PDF took too long. Please try a smaller file.",
+      "too_much_text": "That PDF produced more text than we can import right now.",
+      "unknown": "The PDF could not be processed. Your original file is preserved."
+    },
+    "warning": {
+      "no_sections_detected": "No clear chapter structure was detected — the text is kept as one or more generic sections for you to organize.",
+      "artifacts_detected": "Some repeated page elements (headers, footers, or page numbers) were detected and excluded from the proposed text."
+    },
+    "sectionType": {
+      "title_page": "Title page",
+      "copyright": "Copyright",
+      "dedication": "Dedication",
+      "epigraph": "Epigraph",
+      "contents": "Table of contents",
+      "foreword": "Foreword",
+      "preface": "Preface",
+      "introduction": "Introduction",
+      "prologue": "Prologue",
+      "part": "Part",
+      "chapter": "Chapter",
+      "interlude": "Interlude",
+      "conclusion": "Conclusion",
+      "epilogue": "Epilogue",
+      "acknowledgments": "Acknowledgments",
+      "appendix": "Appendix",
+      "notes": "Notes",
+      "bibliography": "Bibliography",
+      "author_bio": "About the author",
+      "other": "Other / unknown"
+    },
+    "preview": {
+      "metaTitle": "Review import",
+      "title": "Review your imported manuscript",
+      "intro": "Check the proposed structure below. Rename, retype, reorder, merge, split, include, or exclude any section. Nothing is added to your book until you confirm.",
+      "alreadyConfirmed": "This import has already been added to a book.",
+      "backToAuthor": "Back to the author",
+      "pdfPreserved": "Your original PDF is preserved and can be re-imported after any fix.",
+      "abandon": "Discard this import",
+      "tryAnother": "Upload a different PDF",
+      "pages": "Pages",
+      "characters": "Characters",
+      "sections": "Sections (included / total)",
+      "detectedAuthor": "Detected author",
+      "warningsHeading": "Notes from reading your PDF",
+      "artifactLine": "Repeated element excluded: “{text}” (on {count} pages)",
+      "structureHeading": "Proposed structure",
+      "sectionTitle": "Section title",
+      "sectionType": "Type",
+      "save": "Save",
+      "set": "Set",
+      "include": "Include",
+      "exclude": "Exclude",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "mergeUp": "Merge into previous",
+      "reset": "Reset",
+      "pagesRange": "Pages {start}–{end}",
+      "inspectText": "Inspect extracted text",
+      "emptyContent": "(No text in this section.)",
+      "splitAt": "Split at paragraph #",
+      "split": "Split",
+      "confirmHeading": "Create the book",
+      "confirmNote": "This creates a new book with the included sections as ordered chapters, each preserved as an imported version. You can edit everything afterward.",
+      "bookTitle": "Book title",
+      "language": "Manuscript language",
+      "confirm": "Create book from import"
     }
   }
 }
