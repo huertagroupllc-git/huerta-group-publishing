@@ -901,14 +901,16 @@
         "holdPlaced": "Import placed on hold. It will not be cleaned until released.",
         "holdReleased": "Hold released.",
         "importCleaned": "The import's source PDF and preview were permanently deleted.",
-        "batchProcessed": "Cleanup complete: {cleaned} cleaned, {failed} failed."
+        "batchProcessed": "Cleanup complete: {cleaned} cleaned, {failed} failed.",
+        "markedEligible": "Import marked eligible for cleanup now."
       },
       "errors": {
         "cleanupUpdateFailed": "That change could not be saved. Please try again.",
         "cleanupNotFound": "That import could not be found.",
         "cleanupFailed": "The import could not be cleaned. It remains and can be retried.",
         "cleanupSkipped": "That import is not eligible for cleanup right now."
-      }
+      },
+      "markEligible": "Mark eligible now"
     }
   },
   "account": {

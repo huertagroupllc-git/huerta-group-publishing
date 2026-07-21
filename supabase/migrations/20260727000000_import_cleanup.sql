@@ -144,7 +144,15 @@ begin
            + make_interval(days => public._import_cleanup_days('import_cleanup_preview_days', 90))
    where cleanup_status = 'retained' and status in ('uploaded', 'extracting', 'preview_ready')
      and target_book_id is null and cleanup_eligible_at is null;
-  -- (orphaned-confirmed imports are stamped by mark_import_orphaned at deletion.)
+
+  -- Orphaned-confirmed imports: normally stamped by mark_import_orphaned at
+  -- deletion time, but also caught here (e.g. books deleted before this trigger
+  -- existed) — a confirmed import with no live book and no deadline yet.
+  update public.manuscript_imports
+     set cleanup_eligible_at = now()
+           + make_interval(days => public._import_cleanup_days('import_cleanup_orphan_days', 30))
+   where cleanup_status = 'retained' and status = 'confirmed'
+     and target_book_id is null and cleanup_eligible_at is null;
 
   -- Flip to eligible once the deadline has passed, still with no live book.
   update public.manuscript_imports

@@ -9,6 +9,7 @@ import {
 import {
   cleanImport,
   holdImport,
+  markImportEligibleNow,
   releaseImportHold,
   runImportCleanupBatch,
 } from "@/lib/import/cleanup-actions";
@@ -142,6 +143,15 @@ export default async function AdminImportCleanupPage({
                       </button>
                     </form>
                   )}
+
+                  {!cleanable && r.cleanup_status === "retained" && !r.target_book_id ? (
+                    <form action={markImportEligibleNow}>
+                      <input type="hidden" name="id" value={r.id} />
+                      <button type="submit" className="border border-rule px-3 py-2 font-sans text-xs hover:border-oxblood hover:text-oxblood">
+                        {t("markEligible")}
+                      </button>
+                    </form>
+                  ) : null}
 
                   {cleanable ? (
                     <details>

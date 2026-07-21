@@ -79,7 +79,12 @@ export async function getCleanupImports(): Promise<CleanupImportRow[]> {
       .select(
         "id, original_filename, file_size_bytes, status, cleanup_status, cleanup_eligible_at, cleanup_hold_reason, cleanup_failure_code, target_book_id, prior_book_id",
       )
-      .neq("cleanup_status", "retained")
+      // Everything in the cleanup lifecycle, plus retained CANDIDATES (abandoned/
+      // failed/needs-attention, or an orphaned confirmed import) so staff have
+      // visibility during the retention window and can expedite a verified one.
+      .or(
+        "cleanup_status.neq.retained,status.eq.abandoned,status.eq.failed,status.eq.needs_attention,and(status.eq.confirmed,target_book_id.is.null)",
+      )
       .order("cleanup_eligible_at", { ascending: true, nullsFirst: false })
       .limit(200);
     if (error) return [];

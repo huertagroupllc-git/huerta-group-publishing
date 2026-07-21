@@ -901,14 +901,16 @@
         "holdPlaced": "Importación puesta en espera. No se limpiará hasta liberarla.",
         "holdReleased": "Espera liberada.",
         "importCleaned": "El PDF de origen y la vista previa de la importación se eliminaron permanentemente.",
-        "batchProcessed": "Limpieza completa: {cleaned} limpiadas, {failed} fallidas."
+        "batchProcessed": "Limpieza completa: {cleaned} limpiadas, {failed} fallidas.",
+        "markedEligible": "Importación marcada como apta para limpieza ahora."
       },
       "errors": {
         "cleanupUpdateFailed": "No se pudo guardar el cambio. Inténtalo de nuevo.",
         "cleanupNotFound": "No se encontró esa importación.",
         "cleanupFailed": "No se pudo limpiar la importación. Permanece y se puede reintentar.",
         "cleanupSkipped": "Esa importación no es apta para limpieza en este momento."
-      }
+      },
+      "markEligible": "Marcar apta ahora"
     }
   },
   "account": {

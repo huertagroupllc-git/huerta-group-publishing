@@ -150,6 +150,32 @@ export async function releaseImportHold(formData: FormData) {
   redirect(withActionNotice(CLEANUP_PATH, { code: "holdReleased" }));
 }
 
+/** Staff override: expedite a verified cleanup-category import to eligible now,
+ *  bypassing the retention timer (e.g. a confirmed test fixture). Fail-closed —
+ *  refuses any import attached to a live book. The deadline timer protects the
+ *  AUTOMATED path; a deliberate, confirmed staff action may expedite a specific
+ *  verified import. */
+export async function markImportEligibleNow(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  const supabase = await requireStaff();
+  const { data: row } = await supabase
+    .from("manuscript_imports")
+    .select("target_book_id, cleanup_status")
+    .eq("id", id)
+    .maybeSingle();
+  const r = row as { target_book_id: string | null; cleanup_status: string } | null;
+  // Never expedite a live-book import or one already on hold/cleaned.
+  if (!r || r.target_book_id || ["on_hold", "cleaned", "deleting"].includes(r.cleanup_status)) {
+    redirect(withActionMessage(CLEANUP_PATH, { code: "cleanupSkipped" }));
+  }
+  const { error } = await supabase
+    .from("manuscript_imports")
+    .update({ cleanup_status: "eligible", cleanup_eligible_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) redirect(withActionMessage(CLEANUP_PATH, { code: "cleanupUpdateFailed" }));
+  redirect(withActionNotice(CLEANUP_PATH, { code: "markedEligible" }));
+}
+
 /** Clean a single eligible import (with an explicit staff confirmation step). */
 export async function cleanImport(formData: FormData) {
   const id = String(formData.get("id") ?? "");
