@@ -179,7 +179,7 @@ export default async function AdminSystemPage({
         <p className="mt-3 max-w-prose font-sans text-sm text-ink-soft">
           {tModels("policyNote")}
         </p>
-        <dl className="mt-4 grid grid-cols-2 gap-x-10 gap-y-4 sm:grid-cols-3">
+        <dl className="mt-4 grid gap-x-10 gap-y-4 [grid-template-columns:repeat(auto-fit,minmax(13rem,1fr))] [&_div]:min-w-0 [&_dt]:break-words">
           <div>
             <dt className="eyebrow">{tModels("globalOverride")}</dt>
             <dd className="mt-1 font-serif text-base">
@@ -236,7 +236,7 @@ export default async function AdminSystemPage({
           namespace="admin.system.maintenance.errors"
           legacyText={false}
         />
-        <dl className="mt-4 grid grid-cols-2 gap-x-10 gap-y-4 sm:grid-cols-3">
+        <dl className="mt-4 grid gap-x-10 gap-y-4 [grid-template-columns:repeat(auto-fit,minmax(13rem,1fr))] [&_div]:min-w-0 [&_dt]:break-words [&_dd]:break-words">
           <div>
             <dt className="eyebrow">{tMaint("dueLabel")}</dt>
             <dd className="mt-1 font-serif text-lg">
