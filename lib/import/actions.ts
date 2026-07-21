@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { withActionMessage, withActionNotice } from "@/lib/action-messages";
 import { requireEntitledUser } from "@/lib/membership/entitlement";
+import { createClient } from "@/lib/supabase/server";
 import { SECTION_TYPES } from "@/lib/import/config";
 import { splitContentAtParagraph } from "@/lib/import/structure";
 
@@ -228,6 +229,39 @@ export async function resetSection(formData: FormData) {
     .eq("id", id);
   if (error) fail(path, "sectionUpdateFailed");
   redirect(withActionNotice(path, { code: "sectionReset" }));
+}
+
+/**
+ * Download the preserved original PDF via a short-lived signed URL. Available to
+ * the OWNER regardless of edit entitlement (archived accounts keep read-only
+ * access to their own source file); the private bucket + storage RLS ensure only
+ * the owner can sign a URL for their own object.
+ */
+export async function downloadSourcePdf(formData: FormData) {
+  const authorSlug = String(formData.get("author_slug") ?? "");
+  const importId = String(formData.get("import_id") ?? "");
+  const path = previewPath(authorSlug, importId);
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/signin");
+
+  const { data: imp } = await supabase
+    .from("manuscript_imports")
+    .select("storage_path")
+    .eq("id", importId)
+    .maybeSingle();
+  if (!imp) fail(path, "importNotFound");
+
+  const { data: signed, error } = await supabase.storage
+    .from("manuscript-imports")
+    .createSignedUrl((imp as { storage_path: string }).storage_path, 120);
+  if (error || !signed?.signedUrl) {
+    console.error("[import] downloadSourcePdf failed", error);
+    fail(path, "downloadUnavailable");
+  }
+  redirect(signed!.signedUrl);
 }
 
 export async function abandonImport(formData: FormData) {

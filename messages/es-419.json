@@ -1950,7 +1950,8 @@
       "abandonFailed": "No se pudo descartar la importación. Inténtalo de nuevo.",
       "importNotReady": "Esta importación aún no está lista para confirmar.",
       "importNotFound": "No se encontró esa importación.",
-      "confirmFailed": "No se pudo crear el manuscrito. Tu vista previa de importación se conserva."
+      "confirmFailed": "No se pudo crear el manuscrito. Tu vista previa de importación se conserva.",
+      "downloadUnavailable": "No se pudo recuperar el PDF original. Inténtalo de nuevo."
     },
     "notices": {
       "sectionUpdated": "Sección actualizada.",
@@ -2045,7 +2046,8 @@
       "confirmNote": "Esto crea un nuevo libro con las secciones incluidas como capítulos ordenados, cada uno preservado como una versión importada. Puedes editar todo después.",
       "bookTitle": "Título del libro",
       "language": "Idioma del manuscrito",
-      "confirm": "Crear libro desde la importación"
+      "confirm": "Crear libro desde la importación",
+      "downloadSource": "Descargar el PDF original"
     }
   }
 }

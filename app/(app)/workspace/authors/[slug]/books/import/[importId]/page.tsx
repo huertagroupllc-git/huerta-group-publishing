@@ -12,6 +12,7 @@ import { getImport, getImportSections } from "@/lib/import/queries";
 import {
   abandonImport,
   confirmImport,
+  downloadSourcePdf,
   mergeSectionUp,
   moveSection,
   resetSection,
@@ -110,6 +111,12 @@ export default async function ImportPreviewPage({
             {t("preview.pdfPreserved")}
           </p>
         </div>
+        <form action={downloadSourcePdf} className="mt-6">
+          {hidden}
+          <button type="submit" className="font-sans text-sm text-oxblood underline underline-offset-4 hover:text-ink">
+            {t("preview.downloadSource")}
+          </button>
+        </form>
         <form action={abandonImport} className="mt-8">
           {hidden}
           <button
@@ -134,6 +141,12 @@ export default async function ImportPreviewPage({
     <>
       <h1 className="font-display text-4xl tracking-tight">{t("preview.title")}</h1>
       <p className="mt-2 font-sans text-sm text-ink-faint">{record.original_filename}</p>
+      <form action={downloadSourcePdf} className="mt-2">
+        {hidden}
+        <button type="submit" className="font-sans text-xs text-oxblood underline underline-offset-4 hover:text-ink">
+          {t("preview.downloadSource")}
+        </button>
+      </form>
       <p className="mt-6 max-w-prose font-serif text-lg leading-relaxed text-ink-soft">
         {t("preview.intro")}
       </p>

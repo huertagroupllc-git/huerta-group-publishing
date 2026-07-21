@@ -1950,7 +1950,8 @@
       "abandonFailed": "The import could not be discarded. Please try again.",
       "importNotReady": "This import is not ready to confirm yet.",
       "importNotFound": "That import could not be found.",
-      "confirmFailed": "The manuscript could not be created. Your import preview is preserved."
+      "confirmFailed": "The manuscript could not be created. Your import preview is preserved.",
+      "downloadUnavailable": "The original PDF could not be retrieved. Please try again."
     },
     "notices": {
       "sectionUpdated": "Section updated.",
@@ -2045,7 +2046,8 @@
       "confirmNote": "This creates a new book with the included sections as ordered chapters, each preserved as an imported version. You can edit everything afterward.",
       "bookTitle": "Book title",
       "language": "Manuscript language",
-      "confirm": "Create book from import"
+      "confirm": "Create book from import",
+      "downloadSource": "Download original PDF"
     }
   }
 }
