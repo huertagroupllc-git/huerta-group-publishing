@@ -218,12 +218,26 @@ export default async function ImportPreviewPage({
               <form action={updateSectionType} className="flex items-end gap-2">
                 {hidden}
                 <input type="hidden" name="section_id" value={s.id} />
-                <SelectField
-                  id={`type-${s.id}`}
-                  label={t("preview.sectionType")}
-                  defaultValue={s.section_type}
-                  options={SECTION_TYPES.map((v) => ({ value: v, label: t(`sectionType.${v}`) }))}
-                />
+                <div>
+                  <label
+                    htmlFor={`type-${s.id}`}
+                    className="block font-sans text-[0.6875rem] uppercase tracking-[0.14em] text-ink-faint"
+                  >
+                    {t("preview.sectionType")}
+                  </label>
+                  <select
+                    id={`type-${s.id}`}
+                    name="section_type"
+                    defaultValue={s.section_type}
+                    className="mt-1 border border-rule bg-paper-bright px-3 py-2 font-sans text-sm text-ink focus:border-oxblood focus:outline-none"
+                  >
+                    {SECTION_TYPES.map((v) => (
+                      <option key={v} value={v}>
+                        {t(`sectionType.${v}`)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <button type="submit" className="border border-rule px-3 py-2 font-sans text-xs hover:border-oxblood hover:text-oxblood">
                   {t("preview.set")}
                 </button>
