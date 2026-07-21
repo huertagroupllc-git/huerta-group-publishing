@@ -5,9 +5,13 @@ export interface SupportSubmission {
   user_id: string | null;
   email: string | null;
   category: string;
+  priority: string;
   subject: string;
   message: string;
   page_path: string | null;
+  book_id: string | null;
+  bookTitle: string | null;
+  bookAuthor: string | null;
   locale: string;
   status: string;
   staff_note: string | null;
@@ -16,6 +20,46 @@ export interface SupportSubmission {
 }
 
 export const SUPPORT_STATUSES = ["new", "open", "resolved", "archived"] as const;
+
+/** A book the signed-in user owns, offered as an optional association in the
+ *  Support form. RLS returns only owned rows. */
+export interface SupportBookOption {
+  id: string;
+  title: string;
+  author: string;
+}
+
+export async function getOwnedBooksForSupport(): Promise<SupportBookOption[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("books")
+      .select("id, title, working_title, authors!inner(pen_name, full_name)")
+      .order("title");
+    if (error) return [];
+    return (data ?? []).map((b) => {
+      const rec = b as unknown as {
+        id: string;
+        title: string | null;
+        working_title: string | null;
+        authors:
+          | { pen_name: string | null; full_name: string | null }
+          | { pen_name: string | null; full_name: string | null }[]
+          | null;
+      };
+      // PostgREST returns a to-one embed as an object; the generated types
+      // model it as an array — normalize either shape.
+      const a = Array.isArray(rec.authors) ? rec.authors[0] : rec.authors;
+      return {
+        id: rec.id,
+        title: rec.title || rec.working_title || "Untitled",
+        author: a?.pen_name || a?.full_name || "",
+      };
+    });
+  } catch {
+    return [];
+  }
+}
 
 /**
  * Admin support inbox listing. Staff-only by RLS (the query returns rows only
@@ -31,7 +75,7 @@ export async function getSupportSubmissions(
     let q = supabase
       .from("support_submissions")
       .select(
-        "id, user_id, email, category, subject, message, page_path, locale, status, staff_note, created_at, updated_at",
+        "id, user_id, email, category, priority, subject, message, page_path, book_id, locale, status, staff_note, created_at, updated_at, book:books(title, working_title, authors(pen_name, full_name))",
       )
       .order("created_at", { ascending: false })
       .limit(200);
@@ -43,7 +87,31 @@ export async function getSupportSubmissions(
       console.error("[support] getSupportSubmissions failed", error);
       return [];
     }
-    return (data ?? []) as SupportSubmission[];
+    type EmbeddedBook = {
+      title: string | null;
+      working_title: string | null;
+      authors:
+        | { pen_name: string | null; full_name: string | null }
+        | { pen_name: string | null; full_name: string | null }[]
+        | null;
+    };
+    return (data ?? []).map((row) => {
+      const r = row as unknown as Record<string, unknown> & {
+        book?: EmbeddedBook | EmbeddedBook[] | null;
+      };
+      // Normalize the to-one embed (object at runtime, array in the types).
+      const book = Array.isArray(r.book) ? (r.book[0] ?? null) : (r.book ?? null);
+      const author = book
+        ? Array.isArray(book.authors)
+          ? (book.authors[0] ?? null)
+          : book.authors
+        : null;
+      return {
+        ...(r as unknown as SupportSubmission),
+        bookTitle: book ? book.title || book.working_title || "Untitled" : null,
+        bookAuthor: author?.pen_name || author?.full_name || null,
+      } as SupportSubmission;
+    });
   } catch (e) {
     console.error("[support] getSupportSubmissions threw", e);
     return [];

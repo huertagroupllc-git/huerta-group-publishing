@@ -1,6 +1,10 @@
 import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import {
+  ensureMembership,
+  resolveEditEntitlement,
+} from "@/lib/membership/entitlement";
 import { speechBlocks } from "@/lib/manuscript/speech";
 
 /**
@@ -45,6 +49,16 @@ export async function GET(request: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+  }
+
+  // Audio generation is a paid AI operation: archived/deletion accounts are
+  // read/preserve only and may not start it (RLS still guards content access).
+  const membership = await ensureMembership(supabase, user.id);
+  if (!resolveEditEntitlement(membership)) {
+    return NextResponse.json(
+      { error: "membership_inactive" },
+      { status: 403, headers: { "Cache-Control": "no-store" } },
+    );
   }
 
   const versionId = request.nextUrl.searchParams.get("version") ?? "";

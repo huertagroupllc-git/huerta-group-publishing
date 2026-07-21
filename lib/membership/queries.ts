@@ -13,7 +13,7 @@ export interface AccountMembership {
   status: MembershipStatus;
   status_reason: string | null;
   cancellation_scheduled_at: string | null;
-  cancellation_effective_at: string | null;
+  access_ends_at: string | null;
   archived_at: string | null;
   free_retention_months: number;
   extension_granted_months: number;
@@ -30,7 +30,7 @@ export const DEFAULT_MEMBERSHIP: AccountMembership = {
   status: "active",
   status_reason: null,
   cancellation_scheduled_at: null,
-  cancellation_effective_at: null,
+  access_ends_at: null,
   archived_at: null,
   free_retention_months: 12,
   extension_granted_months: 0,
@@ -52,7 +52,7 @@ export async function getMembership(userId: string): Promise<AccountMembership> 
     const { data, error } = await supabase
       .from("account_memberships")
       .select(
-        "status, status_reason, cancellation_scheduled_at, cancellation_effective_at, archived_at, free_retention_months, extension_granted_months, retention_expires_at, deletion_requested_at, deletion_scheduled_at, deleted_at",
+        "status, status_reason, cancellation_scheduled_at, access_ends_at, archived_at, free_retention_months, extension_granted_months, retention_expires_at, deletion_requested_at, deletion_scheduled_at, deleted_at",
       )
       .eq("user_id", userId)
       .maybeSingle();

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { withActionMessage, withActionNotice } from "@/lib/action-messages";
 import { createClient } from "@/lib/supabase/server";
+import { assertEditEntitlement } from "@/lib/membership/entitlement";
 import { SETTINGS_SCHEMA_VERSION } from "@/lib/settings/definitions";
 import {
   validateDisplayWrite,
@@ -201,6 +202,9 @@ export async function saveAuthorEditorialSettings(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/signin");
+  // Editorial settings (incl. the concept-dictionary toggle) are gated by
+  // active membership entitlement; archived/deletion states are read-only.
+  await assertEditEntitlement(supabase, user);
 
   // Parse — an empty select value ("") means inherit (null).
   const nullable = (name: string): string | null => {
@@ -323,6 +327,11 @@ export async function resetAuthorSettingsSection(formData: FormData) {
 
   if (section !== "editorial" && section !== "display") {
     fail(path, "invalidSettingValue");
+  }
+  // Only the EDITORIAL section is entitlement-gated; display (comfort) reset
+  // stays available to archived accounts.
+  if (section === "editorial") {
+    await assertEditEntitlement(supabase, user);
   }
 
   try {
@@ -471,6 +480,8 @@ export async function saveBookEditorialSettings(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/signin");
+  // Book editorial settings (incl. the concept-dictionary toggle) are gated.
+  await assertEditEntitlement(supabase, user);
 
   const nullable = (name: string): string | null => {
     const v = String(formData.get(name) ?? "");
@@ -586,6 +597,10 @@ export async function resetBookSettingsSection(formData: FormData) {
 
   if (section !== "editorial" && section !== "display") {
     fail(path, "invalidBookSetting");
+  }
+  // Only the EDITORIAL section is entitlement-gated; display reset stays open.
+  if (section === "editorial") {
+    await assertEditEntitlement(supabase, user);
   }
 
   try {

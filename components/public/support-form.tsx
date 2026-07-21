@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { ErrorNote, NoticeNote } from "@/components/workspace-frame";
 import { submitSupport } from "@/lib/support/actions";
 import { SUPPORT_CATEGORIES } from "@/lib/support/constants";
+import type { SupportBookOption } from "@/lib/support/queries";
 
 /**
  * The public Feedback & Support form. A server component: it posts to the
@@ -17,6 +18,8 @@ export async function SupportForm({
   pagePath,
   signedIn,
   defaultEmail,
+  books = [],
+  defaultBookId,
   notice,
   error,
 }: {
@@ -25,6 +28,10 @@ export async function SupportForm({
   pagePath: string;
   signedIn: boolean;
   defaultEmail?: string;
+  /** The signed-in submitter's own books, offered as an optional association. */
+  books?: SupportBookOption[];
+  /** Preselected book (e.g. a book-context support link). */
+  defaultBookId?: string;
   notice?: { code: string; params?: Record<string, string> } | null;
   error?: { code: string; params?: Record<string, string> } | null;
 }) {
@@ -83,6 +90,27 @@ export async function SupportForm({
           className={field}
         />
       </div>
+
+      {signedIn && books.length > 0 ? (
+        <div>
+          <label htmlFor="support-book" className={label}>
+            {t("form.book")}
+          </label>
+          <select
+            id="support-book"
+            name="book_id"
+            defaultValue={defaultBookId ?? ""}
+            className={field}
+          >
+            <option value="">{t("form.bookNone")}</option>
+            {books.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.author ? `${b.title} — ${b.author}` : b.title}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
 
       <div>
         <label htmlFor="support-subject" className={label}>

@@ -1,10 +1,27 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { AdminSection } from "@/components/admin-section";
+import { ActionMessage, ActionNotice } from "@/components/action-message";
+import { actionMessageFromQuery, actionNoticeFromQuery } from "@/lib/action-messages";
+import { createClient } from "@/lib/supabase/server";
+import { processDueArchivals } from "@/lib/membership/admin-actions";
 import {
   resolvePolicyFromEnv,
   resolveTokenBudget,
 } from "@/lib/editorial-ai/model-policy";
+
+/** Due archival count for the maintenance panel. Staff-gated RPC; resilient to
+ *  absence (returns null → panel shows the migration is pending). */
+async function dueArchivalCount(): Promise<number | null> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("count_due_archivals");
+    if (error) return null;
+    return typeof data === "number" ? data : null;
+  } catch {
+    return null;
+  }
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("admin.shell.nav");
@@ -50,13 +67,22 @@ async function editorialModelAvailability(): Promise<
   }
 }
 
-export default async function AdminSystemPage() {
+export default async function AdminSystemPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const query = await searchParams;
   const t = await getTranslations("admin.system");
   const tNav = await getTranslations("navigation");
   const tShell = await getTranslations("admin.shell.nav");
   const tModels = await getTranslations("admin.system.models");
+  const tMaint = await getTranslations("admin.system.maintenance");
   const locale = await getLocale();
   const models = await editorialModelAvailability();
+  const dueArchivals = await dueArchivalCount();
+  const maintNotice = actionNoticeFromQuery(query);
+  const maintError = actionMessageFromQuery(query);
 
   // The resolved review-model policy and token ceiling, read-only, from
   // the same trusted server configuration the runner uses. No keys.
@@ -150,6 +176,47 @@ export default async function AdminSystemPage() {
             </dd>
           </div>
         </dl>
+      </section>
+
+      {/* Membership maintenance — the manual archival-transition processor.
+          No scheduler exists yet; a future cron would call the same RPC. */}
+      <section
+        className="rule mt-12 max-w-3xl pt-6"
+        aria-labelledby="maintenance-heading"
+      >
+        <h2 id="maintenance-heading" className="eyebrow">
+          {tMaint("heading")}
+        </h2>
+        <p className="mt-3 max-w-prose font-sans text-sm text-ink-soft">
+          {tMaint("note")}
+        </p>
+        <ActionNotice
+          code={maintNotice?.code}
+          params={maintNotice?.params}
+          namespace="admin.system.maintenance.notices"
+        />
+        <ActionMessage
+          code={maintError?.code}
+          params={maintError?.params}
+          namespace="admin.system.maintenance.errors"
+          legacyText={false}
+        />
+        <dl className="mt-4">
+          <dt className="eyebrow">{tMaint("dueLabel")}</dt>
+          <dd className="mt-1 font-serif text-lg">
+            {dueArchivals === null
+              ? tMaint("dueUnavailable")
+              : dueArchivals.toLocaleString(locale)}
+          </dd>
+        </dl>
+        <form action={processDueArchivals} className="mt-6">
+          <button
+            type="submit"
+            className="border border-rule px-5 py-2.5 font-sans text-sm text-ink hover:border-oxblood hover:text-oxblood focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oxblood"
+          >
+            {tMaint("process")}
+          </button>
+        </form>
       </section>
     </>
   );

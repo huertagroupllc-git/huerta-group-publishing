@@ -5,6 +5,7 @@ import { contentPageMetadata } from "@/lib/public/content-metadata";
 import { actionMessageFromQuery, actionNoticeFromQuery } from "@/lib/action-messages";
 import { isAuthenticated } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import { getOwnedBooksForSupport } from "@/lib/support/queries";
 import { PUBLIC_LOCALE } from "@/lib/locales";
 
 export const dynamic = "force-dynamic";
@@ -25,13 +26,16 @@ export default async function SupportPage({
   const query = await searchParams;
   const signedIn = await isAuthenticated();
   let defaultEmail: string | undefined;
+  let books: Awaited<ReturnType<typeof getOwnedBooksForSupport>> = [];
   if (signedIn) {
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
     defaultEmail = user?.email ?? undefined;
+    books = await getOwnedBooksForSupport();
   }
+  const preselect = typeof query.book === "string" ? query.book : undefined;
 
   return (
     <PublicContentPage locale={PUBLIC_LOCALE} page="support">
@@ -41,6 +45,8 @@ export default async function SupportPage({
         pagePath="/support"
         signedIn={signedIn}
         defaultEmail={defaultEmail}
+        books={books}
+        defaultBookId={preselect}
         notice={actionNoticeFromQuery(query)}
         error={actionMessageFromQuery(query)}
       />

@@ -708,6 +708,19 @@
         "resolvedChapter": "Resolved chapter-reading model",
         "tokenBudget": "Per-run token budget",
         "unset": "not set"
+      },
+      "maintenance": {
+        "heading": "Membership maintenance",
+        "note": "Run the archival transition for accounts whose access has ended. Each due cancellation becomes an archived workspace with its retention window and advance-notice records. Safe to re-run; no email is sent. A scheduler will call this automatically in future.",
+        "dueLabel": "Accounts due for archival",
+        "dueUnavailable": "Unavailable (migration pending)",
+        "process": "Process due archivals",
+        "notices": {
+          "archivalProcessed": "Processed due archivals: {count} archived, {events} notice(s) queued."
+        },
+        "errors": {
+          "archivalFailed": "The archival processor could not run. Please try again."
+        }
       }
     },
     "deletion": {
@@ -797,7 +810,15 @@
       "errors": {
         "notFound": "That submission could not be found.",
         "invalidStatus": "That status is not valid.",
-        "updateFailed": "The submission could not be updated. Please try again."
+        "updateFailed": "The submission could not be updated. Please try again.",
+        "invalidPriority": "That priority is not valid."
+      },
+      "priorityLabel": "Priority",
+      "book": "Book",
+      "priorities": {
+        "normal": "Normal",
+        "elevated": "Elevated",
+        "urgent": "Urgent"
       }
     }
   },
@@ -1600,7 +1621,9 @@
       "subject": "Subject",
       "message": "Your message",
       "submit": "Send",
-      "privacyNote": "Please do not include passwords or other secrets. We reply by email. See the Privacy Policy for how your message is handled."
+      "privacyNote": "Please do not include passwords or other secrets. We reply by email. See the Privacy Policy for how your message is handled.",
+      "book": "Which book? (optional)",
+      "bookNone": "Not about a specific book"
     },
     "errors": {
       "invalidCategory": "Please choose what your message is about.",
@@ -1654,7 +1677,8 @@
     },
     "errors": {
       "membershipUnavailable": "That change could not be saved right now. Please try again shortly.",
-      "deletionConfirmMismatch": "Please type DELETE exactly to confirm your request."
+      "deletionConfirmMismatch": "Please type DELETE exactly to confirm your request.",
+      "membershipInactive": "Your workspace is archived, so editing is paused. Reactivate below to continue working."
     },
     "notices": {
       "cancellationScheduled": "Your membership cancellation is scheduled. Your workspace will be archived, and you can reactivate any time before then.",
@@ -1662,7 +1686,13 @@
       "deletionRequested": "Your permanent-deletion request has been recorded. You can still cancel it until the scheduled date.",
       "deletionRescinded": "Your deletion request has been cancelled. Your workspace is archived and safe.",
       "extensionRequested": "Your request for more time has been sent. We will be in touch."
-    }
+    },
+    "cancellationScheduledLabel": "Cancellation scheduled",
+    "cancellationScheduledValue": "You scheduled cancellation on {date}.",
+    "accessEndsLabel": "Access ends",
+    "accessEndsValue": "Your active access continues until {date}.",
+    "archivedLabel": "Archived",
+    "archivedValue": "Your workspace was archived on {date}."
   },
   "retention": {
     "email": {
@@ -1682,13 +1712,13 @@
         "subject": "7 days until your archived workspace is removed",
         "body": "Your archived workspace is scheduled to be permanently deleted on {expiresOn} — one week from now. This is one of your final reminders."
       },
-      "t_minus_1": {
-        "subject": "Tomorrow: your archived workspace will be removed",
-        "body": "Your archived workspace is scheduled to be permanently deleted on {expiresOn}. If you want to keep it, please reactivate or request more time today."
-      },
       "deleted_notice": {
         "subject": "Your workspace has been removed",
         "body": "As scheduled on {expiresOn}, your archived workspace has been permanently removed. Thank you for having written with us."
+      },
+      "t_minus_180": {
+        "subject": "Six months until your archived workspace is removed",
+        "body": "Your archived workspace is scheduled to be permanently deleted on {expiresOn} — about six months from now. Reactivate or request more time if you would like to keep it."
       }
     }
   }

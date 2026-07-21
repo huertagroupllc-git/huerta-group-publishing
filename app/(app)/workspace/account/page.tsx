@@ -11,10 +11,8 @@ import { resolveInterfaceLocale } from "@/lib/profile/queries";
 import { INTERFACE_TEXT_SCALES } from "@/lib/settings/definitions";
 import { currentAccountDisplay } from "@/lib/settings/account-display";
 import { saveAccountDisplaySettings } from "@/lib/settings/actions";
-import {
-  getMembership,
-  membershipCapabilities,
-} from "@/lib/membership/queries";
+import { membershipCapabilities } from "@/lib/membership/queries";
+import { ensureMembership } from "@/lib/membership/entitlement";
 import {
   reactivateMembership,
   requestAccountDeletion,
@@ -76,22 +74,23 @@ export default async function AccountPage({
   const locale = await resolveInterfaceLocale();
   const display = await currentAccountDisplay();
   const tM = await getTranslations("membership");
-  const membership = await getMembership(user.id);
+  // Safe lazy initialization: persist an active row on first view (idempotent,
+  // never clobbers an existing state), so status is DB-derived on the live path.
+  const membership = await ensureMembership(supabase, user.id);
   const caps = membershipCapabilities(membership);
-  const retentionDate = membership.retention_expires_at
-    ? new Date(membership.retention_expires_at).toLocaleDateString(locale, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : null;
-  const deletionDate = membership.deletion_scheduled_at
-    ? new Date(membership.deletion_scheduled_at).toLocaleDateString(locale, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : null;
+  const fmtDate = (iso: string | null) =>
+    iso
+      ? new Date(iso).toLocaleDateString(locale, {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      : null;
+  const cancellationDate = fmtDate(membership.cancellation_scheduled_at);
+  const accessEndsDate = fmtDate(membership.access_ends_at);
+  const archivedDate = fmtDate(membership.archived_at);
+  const retentionDate = fmtDate(membership.retention_expires_at);
+  const deletionDate = fmtDate(membership.deletion_scheduled_at);
 
   return (
     <WorkspaceFrame
@@ -214,6 +213,30 @@ export default async function AccountPage({
           <dd className="mt-1 font-serif text-lg text-ink">
             {tM(`status.${membership.status}`)}
           </dd>
+          {cancellationDate ? (
+            <>
+              <dt className="eyebrow mt-6">{tM("cancellationScheduledLabel")}</dt>
+              <dd className="mt-1 font-serif text-base text-ink-soft">
+                {tM("cancellationScheduledValue", { date: cancellationDate })}
+              </dd>
+            </>
+          ) : null}
+          {accessEndsDate ? (
+            <>
+              <dt className="eyebrow mt-6">{tM("accessEndsLabel")}</dt>
+              <dd className="mt-1 font-serif text-base text-ink-soft">
+                {tM("accessEndsValue", { date: accessEndsDate })}
+              </dd>
+            </>
+          ) : null}
+          {archivedDate ? (
+            <>
+              <dt className="eyebrow mt-6">{tM("archivedLabel")}</dt>
+              <dd className="mt-1 font-serif text-base text-ink-soft">
+                {tM("archivedValue", { date: archivedDate })}
+              </dd>
+            </>
+          ) : null}
           {retentionDate ? (
             <>
               <dt className="eyebrow mt-6">{tM("retentionLabel")}</dt>

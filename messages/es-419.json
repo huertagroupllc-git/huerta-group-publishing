@@ -708,6 +708,19 @@
         "resolvedChapter": "Modelo resuelto para la lectura de capítulos",
         "tokenBudget": "Presupuesto de tokens por sesión",
         "unset": "sin definir"
+      },
+      "maintenance": {
+        "heading": "Mantenimiento de membresías",
+        "note": "Ejecuta la transición de archivado para las cuentas cuyo acceso terminó. Cada cancelación vencida se convierte en un espacio archivado con su ventana de retención y sus avisos anticipados. Es seguro re-ejecutar; no se envía correo. En el futuro un programador la llamará automáticamente.",
+        "dueLabel": "Cuentas pendientes de archivar",
+        "dueUnavailable": "No disponible (migración pendiente)",
+        "process": "Procesar archivados pendientes",
+        "notices": {
+          "archivalProcessed": "Archivados procesados: {count} archivadas, {events} aviso(s) en cola."
+        },
+        "errors": {
+          "archivalFailed": "El procesador de archivado no se pudo ejecutar. Inténtalo de nuevo."
+        }
       }
     },
     "deletion": {
@@ -797,7 +810,15 @@
       "errors": {
         "notFound": "No se encontró ese envío.",
         "invalidStatus": "Ese estado no es válido.",
-        "updateFailed": "No se pudo actualizar el envío. Inténtalo de nuevo."
+        "updateFailed": "No se pudo actualizar el envío. Inténtalo de nuevo.",
+        "invalidPriority": "Esa prioridad no es válida."
+      },
+      "priorityLabel": "Prioridad",
+      "book": "Libro",
+      "priorities": {
+        "normal": "Normal",
+        "elevated": "Elevada",
+        "urgent": "Urgente"
       }
     }
   },
@@ -1600,7 +1621,9 @@
       "subject": "Asunto",
       "message": "Tu mensaje",
       "submit": "Enviar",
-      "privacyNote": "Por favor no incluyas contraseñas ni otros secretos. Respondemos por correo. Consulta la Política de privacidad sobre cómo se maneja tu mensaje."
+      "privacyNote": "Por favor no incluyas contraseñas ni otros secretos. Respondemos por correo. Consulta la Política de privacidad sobre cómo se maneja tu mensaje.",
+      "book": "¿Sobre qué libro? (opcional)",
+      "bookNone": "No es sobre un libro en particular"
     },
     "errors": {
       "invalidCategory": "Elige de qué trata tu mensaje.",
@@ -1654,7 +1677,8 @@
     },
     "errors": {
       "membershipUnavailable": "Ese cambio no se pudo guardar ahora. Inténtalo de nuevo en un momento.",
-      "deletionConfirmMismatch": "Escribe DELETE exactamente para confirmar tu solicitud."
+      "deletionConfirmMismatch": "Escribe DELETE exactamente para confirmar tu solicitud.",
+      "membershipInactive": "Tu espacio de trabajo está archivado, así que la edición está en pausa. Reactívalo abajo para seguir trabajando."
     },
     "notices": {
       "cancellationScheduled": "La cancelación de tu membresía está programada. Tu espacio de trabajo se archivará, y puedes reactivar en cualquier momento antes de esa fecha.",
@@ -1662,7 +1686,13 @@
       "deletionRequested": "Tu solicitud de eliminación permanente ha sido registrada. Aún puedes cancelarla hasta la fecha programada.",
       "deletionRescinded": "Tu solicitud de eliminación ha sido cancelada. Tu espacio de trabajo está archivado y a salvo.",
       "extensionRequested": "Tu solicitud de más tiempo ha sido enviada. Estaremos en contacto."
-    }
+    },
+    "cancellationScheduledLabel": "Cancelación programada",
+    "cancellationScheduledValue": "Programaste la cancelación el {date}.",
+    "accessEndsLabel": "El acceso termina",
+    "accessEndsValue": "Tu acceso activo continúa hasta el {date}.",
+    "archivedLabel": "Archivada",
+    "archivedValue": "Tu espacio de trabajo se archivó el {date}."
   },
   "retention": {
     "email": {
@@ -1682,13 +1712,13 @@
         "subject": "7 días para que se elimine tu espacio archivado",
         "body": "Tu espacio de trabajo archivado está programado para eliminarse permanentemente el {expiresOn} — dentro de una semana. Este es uno de tus últimos recordatorios."
       },
-      "t_minus_1": {
-        "subject": "Mañana: se eliminará tu espacio archivado",
-        "body": "Tu espacio de trabajo archivado está programado para eliminarse permanentemente el {expiresOn}. Si deseas conservarlo, reactiva o solicita más tiempo hoy."
-      },
       "deleted_notice": {
         "subject": "Tu espacio de trabajo ha sido eliminado",
         "body": "Según lo programado para el {expiresOn}, tu espacio de trabajo archivado ha sido eliminado permanentemente. Gracias por haber escrito con nosotros."
+      },
+      "t_minus_180": {
+        "subject": "Seis meses para que se elimine tu espacio archivado",
+        "body": "Tu espacio de trabajo archivado está programado para eliminarse permanentemente el {expiresOn} — dentro de unos seis meses. Reactiva o solicita más tiempo si deseas conservarlo."
       }
     }
   }

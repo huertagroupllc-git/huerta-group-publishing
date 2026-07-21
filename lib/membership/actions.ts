@@ -50,7 +50,7 @@ export async function scheduleCancellation() {
       user_id: user.id,
       status: "cancellation_scheduled",
       cancellation_scheduled_at: new Date().toISOString(),
-      cancellation_effective_at: daysFromNow(CANCELLATION_GRACE_DAYS),
+      access_ends_at: daysFromNow(CANCELLATION_GRACE_DAYS),
     },
     { onConflict: "user_id" },
   );
@@ -73,7 +73,7 @@ export async function reactivateMembership() {
       user_id: user.id,
       status: "active",
       cancellation_scheduled_at: null,
-      cancellation_effective_at: null,
+      access_ends_at: null,
       archived_at: null,
       retention_expires_at: null,
       deletion_requested_at: null,

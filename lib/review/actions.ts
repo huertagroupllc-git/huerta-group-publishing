@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { withActionMessage, withActionNotice } from "@/lib/action-messages";
 import { createClient } from "@/lib/supabase/server";
+import { assertEditEntitlement } from "@/lib/membership/entitlement";
 import {
   ReviewNotPossibleError,
   continueReview,
@@ -52,6 +53,10 @@ export async function requestConstitutionReview(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/signin");
+  // AI review requires active editorial entitlement (archived/deletion states
+  // may not start or continue a review). Redirect precedes the try so the
+  // NEXT_REDIRECT propagates cleanly.
+  await assertEditEntitlement(supabase, user);
 
   try {
     const result = await startReview(constitutionReview, authorSlug, bookSlug);
@@ -107,6 +112,8 @@ export async function makeCurrentReview(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/signin");
+  // Making a review current mutates editorial findings — gate it.
+  await assertEditEntitlement(supabase, user);
 
   try {
     const { data: run } = await supabase
@@ -166,6 +173,8 @@ export async function continueConstitutionReview(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/signin");
+  // Continuing an AI review requires active editorial entitlement.
+  await assertEditEntitlement(supabase, user);
 
   try {
     const result = await continueReview(

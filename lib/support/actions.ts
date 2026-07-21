@@ -46,6 +46,7 @@ export async function submitSupport(formData: FormData) {
   const message = String(formData.get("message") ?? "").trim();
   const emailInput = String(formData.get("email") ?? "").trim();
   const pagePath = String(formData.get("page_path") ?? "") || null;
+  const bookIdInput = String(formData.get("book_id") ?? "").trim() || null;
 
   const fail = (code: string): never =>
     redirect(withActionMessage(supportPath, { code }));
@@ -71,6 +72,19 @@ export async function submitSupport(formData: FormData) {
     if (user) {
       // Signed-in: direct insert, user_id stamped for RLS ownership.
       const email = emailInput || user.email || null;
+      // Book association is optional and must be a book the submitter OWNS.
+      // Validate through RLS (the query returns the row only if owned); drop a
+      // non-owned/unknown id to null rather than leaking or failing. The RLS
+      // insert policy independently enforces owns_book as a backstop.
+      let bookId: string | null = null;
+      if (bookIdInput) {
+        const { data: owned } = await supabase
+          .from("books")
+          .select("id")
+          .eq("id", bookIdInput)
+          .maybeSingle();
+        bookId = owned?.id ?? null;
+      }
       const { error } = await supabase.from("support_submissions").insert({
         user_id: user.id,
         email,
@@ -79,6 +93,7 @@ export async function submitSupport(formData: FormData) {
         message: message.slice(0, 8000),
         page_path: pagePath,
         locale,
+        book_id: bookId,
         diagnostics,
       });
       if (error) throw new Error(error.message);

@@ -5,6 +5,7 @@ import { contentPageMetadata } from "@/lib/public/content-metadata";
 import { actionMessageFromQuery, actionNoticeFromQuery } from "@/lib/action-messages";
 import { isAuthenticated } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import { getOwnedBooksForSupport } from "@/lib/support/queries";
 
 const ES = "es-419";
 
@@ -27,13 +28,16 @@ export default async function SupportPageEs({
   const query = await searchParams;
   const signedIn = await isAuthenticated();
   let defaultEmail: string | undefined;
+  let books: Awaited<ReturnType<typeof getOwnedBooksForSupport>> = [];
   if (signedIn) {
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
     defaultEmail = user?.email ?? undefined;
+    books = await getOwnedBooksForSupport();
   }
+  const preselect = typeof query.book === "string" ? query.book : undefined;
 
   return (
     <PublicContentPage locale={ES} page="support">
@@ -43,6 +47,8 @@ export default async function SupportPageEs({
         pagePath="/es/support"
         signedIn={signedIn}
         defaultEmail={defaultEmail}
+        books={books}
+        defaultBookId={preselect}
         notice={actionNoticeFromQuery(query)}
         error={actionMessageFromQuery(query)}
       />

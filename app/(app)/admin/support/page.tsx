@@ -3,10 +3,8 @@ import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { ActionMessage, ActionNotice } from "@/components/action-message";
 import { actionMessageFromQuery, actionNoticeFromQuery } from "@/lib/action-messages";
-import {
-  getSupportSubmissions,
-  SUPPORT_STATUSES,
-} from "@/lib/support/queries";
+import { getSupportSubmissions, SUPPORT_STATUSES } from "@/lib/support/queries";
+import { SUPPORT_PRIORITIES } from "@/lib/support/constants";
 import { updateSupportSubmission } from "@/lib/support/admin-actions";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -96,7 +94,18 @@ export default async function AdminSupportPage({
                   {s.subject}
                 </h2>
                 <p className="font-sans text-xs uppercase tracking-[0.14em] text-ink-faint">
-                  {t(`categories.${s.category}`)} ·{" "}
+                  <span
+                    className={
+                      s.priority === "urgent"
+                        ? "text-oxblood"
+                        : s.priority === "elevated"
+                          ? "text-brand-gold-dark"
+                          : "text-ink-faint"
+                    }
+                  >
+                    {t(`priorities.${s.priority}`)}
+                  </span>{" "}
+                  · {t(`categories.${s.category}`)} ·{" "}
                   {new Date(s.created_at).toLocaleDateString(locale, {
                     year: "numeric",
                     month: "short",
@@ -107,6 +116,9 @@ export default async function AdminSupportPage({
               <p className="mt-1 font-sans text-xs text-ink-faint">
                 {s.email ?? t("noEmail")}
                 {s.user_id ? ` · ${t("member")}` : ` · ${t("anonymous")}`}
+                {s.bookTitle
+                  ? ` · ${t("book")}: ${s.bookTitle}${s.bookAuthor ? ` (${s.bookAuthor})` : ""}`
+                  : ""}
                 {s.page_path ? ` · ${s.page_path}` : ""} · {s.locale}
               </p>
               <p className="mt-4 max-w-prose whitespace-pre-wrap font-serif leading-relaxed text-ink-soft">
@@ -134,6 +146,26 @@ export default async function AdminSupportPage({
                     {SUPPORT_STATUSES.map((st) => (
                       <option key={st} value={st}>
                         {t(`statuses.${st}`)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label
+                    htmlFor={`priority-${s.id}`}
+                    className="block font-sans text-[0.6875rem] uppercase tracking-[0.14em] text-ink-faint"
+                  >
+                    {t("priorityLabel")}
+                  </label>
+                  <select
+                    id={`priority-${s.id}`}
+                    name="priority"
+                    defaultValue={s.priority}
+                    className="mt-1 border border-rule bg-paper-bright px-3 py-2 font-sans text-sm text-ink focus:border-oxblood focus:outline-none"
+                  >
+                    {SUPPORT_PRIORITIES.map((p) => (
+                      <option key={p} value={p}>
+                        {t(`priorities.${p}`)}
                       </option>
                     ))}
                   </select>

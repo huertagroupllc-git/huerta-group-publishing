@@ -15,30 +15,35 @@
 
 export type RetentionMilestone =
   | "archived_notice"
+  | "t_minus_180"
   | "t_minus_90"
   | "t_minus_30"
   | "t_minus_7"
-  | "t_minus_1"
   | "deleted_notice";
 
-/** Days BEFORE the deletion deadline each pre-deadline milestone fires. */
+/** Days BEFORE the deletion deadline each pre-deadline milestone fires. The
+ *  set is the confirmed canonical six: archive confirmation, then 180/90/30/7
+ *  days before deletion, then deletion completed. (t_minus_1 was superseded and
+ *  is never created — it remains only a deprecated, historically-valid value in
+ *  the account_retention_events CHECK.) This list is the SINGLE source of the
+ *  pre-deadline offsets and is asserted against the archival RPC in tests. */
 export const RETENTION_MILESTONE_OFFSET_DAYS: Record<
   Exclude<RetentionMilestone, "archived_notice" | "deleted_notice">,
   number
 > = {
+  t_minus_180: 180,
   t_minus_90: 90,
   t_minus_30: 30,
   t_minus_7: 7,
-  t_minus_1: 1,
 };
 
 /** The ordered milestone list, earliest to latest in an account's lifecycle. */
 export const RETENTION_MILESTONES: readonly RetentionMilestone[] = [
   "archived_notice",
+  "t_minus_180",
   "t_minus_90",
   "t_minus_30",
   "t_minus_7",
-  "t_minus_1",
   "deleted_notice",
 ] as const;
 

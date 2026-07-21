@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { withActionMessage } from "@/lib/action-messages";
 import { createClient } from "@/lib/supabase/server";
+import { assertEditEntitlement } from "@/lib/membership/entitlement";
 import { slugify } from "@/lib/memory/types";
 import type { ChapterKind } from "@/lib/manuscript/types";
 
@@ -19,6 +20,9 @@ async function requireUser() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/signin");
+  // Centralized entitlement gate: archived / deletion states cannot mutate the
+  // editorial workspace (they are read/preserve only). See lib/membership/entitlement.
+  await assertEditEntitlement(supabase, user);
   return supabase;
 }
 
