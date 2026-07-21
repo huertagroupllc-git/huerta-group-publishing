@@ -526,7 +526,8 @@
         "reviewRuns": "Review Runs",
         "aiUsage": "AI Usage",
         "system": "System",
-        "support": "Support"
+        "support": "Support",
+        "importCleanup": "Import cleanup"
       }
     },
     "overview": {
@@ -858,6 +859,55 @@
         "normal": "Normal",
         "elevated": "Elevated",
         "urgent": "Urgent"
+      }
+    },
+    "importCleanup": {
+      "intro": "Abandoned, failed, stale-preview, and orphaned manuscript imports become eligible for cleanup after a retention period. Cleanup permanently deletes the private source PDF and the extracted preview — never an import attached to a live book.",
+      "eligibleNow": "Eligible now",
+      "unavailable": "Unavailable (migration pending)",
+      "lastRun": "Last run",
+      "noRuns": "No runs yet",
+      "cleanedCount": "{n} cleaned",
+      "source": {
+        "scheduled": "scheduled",
+        "manual": "manual"
+      },
+      "processAll": "Process all eligible ({n})",
+      "processAllNote": "Deletes each eligible import's source PDF and preview, then records a run. Bounded per run.",
+      "empty": "No imports are in the cleanup lifecycle.",
+      "eligibleOn": "Eligible on",
+      "due": "due now",
+      "orphaned": "orphaned (book deleted)",
+      "held": "on hold",
+      "release": "Release hold",
+      "hold": "Hold",
+      "holdReasonPlaceholder": "Hold reason",
+      "cleanConfirmOpen": "Clean this import…",
+      "cleanConfirmNote": "This permanently deletes the original PDF and the extracted preview for this import. This cannot be undone.",
+      "cleanNow": "Delete permanently",
+      "cleanupStatus": {
+        "retained": "Retained",
+        "eligible": "Eligible",
+        "on_hold": "On hold",
+        "deleting": "Deleting",
+        "cleaned": "Cleaned",
+        "cleanup_failed": "Cleanup failed"
+      },
+      "failure": {
+        "storage_delete_failed": "the source file could not be deleted",
+        "record_update_failed": "the record could not be finalized"
+      },
+      "notices": {
+        "holdPlaced": "Import placed on hold. It will not be cleaned until released.",
+        "holdReleased": "Hold released.",
+        "importCleaned": "The import's source PDF and preview were permanently deleted.",
+        "batchProcessed": "Cleanup complete: {cleaned} cleaned, {failed} failed."
+      },
+      "errors": {
+        "cleanupUpdateFailed": "That change could not be saved. Please try again.",
+        "cleanupNotFound": "That import could not be found.",
+        "cleanupFailed": "The import could not be cleaned. It remains and can be retried.",
+        "cleanupSkipped": "That import is not eligible for cleanup right now."
       }
     }
   },

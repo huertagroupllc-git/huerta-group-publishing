@@ -55,6 +55,59 @@ export async function getImport(importId: string): Promise<ManuscriptImport | nu
   }
 }
 
+export interface CleanupImportRow {
+  id: string;
+  original_filename: string;
+  file_size_bytes: number;
+  status: string;
+  cleanup_status: string;
+  cleanup_eligible_at: string | null;
+  cleanup_hold_reason: string | null;
+  cleanup_failure_code: string | null;
+  target_book_id: string | null;
+  prior_book_id: string | null;
+}
+
+/** Imports in (or scheduled for) the cleanup lifecycle, for the Admin surface.
+ *  Staff-only by RLS; deploy-safe []. Excludes plain retained imports with no
+ *  scheduled deadline (i.e. active/normal ones). */
+export async function getCleanupImports(): Promise<CleanupImportRow[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("manuscript_imports")
+      .select(
+        "id, original_filename, file_size_bytes, status, cleanup_status, cleanup_eligible_at, cleanup_hold_reason, cleanup_failure_code, target_book_id, prior_book_id",
+      )
+      .neq("cleanup_status", "retained")
+      .order("cleanup_eligible_at", { ascending: true, nullsFirst: false })
+      .limit(200);
+    if (error) return [];
+    return (data ?? []) as CleanupImportRow[];
+  } catch {
+    return [];
+  }
+}
+
+/** Staff cleanup status (last run + eligible-now count) via the RPC. */
+export async function getImportCleanupStatus(): Promise<{
+  eligibleNow: number | null;
+  lastRun: { ran_at: string; source: string; cleaned: number } | null;
+}> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("import_cleanup_status");
+    if (error || !data) return { eligibleNow: null, lastRun: null };
+    const d = data as {
+      eligible_now?: number;
+      last_run?: { ran_at: string; source: string; cleaned: number } | null;
+    };
+    return { eligibleNow: d.eligible_now ?? null, lastRun: d.last_run ?? null };
+  } catch {
+    return { eligibleNow: null, lastRun: null };
+  }
+}
+
 /** The confirmed import that produced a given book, if any (RLS-scoped to the
  *  owner). Used by the book's Source Manuscript panel. Null when the book was
  *  not created from an import, the link was cleared, or on absence/error. */

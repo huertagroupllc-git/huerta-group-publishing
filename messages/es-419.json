@@ -526,7 +526,8 @@
         "reviewRuns": "Sesiones de Revisión",
         "aiUsage": "Uso de IA",
         "system": "Sistema",
-        "support": "Soporte"
+        "support": "Soporte",
+        "importCleanup": "Limpieza de importaciones"
       }
     },
     "overview": {
@@ -858,6 +859,55 @@
         "normal": "Normal",
         "elevated": "Elevada",
         "urgent": "Urgente"
+      }
+    },
+    "importCleanup": {
+      "intro": "Las importaciones de manuscritos abandonadas, fallidas, con vista previa vencida y huérfanas quedan aptas para limpieza tras un período de retención. La limpieza elimina permanentemente el PDF de origen privado y la vista previa extraída — nunca una importación vinculada a un libro activo.",
+      "eligibleNow": "Aptas ahora",
+      "unavailable": "No disponible (migración pendiente)",
+      "lastRun": "Última ejecución",
+      "noRuns": "Sin ejecuciones aún",
+      "cleanedCount": "{n} limpiadas",
+      "source": {
+        "scheduled": "programada",
+        "manual": "manual"
+      },
+      "processAll": "Procesar todas las aptas ({n})",
+      "processAllNote": "Elimina el PDF de origen y la vista previa de cada importación apta y registra la ejecución. Limitado por ejecución.",
+      "empty": "No hay importaciones en el ciclo de limpieza.",
+      "eligibleOn": "Apta el",
+      "due": "vencida",
+      "orphaned": "huérfana (libro eliminado)",
+      "held": "en espera",
+      "release": "Liberar espera",
+      "hold": "Retener",
+      "holdReasonPlaceholder": "Motivo de la espera",
+      "cleanConfirmOpen": "Limpiar esta importación…",
+      "cleanConfirmNote": "Esto elimina permanentemente el PDF original y la vista previa extraída de esta importación. No se puede deshacer.",
+      "cleanNow": "Eliminar permanentemente",
+      "cleanupStatus": {
+        "retained": "Retenida",
+        "eligible": "Apta",
+        "on_hold": "En espera",
+        "deleting": "Eliminando",
+        "cleaned": "Limpiada",
+        "cleanup_failed": "Limpieza fallida"
+      },
+      "failure": {
+        "storage_delete_failed": "no se pudo eliminar el archivo de origen",
+        "record_update_failed": "no se pudo finalizar el registro"
+      },
+      "notices": {
+        "holdPlaced": "Importación puesta en espera. No se limpiará hasta liberarla.",
+        "holdReleased": "Espera liberada.",
+        "importCleaned": "El PDF de origen y la vista previa de la importación se eliminaron permanentemente.",
+        "batchProcessed": "Limpieza completa: {cleaned} limpiadas, {failed} fallidas."
+      },
+      "errors": {
+        "cleanupUpdateFailed": "No se pudo guardar el cambio. Inténtalo de nuevo.",
+        "cleanupNotFound": "No se encontró esa importación.",
+        "cleanupFailed": "No se pudo limpiar la importación. Permanece y se puede reintentar.",
+        "cleanupSkipped": "Esa importación no es apta para limpieza en este momento."
       }
     }
   },
