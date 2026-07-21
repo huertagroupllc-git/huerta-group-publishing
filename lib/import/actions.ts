@@ -21,6 +21,15 @@ function fail(path: string, code: string): never {
   redirect(withActionMessage(path, { code }));
 }
 
+/** redirect() throws NEXT_REDIRECT internally; a catch block must re-throw it
+ *  so a control-flow redirect (e.g. a validation fail) is never mistaken for a
+ *  database failure and remapped to a generic code. */
+function isRedirectError(e: unknown): boolean {
+  if (e instanceof Error && e.message === "NEXT_REDIRECT") return true;
+  const digest = (e as { digest?: string })?.digest;
+  return typeof digest === "string" && digest.startsWith("NEXT_REDIRECT");
+}
+
 type Section = {
   id: string;
   position: number;
@@ -117,6 +126,7 @@ export async function moveSection(formData: FormData) {
       .eq("id", b.id);
     if (e1.error || e2.error) throw new Error("reorder failed");
   } catch (err) {
+    if (isRedirectError(err)) throw err;
     console.error("[import] moveSection failed", err);
     fail(path, "sectionUpdateFailed");
   }
@@ -146,6 +156,7 @@ export async function mergeSectionUp(formData: FormData) {
       .eq("id", cur.id);
     if (e1.error || e2.error) throw new Error("merge failed");
   } catch (err) {
+    if (isRedirectError(err)) throw err;
     console.error("[import] mergeSectionUp failed", err);
     fail(path, "sectionUpdateFailed");
   }
@@ -189,6 +200,7 @@ export async function splitSection(formData: FormData) {
     });
     if (e1.error || e2.error) throw new Error("split failed");
   } catch (err) {
+    if (isRedirectError(err)) throw err;
     console.error("[import] splitSection failed", err);
     fail(path, "sectionUpdateFailed");
   }
