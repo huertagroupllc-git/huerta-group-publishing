@@ -240,7 +240,13 @@ export async function resetSection(formData: FormData) {
 export async function downloadSourcePdf(formData: FormData) {
   const authorSlug = String(formData.get("author_slug") ?? "");
   const importId = String(formData.get("import_id") ?? "");
-  const path = previewPath(authorSlug, importId);
+  // Optional caller-supplied error-redirect target (e.g. the book study page);
+  // defaults to the import preview. Only same-site relative paths are honored.
+  const rawReturn = String(formData.get("return_path") ?? "");
+  const path =
+    rawReturn.startsWith("/") && !rawReturn.startsWith("//")
+      ? rawReturn
+      : previewPath(authorSlug, importId);
   const supabase = await createClient();
   const {
     data: { user },

@@ -16,6 +16,8 @@ import { assembleBookContext, serializeBookContext } from "@/lib/books/assemble"
 import { openFindingsCount } from "@/lib/findings/queries";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getManuscriptSummary, type ManuscriptSummary } from "@/lib/manuscript/queries";
+import { getImportForBook, type ManuscriptImport } from "@/lib/import/queries";
+import { downloadSourcePdf } from "@/lib/import/actions";
 import { getBookStudy, type BookStudy } from "@/lib/books/queries";
 import {
   BOOK_DOC_TYPES,
@@ -60,9 +62,12 @@ export default async function BookStudyPage({
   let manuscriptSummary: ManuscriptSummary | null = null;
   let manuscriptNote: string | null = null;
   let findingsCount = 0;
+  let sourceImport: ManuscriptImport | null = null;
   try {
     study = await getBookStudy(slug, bookSlug);
     if (study) {
+      // The preserved source PDF, if this book was created from an import.
+      sourceImport = await getImportForBook(study.book.id);
       const [authorCtx, bookCtx] = await Promise.all([
         assembleAuthorContext(study.author.id),
         assembleBookContext(study.book.id),
@@ -121,6 +126,7 @@ export default async function BookStudyPage({
   const tProgress = await getTranslations("manuscript.progress");
   const tCommon = await getTranslations("common");
   const tNav = await getTranslations("navigation");
+  const tSource = await getTranslations("import.sourcePanel");
 
   // Principle XIV made visible: from the Writing stage onward the
   // manuscript leads and memory becomes reference. Emphasis only.
@@ -349,6 +355,56 @@ export default async function BookStudyPage({
           {manuscriptSection}
         </>
       )}
+
+      {/* Source Manuscript — the preserved original PDF an imported book was
+          created from. Distinct from the editable manuscript (chapters/versions
+          above) and from import provenance. Only shown when a source PDF
+          exists; download is an owner-scoped, short-lived signed URL. */}
+      {sourceImport ? (
+        <section className="mt-14" aria-labelledby="source-heading">
+          <div className="rule pt-5">
+            <h2 id="source-heading" className="eyebrow">
+              {tSource("heading")}
+            </h2>
+          </div>
+          <p className="mt-4 max-w-prose leading-relaxed text-ink-soft">
+            {tSource("intro")}
+          </p>
+          <dl className="mt-6 grid max-w-2xl gap-x-10 gap-y-4 [grid-template-columns:repeat(auto-fit,minmax(12rem,1fr))] [&_div]:min-w-0 [&_dt]:break-words [&_dd]:break-words">
+            <div>
+              <dt className="eyebrow">{tSource("fileLabel")}</dt>
+              <dd className="mt-1 font-serif text-base text-ink">
+                {sourceImport.original_filename}
+              </dd>
+            </div>
+            <div>
+              <dt className="eyebrow">{tSource("importedLabel")}</dt>
+              <dd className="mt-1 font-serif text-base text-ink-soft">
+                {sourceImport.parser_version ?? tSource("unknownParser")}
+              </dd>
+            </div>
+          </dl>
+          <form action={downloadSourcePdf} className="mt-6">
+            <input type="hidden" name="author_slug" value={author.slug} />
+            <input type="hidden" name="import_id" value={sourceImport.id} />
+            <input
+              type="hidden"
+              name="return_path"
+              value={`/workspace/authors/${author.slug}/books/${book.slug}`}
+            />
+            <button
+              type="submit"
+              className="inline-flex items-center gap-2 border border-rule px-5 py-2.5 font-sans text-sm text-ink hover:border-oxblood hover:text-oxblood focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oxblood"
+            >
+              {tSource("download")}
+              <span aria-hidden>↓</span>
+            </button>
+          </form>
+          <p className="mt-3 font-sans text-xs leading-relaxed text-ink-faint">
+            {tSource("note")}
+          </p>
+        </section>
+      ) : null}
 
       <section className="mt-14">
         <details className="group">

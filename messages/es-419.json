@@ -220,6 +220,20 @@
       ],
       "archive": "Cada membresía incluye protección de archivo por doce meses si te ausentas.",
       "cta": "Ver precios"
+    },
+    "bringManuscript": {
+      "eyebrow": "Continuidad",
+      "heading": "Empieza donde estás",
+      "lead": "Comienza un nuevo manuscrito en el Taller, o trae un libro que ya empezaste — nunca tienes que volver a empezar. Sube un PDF con texto, revisa los capítulos y las secciones propuestos, y confirma la estructura antes de que forme parte de tu espacio de trabajo.",
+      "steps": [
+        "Sube un PDF con texto.",
+        "Tu archivo original se conserva de forma privada.",
+        "La plataforma propone un título y una estructura de manuscrito.",
+        "Revisas y corriges los capítulos y las secciones propuestos.",
+        "Nada entra en el libro hasta que confirmes.",
+        "Sigues escribiendo y revisando dentro del Taller."
+      ],
+      "limitation": "Los PDF escaneados o solo de imágenes no se admiten actualmente, a menos que contengan texto seleccionable."
     }
   },
   "author": {
@@ -285,7 +299,7 @@
       "language": "Idioma del manuscrito",
       "languageHintNew": "El idioma en que está escrito el manuscrito. Las futuras revisiones editoriales responderán en este idioma. No cambia el idioma de la plataforma.",
       "languageHintEdit": "El idioma en que está escrito el manuscrito. Las futuras revisiones editoriales responderán en este idioma; las revisiones ya realizadas conservan el idioma en que se realizaron. No cambia el idioma de la plataforma.",
-      "orImportPrefix": "¿Ya tienes un manuscrito?",
+      "orImportPrefix": "¿Ya tienes un manuscrito en curso?",
       "startFromPdf": "Empezar desde un PDF"
     },
     "memoryDocuments": {
@@ -1372,6 +1386,30 @@
           "body": [
             "Usa la página de Soporte para enviarnos una pregunta, comentarios o un reporte de error. Si has iniciado sesión, tendremos el contexto de tu cuenta; si no, deja un correo para responderte."
           ]
+        },
+        {
+          "heading": "¿Puedo traer un manuscrito que ya empecé?",
+          "body": [
+            "Sí. Puedes subir un PDF con texto, revisar el título, los capítulos y las secciones propuestos, y confirmar la estructura antes de que el manuscrito forme parte de tu espacio de trabajo."
+          ]
+        },
+        {
+          "heading": "¿Se conservará mi PDF original?",
+          "body": [
+            "Sí. El PDF original se guarda de forma privada y se conserva por separado del manuscrito editable creado en la plataforma."
+          ]
+        },
+        {
+          "heading": "¿Puedo subir un manuscrito escaneado?",
+          "body": [
+            "Todavía no. El importador actual requiere texto seleccionable y no usa OCR automático. Los PDF escaneados o solo de imágenes pueden necesitar convertirse a un PDF con texto antes de importar."
+          ]
+        },
+        {
+          "heading": "¿La plataforma cambia mi manuscrito automáticamente durante la importación?",
+          "body": [
+            "No. La plataforma propone una estructura para revisión. Tú decides qué incluir, excluir, renombrar, reordenar, dividir o combinar antes de confirmar la importación."
+          ]
         }
       ]
     },
@@ -1860,7 +1898,7 @@
       "archiveTwelveMonths": "Protección de archivo por doce meses",
       "extendedArchive": "Opción de Archivo Extendido",
       "catalogManagement": "Gestión de series y catálogo",
-      "pdfImport": "Importar un manuscrito existente desde PDF"
+      "pdfImport": "Importa un manuscrito PDF existente con texto y revisa su estructura propuesta antes de agregarlo a tu espacio de trabajo"
     },
     "archive": {
       "heading": "Si te ausentas",
@@ -2048,6 +2086,15 @@
       "language": "Idioma del manuscrito",
       "confirm": "Crear libro desde la importación",
       "downloadSource": "Descargar el PDF original"
+    },
+    "sourcePanel": {
+      "heading": "Manuscrito de origen",
+      "intro": "El PDF original desde el que se importó este libro — conservado de forma privada y separado del manuscrito editable de arriba.",
+      "fileLabel": "Archivo original",
+      "importedLabel": "Importado con",
+      "unknownParser": "—",
+      "download": "Descargar el PDF original",
+      "note": "El enlace de descarga es privado y expira en poco tiempo. Tu archivo de origen nunca es de acceso público."
     }
   }
 }

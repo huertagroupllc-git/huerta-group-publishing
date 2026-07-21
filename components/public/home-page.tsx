@@ -300,6 +300,48 @@ export async function PublicHomePage({ locale }: { locale: string }) {
         </div>
       </section>
 
+      {/* ---- Start where you are: new book OR bring an existing manuscript ---- */}
+      <section
+        id="bring-manuscript"
+        aria-labelledby="bring-heading"
+        className="scroll-mt-24 border-t border-rule"
+      >
+        <div className="mx-auto max-w-6xl px-6 py-20 sm:px-8 sm:py-24">
+          <SectionHeader
+            eyebrow={t("bringManuscript.eyebrow")}
+            heading={t("bringManuscript.heading")}
+            id="bring-heading"
+          />
+          <p className="mt-6 max-w-prose font-serif text-lg leading-relaxed text-ink-soft">
+            {t("bringManuscript.lead")}
+          </p>
+          <ol className="mt-12 border-t border-gold-rule">
+            {(t.raw("bringManuscript.steps") as string[]).map((step, i) => (
+              <li
+                key={i}
+                className="grid gap-x-8 gap-y-1 border-b border-rule py-6 sm:grid-cols-[3.5rem_minmax(0,1fr)]"
+              >
+                <span
+                  aria-hidden
+                  className="font-display text-2xl italic text-brand-gold"
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <p className="min-w-0 max-w-prose font-serif leading-relaxed text-ink-soft">
+                  {step}
+                </p>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-8 max-w-prose font-sans text-sm leading-relaxed text-ink-faint">
+            {t("bringManuscript.limitation")}
+          </p>
+          <div className="mt-8">
+            <QuietLink href="#how-it-works">{t("hero.seeHow")}</QuietLink>
+          </div>
+        </div>
+      </section>
+
       {/* ---- Inside the Workshop: ruled editorial rows ---- */}
       <section
         id="workshop"

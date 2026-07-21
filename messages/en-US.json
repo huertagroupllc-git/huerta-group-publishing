@@ -220,6 +220,20 @@
       ],
       "archive": "Every membership includes twelve-month archive protection if you step away.",
       "cta": "See pricing"
+    },
+    "bringManuscript": {
+      "eyebrow": "Continuity",
+      "heading": "Start where you are",
+      "lead": "Begin a new manuscript in the Workshop, or bring over a book you have already started — you never have to start over. Upload a text-based PDF, review the proposed chapters and sections, and confirm the structure before it becomes part of your workspace.",
+      "steps": [
+        "Upload a text-based PDF.",
+        "Your original source file is preserved privately.",
+        "The platform proposes a title and a manuscript structure.",
+        "You review and correct the proposed chapters and sections.",
+        "Nothing enters the live book until you confirm.",
+        "You keep writing and revising inside the Workshop."
+      ],
+      "limitation": "Scanned or image-only PDFs are not currently supported unless they contain selectable text."
     }
   },
   "author": {
@@ -285,7 +299,7 @@
       "language": "Manuscript language",
       "languageHintNew": "The language the manuscript is written in. Future editorial reviews will respond in this language. It does not change the language of the platform itself.",
       "languageHintEdit": "The language the manuscript is written in. Future editorial reviews will respond in this language; reviews already performed keep the language they were performed in. It does not change the language of the platform itself.",
-      "orImportPrefix": "Already have a manuscript?",
+      "orImportPrefix": "Already working on a manuscript?",
       "startFromPdf": "Start from a PDF"
     },
     "memoryDocuments": {
@@ -1372,6 +1386,30 @@
           "body": [
             "Use the Support page to send us a question, feedback, or a bug report. If you are signed in, we will have your account context; if not, leave an email so we can reply."
           ]
+        },
+        {
+          "heading": "Can I bring a manuscript I already started?",
+          "body": [
+            "Yes. You can upload a text-based PDF, review the proposed title, chapters, and sections, and confirm the structure before the manuscript becomes part of your workspace."
+          ]
+        },
+        {
+          "heading": "Will my original PDF be preserved?",
+          "body": [
+            "Yes. The original source PDF is stored privately and preserved separately from the editable manuscript created in the platform."
+          ]
+        },
+        {
+          "heading": "Can I upload a scanned manuscript?",
+          "body": [
+            "Not yet. The current importer requires selectable text and does not use automatic OCR. Scanned or image-only PDFs may need to be converted to a text-based PDF before import."
+          ]
+        },
+        {
+          "heading": "Does the platform automatically change my manuscript during import?",
+          "body": [
+            "No. The platform proposes a structure for review. You decide what to include, exclude, rename, reorder, split, or merge before confirming the import."
+          ]
         }
       ]
     },
@@ -1860,7 +1898,7 @@
       "archiveTwelveMonths": "Twelve-month archive protection",
       "extendedArchive": "Extended Archive option",
       "catalogManagement": "Series and catalog management",
-      "pdfImport": "Import an existing manuscript from PDF"
+      "pdfImport": "Import an existing text-based PDF manuscript and review its proposed structure before adding it to your workspace"
     },
     "archive": {
       "heading": "If you step away",
@@ -2048,6 +2086,15 @@
       "language": "Manuscript language",
       "confirm": "Create book from import",
       "downloadSource": "Download original PDF"
+    },
+    "sourcePanel": {
+      "heading": "Source manuscript",
+      "intro": "The original PDF this book was imported from — preserved privately and kept separate from the editable manuscript above.",
+      "fileLabel": "Original file",
+      "importedLabel": "Imported with",
+      "unknownParser": "—",
+      "download": "Download original PDF",
+      "note": "The download link is private and expires shortly. Your source file is never publicly accessible."
     }
   }
 }

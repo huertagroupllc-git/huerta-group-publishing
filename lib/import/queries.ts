@@ -55,6 +55,29 @@ export async function getImport(importId: string): Promise<ManuscriptImport | nu
   }
 }
 
+/** The confirmed import that produced a given book, if any (RLS-scoped to the
+ *  owner). Used by the book's Source Manuscript panel. Null when the book was
+ *  not created from an import, the link was cleared, or on absence/error. */
+export async function getImportForBook(
+  bookId: string,
+): Promise<ManuscriptImport | null> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("manuscript_imports")
+      .select(IMPORT_COLUMNS)
+      .eq("target_book_id", bookId)
+      .eq("status", "confirmed")
+      .order("confirmed_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error || !data) return null;
+    return data as ManuscriptImport;
+  } catch {
+    return null;
+  }
+}
+
 /** Ordered proposed sections for an import (RLS-scoped). [] on absence/error. */
 export async function getImportSections(importId: string): Promise<ImportSection[]> {
   try {
