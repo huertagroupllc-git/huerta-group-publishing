@@ -23,6 +23,39 @@ async function dueArchivalCount(): Promise<number | null> {
   }
 }
 
+interface LastArchivalRun {
+  ran_at: string;
+  ok: boolean;
+  archived: number;
+  events_created: number;
+  source: string;
+}
+
+/** The most recent archival run, for operational visibility. Null when none
+ *  has occurred yet or the migration is pending. */
+async function lastArchivalRun(): Promise<LastArchivalRun | null> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("last_archival_run");
+    if (error || !data) return null;
+    return data as unknown as LastArchivalRun;
+  } catch {
+    return null;
+  }
+}
+
+/** Whether the daily pg_cron job is registered. Null when unknown/unavailable. */
+async function schedulerConfigured(): Promise<boolean | null> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("archival_schedule_status");
+    if (error || !data) return null;
+    return Boolean((data as { scheduled?: boolean }).scheduled);
+  } catch {
+    return null;
+  }
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("admin.shell.nav");
   return { title: t("system") };
@@ -81,6 +114,8 @@ export default async function AdminSystemPage({
   const locale = await getLocale();
   const models = await editorialModelAvailability();
   const dueArchivals = await dueArchivalCount();
+  const lastRun = await lastArchivalRun();
+  const scheduled = await schedulerConfigured();
   const maintNotice = actionNoticeFromQuery(query);
   const maintError = actionMessageFromQuery(query);
 
@@ -201,13 +236,38 @@ export default async function AdminSystemPage({
           namespace="admin.system.maintenance.errors"
           legacyText={false}
         />
-        <dl className="mt-4">
-          <dt className="eyebrow">{tMaint("dueLabel")}</dt>
-          <dd className="mt-1 font-serif text-lg">
-            {dueArchivals === null
-              ? tMaint("dueUnavailable")
-              : dueArchivals.toLocaleString(locale)}
-          </dd>
+        <dl className="mt-4 grid grid-cols-2 gap-x-10 gap-y-4 sm:grid-cols-3">
+          <div>
+            <dt className="eyebrow">{tMaint("dueLabel")}</dt>
+            <dd className="mt-1 font-serif text-lg">
+              {dueArchivals === null
+                ? tMaint("dueUnavailable")
+                : dueArchivals.toLocaleString(locale)}
+            </dd>
+          </div>
+          <div>
+            <dt className="eyebrow">{tMaint("schedulerLabel")}</dt>
+            <dd className="mt-1 font-serif text-base">
+              {scheduled === null
+                ? tMaint("dueUnavailable")
+                : scheduled
+                  ? tMaint("schedulerOn")
+                  : tMaint("schedulerOff")}
+            </dd>
+          </div>
+          <div>
+            <dt className="eyebrow">{tMaint("lastRunLabel")}</dt>
+            <dd className="mt-1 font-serif text-base">
+              {lastRun
+                ? `${new Date(lastRun.ran_at).toLocaleString(locale)} · ${tMaint(
+                    `source.${lastRun.source}`,
+                  )} · ${tMaint("lastRunResult", {
+                    archived: lastRun.archived.toLocaleString(locale),
+                    events: lastRun.events_created.toLocaleString(locale),
+                  })}`
+                : tMaint("lastRunNever")}
+            </dd>
+          </div>
         </dl>
         <form action={processDueArchivals} className="mt-6">
           <button

@@ -1,10 +1,7 @@
 import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import {
-  ensureMembership,
-  resolveEditEntitlement,
-} from "@/lib/membership/entitlement";
+import { verifyEditEntitlement } from "@/lib/membership/entitlement";
 import { speechBlocks } from "@/lib/manuscript/speech";
 
 /**
@@ -52,9 +49,16 @@ export async function GET(request: NextRequest) {
   }
 
   // Audio generation is a paid AI operation: archived/deletion accounts are
-  // read/preserve only and may not start it (RLS still guards content access).
-  const membership = await ensureMembership(supabase, user.id);
-  if (!resolveEditEntitlement(membership)) {
+  // read/preserve only and may not start it, and entitlement is FAIL-CLOSED —
+  // if it cannot be verified, deny (503) rather than risk a paid AI call.
+  const entitlement = await verifyEditEntitlement(supabase, user.id);
+  if (entitlement.decision === "unavailable") {
+    return NextResponse.json(
+      { error: "membership_unavailable" },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+  if (entitlement.decision === "archived") {
     return NextResponse.json(
       { error: "membership_inactive" },
       { status: 403, headers: { "Cache-Control": "no-store" } },

@@ -720,6 +720,16 @@
         },
         "errors": {
           "archivalFailed": "El procesador de archivado no se pudo ejecutar. Inténtalo de nuevo."
+        },
+        "schedulerLabel": "Programador diario",
+        "schedulerOn": "Configurado",
+        "schedulerOff": "No configurado",
+        "lastRunLabel": "Última ejecución",
+        "lastRunNever": "Sin ejecuciones aún",
+        "lastRunResult": "{archived} archivadas, {events} aviso(s)",
+        "source": {
+          "scheduled": "programada",
+          "manual": "manual"
         }
       }
     },
@@ -1678,7 +1688,8 @@
     "errors": {
       "membershipUnavailable": "Ese cambio no se pudo guardar ahora. Inténtalo de nuevo en un momento.",
       "deletionConfirmMismatch": "Escribe DELETE exactamente para confirmar tu solicitud.",
-      "membershipInactive": "Tu espacio de trabajo está archivado, así que la edición está en pausa. Reactívalo abajo para seguir trabajando."
+      "membershipInactive": "Tu espacio de trabajo está archivado, así que la edición está en pausa. Reactívalo abajo para seguir trabajando.",
+      "membershipVerificationUnavailable": "No pudimos verificar el acceso a tu espacio de trabajo en este momento. No se realizó ningún cambio. Inténtalo de nuevo en un momento."
     },
     "notices": {
       "cancellationScheduled": "La cancelación de tu membresía está programada. Tu espacio de trabajo se archivará, y puedes reactivar en cualquier momento antes de esa fecha.",

@@ -720,6 +720,16 @@
         },
         "errors": {
           "archivalFailed": "The archival processor could not run. Please try again."
+        },
+        "schedulerLabel": "Daily scheduler",
+        "schedulerOn": "Configured",
+        "schedulerOff": "Not configured",
+        "lastRunLabel": "Last run",
+        "lastRunNever": "No runs yet",
+        "lastRunResult": "{archived} archived, {events} notice(s)",
+        "source": {
+          "scheduled": "scheduled",
+          "manual": "manual"
         }
       }
     },
@@ -1678,7 +1688,8 @@
     "errors": {
       "membershipUnavailable": "That change could not be saved right now. Please try again shortly.",
       "deletionConfirmMismatch": "Please type DELETE exactly to confirm your request.",
-      "membershipInactive": "Your workspace is archived, so editing is paused. Reactivate below to continue working."
+      "membershipInactive": "Your workspace is archived, so editing is paused. Reactivate below to continue working.",
+      "membershipVerificationUnavailable": "We could not verify workspace access right now. No changes were made. Please try again shortly."
     },
     "notices": {
       "cancellationScheduled": "Your membership cancellation is scheduled. Your workspace will be archived, and you can reactivate any time before then.",

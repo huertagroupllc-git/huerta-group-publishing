@@ -4,7 +4,6 @@ import { withActionMessage } from "@/lib/action-messages";
 import { createClient } from "@/lib/supabase/server";
 import {
   type AccountMembership,
-  type MembershipStatus,
   DEFAULT_MEMBERSHIP,
 } from "@/lib/membership/queries";
 import { resolveEditEntitlement } from "@/lib/membership/entitlement-rules";
@@ -32,14 +31,18 @@ export { resolveEditEntitlement };
  * rescue/administration flows have their own explicit is_staff() gates and do
  * not route through this guard.
  *
- * Fail-open on infrastructure error: if the membership row cannot be read or
- * lazily created (e.g. the table is briefly unavailable), the guard treats the
- * account as active rather than locking out a legitimate user. Deny-by-default
- * lives in RLS + ownership; this guard is an entitlement layer on top.
+ * FAIL-CLOSED on infrastructure error for MUTATIONS: if membership cannot be
+ * verified (the table/row cannot be read), a paid editorial/AI/upload mutation
+ * is DENIED with a stable temporary-unavailability code — no manuscript change,
+ * no AI request, no upload. Read-only surfaces (the Account page display) keep
+ * a fail-open resolver (ensureMembership) so a membership-service hiccup does
+ * not turn read-only rendering into a hard outage.
  */
 
-/** The stable, localized code a blocked mutation redirects with. */
+/** The stable, localized code a blocked (archived) mutation redirects with. */
 export const MEMBERSHIP_BLOCK_CODE = "membershipInactive";
+/** The stable code when membership entitlement could not be verified (infra). */
+export const MEMBERSHIP_UNAVAILABLE_CODE = "membershipVerificationUnavailable";
 
 async function readMembershipRow(
   supabase: SupabaseClient,
@@ -57,52 +60,93 @@ async function readMembershipRow(
 }
 
 /**
- * Safe lazy initialization: ensure exactly one membership row exists for the
- * user, defaulting to active. Race-safe (insert-if-absent via the user_id
- * unique PK with ignoreDuplicates — never clobbers an existing archived row)
- * and idempotent. Returns the resolved row. Fail-open to DEFAULT_MEMBERSHIP
- * (active) if the table is unavailable, so infra hiccups never lock out edits.
- * This replaces the permanent absence-means-active condition on the live path.
+ * Load the membership row, lazily creating an active one if absent. THROWS on a
+ * real infrastructure error (never swallows) — callers decide fail-open vs
+ * fail-closed. Race-safe: insert-if-absent via the user_id PK with
+ * ignoreDuplicates never clobbers an existing lifecycle state.
+ */
+async function loadOrInitMembership(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<AccountMembership> {
+  const existing = await readMembershipRow(supabase, userId);
+  if (existing) return existing;
+  const { error } = await supabase
+    .from("account_memberships")
+    .upsert(
+      { user_id: userId, status: "active" },
+      { onConflict: "user_id", ignoreDuplicates: true },
+    );
+  if (error) throw error;
+  const after = await readMembershipRow(supabase, userId);
+  return after ?? DEFAULT_MEMBERSHIP;
+}
+
+/**
+ * FAIL-OPEN resolver for READ-ONLY display (the Account page): a missing row is
+ * lazily initialized to active; an infra error degrades to DEFAULT_MEMBERSHIP
+ * (active) so a read-only page still renders. NEVER use this to authorize a
+ * mutation — use verifyEditEntitlement / assertEditEntitlement for that.
  */
 export async function ensureMembership(
   supabase: SupabaseClient,
   userId: string,
 ): Promise<AccountMembership> {
   try {
-    const existing = await readMembershipRow(supabase, userId);
-    if (existing) return existing;
-    // Insert only if absent; ON CONFLICT DO NOTHING keeps any concurrent
-    // insert (and never overwrites a real lifecycle state).
-    await supabase
-      .from("account_memberships")
-      .upsert(
-        { user_id: userId, status: "active" },
-        { onConflict: "user_id", ignoreDuplicates: true },
-      );
-    const after = await readMembershipRow(supabase, userId);
-    return after ?? DEFAULT_MEMBERSHIP;
+    return await loadOrInitMembership(supabase, userId);
   } catch {
-    // Fail-open: never lock out a legitimate user on a read/write error.
     return DEFAULT_MEMBERSHIP;
   }
 }
 
+export type EditDecision =
+  | { decision: "allow"; membership: AccountMembership }
+  | { decision: "archived"; membership: AccountMembership }
+  | { decision: "unavailable" };
+
 /**
- * For server actions that already hold (supabase, user): ensure the membership
- * row exists and, if the account is not editing-entitled, redirect with a
- * stable localized code. Called from each subsystem's requireUser() helper so
- * the check is applied consistently at one line per subsystem.
+ * FAIL-CLOSED entitlement check for MUTATIONS. Returns:
+ *   allow       — active, or cancellation_scheduled within grace;
+ *   archived    — any archived/deletion state (read/preserve only);
+ *   unavailable — membership could not be verified (infra/db error).
+ * The caller denies on both archived and unavailable; nothing is mutated.
+ */
+export async function verifyEditEntitlement(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<EditDecision> {
+  let membership: AccountMembership;
+  try {
+    membership = await loadOrInitMembership(supabase, userId);
+  } catch (e) {
+    console.error("[entitlement] verification unavailable", e);
+    return { decision: "unavailable" };
+  }
+  return resolveEditEntitlement(membership)
+    ? { decision: "allow", membership }
+    : { decision: "archived", membership };
+}
+
+/**
+ * For server actions that already hold (supabase, user): verify editing
+ * entitlement and, if denied, redirect with a stable localized code — the
+ * archived read-only message, or the temporary-unavailability message on an
+ * infrastructure error (fail-closed). Called from each subsystem's
+ * requireUser() helper so the check is applied consistently at one line.
  */
 export async function assertEditEntitlement(
   supabase: SupabaseClient,
   user: User,
   redirectPath = "/workspace/account",
 ): Promise<AccountMembership> {
-  const membership = await ensureMembership(supabase, user.id);
-  if (!resolveEditEntitlement(membership)) {
+  const result = await verifyEditEntitlement(supabase, user.id);
+  if (result.decision === "unavailable") {
+    redirect(withActionMessage(redirectPath, { code: MEMBERSHIP_UNAVAILABLE_CODE }));
+  }
+  if (result.decision === "archived") {
     redirect(withActionMessage(redirectPath, { code: MEMBERSHIP_BLOCK_CODE }));
   }
-  return membership;
+  return result.membership;
 }
 
 /**
@@ -120,26 +164,4 @@ export async function requireEntitledUser(
   if (!user) redirect("/signin");
   const membership = await assertEditEntitlement(supabase, user, redirectPath);
   return { supabase, user, membership };
-}
-
-/**
- * For route handlers (no redirect): report the current user's editing
- * entitlement so the handler can return a 403 itself. Never throws.
- */
-export async function getEditEntitlement(): Promise<{
-  user: User | null;
-  canEdit: boolean;
-  status: MembershipStatus;
-}> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { user: null, canEdit: false, status: "active" };
-  const membership = await ensureMembership(supabase, user.id);
-  return {
-    user,
-    canEdit: resolveEditEntitlement(membership),
-    status: membership.status,
-  };
 }
