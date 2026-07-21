@@ -85,7 +85,10 @@ export async function submitSupport(formData: FormData) {
           .maybeSingle();
         bookId = owned?.id ?? null;
       }
-      const { error } = await supabase.from("support_submissions").insert({
+      // book_id is included ONLY when a book was chosen, so a submission
+      // without one still succeeds in the deploy→migrate window before the
+      // book_id column exists (deploy safety).
+      const payload: Record<string, unknown> = {
         user_id: user.id,
         email,
         category,
@@ -93,9 +96,10 @@ export async function submitSupport(formData: FormData) {
         message: message.slice(0, 8000),
         page_path: pagePath,
         locale,
-        book_id: bookId,
         diagnostics,
-      });
+      };
+      if (bookId) payload.book_id = bookId;
+      const { error } = await supabase.from("support_submissions").insert(payload);
       if (error) throw new Error(error.message);
     } else {
       const { error } = await supabase.rpc("submit_support_request", {

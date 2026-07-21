@@ -72,20 +72,38 @@ export async function getSupportSubmissions(
 ): Promise<SupportSubmission[]> {
   try {
     const supabase = await createClient();
-    let q = supabase
-      .from("support_submissions")
-      .select(
-        "id, user_id, email, category, priority, subject, message, page_path, book_id, locale, status, staff_note, created_at, updated_at, book:books(title, working_title, authors(pen_name, full_name))",
-      )
-      .order("created_at", { ascending: false })
-      .limit(200);
-    if (status && (SUPPORT_STATUSES as readonly string[]).includes(status)) {
-      q = q.eq("status", status);
-    }
-    const { data, error } = await q;
+    const run = async (select: string) => {
+      let q = supabase
+        .from("support_submissions")
+        .select(select)
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (status && (SUPPORT_STATUSES as readonly string[]).includes(status)) {
+        q = q.eq("status", status);
+      }
+      return q;
+    };
+
+    const { data, error } = await run(
+      "id, user_id, email, category, priority, subject, message, page_path, book_id, locale, status, staff_note, created_at, updated_at, book:books(title, working_title, authors(pen_name, full_name))",
+    );
+    // Deploy-safety: before the priority/book_id migration is applied, fall
+    // back to the base columns so the inbox and triage still work.
     if (error) {
-      console.error("[support] getSupportSubmissions failed", error);
-      return [];
+      const base = await run(
+        "id, user_id, email, category, subject, message, page_path, locale, status, staff_note, created_at, updated_at",
+      );
+      if (base.error) {
+        console.error("[support] getSupportSubmissions failed", base.error);
+        return [];
+      }
+      return (base.data ?? []).map((row) => ({
+        ...(row as unknown as SupportSubmission),
+        priority: "normal",
+        book_id: null,
+        bookTitle: null,
+        bookAuthor: null,
+      }));
     }
     type EmbeddedBook = {
       title: string | null;
