@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PublicContentPage } from "@/components/public/content-page";
+import { PublicPricingPage } from "@/components/public/pricing-page";
 import { contentPageMetadata } from "@/lib/public/content-metadata";
 import { PUBLIC_LOCALE } from "@/lib/locales";
 
@@ -14,5 +14,5 @@ export function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PricingPage() {
-  return <PublicContentPage locale={PUBLIC_LOCALE} page="pricing" />;
+  return <PublicPricingPage locale={PUBLIC_LOCALE} basePath="" />;
 }

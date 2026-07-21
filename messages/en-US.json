@@ -208,6 +208,18 @@
       "ogSubtitle": "An Author Operating System",
       "description": "Huerta Group Publishing is an Author Operating System — an editorial environment for developing a book from discovery through review and revision, with the author's voice preserved and every version kept. Not an AI writer: an editorial house with a memory.",
       "ogAlt": "Huerta Group Publishing — Develop books, not just manuscripts."
+    },
+    "pricing": {
+      "eyebrow": "Membership",
+      "heading": "Plans for every kind of author",
+      "lead": "From a first book to a publishing catalog. Launch pricing is being finalized; membership is not required to explore the Workshop.",
+      "plans": [
+        "Individual authors — develop and revise your own book.",
+        "Professional authors — sustain a multi-book practice.",
+        "Publishing teams — manage authors and books together."
+      ],
+      "archive": "Every membership includes twelve-month archive protection if you step away.",
+      "cta": "See pricing"
     }
   },
   "author": {
@@ -1731,6 +1743,167 @@
         "subject": "Six months until your archived workspace is removed",
         "body": "Your archived workspace is scheduled to be permanently deleted on {expiresOn} — about six months from now. Reactivate or request more time if you would like to keep it."
       }
+    }
+  },
+  "pricing": {
+    "eyebrow": "Membership",
+    "title": "Pricing built for authorship",
+    "lead": "Three memberships for three kinds of author. Launch pricing is still being finalized, so no amounts appear yet — no payment is needed to explore the public site or begin in the Workshop.",
+    "cadence": {
+      "label": "Billing cadence",
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "atLaunch": "Billing options available at launch."
+    },
+    "placeholders": {
+      "comingSoon": "Pricing coming soon",
+      "cadenceNote": "Monthly and annual billing available at launch."
+    },
+    "recommendedLabel": "Built for sustained authorship",
+    "allPlans": "All plans",
+    "tierShort": {
+      "individual-author": "Individual",
+      "professional-author": "Professional",
+      "publishing-team": "Team"
+    },
+    "disclosure": "Editorial reviews and AI-assisted tools may include usage allowances based on membership level. Exact limits will be published with final pricing.",
+    "plans": {
+      "individual-author": {
+        "name": "Individual Author",
+        "audience": "Independent writers",
+        "description": "For an independent writer building and revising their own book, with the full editorial Workshop.",
+        "highlights": [
+          "Personal Writing Workspace with Book Constitution and Master Outline",
+          "Editorial findings and deliberations on your manuscript",
+          "Author Memory, Book Memory, and the Concept Dictionary",
+          "Manuscript version history and standard export",
+          "Editorial and AI usage allowances apply"
+        ]
+      },
+      "professional-author": {
+        "name": "Professional Author",
+        "audience": "Multi-book authors",
+        "description": "For authors managing multiple books, a series, or a sustained publishing workflow.",
+        "highlights": [
+          "Everything in Individual Author, with a larger book catalog",
+          "Higher editorial-review and AI usage allowances",
+          "Audio Review and expanded storage",
+          "Advanced export and publishing preparation (under development)",
+          "Series and catalog management, with priority support"
+        ]
+      },
+      "publishing-team": {
+        "name": "Publishing Team",
+        "audience": "Publishers & imprints",
+        "description": "For publishers, imprints, and teams managing multiple authors and books together.",
+        "highlights": [
+          "Everything in Professional Author, across multiple author workspaces",
+          "Publisher administration, staff seats, and role-based permissions",
+          "Cross-author book management and centralized oversight",
+          "Higher review, AI, and storage allowances with reporting",
+          "Publisher-level support and custom onboarding"
+        ]
+      }
+    },
+    "comparison": {
+      "heading": "What each membership includes",
+      "intro": "Capabilities grouped by the work they support. Availability is stated plainly — available now, planned for launch, under development, subject to plan allowances, or custom for teams."
+    },
+    "groups": {
+      "writing": "Writing and organization",
+      "editorial": "Editorial intelligence",
+      "memory": "Memory and continuity",
+      "review": "Review and audio",
+      "export": "Export and publishing preparation",
+      "team": "Team and administration",
+      "support": "Support",
+      "storage": "Storage and retention"
+    },
+    "status": {
+      "available": "Available now",
+      "planned": "Planned for launch",
+      "in_development": "Under development",
+      "plan_limited": "Plan allowances apply",
+      "team_custom": "Custom for teams"
+    },
+    "features": {
+      "writingWorkspace": "Personal Writing Workspace",
+      "bookConstitution": "Book Constitution",
+      "masterOutline": "Master Outline",
+      "manuscriptWorkspace": "Manuscript and chapter workspace",
+      "versionHistory": "Manuscript version history",
+      "editorialFindings": "Editorial findings",
+      "editorialDeliberations": "Editorial deliberations",
+      "constitutionReview": "Constitution Review",
+      "authorMemory": "Author Memory",
+      "bookMemory": "Book Memory",
+      "conceptDictionary": "Concept Dictionary",
+      "reviewAllowance": "Editorial-review allowance",
+      "aiAllowance": "AI-assisted tools allowance",
+      "audioReview": "Audio Review",
+      "standardExport": "Standard export tools",
+      "advancedExport": "Advanced export",
+      "publishingPrep": "Publishing preparation",
+      "multiAuthorWorkspaces": "Multiple author workspaces",
+      "publisherAdmin": "Publisher administration",
+      "rolePermissions": "Role-based permissions",
+      "crossAuthorManagement": "Cross-author book management",
+      "operationalReporting": "Operational reporting",
+      "standardSupport": "Standard support",
+      "prioritySupport": "Priority support",
+      "publisherSupport": "Publisher-level support",
+      "customOnboarding": "Custom onboarding",
+      "storageAllowance": "Storage allowance",
+      "archiveTwelveMonths": "Twelve-month archive protection",
+      "extendedArchive": "Extended Archive option",
+      "catalogManagement": "Series and catalog management"
+    },
+    "archive": {
+      "heading": "If you step away",
+      "body": [
+        "Membership can be cancelled at any time. Cancelling is not deletion — your work is preserved and waiting if you return.",
+        "When active access ends, your workspace is archived and kept for twelve months. An archived workspace is read-only: your books and editorial history are preserved, but editing, AI, review, and uploads are paused until you reactivate."
+      ],
+      "points": [
+        "Cancelling stops active membership access.",
+        "Your workspace is archived for twelve months.",
+        "Your books and editorial history are preserved.",
+        "Reactivating restores active editorial access.",
+        "A paid archive extension may be offered later.",
+        "Cancellation is separate from permanent deletion, which is always your deliberate choice."
+      ]
+    },
+    "extendedArchive": {
+      "eyebrow": "Storage option",
+      "name": "Extended Archive",
+      "description": "Extra storage protection for your work — available after cancellation, or before your free retention period expires.",
+      "points": [
+        "Preserves books and editorial history beyond the included twelve months.",
+        "Read-only: it does not provide editing, AI, review, or upload access.",
+        "Can be converted back to an active membership later.",
+        "Available after cancellation or before free retention expires."
+      ],
+      "note": "Extended Archive is storage protection, not a membership tier. Price and billing cadence are coming later."
+    },
+    "faq": {
+      "heading": "Pricing questions",
+      "intro": "A few of the questions authors ask most. The full answers live in the FAQ.",
+      "items": [
+        "When will prices be announced?",
+        "Will monthly and annual billing be available?",
+        "What happens if I cancel?",
+        "Is archive storage included?",
+        "Do AI and editorial reviews have usage allowances?",
+        "Can publishers request custom access?"
+      ],
+      "linkLabel": "Read the full FAQ →"
+    },
+    "cta": {
+      "heading": "Begin now; choose a membership at launch",
+      "body": "You can start developing a book in the Workshop today. When launch pricing is published, you'll choose the membership that fits — nothing is charged before then.",
+      "enterWorkshop": "Enter the Workshop",
+      "signIn": "Start in the Workshop",
+      "contact": "Contact us"
     }
   }
 }

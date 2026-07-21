@@ -208,6 +208,18 @@
       "ogSubtitle": "Un sistema operativo para autores",
       "description": "Huerta Group Publishing es un sistema operativo para autores — un entorno editorial para desarrollar un libro desde el descubrimiento hasta la revisión y la corrección, conservando la voz del autor y cada versión. No es un escritor de IA: es una casa editorial con memoria.",
       "ogAlt": "Huerta Group Publishing — Desarrolle libros, no solo manuscritos."
+    },
+    "pricing": {
+      "eyebrow": "Membresía",
+      "heading": "Planes para cada tipo de autor",
+      "lead": "Desde un primer libro hasta un catálogo editorial. Los precios de lanzamiento se están definiendo; no se requiere membresía para explorar el Taller.",
+      "plans": [
+        "Autores individuales — desarrolla y revisa tu propio libro.",
+        "Autores profesionales — sostén una práctica de varios libros.",
+        "Equipos editoriales — gestiona autores y libros en conjunto."
+      ],
+      "archive": "Cada membresía incluye protección de archivo por doce meses si te ausentas.",
+      "cta": "Ver precios"
     }
   },
   "author": {
@@ -1731,6 +1743,167 @@
         "subject": "Seis meses para que se elimine tu espacio archivado",
         "body": "Tu espacio de trabajo archivado está programado para eliminarse permanentemente el {expiresOn} — dentro de unos seis meses. Reactiva o solicita más tiempo si deseas conservarlo."
       }
+    }
+  },
+  "pricing": {
+    "eyebrow": "Membresía",
+    "title": "Precios pensados para la autoría",
+    "lead": "Tres membresías para tres tipos de autor. Los precios de lanzamiento aún se están definiendo, así que todavía no aparecen montos — no se necesita pago para explorar el sitio público ni comenzar en el Taller.",
+    "cadence": {
+      "label": "Frecuencia de facturación",
+      "monthly": "Mensual",
+      "annual": "Anual",
+      "atLaunch": "Opciones de facturación disponibles en el lanzamiento."
+    },
+    "placeholders": {
+      "comingSoon": "Precios próximamente",
+      "cadenceNote": "Facturación mensual y anual disponible en el lanzamiento."
+    },
+    "recommendedLabel": "Para una autoría sostenida",
+    "allPlans": "Todos los planes",
+    "tierShort": {
+      "individual-author": "Individual",
+      "professional-author": "Profesional",
+      "publishing-team": "Equipo"
+    },
+    "disclosure": "Las revisiones editoriales y las herramientas asistidas por IA pueden incluir asignaciones de uso según el nivel de membresía. Los límites exactos se publicarán con los precios finales.",
+    "plans": {
+      "individual-author": {
+        "name": "Autor Individual",
+        "audience": "Escritores independientes",
+        "description": "Para un escritor independiente que desarrolla y revisa su propio libro, con el Taller editorial completo.",
+        "highlights": [
+          "Espacio de Escritura personal con Constitución del Libro y Esquema Maestro",
+          "Hallazgos y deliberaciones editoriales sobre tu manuscrito",
+          "Memoria del Autor, Memoria del Libro y el Diccionario de Conceptos",
+          "Historial de versiones del manuscrito y exportación estándar",
+          "Aplican asignaciones de uso editorial y de IA"
+        ]
+      },
+      "professional-author": {
+        "name": "Autor Profesional",
+        "audience": "Autores de varios libros",
+        "description": "Para autores que gestionan varios libros, una serie o un flujo editorial sostenido.",
+        "highlights": [
+          "Todo lo de Autor Individual, con un catálogo de libros más amplio",
+          "Mayores asignaciones de revisión editorial y de IA",
+          "Revisión en Audio y almacenamiento ampliado",
+          "Exportación avanzada y preparación para publicación (en desarrollo)",
+          "Gestión de series y catálogo, con soporte prioritario"
+        ]
+      },
+      "publishing-team": {
+        "name": "Equipo Editorial",
+        "audience": "Editoriales y sellos",
+        "description": "Para editoriales, sellos y equipos que gestionan varios autores y libros en conjunto.",
+        "highlights": [
+          "Todo lo de Autor Profesional, en varios espacios de autor",
+          "Administración editorial, asientos de personal y permisos por rol",
+          "Gestión de libros entre autores y supervisión centralizada",
+          "Mayores asignaciones de revisión, IA y almacenamiento con reportes",
+          "Soporte a nivel editorial e incorporación personalizada"
+        ]
+      }
+    },
+    "comparison": {
+      "heading": "Qué incluye cada membresía",
+      "intro": "Capacidades agrupadas por el trabajo que apoyan. La disponibilidad se indica con claridad — disponible ahora, prevista para el lanzamiento, en desarrollo, sujeta a asignaciones del plan, o personalizada para equipos."
+    },
+    "groups": {
+      "writing": "Escritura y organización",
+      "editorial": "Inteligencia editorial",
+      "memory": "Memoria y continuidad",
+      "review": "Revisión y audio",
+      "export": "Exportación y preparación para publicación",
+      "team": "Equipo y administración",
+      "support": "Soporte",
+      "storage": "Almacenamiento y retención"
+    },
+    "status": {
+      "available": "Disponible ahora",
+      "planned": "Prevista para el lanzamiento",
+      "in_development": "En desarrollo",
+      "plan_limited": "Aplican asignaciones del plan",
+      "team_custom": "Personalizada para equipos"
+    },
+    "features": {
+      "writingWorkspace": "Espacio de Escritura personal",
+      "bookConstitution": "Constitución del Libro",
+      "masterOutline": "Esquema Maestro",
+      "manuscriptWorkspace": "Espacio de manuscrito y capítulos",
+      "versionHistory": "Historial de versiones del manuscrito",
+      "editorialFindings": "Hallazgos editoriales",
+      "editorialDeliberations": "Deliberaciones editoriales",
+      "constitutionReview": "Revisión de Constitución",
+      "authorMemory": "Memoria del Autor",
+      "bookMemory": "Memoria del Libro",
+      "conceptDictionary": "Diccionario de Conceptos",
+      "reviewAllowance": "Asignación de revisión editorial",
+      "aiAllowance": "Asignación de herramientas asistidas por IA",
+      "audioReview": "Revisión en Audio",
+      "standardExport": "Herramientas de exportación estándar",
+      "advancedExport": "Exportación avanzada",
+      "publishingPrep": "Preparación para publicación",
+      "multiAuthorWorkspaces": "Varios espacios de autor",
+      "publisherAdmin": "Administración editorial",
+      "rolePermissions": "Permisos por rol",
+      "crossAuthorManagement": "Gestión de libros entre autores",
+      "operationalReporting": "Reportes operativos",
+      "standardSupport": "Soporte estándar",
+      "prioritySupport": "Soporte prioritario",
+      "publisherSupport": "Soporte a nivel editorial",
+      "customOnboarding": "Incorporación personalizada",
+      "storageAllowance": "Asignación de almacenamiento",
+      "archiveTwelveMonths": "Protección de archivo por doce meses",
+      "extendedArchive": "Opción de Archivo Extendido",
+      "catalogManagement": "Gestión de series y catálogo"
+    },
+    "archive": {
+      "heading": "Si te ausentas",
+      "body": [
+        "La membresía puede cancelarse en cualquier momento. Cancelar no es eliminar — tu trabajo se conserva y te espera si regresas.",
+        "Cuando termina el acceso activo, tu espacio de trabajo se archiva y se conserva por doce meses. Un espacio archivado es de solo lectura: tus libros y tu historial editorial se conservan, pero la edición, la IA, la revisión y las subidas quedan en pausa hasta que reactives."
+      ],
+      "points": [
+        "Cancelar detiene el acceso activo de la membresía.",
+        "Tu espacio de trabajo se archiva por doce meses.",
+        "Tus libros y tu historial editorial se conservan.",
+        "Reactivar restaura el acceso editorial activo.",
+        "Más adelante podría ofrecerse una extensión de archivo de pago.",
+        "La cancelación es distinta de la eliminación permanente, que siempre es tu decisión deliberada."
+      ]
+    },
+    "extendedArchive": {
+      "eyebrow": "Opción de almacenamiento",
+      "name": "Archivo Extendido",
+      "description": "Protección de almacenamiento adicional para tu trabajo — disponible tras la cancelación, o antes de que expire tu período de retención gratuito.",
+      "points": [
+        "Conserva libros e historial editorial más allá de los doce meses incluidos.",
+        "Solo lectura: no ofrece edición, IA, revisión ni subidas.",
+        "Puede convertirse de nuevo en una membresía activa más adelante.",
+        "Disponible tras la cancelación o antes de que expire la retención gratuita."
+      ],
+      "note": "El Archivo Extendido es protección de almacenamiento, no un nivel de membresía. El precio y la frecuencia de facturación llegarán más adelante."
+    },
+    "faq": {
+      "heading": "Preguntas sobre precios",
+      "intro": "Algunas de las preguntas más frecuentes. Las respuestas completas están en las Preguntas frecuentes.",
+      "items": [
+        "¿Cuándo se anunciarán los precios?",
+        "¿Habrá facturación mensual y anual?",
+        "¿Qué pasa si cancelo?",
+        "¿Se incluye el almacenamiento de archivo?",
+        "¿Las revisiones de IA y editoriales tienen asignaciones de uso?",
+        "¿Las editoriales pueden solicitar acceso personalizado?"
+      ],
+      "linkLabel": "Leer las Preguntas frecuentes completas →"
+    },
+    "cta": {
+      "heading": "Empieza ahora; elige una membresía en el lanzamiento",
+      "body": "Puedes empezar a desarrollar un libro en el Taller hoy. Cuando se publiquen los precios de lanzamiento, elegirás la membresía que te convenga — no se cobra nada antes de eso.",
+      "enterWorkshop": "Entrar al Taller",
+      "signIn": "Comenzar en el Taller",
+      "contact": "Contáctanos"
     }
   }
 }

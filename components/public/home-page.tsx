@@ -370,6 +370,44 @@ export async function PublicHomePage({ locale }: { locale: string }) {
         </div>
       </section>
 
+      {/* ---- Membership teaser: names the three audiences + archive, links to
+              the full Pricing page. Concise; the hero is untouched. ---- */}
+      <section
+        id="pricing"
+        aria-labelledby="pricing-heading"
+        className="scroll-mt-24 border-t border-rule"
+      >
+        <div className="mx-auto max-w-6xl px-6 py-20 sm:px-8 sm:py-24">
+          <SectionHeader
+            eyebrow={t("pricing.eyebrow")}
+            heading={t("pricing.heading")}
+            id="pricing-heading"
+          />
+          <p className="mt-6 max-w-prose font-serif text-lg leading-relaxed text-ink-soft">
+            {t("pricing.lead")}
+          </p>
+          <ul className="mt-10 grid gap-x-12 gap-y-4 border-t border-gold-rule pt-6 lg:grid-cols-3">
+            {(t.raw("pricing.plans") as string[]).map((p, i) => (
+              <li
+                key={i}
+                className="min-w-0 font-serif leading-relaxed text-ink break-words"
+              >
+                {p}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-8 max-w-prose font-serif leading-relaxed text-ink-soft">
+            {t("pricing.archive")}
+          </p>
+          <Link
+            href={segment ? `/${segment}/pricing` : "/pricing"}
+            className="mt-6 inline-block font-sans text-sm text-oxblood underline underline-offset-4 hover:text-ink focus-visible:outline-none focus-visible:text-ink"
+          >
+            {t("pricing.cta")} →
+          </Link>
+        </div>
+      </section>
+
       {/* ---- Final invitation ---- */}
       <section
         aria-labelledby="cta-heading"

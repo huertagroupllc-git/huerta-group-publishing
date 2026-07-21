@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PublicContentPage } from "@/components/public/content-page";
+import { PublicPricingPage } from "@/components/public/pricing-page";
 import { contentPageMetadata } from "@/lib/public/content-metadata";
 
 const ES = "es-419";
@@ -16,5 +16,5 @@ export function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PricingPageEs() {
-  return <PublicContentPage locale={ES} page="pricing" />;
+  return <PublicPricingPage locale={ES} basePath="/es" />;
 }
