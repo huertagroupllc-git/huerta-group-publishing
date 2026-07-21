@@ -311,9 +311,20 @@ export async function confirmImport(formData: FormData) {
     book_id?: string;
     book_slug?: string;
     author_slug?: string;
+    already_confirmed?: boolean;
   } | null;
-  const bookSlug = result?.book_slug;
+  let bookSlug = result?.book_slug;
   const aSlug = result?.author_slug ?? authorSlug;
+  // Idempotent re-confirm returns book_id without the slug — resolve it so the
+  // redirect still lands on the existing book (never a duplicate).
+  if (!bookSlug && result?.book_id) {
+    const { data: book } = await supabase
+      .from("books")
+      .select("slug")
+      .eq("id", result.book_id)
+      .maybeSingle();
+    bookSlug = (book as { slug: string } | null)?.slug;
+  }
   if (!bookSlug) fail(path, "confirmFailed");
   redirect(
     withActionNotice(`/workspace/authors/${aSlug}/books/${bookSlug}`, {
