@@ -1,11 +1,27 @@
 # Production Bridge — Phase 1 Blueprint
 
-Status: proposed, awaiting Founder Office approval. Blueprint only — no
-code, no migrations, no schema, no application changes. Authorized by
-the Founder Office Production Bridge program (Phase 1 — Blueprint &
-Lifecycle Definition) following the August 2026 repository audit and
+Status: **approved by Founder Office determination, August 2026, with
+Required Revision 2 incorporated below.** Blueprint only — no code, no
+migrations, no schema, no application changes; Phase 2 implementation
+awaits its own authorization. Originally proposed at commit `d4e4b2b`
+under the Founder Office Production Bridge program (Phase 1 — Blueprint
+& Lifecycle Definition) following the August 2026 repository audit and
 the accepted WP-00 baseline (`38f635f`, reconciliation closed at
-`96a8b4e`).
+`96a8b4e`). Amended, never silently rewritten.
+
+**Revision 2 (August 9, 2026) — Founder Office required revisions,
+incorporated in place:** (A) the Candidate defined as the immutable
+*publication-context snapshot* required to reproduce its publication
+state (§1, §3, §6); (B) the Book / Edition conceptual distinction,
+with Edition architecture deferred (§3, §6, §9); (C) explicit approval
+record semantics — actor, moment, authority, optional reason,
+withdrawal/supersession relationships (§11); (D) artifacts clarified as
+reproducible derivatives of Candidates, with the reproducibility law
+qualified for format determinism (§9, §10); (E) Manuscript Lock
+clarified as an operational constraint, never a publication-state
+identity (§8). The three open questions of the original §15 were
+resolved by Founder Office determination and that section now records
+the answers (§5, §7, §8, §15).
 
 Governing canon: all four constitutions, the terminology document, the
 Book Lifecycle (adopted July 2026), the Capability 3 blueprint (the
@@ -38,19 +54,23 @@ be exported.
 The Production Bridge closes that gap with one central architectural
 idea:
 
-> **The Publication Candidate is the manuscript-level version.**
+> **The Publication Candidate is the manuscript-level version: the
+> immutable publication-context snapshot required to reproduce the
+> publication state it represents.** *(principle established by
+> Founder Office Revision 2A)*
 
 Today, versions exist only at the chapter level; the assembled
 manuscript is computed at read time and never stored **(existing)**.
 The Production Bridge extends the same append-only version philosophy
 one level up: a **Publication Candidate** is an immutable, numbered,
-manuscript-level freeze — the complete composition of the book (which
+manuscript-level freeze — not merely the text, but the complete
+publication context needed to reproduce the candidate later (which
 chapters, in what order, under which parts, at which finalized
-versions, under which title-page facts) captured as a permanent record
-**(new)**. Everything else in this blueprint — locking, readiness,
-approval, authorization, export, artifacts — is defined relative to
-candidates, exactly as the editorial system is defined relative to
-chapter versions.
+versions, under which title-page facts, in which manuscript language)
+captured as a permanent record **(new)**. Everything else in this
+blueprint — locking, readiness, approval, authorization, export,
+artifacts — is defined relative to candidates, exactly as the
+editorial system is defined relative to chapter versions.
 
 Nothing in the existing architecture is replaced. The manuscript
 remains chapter-versioned; the Reading Copy remains computed; the
@@ -100,9 +120,11 @@ verbs).
 
 | Term | Meaning |
 |---|---|
-| **Publication Candidate** (the **Candidate**) | An immutable, numbered, manuscript-level freeze of the book's complete composition. The only manuscript-level version object the platform has. Never "snapshot", "build", or "draft of the book". |
+| **Publication Candidate** (the **Candidate**) | An immutable, numbered, manuscript-level freeze of the book's complete Publication Context. The only manuscript-level version object the platform has. Never "build" or "draft of the book". |
+| **Publication Context** | Everything a Candidate must freeze to deterministically reproduce the publication state it represents: the Composition, the title-page facts, and the manuscript language — and only what reproduction actually requires (Revision 2A). Distinct from *historical context* (memory and editorial-record maps), which is recorded as provenance and never rendered. |
 | **Present** (a candidate) | The deliberate act that creates a Candidate. A candidate is *presented*, never "generated" or "created automatically". |
-| **Composition** | What a Candidate freezes: the ordered chapter set (with parts and their order), each chapter's identity facts, the finalized version each chapter contributes, and the title-page facts. |
+| **Composition** | The textual core of the Publication Context: the ordered chapter set (with parts and their order), each chapter's identity facts, and the finalized version each chapter contributes. |
+| **Edition** *(future)* | A named publication form of a Book that will *reference* Publication Candidates. The word is reserved by this blueprint (Revision 2B); Edition architecture is deferred to a later authorized phase. Candidates belong to Books, never to Editions. |
 | **Candidate Fingerprint** | The deterministic content fingerprint of a Candidate's assembled text, computed through the invariant-tested assembly boundary. Two candidates with the same composition have the same fingerprint, forever. |
 | **Manuscript Lock** | A deliberate, reversible act suspending changes to the manuscript's composition while publication preparation proceeds. Locked / **unlocked** are its states; both acts are recorded. (The name is reserved by the Book Lifecycle §5 — this blueprint defines it.) |
 | **Publication Preview** | The Reading Copy rendered *from a Candidate's frozen composition* rather than from the live active pointers. What you review is what was presented. (Name reserved by Book Lifecycle §5.) |
@@ -178,11 +200,14 @@ never gate.
 
 **When it exists.** When the author (or staff, for imprint-managed
 books) states it on the Book Record, exactly as every stage is stated
-today **(existing)**. This blueprint deliberately does not add
-preconditions to the stage declaration itself; instead the Readiness
-Report makes the supporting facts legible (are all chapters written? do
-open drafts exist? is the active composition stable?). A stated stage
-with contrary facts is visible, not blocked.
+today **(existing)**. The stage declaration carries no preconditions —
+**determined by the Founder Office (Revision 2, Question 2): Principle
+XIV is preserved; stages remain stated facts, never workflow gates.**
+The Readiness Report presents deterministic evidence and unresolved
+conditions (are all chapters written? do open drafts exist? is the
+active composition stable?) but never automatically determines Final
+Manuscript or Ready for Publication status. Human authority makes the
+decision; a stated stage with contrary facts is visible, not blocked.
 
 **Who creates it.** The author, or staff under the established
 staff-management authority for unlinked books **(existing pattern)**.
@@ -219,24 +244,40 @@ verifiable, immutable fact — the manuscript-level counterpart of a
 finalized chapter version, and the single object every downstream
 publication concept (approval, export, artifact, release) refers to.
 
+**Defining principle (Revision 2A).** *A Publication Candidate is the
+immutable publication-context snapshot required to reproduce the
+publication state it represents.* The candidate freezes not merely
+manuscript text but every element deterministic reproduction actually
+needs — and nothing more. Elements the future publication domain will
+add (ISBN, rights, covers, distribution facts) are not designed here;
+when their phases arrive, each will decide what joins the Publication
+Context, under this same necessity test.
+
 **Identity.** Per book, candidates are numbered sequentially from 1,
 append-only, never renumbered — the same identity discipline as chapter
 versions **(existing pattern)**. A candidate is permanently identified
 by (book, candidate number) and carries its Candidate Fingerprint.
 
-**What candidacy freezes (the Composition).**
+**What candidacy freezes (the Publication Context).**
 
-- The ordered chapter set: which chapters, in which order, grouped
-  under which parts (with part titles and order) — *order and grouping
-  are frozen facts, not references to the live rows*, because positions
-  are mutable and the book's shape is part of the book.
-- For each included chapter: its identity facts (title, kind) and the
-  exact finalized version contributing its text.
+- The Composition — the ordered chapter set: which chapters, in which
+  order, grouped under which parts (with part titles and order) —
+  *order and grouping are frozen facts, not references to the live
+  rows*, because positions are mutable and the book's shape is part of
+  the book; and, for each included chapter, its identity facts (title,
+  kind) and the exact finalized version contributing its text.
 - The title-page facts as of candidacy: book title, subtitle, author
   name — because later identity edits must not silently change what
   was approved.
+- The manuscript language as of candidacy **(existing fact on the Book
+  Record)** — reproduction context, because a rendering cannot be
+  regenerated deterministically without it.
 - The Candidate Fingerprint, computed deterministically from the
   assembled composition through the WP-00 invariant boundary.
+
+The necessity test (Revision 2A) bounds this list: an element joins
+the frozen Publication Context only if reproducing the candidate's
+publication state deterministically requires it.
 
 **What candidacy records as provenance without freezing as content**
 (mirroring `context_versions` on review runs **(existing pattern)**):
@@ -293,6 +334,16 @@ manuscript's versions** — created only by the deliberate act of
 presentation, exactly as chapter versions are created only by the
 deliberate act of finalization. One version philosophy, two levels.
 
+**Relationship to the Book and future Editions (Revision 2B).** A
+Publication Candidate belongs to a **Book** — the enduring work — and
+to nothing else. An **Edition** is a future concept: a named
+publication form of a Book that will *reference* Publication
+Candidates when edition architecture arrives in its own authorized
+phase. The distinction is established now so the candidate model needs
+no redesign then: candidates never belong to editions; editions will
+point at candidates. No Edition records, workflow, or management exist
+in this program.
+
 **Divergence.** After candidacy, the live manuscript may change (if
 unlocked). Divergence between the current candidate's composition and
 the live active composition is deterministically detectable and is
@@ -331,10 +382,13 @@ conversation (Engineering Constitution §13 **(existing)**).
 
 For **imprint-managed books with no linked author account**, staff
 already act with recorded authority in the editorial system
-**(existing: the current-review staff authority correction)**. Whether
-that precedent extends to the *Approval* act itself — staff approving a
-candidate on a real author's behalf — is an institutional question, not
-an architectural one, and is put to the Founder Office in §15.
+**(existing: the current-review staff authority correction)**. That
+precedent does **not** extend implicitly to the Approval act.
+**Determined by the Founder Office (Revision 2, Question 1): Author
+Approval belongs to the author. Staff may exercise it only where
+explicit delegated authority exists and is recorded — recorded
+delegation, then a recorded act citing it. There is no implicit proxy
+approval.**
 
 **AI holds no publication authority of any kind.** The reviewer is
 already forbidden to judge publication readiness **(existing)**; this
@@ -387,6 +441,22 @@ visible. The lock exists so that, by convention, what the author reads
 in the Publication Preview and what the live book says remain the same
 thing during the approval window.
 
+**What the lock is not (Revision 2E).** The Manuscript Lock is an
+**operational constraint, never a publication-state identity**: it
+governs which composition changes are permitted while it is active,
+and nothing else. It does not redefine what the manuscript is, it
+cannot alter or invalidate any historical Candidate, it is not a
+lifecycle stage, and its presence or absence is never itself evidence
+of publication state — the Candidate and the recorded acts are.
+
+**Approval-window convention — determined by the Founder Office
+(Revision 2, Question 3):** the Manuscript Lock remains **optional but
+conventional** during candidate approval, and shall not become a
+mandatory approval precondition. If composition changes are required
+mid-approval, the manuscript is unlocked (recorded, reasoned), the
+changes are made, and a **new Candidate is presented** — the
+historical Candidate is never altered.
+
 ## 9. Publication Provenance Model
 
 The Bridge completes a provenance chain the platform has been building
@@ -429,16 +499,21 @@ it?* from the repository-governed record alone.
 candidate, in which format, by which serializer version, producing
 which artifact fingerprint, by whose export act. The reproducibility
 law: **the same candidate rendered by the same serializer version
-yields a byte-identical artifact.** Serializer changes therefore create
-*new artifact identities* — they never overwrite an existing artifact's
-meaning. (This is the WP-00 determinism guarantee extended through the
-export boundary.)
+yields a byte-identical artifact, where the format permits
+deterministic serialization** (Revision 2D). Serializer changes
+therefore create *new artifact identities* — they never overwrite an
+existing artifact's meaning. Should any future format prove incapable
+of full byte determinism, its serializer must record that limitation
+in the artifact's provenance rather than silently weakening the law.
+(This is the WP-00 determinism guarantee extended through the export
+boundary.)
 
-**Edition provenance (future).** Editions are acknowledged, not
-designed: when edition assembly becomes real (its deferral is on the
-record **(existing)**), an edition will be a *named lineage of
-candidates*, so the numbering and provenance model defined here absorbs
-editions without redesign. Nothing further is decided now.
+**Edition provenance (future, Revision 2B).** Editions are
+acknowledged, not designed: when edition architecture arrives in its
+own authorized phase, an **Edition will reference the Publication
+Candidates it publishes** — candidates belong to the Book, and the
+numbering and provenance model defined here absorbs editions without
+redesign. Nothing further is decided now.
 
 **Approval provenance.** Every approval and authorization act binds to
 a candidate number *and its fingerprint*, so an act can never drift
@@ -453,9 +528,13 @@ Four identities, strictly distinguished (no storage design here):
    no format. The only object approvals attach to.
 2. **Publication Artifact** — *one rendering of it.* Identity =
    (candidate, format, serializer version); carries its own
-   fingerprint and export provenance. Conceptually regenerable at any
-   time to the identical bytes; the identity record, not the bytes, is
-   the institutional fact.
+   fingerprint and export provenance. **Artifacts are reproducible
+   derivatives, never records of truth in their own right (Revision
+   2D): the durable authoritative publication-state record is the
+   Candidate and its provenance.** An artifact is regenerable at any
+   time from the same candidate and serializer version — to identical
+   bytes where the format permits deterministic serialization — and
+   the identity record, not the bytes, is the institutional fact.
 3. **Exported File** — *a byte instance* of an artifact, stored
    somewhere, verifiable against the artifact fingerprint. Files can
    be re-derived, moved, or expired without touching history, because
@@ -515,6 +594,18 @@ immutable once given; ending states preserve everything.
    never mutate a candidate, a manuscript, or any history.
 6. **Release (later phase)** — named, reserved, undesigned.
 
+**Approval record semantics (Revision 2C).** Every Approval and every
+Authorization is a permanent record preserving, at minimum: the
+**actor** (who performed the act); the **moment** (when); the
+**authority** under which the act was taken (the author's own
+sovereignty, the imprint's operational authority, or an explicitly
+recorded delegation — never an implicit capacity); an **optional
+reason**; and, where applicable, the act's **withdrawal or
+supersession relationship** — which candidate superseded the one acted
+on, or which recorded withdrawal set it aside. Acts bind to (candidate
+number, fingerprint) as §9 requires, are immutable once given, and are
+ordered author-first: Authorization presupposes a recorded Approval.
+
 **Withdrawal at any pre-release status** is a recorded set-aside with a
 reason. **Supersession** occurs when a newer candidate is presented.
 Neither erases acts already taken; both leave the historical chain
@@ -526,11 +617,13 @@ Impacts required for future implementation — conceptual entities and
 records, not schemas:
 
 **New conceptual entities** (Phase 2 unless noted): the Publication
-Candidate (with composition, fingerprint, context map, status); the
-Manuscript Lock state and its act records; the Readiness Report (a
-computed statement, not a stored verdict); the Approval and
-Authorization acts; the Publication Artifact identity and export act
-records (Phase 3).
+Candidate (with its frozen Publication Context, fingerprint,
+historical-context map, and status); the Manuscript Lock state and its
+act records; the Readiness Report (a computed statement, not a stored
+verdict); the Approval and Authorization acts with the Revision 2C
+record semantics; the recorded-delegation instrument for
+imprint-managed books (§7, §14.3); the Publication Artifact identity
+and export act records (Phase 3).
 
 **New lifecycle events to be recorded append-only:** presented,
 withdrawn, superseded, locked, unlocked, approved, authorized, exported
@@ -606,10 +699,14 @@ launch consideration; any storage, schema, API, or UI design.
    identity to serializer version and by the WP-00 invariant suite;
    any assembly-affecting change is by definition a new serializer
    version.
-3. **Approval-authority gap for unlinked authors.** If the Founder
-   Office requires authors' own approval strictly, imprint-managed
-   books without accounts cannot complete the lifecycle. Put to the
-   Founder Office (§15) rather than silently resolved.
+3. **Approval-authority gap for unlinked authors — determined and
+   accepted.** The Founder Office requires the author's own approval
+   or an explicit recorded delegation (§7, §15). The operational
+   consequence is accepted: an imprint-managed book without a linked
+   account and without a recorded delegation cannot complete the
+   approval lifecycle — by design, not by defect. Phase 2 must give
+   recorded delegation a durable home before such a book is taken
+   through approval.
 4. **Scope creep toward format engineering.** Typesetting quality
    questions (fonts, page geometry, front matter content) will exert
    pressure on Phase 2. The phase boundary holds: Phase 2 freezes and
@@ -628,34 +725,39 @@ launch consideration; any storage, schema, API, or UI design.
    VI) — but Phase 2 acceptance should verify with a real book that
    the ceremony reads as care, not bureaucracy.
 
-## 15. Open Questions Requiring Founder Office Determination
+## 15. Founder Office Determinations (August 2026)
 
-1. **Proxy approval for imprint-managed books.** May staff exercise
-   the author's Approval act for books with no linked author account
-   (extending the current-review staff-authority precedent to the most
-   consequential act in the system)? Or does Approval strictly require
-   the author's own recorded act — with a recorded, out-of-band
-   delegation instrument as the only alternative? This blueprint
-   recommends the stricter reading (approval is the author's act;
-   delegation must be explicit and recorded), but the choice is
-   institutional.
-2. **Final Manuscript stage preconditions.** Should declaring the
-   Final Manuscript stage remain a pure stated fact (this blueprint's
-   proposal, preserving Principle XIV cleanly), or should the platform
-   require a clean Readiness Report to state it? The stricter option
-   would be the platform's first stage gate and would amend the
-   lifecycle's "never a workflow gate" rule — a constitutional matter,
-   not an implementation detail.
-3. **The approval window convention.** Should Manuscript Lock be
-   *required* while a candidate awaits approval (making
-   preview-equals-live a guarantee rather than a convention), or
-   remain optional as proposed? Requiring it is defensible and simple;
-   this blueprint proposes optional-but-conventional to keep locks
-   deliberate rather than automatic.
+The original proposal put three open questions to the Founder Office.
+All three were resolved by the Revision 2 determination; the questions
+are preserved here with their answers, and the answers are
+incorporated at §5, §7, and §8.
+
+1. **Proxy approval for imprint-managed books.** *Asked:* may staff
+   exercise the author's Approval act for books with no linked author
+   account? *Determined:* **Author Approval belongs to the author.
+   Staff may exercise that approval only where explicit delegated
+   authority exists and is recorded. There is no implicit proxy
+   approval.** (Incorporated at §7; consequence accepted at §14.3.)
+2. **Final Manuscript stage preconditions.** *Asked:* should the
+   stage remain a pure stated fact, or require a clean Readiness
+   Report? *Determined:* **Principle XIV is preserved. Lifecycle
+   stages remain stated facts, never workflow gates. The Readiness
+   Report presents deterministic evidence and unresolved conditions
+   but never automatically determines Final Manuscript or Ready for
+   Publication status. Human authority makes the decision.**
+   (Incorporated at §5.)
+3. **The approval-window convention.** *Asked:* should Manuscript
+   Lock be required while a candidate awaits approval? *Determined:*
+   **The lock remains optional but conventional and shall not become a
+   mandatory approval precondition. If composition changes are needed,
+   the manuscript may be unlocked and a new Candidate presented — the
+   historical Candidate is never altered.** (Incorporated at §8.)
+
+No open architectural questions remain in this blueprint.
 
 ---
 
-*Phase 1 ends here. Upon Founder Office approval, Phase 2 (Candidate
-Foundation) begins with its own implementation authorization; upon
-amendment, this document is amended in place, dated, never silently
-rewritten.*
+*Phase 1 is complete: the architecture is approved with Revision 2
+incorporated. Phase 2 (Candidate Foundation) begins only under its own
+Founder Office implementation authorization. This document is amended
+in place, dated, never silently rewritten.*
