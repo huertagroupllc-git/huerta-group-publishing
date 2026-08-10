@@ -281,7 +281,8 @@
       "workingTitle": "Working Title",
       "inheritedFrom": "Inherited From",
       "memoryNotEstablished": "Author Memory not yet established",
-      "assembledMemoryHint": "the exact record future AI assistance will receive — the author’s memory first, then the book’s; active, finalized versions only"
+      "assembledMemoryHint": "the exact record future AI assistance will receive — the author’s memory first, then the book’s; active, finalized versions only",
+      "publicationLink": "Publication"
     },
     "form": {
       "addMetaTitle": "Add a book",
@@ -527,7 +528,8 @@
         "aiUsage": "AI Usage",
         "system": "System",
         "support": "Support",
-        "importCleanup": "Import cleanup"
+        "importCleanup": "Import cleanup",
+        "publication": "Publication"
       }
     },
     "overview": {
@@ -2147,6 +2149,160 @@
       "unknownParser": "—",
       "download": "Download original PDF",
       "note": "The download link is private and expires shortly. Your source file is never publicly accessible."
+    }
+  },
+  "publication": {
+    "desk": {
+      "metaTitle": "Publication",
+      "eyebrow": "Publication",
+      "lede": "Where the manuscript becomes the book: present an immutable candidate, read it as it will stand, and record the approvals that let it proceed. Nothing here is automatic, and nothing here is ever deleted."
+    },
+    "lock": {
+      "heading": "Manuscript Lock",
+      "lockedSince": "The composition has been locked since {date}. Drafts, memory, and the editorial record remain open; chapter order, titles, activations, and title-page facts are suspended.",
+      "unlockedState": "The composition is unlocked. Locking is conventional while a candidate awaits approval, so the preview and the manuscript remain the same text.",
+      "reasonLabel": "Reason",
+      "lockAction": "Lock the composition",
+      "unlockAction": "Unlock the composition"
+    },
+    "present": {
+      "heading": "Present a Publication Candidate",
+      "lede": "Presenting freezes the exact composition — every chapter at its active finalized version, in reading order, under the current title-page facts — into an immutable, numbered record with a deterministic fingerprint.",
+      "liveFingerprint": "The manuscript as it stands would carry fingerprint {fingerprint}.",
+      "reasonLabel": "Note for the record",
+      "action": "Present the candidate",
+      "noWritten": "No chapter has an active finalized version yet; there is nothing to present."
+    },
+    "current": {
+      "numberLabel": "Candidate No. {number}",
+      "presentedLabel": "Presented",
+      "fingerprintLabel": "Fingerprint",
+      "frozenTitleLabel": "Frozen title",
+      "frozenAuthorLabel": "Frozen author · language",
+      "previewAction": "Read the Publication Preview",
+      "withdrawReasonLabel": "Reason for withdrawal",
+      "withdrawAction": "Withdraw this candidate"
+    },
+    "readiness": {
+      "heading": "Readiness Report",
+      "matchesManuscript": "The candidate matches the manuscript as it stands.",
+      "diverged": "The manuscript has changed since this candidate was presented ({changes}). The candidate holds the text as presented; a new candidate would capture the current text.",
+      "compositionInvalid": "The current manuscript state could not be compared safely.",
+      "unwrittenChapters": "{count, plural, one {One chapter is} other {# chapters are}} not yet written: {titles}.",
+      "allChaptersWritten": "Every chapter has an active finalized version.",
+      "openDrafts": "{count, plural, one {One chapter has} other {# chapters have}} an open draft: {titles}.",
+      "noOpenDrafts": "No drafts are open.",
+      "manuscriptLocked": "The composition is locked.",
+      "manuscriptUnlocked": "The composition is unlocked.",
+      "approvedByAuthor": "The author has approved this candidate.",
+      "approvedDelegated": "This candidate carries a delegated approval on the author's behalf.",
+      "awaitingApproval": "The author's approval has not been recorded.",
+      "authorizedByImprint": "The imprint has authorized this candidate.",
+      "awaitingAuthorization": "Imprint authorization has not been recorded.",
+      "candidateClosed": "This candidate is no longer open."
+    },
+    "acts": {
+      "approvalHeading": "Author Approval",
+      "approveLede": "Approval is your recorded judgment that candidate fingerprint {fingerprint} — exactly as the Publication Preview reads — is your book. It binds to this candidate alone.",
+      "approveAction": "Approve this candidate",
+      "approvedOn": "Approved {date}.",
+      "authorityAuthor": "the author's own act",
+      "authorityDelegated": "recorded delegated authority",
+      "withdrawApprovalAction": "Withdraw the approval",
+      "authorizationHeading": "Imprint Authorization",
+      "authorizeLede": "Authorization is the imprint's recorded decision that the approved candidate proceeds. It requires the author's approval first — the database will not record it otherwise.",
+      "authorizeAction": "Authorize publication",
+      "authorizedOn": "Authorized {date}.",
+      "withdrawAuthorizationAction": "Withdraw the authorization",
+      "authorizationPending": "Authorization is the imprint's act; it will appear here once recorded.",
+      "reasonLabel": "Reason"
+    },
+    "history": {
+      "heading": "Candidate history",
+      "empty": "No candidate has been presented for this book.",
+      "entry": "Candidate No. {number}",
+      "dispositionPresented": "open",
+      "dispositionSuperseded": "superseded",
+      "dispositionWithdrawn": "withdrawn"
+    },
+    "preview": {
+      "metaTitle": "Publication Preview",
+      "candidateLine": "Candidate No. {number} · presented {date}",
+      "backToDesk": "The Publication Desk",
+      "appendix": "Appendix",
+      "chapterNumber": "Chapter {number}",
+      "versionMark": "as finalized in version {number}",
+      "colophon": "Rendered from the frozen composition of Candidate No. {number} · {language}"
+    },
+    "admin": {
+      "metaTitle": "Publication — Administration",
+      "heading": "Publication",
+      "lede": "Every Publication Candidate across the imprint, with its recorded acts, and the approval delegations — the only instrument by which staff may ever exercise an author's approval.",
+      "candidatesHeading": "Candidates",
+      "candidatesEmpty": "No candidates have been presented.",
+      "candidateNo": "Candidate No. {number}",
+      "disposition": {
+        "presented": "Open",
+        "superseded": "Superseded",
+        "withdrawn": "Withdrawn"
+      },
+      "approvedAuthor": "approved by the author",
+      "approvedDelegated": "approved under delegation",
+      "awaitingApproval": "awaiting author approval",
+      "authorized": "authorized by the imprint",
+      "awaitingAuthorization": "awaiting imprint authorization",
+      "delegationsHeading": "Approval delegations",
+      "delegationsLede": "A delegation records the explicit basis on which staff may approve on an author's behalf. There is no implicit proxy approval; without a live delegation, staff approval attempts fail at the database.",
+      "delegationsEmpty": "No delegations are on record.",
+      "scopeAllBooks": "all of the author's books",
+      "active": "active",
+      "revoked": "revoked",
+      "expired": "expired",
+      "revokeReasonLabel": "Reason for revocation",
+      "revokeAction": "Revoke this delegation",
+      "createHeading": "Record a delegation",
+      "createLede": "Record the underlying authority exactly — the instrument on file that grants it. The delegation itself never substitutes for that instrument.",
+      "authorLabel": "Author",
+      "basisLabel": "Basis of authority",
+      "reasonLabel": "Note",
+      "createAction": "Record the delegation"
+    },
+    "errors": {
+      "manuscriptLocked": "The composition is locked; unlock it before changing the manuscript's shape.",
+      "alreadyLocked": "The composition is already locked.",
+      "notLocked": "The composition is not locked.",
+      "noWrittenChapters": "No chapter has an active finalized version yet; there is nothing to present.",
+      "fingerprintMismatch": "The manuscript changed while the candidate was being presented. Nothing was recorded — review the manuscript and present again.",
+      "invalidComposition": "The manuscript's active versions are not in a presentable state.",
+      "candidateNotOpen": "This candidate is no longer open to acts.",
+      "approvalRequired": "Authorization requires the author's recorded approval first.",
+      "delegationRequired": "Approval on the author's behalf requires an explicit recorded delegation.",
+      "alreadyWithdrawn": "This act has already been withdrawn.",
+      "notAuthor": "Only the book's author can record this approval.",
+      "notAuthorized": "You are not authorized to perform this act.",
+      "publicationMigrationMissing": "The publication schema has not been applied yet (migration 20260810000000_publication_candidates.sql).",
+      "presentFailed": "The candidate could not be presented.",
+      "withdrawFailed": "The candidate could not be withdrawn.",
+      "lockFailed": "The composition could not be locked.",
+      "unlockFailed": "The composition could not be unlocked.",
+      "approveFailed": "The approval could not be recorded.",
+      "authorizeFailed": "The authorization could not be recorded.",
+      "withdrawActFailed": "The withdrawal could not be recorded.",
+      "delegationBasisRequired": "A delegation requires its recorded basis of authority.",
+      "delegationCreateFailed": "The delegation could not be recorded.",
+      "delegationRevokeFailed": "The delegation could not be revoked."
+    },
+    "notices": {
+      "candidatePresented": "The candidate has been presented and its composition is frozen.",
+      "candidateWithdrawn": "The candidate has been withdrawn. Its record remains.",
+      "manuscriptLockedNotice": "The composition is locked.",
+      "manuscriptUnlockedNotice": "The composition is unlocked.",
+      "candidateApproved": "The approval has been recorded.",
+      "approvalWithdrawn": "The approval has been withdrawn. The original act remains on record.",
+      "candidateAuthorized": "The authorization has been recorded.",
+      "authorizationWithdrawn": "The authorization has been withdrawn. The original act remains on record.",
+      "delegationCreated": "The delegation has been recorded.",
+      "delegationRevoked": "The delegation has been revoked."
     }
   }
 }

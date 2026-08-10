@@ -281,7 +281,8 @@
       "workingTitle": "Título de Trabajo",
       "inheritedFrom": "Heredado De",
       "memoryNotEstablished": "Memoria del Autor aún sin establecer",
-      "assembledMemoryHint": "el registro exacto que recibirá la futura asistencia de IA — primero la memoria del autor, luego la del libro; únicamente versiones activas y finalizadas"
+      "assembledMemoryHint": "el registro exacto que recibirá la futura asistencia de IA — primero la memoria del autor, luego la del libro; únicamente versiones activas y finalizadas",
+      "publicationLink": "Publicación"
     },
     "form": {
       "addMetaTitle": "Agregar un libro",
@@ -527,7 +528,8 @@
         "aiUsage": "Uso de IA",
         "system": "Sistema",
         "support": "Soporte",
-        "importCleanup": "Limpieza de importaciones"
+        "importCleanup": "Limpieza de importaciones",
+        "publication": "Publicación"
       }
     },
     "overview": {
@@ -2147,6 +2149,160 @@
       "unknownParser": "—",
       "download": "Descargar el PDF original",
       "note": "El enlace de descarga es privado y expira en poco tiempo. Tu archivo de origen nunca es de acceso público."
+    }
+  },
+  "publication": {
+    "desk": {
+      "metaTitle": "Publicación",
+      "eyebrow": "Publicación",
+      "lede": "Donde el manuscrito se convierte en el libro: presente un candidato inmutable, léalo tal como quedará y registre las aprobaciones que le permiten avanzar. Nada aquí es automático y nada se elimina jamás."
+    },
+    "lock": {
+      "heading": "Bloqueo del Manuscrito",
+      "lockedSince": "La composición está bloqueada desde el {date}. Los borradores, la memoria y el registro editorial permanecen abiertos; el orden de capítulos, los títulos, las activaciones y los datos de portada quedan suspendidos.",
+      "unlockedState": "La composición está desbloqueada. Bloquearla es la convención mientras un candidato espera aprobación, para que la vista y el manuscrito sean el mismo texto.",
+      "reasonLabel": "Motivo",
+      "lockAction": "Bloquear la composición",
+      "unlockAction": "Desbloquear la composición"
+    },
+    "present": {
+      "heading": "Presentar un Candidato de Publicación",
+      "lede": "Presentar congela la composición exacta — cada capítulo en su versión final activa, en orden de lectura, con los datos de portada vigentes — en un registro inmutable y numerado con una huella determinista.",
+      "liveFingerprint": "El manuscrito tal como está llevaría la huella {fingerprint}.",
+      "reasonLabel": "Nota para el registro",
+      "action": "Presentar el candidato",
+      "noWritten": "Ningún capítulo tiene aún una versión final activa; no hay nada que presentar."
+    },
+    "current": {
+      "numberLabel": "Candidato N.º {number}",
+      "presentedLabel": "Presentado",
+      "fingerprintLabel": "Huella",
+      "frozenTitleLabel": "Título congelado",
+      "frozenAuthorLabel": "Autor · idioma congelados",
+      "previewAction": "Leer la Vista de Publicación",
+      "withdrawReasonLabel": "Motivo del retiro",
+      "withdrawAction": "Retirar este candidato"
+    },
+    "readiness": {
+      "heading": "Informe de Preparación",
+      "matchesManuscript": "El candidato coincide con el manuscrito tal como está.",
+      "diverged": "El manuscrito cambió desde que se presentó este candidato ({changes}). El candidato conserva el texto tal como fue presentado; un candidato nuevo capturaría el texto actual.",
+      "compositionInvalid": "El estado actual del manuscrito no pudo compararse con seguridad.",
+      "unwrittenChapters": "{count, plural, one {Un capítulo aún no está escrito} other {# capítulos aún no están escritos}}: {titles}.",
+      "allChaptersWritten": "Cada capítulo tiene una versión final activa.",
+      "openDrafts": "{count, plural, one {Un capítulo tiene un borrador abierto} other {# capítulos tienen borradores abiertos}}: {titles}.",
+      "noOpenDrafts": "No hay borradores abiertos.",
+      "manuscriptLocked": "La composición está bloqueada.",
+      "manuscriptUnlocked": "La composición está desbloqueada.",
+      "approvedByAuthor": "El autor aprobó este candidato.",
+      "approvedDelegated": "Este candidato lleva una aprobación delegada en nombre del autor.",
+      "awaitingApproval": "La aprobación del autor no está registrada.",
+      "authorizedByImprint": "El sello autorizó este candidato.",
+      "awaitingAuthorization": "La autorización del sello no está registrada.",
+      "candidateClosed": "Este candidato ya no está abierto."
+    },
+    "acts": {
+      "approvalHeading": "Aprobación del Autor",
+      "approveLede": "La aprobación es su juicio registrado de que la huella {fingerprint} — exactamente como se lee en la Vista de Publicación — es su libro. Queda ligada solo a este candidato.",
+      "approveAction": "Aprobar este candidato",
+      "approvedOn": "Aprobado el {date}.",
+      "authorityAuthor": "acto propio del autor",
+      "authorityDelegated": "autoridad delegada registrada",
+      "withdrawApprovalAction": "Retirar la aprobación",
+      "authorizationHeading": "Autorización del Sello",
+      "authorizeLede": "La autorización es la decisión registrada del sello de que el candidato aprobado avanza. Requiere primero la aprobación del autor — la base de datos no la registrará de otro modo.",
+      "authorizeAction": "Autorizar la publicación",
+      "authorizedOn": "Autorizado el {date}.",
+      "withdrawAuthorizationAction": "Retirar la autorización",
+      "authorizationPending": "La autorización es un acto del sello; aparecerá aquí cuando quede registrada.",
+      "reasonLabel": "Motivo"
+    },
+    "history": {
+      "heading": "Historial de candidatos",
+      "empty": "No se ha presentado ningún candidato para este libro.",
+      "entry": "Candidato N.º {number}",
+      "dispositionPresented": "abierto",
+      "dispositionSuperseded": "reemplazado",
+      "dispositionWithdrawn": "retirado"
+    },
+    "preview": {
+      "metaTitle": "Vista de Publicación",
+      "candidateLine": "Candidato N.º {number} · presentado el {date}",
+      "backToDesk": "El Escritorio de Publicación",
+      "appendix": "Apéndice",
+      "chapterNumber": "Capítulo {number}",
+      "versionMark": "según la versión final {number}",
+      "colophon": "Compuesto desde la composición congelada del Candidato N.º {number} · {language}"
+    },
+    "admin": {
+      "metaTitle": "Publicación — Administración",
+      "heading": "Publicación",
+      "lede": "Cada Candidato de Publicación del sello, con sus actos registrados, y las delegaciones de aprobación — el único instrumento por el cual el personal puede ejercer la aprobación de un autor.",
+      "candidatesHeading": "Candidatos",
+      "candidatesEmpty": "No se han presentado candidatos.",
+      "candidateNo": "Candidato N.º {number}",
+      "disposition": {
+        "presented": "Abierto",
+        "superseded": "Reemplazado",
+        "withdrawn": "Retirado"
+      },
+      "approvedAuthor": "aprobado por el autor",
+      "approvedDelegated": "aprobado por delegación",
+      "awaitingApproval": "en espera de la aprobación del autor",
+      "authorized": "autorizado por el sello",
+      "awaitingAuthorization": "en espera de la autorización del sello",
+      "delegationsHeading": "Delegaciones de aprobación",
+      "delegationsLede": "Una delegación registra la base explícita por la cual el personal puede aprobar en nombre de un autor. No existe la aprobación implícita; sin una delegación vigente, el intento falla en la base de datos.",
+      "delegationsEmpty": "No hay delegaciones registradas.",
+      "scopeAllBooks": "todos los libros del autor",
+      "active": "vigente",
+      "revoked": "revocada",
+      "expired": "vencida",
+      "revokeReasonLabel": "Motivo de la revocación",
+      "revokeAction": "Revocar esta delegación",
+      "createHeading": "Registrar una delegación",
+      "createLede": "Registre la autoridad subyacente con exactitud — el instrumento en archivo que la otorga. La delegación nunca sustituye a ese instrumento.",
+      "authorLabel": "Autor",
+      "basisLabel": "Base de autoridad",
+      "reasonLabel": "Nota",
+      "createAction": "Registrar la delegación"
+    },
+    "errors": {
+      "manuscriptLocked": "La composición está bloqueada; desbloquéela antes de cambiar la forma del manuscrito.",
+      "alreadyLocked": "La composición ya está bloqueada.",
+      "notLocked": "La composición no está bloqueada.",
+      "noWrittenChapters": "Ningún capítulo tiene aún una versión final activa; no hay nada que presentar.",
+      "fingerprintMismatch": "El manuscrito cambió mientras se presentaba el candidato. No se registró nada — revise el manuscrito y presente de nuevo.",
+      "invalidComposition": "Las versiones activas del manuscrito no están en un estado presentable.",
+      "candidateNotOpen": "Este candidato ya no admite actos.",
+      "approvalRequired": "La autorización requiere primero la aprobación registrada del autor.",
+      "delegationRequired": "Aprobar en nombre del autor requiere una delegación explícita registrada.",
+      "alreadyWithdrawn": "Este acto ya fue retirado.",
+      "notAuthor": "Solo el autor del libro puede registrar esta aprobación.",
+      "notAuthorized": "No está autorizado para realizar este acto.",
+      "publicationMigrationMissing": "El esquema de publicación aún no se ha aplicado (migración 20260810000000_publication_candidates.sql).",
+      "presentFailed": "El candidato no pudo presentarse.",
+      "withdrawFailed": "El candidato no pudo retirarse.",
+      "lockFailed": "La composición no pudo bloquearse.",
+      "unlockFailed": "La composición no pudo desbloquearse.",
+      "approveFailed": "La aprobación no pudo registrarse.",
+      "authorizeFailed": "La autorización no pudo registrarse.",
+      "withdrawActFailed": "El retiro no pudo registrarse.",
+      "delegationBasisRequired": "Una delegación requiere su base de autoridad registrada.",
+      "delegationCreateFailed": "La delegación no pudo registrarse.",
+      "delegationRevokeFailed": "La delegación no pudo revocarse."
+    },
+    "notices": {
+      "candidatePresented": "El candidato fue presentado y su composición quedó congelada.",
+      "candidateWithdrawn": "El candidato fue retirado. Su registro permanece.",
+      "manuscriptLockedNotice": "La composición quedó bloqueada.",
+      "manuscriptUnlockedNotice": "La composición quedó desbloqueada.",
+      "candidateApproved": "La aprobación quedó registrada.",
+      "approvalWithdrawn": "La aprobación fue retirada. El acto original permanece en el registro.",
+      "candidateAuthorized": "La autorización quedó registrada.",
+      "authorizationWithdrawn": "La autorización fue retirada. El acto original permanece en el registro.",
+      "delegationCreated": "La delegación quedó registrada.",
+      "delegationRevoked": "La delegación quedó revocada."
     }
   }
 }

@@ -71,9 +71,11 @@ author's own linked record, enforced by Row Level Security end to end.
 Deliberate exclusions, not omissions:
 
 - **Publication production and distribution** — export, EPUB, print-ready
-  PDF, covers, ISBN, metadata, rights, editions, retailers. This is the
-  authorized next territory (the Production Bridge program) and begins
-  with a blueprint, not code.
+  PDF, covers, ISBN, metadata, rights, editions, retailers. The
+  Production Bridge program is building this territory in phases: the
+  Candidate Foundation (immutable publication candidates, manuscript
+  lock, author approval, imprint authorization) is live; deterministic
+  export is Phase 3 and does not exist yet.
 - **Billing** — pricing is a published template; no payment is collected
   and no billing SDK exists.
 - **Outbound email** — retention milestones are planned and recorded, but
@@ -123,9 +125,9 @@ Supabase as the permanent data layer; GitHub as the only path to
 production. Nine runtime dependencies; OpenAI is called by plain `fetch`
 in exactly two places (editorial readings, hosted TTS).
 
-- **Schema** — parallel domain models across 27 tables (author memory,
+- **Schema** — parallel domain models across 33 tables (author memory,
   book memory, manuscript, findings/reviews/deliberation, settings,
-  membership/support/retention, import), all RLS-enabled, integrity
+  membership/support/retention, import, publication), all RLS-enabled, integrity
   enforced by triggers, partial unique indexes, and composite
   active-pointer FKs. Atomic workflows are SECURITY INVOKER database
   functions; the app never uses `service_role`.
@@ -189,10 +191,12 @@ production build on every push to `main` and every pull request.
 
 ## What's next
 
-**The Production Bridge** — Final Manuscript finalization and
-deterministic export from the Reading Copy: the platform's first
-publishing-side capability. WP-00 (this baseline: CI, assembly invariant
-tests, migration reconciliation record, documentation trueing) is
-complete; Phase 1 begins with a blueprint for review, not code, exactly
-as every capability before it did — once the production migration
-baseline records an exact reconciliation.
+**The Production Bridge** — the publishing half of the lifecycle,
+in phases. Complete: WP-00 (CI, assembly invariant tests, migration
+baseline), the Phase 1 blueprint (approved with Revision 2), and
+Phase 2 — the Candidate Foundation: immutable Publication Candidates
+with deterministic fingerprints, the Manuscript Lock, the Readiness
+Report, Author Approval, and Imprint Authorization
+([as-built record](docs/operations/publication-candidates.md)).
+Next: Phase 3 — Deterministic Export — which begins only under its own
+authorization.

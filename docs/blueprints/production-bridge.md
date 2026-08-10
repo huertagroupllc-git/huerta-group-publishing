@@ -2,8 +2,9 @@
 
 Status: **approved by Founder Office determination, August 2026, with
 Required Revision 2 incorporated below.** Blueprint only — no code, no
-migrations, no schema, no application changes; Phase 2 implementation
-awaits its own authorization. Originally proposed at commit `d4e4b2b`
+migrations, no schema, no application changes live in this document;
+Phase 2 (Candidate Foundation) has since been implemented under its own
+authorization (see the closing note). Originally proposed at commit `d4e4b2b`
 under the Founder Office Production Bridge program (Phase 1 — Blueprint
 & Lifecycle Definition) following the August 2026 repository audit and
 the accepted WP-00 baseline (`38f635f`, reconciliation closed at
@@ -758,6 +759,8 @@ No open architectural questions remain in this blueprint.
 ---
 
 *Phase 1 is complete: the architecture is approved with Revision 2
-incorporated. Phase 2 (Candidate Foundation) begins only under its own
-Founder Office implementation authorization. This document is amended
-in place, dated, never silently rewritten.*
+incorporated. Phase 2 (Candidate Foundation) was implemented August
+2026 under its own Founder Office authorization — as-built record:
+docs/operations/publication-candidates.md. Phase 3 (Deterministic
+Export) begins only under its own authorization. This document is
+amended in place, dated, never silently rewritten.*

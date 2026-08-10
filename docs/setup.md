@@ -32,7 +32,7 @@ touch Supabase and works even if these are unset; `/signin`,
 
 ## 2. Apply the database migrations
 
-**29 migrations**, applied strictly in filename order. The hosted
+**30 migrations**, applied strictly in filename order. The hosted
 database's applied state is reconciled against this list in
 [docs/operations/production-migration-baseline.md](operations/production-migration-baseline.md)
 — consult and update that record whenever migrations are applied.
@@ -112,6 +112,12 @@ database's applied state is reconciled against this list in
 29. `20260727000000_import_cleanup.sql` — the locked-down app_config
     table, import cleanup lifecycle columns, import_cleanup_runs, and
     the pg_cron job `import-cleanup-sweep` (04:30 UTC daily).
+30. `20260810000000_publication_candidates.sql` — Production Bridge
+    Phase 2: publication_candidates and frozen composition rows,
+    Manuscript Lock (columns, ledger, mutation-boundary triggers),
+    approval delegations, author approvals and imprint authorizations
+    (author-first by trigger), the pbc-v1 fingerprint functions, RLS,
+    and grants.
 
 Storage buckets and cron jobs are created by the migrations themselves;
 there is no separate manual step beyond confirming pg_cron is enabled.
