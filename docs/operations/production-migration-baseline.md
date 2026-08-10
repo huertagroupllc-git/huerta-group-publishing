@@ -92,3 +92,13 @@ repair the ledger immediately and append an entry below.
   29/29 in exact local = remote agreement. **Reconciliation complete;
   no open discrepancy.** `supabase db push` is now the single
   application path.
+- **August 10, 2026** — Migration 30
+  (`20260810000000_publication_candidates.sql`, Production Bridge
+  Phase 2) applied via `supabase db push`. Re-verified: 30/30 in exact
+  local = remote agreement. Production verification executed against a
+  disposable labeled fixture (created and removed through the
+  sanctioned workflows): presentation, fingerprint cross-check
+  (TypeScript pbc-v1 reproduced the SQL fingerprint exactly), lock
+  enforcement, supersession, author-first authorization ordering,
+  immutability and no-delete probes, RLS invisibility to strangers,
+  no-implicit-proxy, delegated approval. No discrepancy.
