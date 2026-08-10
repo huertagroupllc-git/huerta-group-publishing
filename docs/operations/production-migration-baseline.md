@@ -60,26 +60,18 @@ schema work begins.
   dashboard SQL Editor (the sanctioned alternative in
   [docs/setup.md](../setup.md) §2), which does not record CLI history.
 
-### Operational hazard — do not `supabase db push` yet
+### Ledger repair — executed August 9, 2026 (owner-approved)
 
-With an empty remote ledger, `supabase db push` would attempt to
-re-apply **all 29 migrations** against the live schema. Do not run it
-until the ledger is repaired.
+The empty ledger was repaired with
+`supabase migration repair --status applied` across all 29 versions —
+a bookkeeping-only operation; no schema SQL ran. Post-repair,
+`supabase migration list --linked` shows **29 of 29 versions in exact
+local = remote agreement**.
 
-### Recommended disposition (awaiting Founder Office approval)
-
-Repair the ledger to match verified reality — a bookkeeping-only
-operation that executes no schema SQL:
-
-```sh
-supabase migration repair --status applied 20260702000000 ... 20260727000000
-# (one repair per version, all 29, in order)
-```
-
-After repair, `supabase migration list --linked` must show local and
-remote in exact agreement, and `supabase db push` becomes the single
-application path going forward, keeping this record trivially true.
-Not executed automatically per WP-00's discrepancy rule.
+From this point, `supabase db push` is the single sanctioned
+application path for new migrations; it keeps this ledger true
+automatically. If the SQL Editor is ever used again in an emergency,
+repair the ledger immediately and append an entry below.
 
 ## Verification log
 
@@ -94,3 +86,9 @@ Not executed automatically per WP-00's discrepancy rule.
   empty (SQL-Editor application history)**. Discrepancy disposition
   recommended: ledger repair, pending approval. Repository baseline at
   verification: `38f635f` (WP-00).
+- **August 9, 2026 (third entry)** — Ledger repair approved by the
+  owner and executed (`migration repair --status applied`, all 29
+  versions). Re-verified: `supabase migration list --linked` reports
+  29/29 in exact local = remote agreement. **Reconciliation complete;
+  no open discrepancy.** `supabase db push` is now the single
+  application path.
