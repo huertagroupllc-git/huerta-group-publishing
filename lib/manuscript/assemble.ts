@@ -1,10 +1,14 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import { countWords, type ChapterKind } from "@/lib/manuscript/types";
 import type { AuthorContext } from "@/lib/memory/assemble";
 import type { BookContext } from "@/lib/books/assemble";
 import { serializeBookContext } from "@/lib/books/assemble";
+import {
+  assembleManuscriptRows,
+  type ActiveManuscriptRow,
+  type AssembledManuscript,
+} from "@/lib/manuscript/assemble-core";
 
 /**
  * Manuscript assembly — how the reader experiences the work.
@@ -12,30 +16,15 @@ import { serializeBookContext } from "@/lib/books/assemble";
  * Reads only the active_manuscript view: active, finalized chapter
  * versions in reading order. Drafts and unwritten chapters are
  * structurally unreachable. Computed at read time, never stored.
+ * The deterministic composition itself lives in assemble-core.ts,
+ * where its invariants are protected by tests.
  */
 
-export interface AssembledChapter {
-  chapterId: string;
-  slug: string;
-  title: string;
-  kind: ChapterKind;
-  versionId: string;
-  versionNumber: number;
-  content: string;
-  wordCount: number;
-}
-
-export interface ManuscriptSection {
-  partTitle: string | null;
-  chapters: AssembledChapter[];
-}
-
-export interface AssembledManuscript {
-  bookId: string;
-  sections: ManuscriptSection[];
-  writtenChapterCount: number;
-  totalWords: number;
-}
+export type {
+  AssembledChapter,
+  ManuscriptSection,
+  AssembledManuscript,
+} from "@/lib/manuscript/assemble-core";
 
 export async function assembleManuscript(
   bookId: string,
@@ -52,62 +41,10 @@ export async function assembleManuscript(
     throw new Error(`Could not assemble the manuscript: ${error.message}`);
   }
 
-  // Written chapters only; unwritten chapters simply do not appear.
-  const rows = (data ?? []).filter((r) => r.version_id !== null);
-
-  // Reading order: ungrouped chapters first, then parts by position,
-  // chapters by position within each group (the Library's order).
-  const toChapter = (r: (typeof rows)[number]): AssembledChapter => ({
-    chapterId: r.chapter_id as string,
-    slug: r.chapter_slug as string,
-    title: r.chapter_title as string,
-    kind: r.kind as ChapterKind,
-    versionId: r.version_id as string,
-    versionNumber: r.version_number as number,
-    content: (r.content as string) ?? "",
-    wordCount: countWords((r.content as string) ?? ""),
-  });
-
-  const byPosition = <T extends { chapter_position: number }>(a: T, b: T) =>
-    a.chapter_position - b.chapter_position;
-
-  const sections: ManuscriptSection[] = [];
-
-  const ungrouped = rows.filter((r) => r.part_id === null).sort(byPosition);
-  if (ungrouped.length) {
-    sections.push({ partTitle: null, chapters: ungrouped.map(toChapter) });
-  }
-
-  const partIds = new Map<string, { title: string; position: number }>();
-  for (const r of rows) {
-    if (r.part_id && !partIds.has(r.part_id as string)) {
-      partIds.set(r.part_id as string, {
-        title: r.part_title as string,
-        position: r.part_position as number,
-      });
-    }
-  }
-  const orderedParts = [...partIds.entries()].sort(
-    (a, b) => a[1].position - b[1].position,
-  );
-  for (const [partId, part] of orderedParts) {
-    const chapters = rows
-      .filter((r) => r.part_id === partId)
-      .sort(byPosition)
-      .map(toChapter);
-    if (chapters.length) {
-      sections.push({ partTitle: part.title, chapters });
-    }
-  }
-
-  const all = sections.flatMap((s) => s.chapters);
-
-  return {
+  return assembleManuscriptRows(
     bookId,
-    sections,
-    writtenChapterCount: all.length,
-    totalWords: all.reduce((sum, c) => sum + c.wordCount, 0),
-  };
+    (data ?? []) as unknown as ActiveManuscriptRow[],
+  );
 }
 
 /**

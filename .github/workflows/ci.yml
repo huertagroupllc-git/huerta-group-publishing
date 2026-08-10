@@ -1,0 +1,41 @@
+# Minimal CI gate (WP-00): lint, focused invariant tests, production build.
+#
+# No secrets and no external services: the tests are pure domain tests,
+# and the production build degrades cleanly when Supabase variables are
+# unset (the code's deploy-safe convention), so CI needs no environment
+# configuration. Deployment stays Vercel's job; this workflow only gates.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm version comes from the packageManager field in package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies (lockfile-exact)
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Manuscript invariant tests
+        run: pnpm test
+
+      - name: Production build (includes strict TypeScript)
+        run: pnpm build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"

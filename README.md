@@ -22,90 +22,78 @@ AI here is a servant of the author's voice, never a source of it. The
 platform will never generate an author's identity documents, silently
 rewrite their words, or flatten their tone.
 
-## What exists today — Milestones 1, 2, and 3, complete
+## What exists today (August 2026)
 
-The **Author Memory System**, the **Book Memory System**, and the
-**Writing Workspace**: memory, intent, and the manuscript itself, live
-in production.
+The platform runs the authoring and editorial half of the Book Lifecycle
+in production — from author intake through editorial review and revision:
 
-- **The Author Roster** (`/workspace`) — the imprint's authors, each with a
-  count of established memory documents.
-- **The Author Record** — identity (name, pen name, bio, permanent slug),
-  opened with four memory document shells and editable thereafter.
-- **Four author-level memory documents**, in hierarchy order: **Writing
-  Philosophy**, **Author Bible**, **Voice Profile**, **Editorial
-  Decisions**.
-- **Versioning** — every document is an append-only history of immutable,
-  numbered versions. Editing never mutates the past; it creates version
-  N+1. At most one draft exists per document; drafts are the only deletable
-  thing, because a draft was never part of the record.
-- **Activation** — exactly one finalized version per document is *active*
-  (a pointer). Activating finalizes a draft; restoring re-points to a
-  superseded version without renumbering anything.
-- **Import with provenance** — every version records its source (written
-  directly, distilled from ChatGPT or Claude, a file, other) and a source
-  note.
-- **Assembled Memory** — the exact, deterministic payload any future AI
-  tool will receive: active finalized versions only, in hierarchy order,
-  version-stamped, inspectable verbatim on the Author Study page.
-- **Book Records** — books belong to authors, never exist without one:
-  identity metadata only (title, subtitle, working title, lifecycle
-  stage, permanent slug). Why a book exists lives in its Constitution,
-  never in a column. The **Book Lifecycle** runs Discovery → Writing →
-  Editorial Review → Revision → Final Manuscript → Ready for
-  Publication → Published (and Archived) — a stated fact on the record,
-  never a workflow gate, and the organizing principle future
-  capabilities plug into.
-- **Three book-level memory documents per book** — **Book
-  Constitution**, **Master Outline**, **Concept Dictionary** — with the
-  full versioning workflow: append-only immutable versions, one draft
-  per document, activation, restore, import provenance.
-- **Origins** — every book permanently records which active Author
-  Memory versions existed when it was begun ("Inherited From" on the
-  Book Study): immutable provenance, never assembly input.
-- **Book Assembled Memory** — the composed payload future AI tools will
-  receive: the author's active finalized memory first (it governs), then
-  the book's (it specializes) — version-stamped, computed at read time,
-  inspectable verbatim on the Book Study.
-- **The Manuscript** — a first-class object per book (Author → Book →
-  Manuscript → Part → Chapter): chapters as the primary unit of
-  authorship (Principle XV), each with identity (title, Core Question,
-  purpose, summary, Master Outline Location with a version-precise
-  link) and the full append-only version workflow.
-- **The Chapter Library** — chapters in reading order, grouped under
-  Parts, with word counts, states, and word-button arrangement.
-- **The writing room** — one chapter at a time: a quiet full-measure
-  Markdown surface, explicit Save draft (no autosave by design), The
-  Brief and the version rail in the margin, the active Concept
-  Dictionary in reach, and the verbatim Chapter Context preview.
-- **The Reading Copy** — the manuscript assembled read-only from active
-  chapter versions: title page, Parts as section breaks, chapters in
-  sequence, computed at read time, never stored.
-- **The home transition** — Principle XIV visible: from the Writing
-  stage onward, book titles open the Chapter Library and the manuscript
-  leads the Book Study; in Discovery, memory leads. Emphasis only;
-  nothing is hidden.
-- **Auth** — Supabase email/password; the workspace is staff-only (JWT
-  `app_metadata.role = 'staff'`) plus each author's own linked record,
-  enforced by Row Level Security.
-- A one-page public **holding site** at `/`.
+- **Author and Book Memory** — append-only, versioned memory documents at
+  both levels (Writing Philosophy, Author Bible, Voice Profile, Editorial
+  Decisions; Book Constitution, Master Outline, Concept Dictionary), with
+  activation, restore, import provenance, and deterministic Assembled
+  Memory views.
+- **The Writing Workspace** — the Manuscript as a first-class object
+  (Author → Book → Manuscript → Part → Chapter), the Chapter Library, the
+  one-chapter-at-a-time writing room, and the Reading Copy assembled
+  read-only from active finalized chapter versions.
+- **Manuscript PDF import** — a deterministic, no-AI pipeline: upload →
+  extract → structure review → confirm into a real book, with the source
+  PDF preserved and a staff-operated cleanup lifecycle.
+- **Editorial review** — the Constitution Review (Reviewer v4), the
+  platform's first AI editorial reviewer: chunked and resumable, every
+  run frozen with full provenance (model policy, prompt fingerprint,
+  settings snapshot, context versions, per-reading usage records).
+- **Findings, Deliberation, and the current review** — findings as
+  revision prompts, one deliberation per finding with adopted judgments,
+  and a book-level current-review working set.
+- **Audio Review** — hosted natural-voice read-back with a
+  content-addressed cache and daily budget (browser voice fallback).
+- **Author and Book Settings** — typed editorial preferences (tone,
+  observations, emphasis, regional convention) inherited
+  Account → Author → Book and snapshotted into review provenance.
+- **Membership, support, and retention** — the membership state machine
+  with fail-closed edit entitlement, scheduled archival (pg_cron), the
+  retention event ledger (planning only — nothing sends email), and a
+  support inbox with staff triage.
+- **Administration** — staff-only operations area: authors, books,
+  review runs and readings, support, import cleanup, system health, and
+  audited permanent deletion.
+- **The public site** — nine editorial pages in English with a Spanish
+  (es-419) preview at `/es`, exact message-catalog parity, truthful
+  unpublished pricing, and a working support form. Access is provisioned
+  by the publisher; there is no self-serve sign-up.
+
+**Auth** — Supabase email/password; the workspace is staff plus each
+author's own linked record, enforced by Row Level Security end to end.
 
 ## Current non-goals
 
-Deliberate exclusions, not omissions: the Research Vault and Discovery
-Log (next), AI features of any kind (the assembly functions exist —
-Chapter Context is inspectable verbatim — but nothing calls a model),
-rich text editing (Markdown in, typeset prose out), version diff views,
-teams/invitations, dashboards or metrics, file uploads, and any public
-website beyond the holding page.
+Deliberate exclusions, not omissions:
+
+- **Publication production and distribution** — export, EPUB, print-ready
+  PDF, covers, ISBN, metadata, rights, editions, retailers. This is the
+  authorized next territory (the Production Bridge program) and begins
+  with a blueprint, not code.
+- **Billing** — pricing is a published template; no payment is collected
+  and no billing SDK exists.
+- **Outbound email** — retention milestones are planned and recorded, but
+  nothing sends.
+- **Spanish public launch** — `/es` is a preview; launch is gated on the
+  recorded human sign-offs the globalization program requires.
+- **Research Vault, Discovery Log, Chapter Memory, Draft Assistant** —
+  named future capabilities, still unblueprinted.
+- Teams/invitations, version diff views, rich text editing (Markdown in,
+  typeset prose out), and dashboards beyond the read-only Administration
+  views.
 
 ## Governing canon
 
 Read these before proposing changes; every screen and feature is measured
 against them:
 
-- [Product Constitution](docs/constitution/product-constitution.md) — twelve
-  principles (author-first, permanence, calm, deliberateness, legible truth…)
+- [Product Constitution](docs/constitution/product-constitution.md) —
+  fifteen principles (author-first, permanence, calm, deliberateness,
+  legible truth…)
 - [Design Constitution](docs/constitution/design-constitution.md) — the
   editorial desk: three typefaces with fixed jobs, one accent with one
   meaning, hairline rules instead of cards, words instead of icons
@@ -113,76 +101,77 @@ against them:
   — how it is built: production-first, vertical slices, append-only
   history, RLS as the security boundary, database integrity before
   framework cleverness, parallel domain models over polymorphic systems
-- [Terminology](docs/constitution/terminology.md) — one concept, one word:
-  documents are *established*, versions are *finalized* and *activated*,
-  superseded versions are *restored*, drafts are *discarded*
-- [Milestone 1 blueprint](docs/blueprints/milestone-1-author-memory-system.md)
-  and [Milestone 2 blueprint](docs/blueprints/milestone-2-book-memory-system.md)
-  — the architecture as designed, with retrospectives
-- [The Book Lifecycle](docs/blueprints/book-lifecycle-stages.md) — the
-  eight stages from Discovery to Archived, each with its question, and
-  where future capabilities will live
-- [July 2026 refinement review](docs/reviews/2026-07-refinement-review.md) —
-  what was deliberately deferred, and why
+- [Terminology](docs/constitution/terminology.md) — one concept, one word
+  (with the [Spanish canon](docs/globalization/terminology-es-419.md))
+- [The Book Lifecycle](docs/blueprints/book-lifecycle-stages.md) — adopted
+  July 2026: the eight stages from Discovery to Archived, and where
+  future capabilities will live
+- [Editorial AI Engine](docs/architecture/editorial-ai-engine.md) — the
+  engine's architecture and invariants (as built through Reviewer v2;
+  v3/v4 changes are recorded in `docs/globalization/` and
+  `docs/operations/`)
+- The capability blueprints in [docs/blueprints/](docs/blueprints/) and
+  the approved specifications in [docs/settings/](docs/settings/) and
+  [docs/globalization/](docs/globalization/). Older blueprints keep
+  their original status lines as history; the capabilities they describe
+  are live.
 
 ## Architecture
 
-Next.js (App Router, TypeScript, Tailwind) on Vercel; hosted Supabase as
-the permanent data layer; GitHub as the only path to production.
+Next.js (App Router, TypeScript strict, Tailwind) on Vercel; hosted
+Supabase as the permanent data layer; GitHub as the only path to
+production. Nine runtime dependencies; OpenAI is called by plain `fetch`
+in exactly two places (editorial readings, hosted TTS).
 
-- **Schema** (parallel domain models, deliberately not a generic objects
-  system): `authors` → `author_documents` → `document_versions`, echoed
-  one level down as `books` → `book_documents` →
-  `book_document_versions` (same column names, same constraint shapes),
-  plus immutable `book_origins`. Partial unique indexes enforce one
-  draft per document; triggers enforce final-version immutability and
-  that active pointers reference finalized versions.
-- **Atomicity** lives in the database: SECURITY INVOKER functions
-  (`create_author_with_documents`, `create_document_version`,
-  `activate_document_version`) wrap multi-step writes; RLS applies to the
-  calling user throughout. The app never uses `service_role`.
-- **Modules**: `lib/memory/`, `lib/books/`, and `lib/manuscript/`
-  (types, queries, server actions, context assembly — parallel, per
-  level), `lib/supabase/` (SSR
-  clients + session proxy), `lib/auth/` (sign-in/out),
-  `components/editorial.tsx` and `components/document-room.tsx` (the
-  house UI patterns and the shared Document Room),
-  `app/workspace/…` (rosters, studies, memory documents, record editing).
-- **Context assembly** (`lib/memory/assemble.ts`, `lib/books/assemble.ts`,
-  `lib/manuscript/assemble.ts`) reads only the `active_author_memory`,
-  `active_book_memory`, and `active_manuscript` views — drafts and
-  superseded versions can never reach an AI context or a reader, by
-  construction. Each level composes with the one above by reference;
-  nothing is copied or stored.
+- **Schema** — parallel domain models across 27 tables (author memory,
+  book memory, manuscript, findings/reviews/deliberation, settings,
+  membership/support/retention, import), all RLS-enabled, integrity
+  enforced by triggers, partial unique indexes, and composite
+  active-pointer FKs. Atomic workflows are SECURITY INVOKER database
+  functions; the app never uses `service_role`.
+- **Assembly** — `active_author_memory`, `active_book_memory`, and
+  `active_manuscript` views are the only read paths for assembled
+  memory and the Reading Copy: active finalized versions only, drafts
+  and superseded versions unreachable by construction. The deterministic
+  manuscript composition lives in `lib/manuscript/assemble-core.ts`,
+  protected by tests.
+- **Modules** — one `lib/<domain>/` per domain (types, queries, server
+  actions), `components/editorial.tsx` and `document-room.tsx` as the
+  house UI patterns, route groups `(public-en)`, `(public-es)`, and
+  `(app)` for the two-locale public site and the authenticated
+  workspace/administration.
 
 ## Production-first workflow
 
 There is no local database and no Docker. The workflow is:
 
 ```
-commit → push to main → automatic Vercel production deploy → test on the live URL
+commit → push to main → CI (lint, tests, build) → automatic Vercel production deploy → test on the live URL
 ```
 
-Schema changes are written as committed SQL files in `supabase/migrations/`
-and applied to the **hosted** Supabase project (dashboard SQL Editor, or
-`supabase link` + `supabase db push`). The database is the permanent record;
-treat migrations accordingly — append new ones, never edit applied ones.
+Schema changes are written as committed SQL files in
+`supabase/migrations/` and applied to the **hosted** Supabase project.
+The database is the permanent record; append new migrations, never edit
+applied ones. Applied state is reconciled in
+[docs/operations/production-migration-baseline.md](docs/operations/production-migration-baseline.md).
 
-## Setup
+## Setup and validation
 
-Two environment variables (Vercel and `.env.example`):
-`NEXT_PUBLIC_SUPABASE_URL` (bare project origin) and
-`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (the anon-key name is honored as a
-fallback). Apply the five migrations in order (author memory schema,
-workflow functions, grants, book records, book memory documents), then
-create a staff user. Exact steps, including the staff-role SQL and a
-verification checklist, are in [docs/setup.md](docs/setup.md).
+Two required environment variables (`NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`), optional OpenAI configuration,
+and **29 migrations** applied in order — exact steps, including the
+staff-role SQL, are in [docs/setup.md](docs/setup.md).
 
 ```sh
 pnpm install
 pnpm dev        # local UI against the hosted database
+pnpm lint       # ESLint
+pnpm test       # manuscript-assembly invariant tests (no network)
 pnpm build      # must pass before pushing
 ```
+
+CI (`.github/workflows/ci.yml`) runs lint, the invariant tests, and the
+production build on every push to `main` and every pull request.
 
 ## Development guardrails
 
@@ -200,7 +189,10 @@ pnpm build      # must pass before pushing
 
 ## What's next
 
-**Capability 4** — either the Discovery capability (Research Vault and
-Discovery Log) or the first AI capability (a Draft Assistant consuming
-Chapter Context). It begins with a blueprint for review, not code,
-exactly as every capability before it did.
+**The Production Bridge** — Final Manuscript finalization and
+deterministic export from the Reading Copy: the platform's first
+publishing-side capability. WP-00 (this baseline: CI, assembly invariant
+tests, migration reconciliation record, documentation trueing) is
+complete; Phase 1 begins with a blueprint for review, not code, exactly
+as every capability before it did — once the production migration
+baseline records an exact reconciliation.
