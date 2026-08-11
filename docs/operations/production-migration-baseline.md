@@ -92,6 +92,24 @@ repair the ledger immediately and append an entry below.
   29/29 in exact local = remote agreement. **Reconciliation complete;
   no open discrepancy.** `supabase db push` is now the single
   application path.
+- **August 10, 2026 (third entry)** — Migration 32
+  (`20260812000000_publication_releases.sql`, the Release Record)
+  applied via `supabase db push`. Re-verified: 32/32 in exact local =
+  remote agreement. Production verification with a disposable fixture
+  (created and removed through the sanctioned workflows): declaration
+  with frozen provenance and exact institutional timestamp; export and
+  declaration refused before authorization; duplicate active
+  declaration refused; the deferred evidence constraint refused
+  acceptance without evidence (verified both at commit and with SET
+  CONSTRAINTS IMMEDIATE); evidence-backed acceptance (exact time) and
+  availability (date-only precision, no invented clock time);
+  release-level amendment; channel correction preserving the original
+  entry; release tamper/event tamper/delete all refused; withdrawal
+  and supersession preserving every record; author-without-staff-role
+  read all, mutate nothing; stranger saw nothing; book lifecycle
+  status untouched throughout; channel registry (6 rows) intact after
+  fixture deletion. No retailer or OpenAI call occurred. No
+  discrepancy.
 - **August 10, 2026 (second entry)** — Migration 31
   (`20260811000000_publication_artifacts.sql`, Production Bridge
   Phase 3) applied via `supabase db push`. Re-verified: 31/31 in exact
