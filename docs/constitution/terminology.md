@@ -152,3 +152,14 @@ shows the labels, not the word.
 | **Production-Valid** | **Ratified** | The internal claim that house production rules hold. Never implies printer, distributor, or PDF/X conformance ("Externally Validated" is that future claim). |
 | **Font Input** | **Ratified** | An exact checksummed font file with embedding-license evidence. A production input, not a style preference. |
 | **Pagination Identity** | **Ratified** | Identical governed inputs yield identical pages — and identical bytes. |
+
+## Publication Metadata & ISBN terms (ratified August 2026)
+
+| Term | Verdict | Canon |
+| --- | --- | --- |
+| **Bibliographic Record** | **Ratified** | The Book's governed, versioned commercial description — one family per Book, numbered immutable versions, one active. Never "metadata form" or "listing". |
+| **Derived Fact** | **Ratified** | A bibliographic fact the Book already governs (title, subtitle, author display, language), snapshotted into each version — referenced, never retyped. |
+| **Divergence** | **Ratified** | The computed, stated difference between an active version's derived-fact snapshot and the live Book. Information, never an automatic rewrite. |
+| **Contributor** | **Ratified** | A publication fact of the work — display name, role, order — never a platform account. The primary author entry derives from the Book. |
+| **ISBN Registration** | **Ratified** | The record of an externally governed identifier with its source and evidence. **Recording is not assignment**: the platform never generates, assigns, or infers; new institutional assignment waits for Edition architecture. |
+| **Externally Assigned** | **Ratified** | The evidenced fact that an ISBN's assignment already exists outside the platform, recorded verbatim (external wording, no inferred format or Edition semantics). |

@@ -298,7 +298,8 @@
       "inheritedFrom": "Heredado De",
       "memoryNotEstablished": "Memoria del Autor aún sin establecer",
       "assembledMemoryHint": "el registro exacto que recibirá la futura asistencia de IA — primero la memoria del autor, luego la del libro; únicamente versiones activas y finalizadas",
-      "publicationLink": "Publicación"
+      "publicationLink": "Publicación",
+      "metadataLink": "Metadatos"
     },
     "form": {
       "addMetaTitle": "Agregar un libro",
@@ -545,7 +546,8 @@
         "system": "Sistema",
         "support": "Soporte",
         "importCleanup": "Limpieza de importaciones",
-        "publication": "Publicación"
+        "publication": "Publicación",
+        "isbn": "Registro de ISBN"
       }
     },
     "overview": {
@@ -2377,7 +2379,19 @@
       "profileInvalid": "La procedencia del perfil de imprenta no validó.",
       "pdfStructureInvalid": "El PDF generado no superó la validación estructural. No se registró ningún artefacto.",
       "productionValidationFailed": "El interior generado no superó la validación de producción. No se registró ningún artefacto.",
-      "proofNotReleasable": "Un interior de prueba nunca puede lanzarse."
+      "proofNotReleasable": "Un interior de prueba nunca puede lanzarse.",
+      "metadataMigrationMissing": "El esquema bibliográfico aún no se ha aplicado (migración 20260814000000_publication_metadata.sql).",
+      "metadataSaveFailed": "El registro no pudo guardarse.",
+      "draftAlreadyOpen": "Ya hay un borrador abierto para este registro.",
+      "activateFailed": "La versión no pudo activarse.",
+      "discardFailed": "El borrador no pudo descartarse.",
+      "isbnInvalid": "Ese no es un ISBN-13 válido. No se registró nada — la plataforma nunca corrige un identificador en silencio.",
+      "isbnDuplicate": "Ya existe un registro vigente para ese ISBN.",
+      "isbnSourceRequired": "Un registro de ISBN requiere su fuente.",
+      "isbnRecordFailed": "El ISBN no pudo registrarse.",
+      "registrationNotCurrent": "Solo el registro vigente puede corregirse.",
+      "reasonRequired": "Se requiere un motivo.",
+      "evidenceRequiredIsbn": "Una asignación externa requiere evidencia. No se registró nada."
     },
     "notices": {
       "candidatePresented": "El candidato fue presentado y su composición quedó congelada.",
@@ -2397,7 +2411,13 @@
       "releaseWithdrawn": "El lanzamiento fue retirado. Su registro permanece.",
       "releaseSuperseded": "El reemplazo quedó registrado. Ambos lanzamientos permanecen.",
       "printProofGenerated": "El interior de prueba fue generado, validado y preservado. Las pruebas nunca pueden lanzarse.",
-      "printProductionGenerated": "El interior de producción fue generado, validado como Válido para Producción y preservado."
+      "printProductionGenerated": "El interior de producción fue generado, validado como Válido para Producción y preservado.",
+      "draftOpened": "El borrador está abierto, con los datos derivados en su lugar.",
+      "draftSaved": "El borrador quedó guardado.",
+      "versionActivated": "La versión ahora está activa. Las versiones anteriores permanecen.",
+      "draftDiscarded": "El borrador fue descartado. Las versiones finalizadas quedan intactas.",
+      "isbnRecorded": "El ISBN quedó registrado con su procedencia.",
+      "isbnCorrected": "La corrección quedó registrada. El registro original permanece, marcado."
     },
     "export": {
       "heading": "Exportación Determinista — EPUB",
@@ -2528,6 +2548,125 @@
       "proofAction": "Generar interior de prueba",
       "productionAction": "Generar interior de producción",
       "productionNeedsAuthority": "Los interiores de producción requieren la aprobación del autor y la autorización del sello."
+    },
+    "metadata": {
+      "metaTitle": "Registro Bibliográfico",
+      "eyebrow": "Registro Bibliográfico",
+      "lede": "La descripción del libro para publicación y comercio. Los datos que la plataforma ya gobierna se derivan, nunca se reescriben; todo lo demás se redacta deliberadamente y se conserva en versiones numeradas.",
+      "derived": {
+        "heading": "Derivado del Libro",
+        "lede": "Estos datos provienen del Registro del Libro. Edítelos en la página del libro; el registro nota cuando cambian.",
+        "title": "Título",
+        "subtitle": "Subtítulo",
+        "author": "Autor",
+        "language": "Idioma",
+        "imprint": "Sello",
+        "legalEntity": "Editorial responsable"
+      },
+      "divergence": {
+        "titleChanged": "El título del libro cambió desde que este registro se finalizó.",
+        "subtitleChanged": "El subtítulo del libro cambió desde que este registro se finalizó.",
+        "authorDisplayChanged": "El nombre visible del autor cambió desde que este registro se finalizó.",
+        "languageChanged": "El idioma del libro cambió desde que este registro se finalizó."
+      },
+      "record": {
+        "heading": "El registro",
+        "begin": "Comenzar el registro bibliográfico",
+        "openDraft": "Abrir un borrador",
+        "emptyLede": "Aún no existe un registro bibliográfico. Comenzarlo abre un borrador con los datos derivados ya en su lugar.",
+        "editLede": "El registro activo está versionado. Abrir un borrador inicia la siguiente versión; nada ya finalizado cambia.",
+        "saveDraft": "Guardar borrador",
+        "finalizeActivate": "Finalizar y activar",
+        "discardDraft": "Descartar borrador"
+      },
+      "fields": {
+        "publicationDescription": "Descripción de publicación",
+        "marketingDescription": "Descripción de mercadeo",
+        "shortDescription": "Descripción breve",
+        "shortDescriptionHint": "Una o dos oraciones; hasta 600 caracteres.",
+        "keywords": "Palabras clave",
+        "listHint": "Separadas por comas; el orden se conserva.",
+        "categories": "Materias",
+        "categoriesHint": "Separadas por comas, en sus propias palabras — no se declara ninguna taxonomía externa.",
+        "copyrightYear": "Año de copyright",
+        "copyrightLine": "Línea de copyright",
+        "publicationNotes": "Notas de publicación",
+        "changeSummary": "Nota de la versión"
+      },
+      "contributors": {
+        "heading": "Colaboradores",
+        "lede": "{author} es el autor, derivado del Libro — nunca reescrito. Agregue otros colaboradores abajo; el orden se conserva.",
+        "nameLabel": "Nombre",
+        "roleLabel": "Rol"
+      },
+      "roles": {
+        "author": "Autor",
+        "co-author": "Coautor",
+        "editor": "Editor",
+        "translator": "Traductor",
+        "illustrator": "Ilustrador",
+        "photographer": "Fotógrafo",
+        "foreword": "Prólogo de",
+        "introduction": "Introducción de",
+        "afterword": "Epílogo de",
+        "contributor": "Colaborador"
+      },
+      "history": {
+        "heading": "Historial de versiones",
+        "empty": "Aún no hay versiones finalizadas.",
+        "entry": "Versión {number}",
+        "active": "activa",
+        "restore": "Restaurar"
+      },
+      "isbn": {
+        "heading": "ISBN",
+        "lede": "Los ISBN son hechos externos registrados con su evidencia — la plataforma nunca crea ni asigna uno. Lo que aparece aquí fue registrado por el sello.",
+        "empty": "No se ha registrado ningún ISBN para este libro.",
+        "externallyAssigned": "asignado externamente (con evidencia)",
+        "recordedOnly": "registrado por Huerta Group Publishing"
+      }
+    },
+    "isbnAdmin": {
+      "metaTitle": "Registro de ISBN — Administración",
+      "heading": "Registro de ISBN",
+      "lede": "Identificadores gobernados externamente, registrados con su procedencia y evidencia. La plataforma nunca genera un ISBN, y no existe ninguna acción de asignación — registrar no es asignar.",
+      "registryHeading": "ISBN registrados",
+      "registryEmpty": "No hay ISBN en el registro.",
+      "recordHeading": "Registrar un ISBN",
+      "recordLede": "Registre exactamente lo que la evidencia establece. Una asignación externa existente requiere al menos una evidencia.",
+      "disposition": {
+        "recorded": "vigente",
+        "corrected": "corregido",
+        "superseded": "reemplazado",
+        "invalidated": "invalidado"
+      },
+      "externallyAssigned": "asignado externamente",
+      "recordedOnly": "solo registrado",
+      "sourceLine": "Fuente: {source}",
+      "evidenceMissing": "Asignación declarada sin evidencia en archivo.",
+      "correctAction": "Corregir este registro",
+      "form": {
+        "isbnLabel": "ISBN-13",
+        "sourceLabel": "Fuente",
+        "sourceHint": "De dónde proviene este identificador — agencia, asignación de bloque o documento en archivo.",
+        "noteLabel": "Nota",
+        "reasonLabel": "Motivo de la corrección",
+        "externallyAssignedLabel": "Ya existe una asignación externa (requiere evidencia)",
+        "externalTitleLabel": "Título listado externamente",
+        "externalFormatLabel": "Redacción externa del formato",
+        "externalFormatHint": "Exactamente como lo redacta la fuente externa — nada se infiere.",
+        "externalRegistrantLabel": "Registrante externo",
+        "evidenceKindLabel": "Evidencia",
+        "evidenceNone": "— ninguna —",
+        "referenceNumber": "Número de referencia",
+        "agencyRecord": "Registro de agencia",
+        "documentReference": "Referencia de documento",
+        "evidenceNote": "Nota",
+        "evidenceValueLabel": "Valor de la evidencia",
+        "evidenceSourceLabel": "Fuente de la evidencia",
+        "recordSubmit": "Registrar el ISBN",
+        "correctSubmit": "Registrar la corrección"
+      }
     }
   }
 }

@@ -219,6 +219,11 @@ export default async function BookStudyPage({
             >
               {t("publicationLink")}
             </ActionLink>
+            <ActionLink
+              href={`/workspace/authors/${author.slug}/books/${book.slug}/metadata`}
+            >
+              {t("metadataLink")}
+            </ActionLink>
           </span>
         </div>
         {manuscriptNote ? (

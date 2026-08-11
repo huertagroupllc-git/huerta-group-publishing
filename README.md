@@ -70,12 +70,14 @@ author's own linked record, enforced by Row Level Security end to end.
 
 Deliberate exclusions, not omissions:
 
-- **Publication production and distribution** — covers, ISBN,
-  metadata, rights, editions, retailers, automated distribution. The Production Bridge has shipped its first two
-  operational layers: the Candidate Foundation and deterministic EPUB
-  export (immutable, validated, reproducible artifacts). Everything
-  beyond EPUB remains future territory, each piece behind its own
-  blueprint.
+- **Publication production and distribution** — covers, barcodes,
+  Editions, new institutional ISBN assignment, rights, retailers,
+  automated distribution, ONIX export. The publication chain shipped
+  so far: the Candidate Foundation, deterministic EPUB export and 6×9
+  print interiors, evidence-gated Releases, and the Bibliographic
+  Record with the ISBN Registry (recording externally governed
+  identifiers with evidence — never assigning them). Everything beyond
+  remains future territory, each piece behind its own blueprint.
 - **Billing** — pricing is a published template; no payment is collected
   and no billing SDK exists.
 - **Outbound email** — retention milestones are planned and recorded, but
@@ -201,6 +203,11 @@ Record ([as-built](docs/operations/release-record.md)), and Print
 Production: deterministic 6×9 print interiors through the hgp-print
 serializer — fixed-grid pagination, governed checksummed fonts, PDF
 1.7 with byte-identical regeneration, proof and production
-designations ([as-built](docs/operations/print-production.md)).
-Later phases (covers, metadata/ISBN, editions, automated
+designations ([as-built](docs/operations/print-production.md)), and
+Publication Metadata & ISBN: the versioned Bibliographic Record
+(derived Book facts with divergence detection, authored commercial
+metadata, version-frozen contributors) and the provenance-first ISBN
+Registry — recording and forward-only correction only, no assignment
+path ([as-built](docs/operations/publication-metadata.md)).
+Later phases (covers, editions, ISBN assignment, ONIX, automated
 distribution) each begin under their own authorization.

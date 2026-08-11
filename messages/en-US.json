@@ -298,7 +298,8 @@
       "inheritedFrom": "Inherited From",
       "memoryNotEstablished": "Author Memory not yet established",
       "assembledMemoryHint": "the exact record future AI assistance will receive — the author’s memory first, then the book’s; active, finalized versions only",
-      "publicationLink": "Publication"
+      "publicationLink": "Publication",
+      "metadataLink": "Metadata"
     },
     "form": {
       "addMetaTitle": "Add a book",
@@ -545,7 +546,8 @@
         "system": "System",
         "support": "Support",
         "importCleanup": "Import cleanup",
-        "publication": "Publication"
+        "publication": "Publication",
+        "isbn": "ISBN Registry"
       }
     },
     "overview": {
@@ -2377,7 +2379,19 @@
       "profileInvalid": "The print profile provenance did not validate.",
       "pdfStructureInvalid": "The generated PDF did not pass structural validation. Nothing was recorded as an artifact.",
       "productionValidationFailed": "The generated interior did not pass production validation. Nothing was recorded as an artifact.",
-      "proofNotReleasable": "A proof interior can never be released."
+      "proofNotReleasable": "A proof interior can never be released.",
+      "metadataMigrationMissing": "The bibliographic schema has not been applied yet (migration 20260814000000_publication_metadata.sql).",
+      "metadataSaveFailed": "The record could not be saved.",
+      "draftAlreadyOpen": "A draft is already open for this record.",
+      "activateFailed": "The version could not be activated.",
+      "discardFailed": "The draft could not be discarded.",
+      "isbnInvalid": "That is not a valid ISBN-13. Nothing was recorded — the platform never corrects an identifier silently.",
+      "isbnDuplicate": "A current registration for that ISBN already exists.",
+      "isbnSourceRequired": "An ISBN registration requires its source.",
+      "isbnRecordFailed": "The ISBN could not be recorded.",
+      "registrationNotCurrent": "Only the current registration can be corrected.",
+      "reasonRequired": "A reason is required.",
+      "evidenceRequiredIsbn": "An external assignment requires evidence. Nothing was recorded."
     },
     "notices": {
       "candidatePresented": "The candidate has been presented and its composition is frozen.",
@@ -2397,7 +2411,13 @@
       "releaseWithdrawn": "The release has been withdrawn. Its record remains.",
       "releaseSuperseded": "The supersession has been recorded. Both releases remain.",
       "printProofGenerated": "The proof interior was generated, validated, and preserved. Proofs can never be released.",
-      "printProductionGenerated": "The production interior was generated, validated as Production-Valid, and preserved."
+      "printProductionGenerated": "The production interior was generated, validated as Production-Valid, and preserved.",
+      "draftOpened": "The draft is open, with the derived facts in place.",
+      "draftSaved": "The draft has been saved.",
+      "versionActivated": "The version is now active. Earlier versions remain.",
+      "draftDiscarded": "The draft has been discarded. Finalized versions are untouched.",
+      "isbnRecorded": "The ISBN has been recorded with its provenance.",
+      "isbnCorrected": "The correction has been recorded. The original registration remains, marked."
     },
     "export": {
       "heading": "Deterministic Export — EPUB",
@@ -2528,6 +2548,125 @@
       "proofAction": "Generate proof interior",
       "productionAction": "Generate production interior",
       "productionNeedsAuthority": "Production interiors require the author's approval and the imprint's authorization."
+    },
+    "metadata": {
+      "metaTitle": "Bibliographic Record",
+      "eyebrow": "Bibliographic Record",
+      "lede": "The book's description for publication and commerce. Facts the platform already governs are derived, never retyped; everything else is deliberately authored and kept in numbered versions.",
+      "derived": {
+        "heading": "Derived from the Book",
+        "lede": "These facts come from the Book Record itself. Edit them on the book's page; the record notices when they change.",
+        "title": "Title",
+        "subtitle": "Subtitle",
+        "author": "Author",
+        "language": "Language",
+        "imprint": "Imprint",
+        "legalEntity": "Publisher of record"
+      },
+      "divergence": {
+        "titleChanged": "The book's title has changed since this record was finalized.",
+        "subtitleChanged": "The book's subtitle has changed since this record was finalized.",
+        "authorDisplayChanged": "The author's display name has changed since this record was finalized.",
+        "languageChanged": "The book's language has changed since this record was finalized."
+      },
+      "record": {
+        "heading": "The record",
+        "begin": "Begin the bibliographic record",
+        "openDraft": "Open a draft",
+        "emptyLede": "No bibliographic record exists yet. Beginning one opens a draft with the derived facts already in place.",
+        "editLede": "The active record is versioned. Opening a draft starts the next version; nothing already finalized changes.",
+        "saveDraft": "Save draft",
+        "finalizeActivate": "Finalize & activate",
+        "discardDraft": "Discard draft"
+      },
+      "fields": {
+        "publicationDescription": "Publication description",
+        "marketingDescription": "Marketing description",
+        "shortDescription": "Short description",
+        "shortDescriptionHint": "One or two sentences; up to 600 characters.",
+        "keywords": "Keywords",
+        "listHint": "Comma-separated; order is kept.",
+        "categories": "Subjects",
+        "categoriesHint": "Comma-separated, in your own words — no external taxonomy is claimed.",
+        "copyrightYear": "Copyright year",
+        "copyrightLine": "Copyright line",
+        "publicationNotes": "Publication notes",
+        "changeSummary": "Version note"
+      },
+      "contributors": {
+        "heading": "Contributors",
+        "lede": "{author} is the author, derived from the Book — never retyped. Add other contributors below; order is kept.",
+        "nameLabel": "Name",
+        "roleLabel": "Role"
+      },
+      "roles": {
+        "author": "Author",
+        "co-author": "Co-author",
+        "editor": "Editor",
+        "translator": "Translator",
+        "illustrator": "Illustrator",
+        "photographer": "Photographer",
+        "foreword": "Foreword by",
+        "introduction": "Introduction by",
+        "afterword": "Afterword by",
+        "contributor": "Contributor"
+      },
+      "history": {
+        "heading": "Version history",
+        "empty": "No finalized versions yet.",
+        "entry": "Version {number}",
+        "active": "active",
+        "restore": "Restore"
+      },
+      "isbn": {
+        "heading": "ISBNs",
+        "lede": "ISBNs are recorded external facts with their evidence — the platform never creates or assigns one. What appears here was recorded by the imprint.",
+        "empty": "No ISBN has been recorded for this book.",
+        "externallyAssigned": "externally assigned (evidenced)",
+        "recordedOnly": "recorded by Huerta Group Publishing"
+      }
+    },
+    "isbnAdmin": {
+      "metaTitle": "ISBN Registry — Administration",
+      "heading": "ISBN Registry",
+      "lede": "Externally governed identifiers, recorded with their provenance and evidence. The platform never generates an ISBN, and no assignment action exists — recording is not assignment.",
+      "registryHeading": "Registered ISBNs",
+      "registryEmpty": "No ISBNs are on record.",
+      "recordHeading": "Record an ISBN",
+      "recordLede": "Record exactly what the evidence establishes. An externally existing assignment requires at least one piece of evidence.",
+      "disposition": {
+        "recorded": "current",
+        "corrected": "corrected",
+        "superseded": "superseded",
+        "invalidated": "invalidated"
+      },
+      "externallyAssigned": "externally assigned",
+      "recordedOnly": "recorded only",
+      "sourceLine": "Source: {source}",
+      "evidenceMissing": "Assignment claimed without evidence on file.",
+      "correctAction": "Correct this registration",
+      "form": {
+        "isbnLabel": "ISBN-13",
+        "sourceLabel": "Source",
+        "sourceHint": "Where this identifier comes from — agency, allocation, or record on file.",
+        "noteLabel": "Note",
+        "reasonLabel": "Reason for correction",
+        "externallyAssignedLabel": "An external assignment already exists (evidence required)",
+        "externalTitleLabel": "Externally listed title",
+        "externalFormatLabel": "External format wording",
+        "externalFormatHint": "Exactly as the external source words it — nothing is inferred.",
+        "externalRegistrantLabel": "External registrant",
+        "evidenceKindLabel": "Evidence",
+        "evidenceNone": "— none —",
+        "referenceNumber": "Reference number",
+        "agencyRecord": "Agency record",
+        "documentReference": "Document reference",
+        "evidenceNote": "Note",
+        "evidenceValueLabel": "Evidence value",
+        "evidenceSourceLabel": "Evidence source",
+        "recordSubmit": "Record the ISBN",
+        "correctSubmit": "Record the correction"
+      }
     }
   }
 }

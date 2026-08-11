@@ -32,7 +32,7 @@ touch Supabase and works even if these are unset; `/signin`,
 
 ## 2. Apply the database migrations
 
-**33 migrations**, applied strictly in filename order. The hosted
+**34 migrations**, applied strictly in filename order. The hosted
 database's applied state is reconciled against this list in
 [docs/operations/production-migration-baseline.md](operations/production-migration-baseline.md)
 — consult and update that record whenever migrations are applied.
@@ -138,6 +138,15 @@ database's applied state is reconciled against this list in
     candidate; proofs are unreleasable at the release guard), the
     print_artifact_provenance companion record, the print-pdf format,
     RLS, and grants.
+34. `20260814000000_publication_metadata.sql` — Publication Metadata &
+    ISBN: bibliographic_records/versions (one family per Book, house
+    versioning — one draft, immutable finalized versions, active
+    pointer restricted to finalized), version-frozen
+    bibliographic_contributors (ten roles), the provenance-first
+    isbn_registrations + append-only isbn_evidence (ISBN-13 check-digit
+    validation in SQL, forward-only corrections, evidence-gated
+    external assignment, no assignment path), workflow functions, RLS,
+    and grants.
 
 Storage buckets and cron jobs are created by the migrations themselves;
 there is no separate manual step beyond confirming pg_cron is enabled.
