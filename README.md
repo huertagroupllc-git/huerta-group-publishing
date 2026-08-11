@@ -70,9 +70,8 @@ author's own linked record, enforced by Row Level Security end to end.
 
 Deliberate exclusions, not omissions:
 
-- **Publication production and distribution** — print-ready PDF,
-  covers, ISBN, metadata, rights, editions, retailers, release
-  management. The Production Bridge has shipped its first two
+- **Publication production and distribution** — covers, ISBN,
+  metadata, rights, editions, retailers, automated distribution. The Production Bridge has shipped its first two
   operational layers: the Candidate Foundation and deterministic EPUB
   export (immutable, validated, reproducible artifacts). Everything
   beyond EPUB remains future territory, each piece behind its own
@@ -126,7 +125,7 @@ Supabase as the permanent data layer; GitHub as the only path to
 production. Nine runtime dependencies; OpenAI is called by plain `fetch`
 in exactly two places (editorial readings, hosted TTS).
 
-- **Schema** — parallel domain models across 41 tables (author memory,
+- **Schema** — parallel domain models across 44 tables (author memory,
   book memory, manuscript, findings/reviews/deliberation, settings,
   membership/support/retention, import, publication), all RLS-enabled, integrity
   enforced by triggers, partial unique indexes, and composite
@@ -197,9 +196,11 @@ in phases. Complete: WP-00 (CI, assembly invariant tests, migration
 baseline), the Phase 1 blueprint (approved with Revision 2), Phase 2 —
 the Candidate Foundation ([as-built](docs/operations/publication-candidates.md)),
 Phase 3 — Deterministic Export
-([as-built](docs/operations/deterministic-export.md)), and the Release
-Record: the imprint's permanent declared publication act with channel
-participations, evidence-backed derived states, and forward-only
-post-release history ([as-built](docs/operations/release-record.md)).
-Later phases (print PDF, covers, metadata/ISBN, editions, automated
+([as-built](docs/operations/deterministic-export.md)), the Release
+Record ([as-built](docs/operations/release-record.md)), and Print
+Production: deterministic 6×9 print interiors through the hgp-print
+serializer — fixed-grid pagination, governed checksummed fonts, PDF
+1.7 with byte-identical regeneration, proof and production
+designations ([as-built](docs/operations/print-production.md)).
+Later phases (covers, metadata/ISBN, editions, automated
 distribution) each begin under their own authorization.

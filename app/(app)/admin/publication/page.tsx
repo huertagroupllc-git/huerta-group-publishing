@@ -63,7 +63,7 @@ export default async function AdminPublicationPage({
       supabase
         .from("publication_artifacts")
         .select(
-          "id, candidate_number, artifact_number, format, serializer, serializer_version, generated_at, checksum, byte_size, validator, validator_version, regenerates_artifact_id, books(title)",
+          "id, candidate_number, artifact_number, format, designation, serializer, serializer_version, generated_at, checksum, byte_size, validator, validator_version, regenerates_artifact_id, books(title), print_artifact_provenance(page_count)",
         )
         .order("generated_at", { ascending: false })
         .limit(50),
@@ -198,7 +198,17 @@ export default async function AdminPublicationPage({
                       {book?.title} — {t("candidateNo", { number: a.candidate_number })}
                     </span>
                     <span className="text-ink-faint">
-                      {a.format} · {a.serializer} {a.serializer_version} · #{a.artifact_number}
+                      {a.format} · {a.designation} · {a.serializer}{" "}
+                      {a.serializer_version} · #{a.artifact_number}
+                      {(a.print_artifact_provenance as unknown as {
+                        page_count: number;
+                      } | null)
+                        ? ` · ${
+                            (a.print_artifact_provenance as unknown as {
+                              page_count: number;
+                            }).page_count
+                          }pp`
+                        : ""}
                     </span>
                     <span className="text-ink-faint">{date(a.generated_at)}</span>
                     <span className="text-ink-faint">

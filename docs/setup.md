@@ -32,7 +32,7 @@ touch Supabase and works even if these are unset; `/signin`,
 
 ## 2. Apply the database migrations
 
-**32 migrations**, applied strictly in filename order. The hosted
+**33 migrations**, applied strictly in filename order. The hosted
 database's applied state is reconciled against this list in
 [docs/operations/production-migration-baseline.md](operations/production-migration-baseline.md)
 — consult and update that record whenever migrations are applied.
@@ -130,6 +130,14 @@ database's applied state is reconciled against this list in
     participations, two append-only event ledgers, evidence records
     (acceptance/availability require evidence via deferred constraint),
     workflow functions, RLS, and grants.
+33. `20260813000000_print_production.sql` — Print Production: the
+    immutable print_profiles registry (seeded with HGP Trade 6×9 —
+    Text v1), governed print_font_inputs (checksums + OFL evidence),
+    proof|production designation on artifacts/attempts with
+    designation-aware eligibility (proofs need only an open
+    candidate; proofs are unreleasable at the release guard), the
+    print_artifact_provenance companion record, the print-pdf format,
+    RLS, and grants.
 
 Storage buckets and cron jobs are created by the migrations themselves;
 there is no separate manual step beyond confirming pg_cron is enabled.

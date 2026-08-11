@@ -18,6 +18,15 @@ import {
   downloadArtifact,
   generateEpubArtifact,
 } from "@/lib/publication/export-actions";
+import { generatePrintArtifact } from "@/lib/publication/print-actions";
+import {
+  PRINT_SERIALIZER_ID,
+  PRINT_SERIALIZER_VERSION,
+} from "@/lib/publication/print-serializer";
+import {
+  HGP_TRADE_6X9_TEXT_V1,
+  profileFingerprint,
+} from "@/lib/publication/print-profile";
 import {
   SERIALIZER_ID,
   SERIALIZER_VERSION,
@@ -83,7 +92,9 @@ export default async function PublicationDeskPage({
     : { artifacts: [], attempts: [] };
   const exportEligible = Boolean(current?.approval && current?.authorization);
   const releaseDesk = await getReleaseDesk(book.id, book.status);
-  const latestArtifact = exportHistory.artifacts[0] ?? null;
+  const latestArtifact =
+    exportHistory.artifacts.find((a) => a.designation === "production") ??
+    null;
   const declareArtifact =
     exportEligible &&
     latestArtifact &&
@@ -423,6 +434,17 @@ export default async function PublicationDeskPage({
                         })}
                       </span>
                       <span className="text-ink-faint">
+                        {a.format === "print-pdf"
+                          ? t("print.formatLabel")
+                          : "EPUB"}
+                        {a.designation === "proof"
+                          ? ` · ${t("print.designationProof")}`
+                          : ""}
+                        {a.print
+                          ? ` · ${t("print.pages", { count: a.print.page_count })}`
+                          : ""}
+                      </span>
+                      <span className="text-ink-faint">
                         {date(a.generated_at)}
                       </span>
                       <span className="text-ink-faint">
@@ -469,6 +491,61 @@ export default async function PublicationDeskPage({
                 </ul>
               </div>
             ) : null}
+          </section>
+
+          {/* ---- Print Production — the deterministic interior ---- */}
+          <section aria-labelledby="print-heading" className="rule mt-8 pt-5">
+            <h3
+              id="print-heading"
+              className="font-display text-lg tracking-tight"
+            >
+              {t("print.heading")}
+            </h3>
+            <p className="mt-1 font-sans text-xs text-ink-faint">
+              {t("print.profileLine", {
+                name: HGP_TRADE_6X9_TEXT_V1.displayName,
+                version: HGP_TRADE_6X9_TEXT_V1.version,
+              })}{" "}
+              · {shortFingerprint(profileFingerprint(HGP_TRADE_6X9_TEXT_V1))} ·{" "}
+              {t("print.serializerLine", {
+                serializer: PRINT_SERIALIZER_ID,
+                version: PRINT_SERIALIZER_VERSION,
+              })}
+            </p>
+            <p className="mt-1 font-sans text-xs text-ink-faint">
+              {t("print.fontsLine")}
+            </p>
+            <p className="mt-3 max-w-prose text-sm text-ink-soft">
+              {t("print.lede")}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-4">
+              <form action={generatePrintArtifact}>
+                <input
+                  type="hidden"
+                  name="candidate_id"
+                  value={current.record.id}
+                />
+                <input type="hidden" name="desk_path" value={deskPath} />
+                <input type="hidden" name="designation" value="proof" />
+                <QuietButton>{t("print.proofAction")}</QuietButton>
+              </form>
+              {exportEligible ? (
+                <form action={generatePrintArtifact}>
+                  <input
+                    type="hidden"
+                    name="candidate_id"
+                    value={current.record.id}
+                  />
+                  <input type="hidden" name="desk_path" value={deskPath} />
+                  <input type="hidden" name="designation" value="production" />
+                  <PrimaryButton>{t("print.productionAction")}</PrimaryButton>
+                </form>
+              ) : (
+                <p className="max-w-prose self-center font-sans text-xs italic text-ink-soft">
+                  {t("print.productionNeedsAuthority")}
+                </p>
+              )}
+            </div>
           </section>
 
           {/* Withdraw the candidate */}

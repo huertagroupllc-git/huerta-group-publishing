@@ -2329,7 +2329,19 @@
       "eventInvalid": "Esa entrada no se reconoce.",
       "noteRequired": "Esta entrada requiere una nota.",
       "withdrawReleaseFailed": "El lanzamiento no pudo retirarse.",
-      "supersedeFailed": "El reemplazo no pudo registrarse."
+      "supersedeFailed": "El reemplazo no pudo registrarse.",
+      "printMigrationMissing": "El esquema de imprenta aún no se ha aplicado (migración 20260813000000_print_production.sql).",
+      "generatePrintFailed": "El interior de imprenta no pudo generarse. El intento queda registrado.",
+      "unsupportedContent": "El manuscrito contiene contenido que el perfil de solo texto no admite. No se generó nada.",
+      "imageContentUnsupported": "El manuscrito contiene imágenes; el perfil de solo texto no puede producirlo. No se generó nada.",
+      "missingGlyph": "Un carácter del manuscrito está fuera del repertorio gobernado de imprenta. No se generó nada.",
+      "fontMissing": "Una tipografía gobernada de imprenta no está disponible. No se generó nada.",
+      "fontChecksumMismatch": "Una tipografía gobernada no coincidió con su suma de verificación registrada. No se generó nada.",
+      "fontEmbeddingNotAuthorized": "Una tipografía gobernada carece de autorización de incrustación. No se generó nada.",
+      "profileInvalid": "La procedencia del perfil de imprenta no validó.",
+      "pdfStructureInvalid": "El PDF generado no superó la validación estructural. No se registró ningún artefacto.",
+      "productionValidationFailed": "El interior generado no superó la validación de producción. No se registró ningún artefacto.",
+      "proofNotReleasable": "Un interior de prueba nunca puede lanzarse."
     },
     "notices": {
       "candidatePresented": "El candidato fue presentado y su composición quedó congelada.",
@@ -2347,7 +2359,9 @@
       "channelAdded": "El canal previsto quedó agregado.",
       "eventRecorded": "El hecho quedó registrado.",
       "releaseWithdrawn": "El lanzamiento fue retirado. Su registro permanece.",
-      "releaseSuperseded": "El reemplazo quedó registrado. Ambos lanzamientos permanecen."
+      "releaseSuperseded": "El reemplazo quedó registrado. Ambos lanzamientos permanecen.",
+      "printProofGenerated": "El interior de prueba fue generado, validado y preservado. Las pruebas nunca pueden lanzarse.",
+      "printProductionGenerated": "El interior de producción fue generado, validado como Válido para Producción y preservado."
     },
     "export": {
       "heading": "Exportación Determinista — EPUB",
@@ -2465,6 +2479,19 @@
         "reference_number": "Número de referencia",
         "note": "Nota"
       }
+    },
+    "print": {
+      "heading": "Producción de Imprenta — Interior",
+      "profileLine": "Perfil de Imprenta {name} · v{version}",
+      "serializerLine": "serializador {serializer} {version}",
+      "fontsLine": "Tipografías: Newsreader (regular, cursiva, negrita) · Fraunces — archivos exactos con suma de verificación, SIL OFL 1.1, incrustación permitida.",
+      "lede": "La generación compone el texto congelado de este candidato sobre la retícula fija de 6×9 — paginación determinista, tipografías gobernadas incrustadas, PDF 1.7 con TrimBox igual a MediaBox. Una prueba es un documento interno de trabajo y nunca puede lanzarse; un interior de producción requiere la cadena completa de aprobación y autorización.",
+      "formatLabel": "PDF de imprenta",
+      "designationProof": "prueba",
+      "pages": "{count} páginas",
+      "proofAction": "Generar interior de prueba",
+      "productionAction": "Generar interior de producción",
+      "productionNeedsAuthority": "Los interiores de producción requieren la aprobación del autor y la autorización del sello."
     }
   }
 }

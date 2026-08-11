@@ -2329,7 +2329,19 @@
       "eventInvalid": "That entry is not recognized.",
       "noteRequired": "A note is required for this entry.",
       "withdrawReleaseFailed": "The release could not be withdrawn.",
-      "supersedeFailed": "The supersession could not be recorded."
+      "supersedeFailed": "The supersession could not be recorded.",
+      "printMigrationMissing": "The print schema has not been applied yet (migration 20260813000000_print_production.sql).",
+      "generatePrintFailed": "The print interior could not be generated. The attempt is on record.",
+      "unsupportedContent": "The manuscript contains content the text-only print profile does not support. Nothing was generated.",
+      "imageContentUnsupported": "The manuscript contains images; the text-only print profile cannot produce it. Nothing was generated.",
+      "missingGlyph": "A character in the manuscript is outside the governed print repertoire. Nothing was generated.",
+      "fontMissing": "A governed print font is unavailable. Nothing was generated.",
+      "fontChecksumMismatch": "A governed print font did not match its recorded checksum. Nothing was generated.",
+      "fontEmbeddingNotAuthorized": "A governed print font lacks embedding authority. Nothing was generated.",
+      "profileInvalid": "The print profile provenance did not validate.",
+      "pdfStructureInvalid": "The generated PDF did not pass structural validation. Nothing was recorded as an artifact.",
+      "productionValidationFailed": "The generated interior did not pass production validation. Nothing was recorded as an artifact.",
+      "proofNotReleasable": "A proof interior can never be released."
     },
     "notices": {
       "candidatePresented": "The candidate has been presented and its composition is frozen.",
@@ -2347,7 +2359,9 @@
       "channelAdded": "The intended channel has been added.",
       "eventRecorded": "The fact has been recorded.",
       "releaseWithdrawn": "The release has been withdrawn. Its record remains.",
-      "releaseSuperseded": "The supersession has been recorded. Both releases remain."
+      "releaseSuperseded": "The supersession has been recorded. Both releases remain.",
+      "printProofGenerated": "The proof interior was generated, validated, and preserved. Proofs can never be released.",
+      "printProductionGenerated": "The production interior was generated, validated as Production-Valid, and preserved."
     },
     "export": {
       "heading": "Deterministic Export — EPUB",
@@ -2465,6 +2479,19 @@
         "reference_number": "Reference number",
         "note": "Note"
       }
+    },
+    "print": {
+      "heading": "Print Production — Interior",
+      "profileLine": "Print Profile {name} · v{version}",
+      "serializerLine": "serializer {serializer} {version}",
+      "fontsLine": "Faces: Newsreader (regular, italic, bold) · Fraunces — exact checksummed files, SIL OFL 1.1, embedding permitted.",
+      "lede": "Generation lays out this candidate's frozen text on the fixed 6×9 grid — deterministic pagination, embedded governed fonts, PDF 1.7 with TrimBox equal to MediaBox. A proof is an internal working document and can never be released; a production interior requires the full approval and authorization chain.",
+      "formatLabel": "Print PDF",
+      "designationProof": "proof",
+      "pages": "{count} pages",
+      "proofAction": "Generate proof interior",
+      "productionAction": "Generate production interior",
+      "productionNeedsAuthority": "Production interiors require the author's approval and the imprint's authorization."
     }
   }
 }
