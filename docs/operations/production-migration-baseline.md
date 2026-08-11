@@ -155,3 +155,40 @@ repair the ledger immediately and append an entry below.
   enforcement, supersession, author-first authorization ordering,
   immutability and no-delete probes, RLS invisibility to strangers,
   no-implicit-proxy, delegated approval. No discrepancy.
+- **August 11, 2026 (fifth entry)** — Migrations 34
+  (`20260814000000_publication_metadata.sql`, Publication Metadata &
+  ISBN Phase 2) and 35
+  (`20260815000000_isbn_registry_cascade_unlink.sql`, a defect fix
+  found by this verification) applied via `supabase db push`.
+  Re-verified: **35/35 in exact local = remote agreement.** Production
+  verification with disposable TEST-labeled fixtures (two authors, one
+  book, three auth users; created and removed in-session): 35 SQL
+  probes all passed — derived-fact draft V1; draft-already-open
+  refusal; authored fields with bounded short description/keywords;
+  contributor ordering, role vocabulary, duplicate-position refusal,
+  derived primary author; finalize + activate; active pointer refuses
+  drafts; finalized version/contributor immutability; **no finalized
+  delete path for author or staff** (0 rows each); V2 lifecycle;
+  divergence snapshot preserved after a controlled book retitle (no
+  silent rewrite); restore to V1 with numbering intact; V3 draft
+  discard; valid ISBN recorded with normalization, as-entered form,
+  actor, and labeled evidence; invalid check digit refused
+  (`isbn_invalid`); duplicate current registration refused; externally
+  existing assignment recorded verbatim (date precision, book link,
+  two evidence rows); schema census — no assign function/table, no
+  format-scope/edition columns; registration immutability; forward-only
+  correction preserving the original with back-pointer; non-current
+  correction refused; author cannot record or insert ISBNs; visibility
+  matrix (author sees own evidenced ISBN only, stranger sees none,
+  staff sees all); evidence append-only and undeletable; unevidenced
+  external claim **refused at commit** by the deferred constraint;
+  manual book unlink refused while the book exists. Defect found and
+  fixed forward: the ISBN immutability trigger refused the FK's
+  `ON DELETE SET NULL`, breaking the sanctioned whole-book cascade for
+  ISBN-linked books — migration 35 admits exactly that referential
+  transition and the cascade now completes. Zero fixture residue
+  (counts returned exactly to baseline: 1 book, 1 author, 10 review
+  runs, empty registry); candidates/artifacts/releases untouched at 0;
+  no OpenAI call occurred. Live routes `/admin/isbn` and
+  `/workspace/.../metadata` present in the production build and gated
+  to `/signin`. No discrepancy.

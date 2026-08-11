@@ -124,7 +124,14 @@ trigger-rejected. Registrations: staff read/insert/update (updates
 constrained to the forward transitions by trigger); authors read only
 registrations evidenced to their own book; evidence follows the
 registration's visibility. The whole-book sanctioned cascade remains
-the only removal path.
+the only removal path for bibliographic records; ISBN registrations
+**survive** book deletion — the registry outlives any book, with the
+book link severed by the FK's referential `SET NULL`, which the
+immutability trigger admits only when the referenced book is actually
+gone (migration `20260815000000`, a production-verification defect
+fix: the original trigger froze `book_id` unconditionally and broke
+the cascade). A hand-written unlink while the book exists remains
+refused.
 
 ## Operational UI
 

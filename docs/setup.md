@@ -32,7 +32,7 @@ touch Supabase and works even if these are unset; `/signin`,
 
 ## 2. Apply the database migrations
 
-**34 migrations**, applied strictly in filename order. The hosted
+**35 migrations**, applied strictly in filename order. The hosted
 database's applied state is reconciled against this list in
 [docs/operations/production-migration-baseline.md](operations/production-migration-baseline.md)
 — consult and update that record whenever migrations are applied.
@@ -147,6 +147,10 @@ database's applied state is reconciled against this list in
     validation in SQL, forward-only corrections, evidence-gated
     external assignment, no assignment path), workflow functions, RLS,
     and grants.
+35. `20260815000000_isbn_registry_cascade_unlink.sql` — teaches the
+    ISBN immutability trigger to admit the whole-book cascade's
+    referential `SET NULL` on `book_id` (the registry outlives books);
+    every hand-written unlink or riding-along change remains refused.
 
 Storage buckets and cron jobs are created by the migrations themselves;
 there is no separate manual step beyond confirming pg_cron is enabled.
