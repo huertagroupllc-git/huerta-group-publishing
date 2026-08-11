@@ -111,8 +111,12 @@
           "body": "The manuscript improves through the same deliberate versions it was written in — nothing overwritten, nothing lost."
         },
         "publication": {
-          "title": "Toward Publication",
-          "body": "The end the whole process is built toward: a book brought to completion and readiness, on the author's terms."
+          "title": "Publication",
+          "body": "When the manuscript is ready, you read it exactly as it will stand and approve it. The house then makes the book itself — a publication-ready ebook and a typeset print interior, produced from your approved text and nothing else."
+        },
+        "release": {
+          "title": "Release",
+          "body": "Publishing is an act, not a checkbox. The house records when and where your book goes into the world — and keeps that record, permanently."
         }
       }
     },
@@ -152,6 +156,18 @@
         "constitutionReview": {
           "name": "Constitution Review",
           "body": "A reading of the whole manuscript against the book's founding intent."
+        },
+        "audioReview": {
+          "name": "Audio Review",
+          "body": "Hear your chapters read back in a natural voice — distance for the ear that reading alone can't give."
+        },
+        "publicationDesk": {
+          "name": "The Publication Desk",
+          "body": "Where a finished manuscript is read as it will stand, approved on your terms, and made into publication-ready files."
+        },
+        "releaseRecord": {
+          "name": "The Release Record",
+          "body": "A permanent account of every publication: what went into the world, when, where, and on what evidence."
         }
       }
     },
@@ -174,9 +190,9 @@
       }
     },
     "publication": {
-      "eyebrow": "Toward publication",
-      "heading": "Built with publication in view",
-      "body": "Every stage of the Workshop points toward a finished book. Publishing capabilities will grow within the ecosystem; today, the Workshop's work is making the manuscript worthy of them — developed, reviewed, revised, and preserved on the author's terms."
+      "eyebrow": "Publication",
+      "heading": "From your manuscript to a published book",
+      "body": "Publication is not a separate product — it is the same workshop, continuing. Your approved manuscript becomes the book itself: a publication-ready ebook and a professionally typeset print interior, each made from your exact approved text, each kept with a permanent record of what was published, when, and where. Covers, ISBNs, editions, and store distribution are still ahead — and we will say so plainly until they arrive."
     },
     "cta": {
       "heading": "Your book has a place to take shape.",
@@ -206,7 +222,7 @@
     "meta": {
       "promise": "Develop books, not just manuscripts.",
       "ogSubtitle": "An Author Operating System",
-      "description": "Huerta Group Publishing is an Author Operating System — an editorial environment for developing a book from discovery through review and revision, with the author's voice preserved and every version kept. Not an AI writer: an editorial house with a memory.",
+      "description": "Huerta Group Publishing is an Author Operating System — one continuous workshop where a book is developed, reviewed, approved, and published: from the first idea to publication-ready ebook and print files, with a permanent record of every step.",
       "ogAlt": "Huerta Group Publishing — Develop books, not just manuscripts."
     },
     "pricing": {
@@ -1390,7 +1406,7 @@
         {
           "heading": "What is Huerta Group Publishing?",
           "body": [
-            "A membership workshop that helps authors develop a book through conversation and careful editorial review — one that sounds more like you, not more like a machine."
+            "A publishing house operating through software: a membership workshop where authors develop a book with careful editorial review — and where the finished manuscript continues naturally into publication: your approval, publication-ready ebook and print files, and a permanent record of every release."
           ]
         },
         {
@@ -1402,7 +1418,7 @@
         {
           "heading": "Do you use AI, and how?",
           "body": [
-            "Yes, as a tool. AI assists with discovery conversations and with editorial review. It does not write your book for you and it does not make final decisions. See the AI & Editorial Disclaimer for the full picture."
+            "Yes, as a tool. AI powers the editorial review you request and the natural voice that can read chapters back to you. It does not write your book, it does not make publishing decisions, and no AI can approve or publish anything. See the AI & Editorial Disclaimer for the full picture."
           ]
         },
         {
@@ -1415,6 +1431,24 @@
           "heading": "Who owns the rights to my book?",
           "body": [
             "You do. You retain authorship and the intellectual-property rights in your work. We receive only the limited license needed to operate the service for you. See Copyright & IP."
+          ]
+        },
+        {
+          "heading": "Can the platform produce my finished book?",
+          "body": [
+            "Yes. When your manuscript is ready, you approve it, and the platform produces the book itself: a publication-ready EPUB and a professionally typeset print-interior PDF, both made from your exact approved text. Covers, ISBNs, and store distribution are still ahead — we say plainly what exists and what doesn't."
+          ]
+        },
+        {
+          "heading": "Who decides when my book is published?",
+          "body": [
+            "You do, first: nothing is prepared for publication until you approve the exact text. The imprint then authorizes it, and publishing itself is a deliberate, recorded act — never automatic, never a background process."
+          ]
+        },
+        {
+          "heading": "What record exists after my book is published?",
+          "body": [
+            "A permanent one. The platform keeps the publication record itself: which version of your book went into the world, when it was released, through which channels, and the evidence behind each claim. Years later, the record still answers exactly what was published."
           ]
         },
         {
@@ -1613,7 +1647,7 @@
         {
           "heading": "AI is a tool, not the author",
           "body": [
-            "The platform uses AI to help you discover ideas through conversation and to review your manuscript. It does not write your book for you, and it never makes a final editorial decision. You are the author."
+            "The platform uses AI to review your manuscript when you ask, and to read chapters back to you in a natural voice. It does not write your book for you, and it never makes a final editorial decision. You are the author."
           ]
         },
         {
@@ -1937,8 +1971,8 @@
       "aiAllowance": "AI-assisted tools allowance",
       "audioReview": "Audio Review",
       "standardExport": "Standard export tools",
-      "advancedExport": "Advanced export",
-      "publishingPrep": "Publishing preparation",
+      "advancedExport": "Publication-ready EPUB",
+      "publishingPrep": "Publication preparation & approval",
       "multiAuthorWorkspaces": "Multiple author workspaces",
       "publisherAdmin": "Publisher administration",
       "rolePermissions": "Role-based permissions",
@@ -1952,7 +1986,9 @@
       "archiveTwelveMonths": "Twelve-month archive protection",
       "extendedArchive": "Extended Archive option",
       "catalogManagement": "Series and catalog management",
-      "pdfImport": "Import an existing text-based PDF manuscript and review its proposed structure before adding it to your workspace"
+      "pdfImport": "Import an existing text-based PDF manuscript and review its proposed structure before adding it to your workspace",
+      "printInterior": "Typeset print interior (PDF)",
+      "releaseRecord": "Publication release record"
     },
     "archive": {
       "heading": "If you step away",

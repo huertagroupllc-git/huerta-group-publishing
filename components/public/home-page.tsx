@@ -130,6 +130,7 @@ const JOURNEY_KEYS = [
   "deliberation",
   "revision",
   "publication",
+  "release",
 ] as const;
 
 const ROOM_KEYS = [
@@ -141,6 +142,9 @@ const ROOM_KEYS = [
   "deliberation",
   "versions",
   "constitutionReview",
+  "audioReview",
+  "publicationDesk",
+  "releaseRecord",
 ] as const;
 
 const PRINCIPLE_KEYS = ["authorship", "complete", "deliberate"] as const;

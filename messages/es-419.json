@@ -111,8 +111,12 @@
           "body": "El manuscrito mejora mediante las mismas versiones deliberadas con las que fue escrito — nada se sobrescribe, nada se pierde."
         },
         "publication": {
-          "title": "Hacia la Publicación",
-          "body": "El fin hacia el que apunta todo el proceso: un libro llevado a su término y a su madurez, en los términos del autor."
+          "title": "Publicación",
+          "body": "Cuando el manuscrito está listo, usted lo lee exactamente como quedará y lo aprueba. La casa entonces hace el libro mismo — un libro electrónico listo para publicar y un interior de imprenta compuesto, producidos desde su texto aprobado y nada más."
+        },
+        "release": {
+          "title": "Lanzamiento",
+          "body": "Publicar es un acto, no una casilla. La casa registra cuándo y dónde su libro sale al mundo — y conserva ese registro, permanentemente."
         }
       }
     },
@@ -152,6 +156,18 @@
         "constitutionReview": {
           "name": "Revisión de Constitución",
           "body": "Una lectura del manuscrito completo frente a la intención fundacional del libro."
+        },
+        "audioReview": {
+          "name": "Revisión en Audio",
+          "body": "Escuche sus capítulos leídos en una voz natural — la distancia para el oído que la lectura sola no da."
+        },
+        "publicationDesk": {
+          "name": "El Escritorio de Publicación",
+          "body": "Donde un manuscrito terminado se lee tal como quedará, se aprueba en sus términos y se convierte en archivos listos para publicar."
+        },
+        "releaseRecord": {
+          "name": "El Registro de Lanzamiento",
+          "body": "Una cuenta permanente de cada publicación: qué salió al mundo, cuándo, dónde y con qué evidencia."
         }
       }
     },
@@ -174,9 +190,9 @@
       }
     },
     "publication": {
-      "eyebrow": "Hacia la publicación",
-      "heading": "Construido con la publicación en el horizonte",
-      "body": "Cada etapa del Taller apunta hacia un libro terminado. Las capacidades de publicación crecerán dentro del ecosistema; hoy, el trabajo del Taller es hacer que el manuscrito sea digno de ellas — desarrollado, revisado, corregido y preservado en los términos del autor."
+      "eyebrow": "Publicación",
+      "heading": "De su manuscrito a un libro publicado",
+      "body": "La publicación no es un producto aparte — es el mismo taller, continuando. Su manuscrito aprobado se convierte en el libro mismo: un libro electrónico listo para publicar y un interior de imprenta compuesto profesionalmente, cada uno hecho desde su texto aprobado exacto, cada uno conservado con un registro permanente de qué se publicó, cuándo y dónde. Las portadas, los ISBN, las ediciones y la distribución en tiendas aún están por venir — y lo diremos con claridad hasta que lleguen."
     },
     "cta": {
       "heading": "Su libro tiene un lugar donde tomar forma.",
@@ -206,7 +222,7 @@
     "meta": {
       "promise": "Desarrolle libros, no solo manuscritos.",
       "ogSubtitle": "Un sistema operativo para autores",
-      "description": "Huerta Group Publishing es un sistema operativo para autores — un entorno editorial para desarrollar un libro desde el descubrimiento hasta la revisión y la corrección, conservando la voz del autor y cada versión. No es un escritor de IA: es una casa editorial con memoria.",
+      "description": "Huerta Group Publishing es un Sistema Operativo del Autor — un taller continuo donde un libro se desarrolla, se revisa, se aprueba y se publica: desde la primera idea hasta archivos de libro electrónico e imprenta listos para publicar, con un registro permanente de cada paso.",
       "ogAlt": "Huerta Group Publishing — Desarrolle libros, no solo manuscritos."
     },
     "pricing": {
@@ -1390,7 +1406,7 @@
         {
           "heading": "¿Qué es Huerta Group Publishing?",
           "body": [
-            "Un taller por membresía que ayuda a los autores a desarrollar un libro mediante conversación y una revisión editorial cuidadosa — uno que suene más como tú, no más como una máquina."
+            "Una casa editorial que opera mediante software: un taller de membresía donde los autores desarrollan un libro con una revisión editorial cuidadosa — y donde el manuscrito terminado continúa naturalmente hacia la publicación: su aprobación, archivos de libro electrónico e imprenta listos para publicar, y un registro permanente de cada lanzamiento."
           ]
         },
         {
@@ -1402,7 +1418,7 @@
         {
           "heading": "¿Usan IA, y cómo?",
           "body": [
-            "Sí, como herramienta. La IA ayuda con las conversaciones de descubrimiento y con la revisión editorial. No escribe tu libro por ti ni toma decisiones finales. Consulta el Aviso sobre IA y edición."
+            "Sí, como herramienta. La IA impulsa la revisión editorial que usted solicita y la voz natural que puede leerle sus capítulos. No escribe su libro, no toma decisiones de publicación, y ninguna IA puede aprobar ni publicar nada. Vea el Descargo de IA y Editorial para el panorama completo."
           ]
         },
         {
@@ -1415,6 +1431,24 @@
           "heading": "¿Quién posee los derechos de mi libro?",
           "body": [
             "Tú. Conservas la autoría y los derechos de propiedad intelectual de tu obra. Nosotros recibimos solo la licencia limitada necesaria para operar el servicio. Consulta Derechos de autor y PI."
+          ]
+        },
+        {
+          "heading": "¿La plataforma puede producir mi libro terminado?",
+          "body": [
+            "Sí. Cuando su manuscrito está listo, usted lo aprueba, y la plataforma produce el libro mismo: un EPUB listo para publicar y un PDF de interior de imprenta compuesto profesionalmente, ambos hechos desde su texto aprobado exacto. Las portadas, los ISBN y la distribución en tiendas aún están por venir — decimos con claridad qué existe y qué no."
+          ]
+        },
+        {
+          "heading": "¿Quién decide cuándo se publica mi libro?",
+          "body": [
+            "Usted, primero: nada se prepara para publicación hasta que usted aprueba el texto exacto. El sello luego lo autoriza, y publicar es un acto deliberado y registrado — nunca automático, nunca un proceso de fondo."
+          ]
+        },
+        {
+          "heading": "¿Qué registro existe después de que mi libro se publica?",
+          "body": [
+            "Uno permanente. La plataforma conserva el registro de publicación mismo: qué versión de su libro salió al mundo, cuándo se lanzó, por qué canales, y la evidencia detrás de cada afirmación. Años después, el registro sigue respondiendo exactamente qué se publicó."
           ]
         },
         {
@@ -1613,7 +1647,7 @@
         {
           "heading": "La IA es una herramienta, no el autor",
           "body": [
-            "La plataforma usa IA para ayudarte a descubrir ideas mediante la conversación y para revisar tu manuscrito. No escribe tu libro por ti y nunca toma una decisión editorial final. Tú eres el autor."
+            "La plataforma usa IA para revisar tu manuscrito cuando lo pides, y para leerte los capítulos en una voz natural. No escribe tu libro por ti y nunca toma una decisión editorial final. Tú eres el autor."
           ]
         },
         {
@@ -1937,8 +1971,8 @@
       "aiAllowance": "Asignación de herramientas asistidas por IA",
       "audioReview": "Revisión en Audio",
       "standardExport": "Herramientas de exportación estándar",
-      "advancedExport": "Exportación avanzada",
-      "publishingPrep": "Preparación para publicación",
+      "advancedExport": "EPUB listo para publicar",
+      "publishingPrep": "Preparación y aprobación de publicación",
       "multiAuthorWorkspaces": "Varios espacios de autor",
       "publisherAdmin": "Administración editorial",
       "rolePermissions": "Permisos por rol",
@@ -1952,7 +1986,9 @@
       "archiveTwelveMonths": "Protección de archivo por doce meses",
       "extendedArchive": "Opción de Archivo Extendido",
       "catalogManagement": "Gestión de series y catálogo",
-      "pdfImport": "Importa un manuscrito PDF existente con texto y revisa su estructura propuesta antes de agregarlo a tu espacio de trabajo"
+      "pdfImport": "Importa un manuscrito PDF existente con texto y revisa su estructura propuesta antes de agregarlo a tu espacio de trabajo",
+      "printInterior": "Interior de imprenta compuesto (PDF)",
+      "releaseRecord": "Registro de lanzamiento de publicación"
     },
     "archive": {
       "heading": "Si te ausentas",

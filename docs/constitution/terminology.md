@@ -111,3 +111,44 @@ shows the labels, not the word.
 - Status lines state facts without alarm: "Version 3 · active · finalized 2 July 2026".
 - Dates are written as "July 3, 2026" — never numeric, abbreviated, or relative.
 - The platform refers to itself as "the platform" or by name — never "the app".
+
+## Production Bridge terms (ratified August 2026)
+
+| Term | Verdict | Canon |
+| --- | --- | --- |
+| **Publication Candidate** | **Ratified** | The manuscript-level version: an immutable publication-context snapshot with a deterministic fingerprint. A candidate is **presented**, never "generated". Never "build" or "draft of the book". |
+| **Publication Context** | **Ratified** | What a candidate freezes: the Composition, the title-page facts, and the manuscript language — only what reproduction requires. |
+| **Manuscript Lock** | **Ratified** | The reversible operational act suspending composition change. Locked / unlocked; never a lifecycle stage, never publication status. |
+| **Publication Preview** | **Ratified** | The Reading Copy rendered from a candidate's frozen composition. |
+| **Readiness Report** | **Ratified** | Deterministic facts about a candidate; never a verdict, never an authority. |
+| **Approve / Authorize** | **Ratified** | The author **approves** (their own act); the imprint **authorizes**. Author-first, always. Withdrawal preserves the original act. |
+| **Supersede / Withdraw** | **Ratified** | How candidates and acts end. Set-aside is the record; nothing is deleted. |
+
+## Deterministic Export terms (ratified August 2026)
+
+| Term | Verdict | Canon |
+| --- | --- | --- |
+| **Publication Artifact** | **Ratified** | One deterministic rendering of a candidate in one format by one serializer version. A reproducible derivative — the candidate remains the record. Existence means success. |
+| **Exported File** | **Ratified** | A stored byte instance of an artifact, checksum-verifiable. Files are derivable; the artifact identity is the fact. |
+| **Serializer** | **Ratified** | The versioned institutional program that renders candidates (`hgp-epub`, `hgp-print`). Output-affecting change = new version, never a silent edit. |
+
+## Release terms (ratified August 2026)
+
+| Term | Verdict | Canon |
+| --- | --- | --- |
+| **Release** | **Ratified** | The imprint's permanent declared publication act for one artifact. A release is **declared**. Public copy may say "release" plainly. |
+| **Release Channel / Channel Participation** | **Ratified** | A canonical channel record; a release's intent toward one channel. Intent is never evidence of publication. |
+| **Intended / Submitted / Accepted / Available** | **Ratified** | The four channel states, held strictly distinct; acceptance and availability require evidence. |
+| **Asserted / Evidenced / Verified** | **Ratified** | The three evidence classes. Verified is reserved for future trusted integrations. |
+| **Correction / Amendment / Withdrawal / Supersession** | **Ratified** | The four forward-only history mechanisms; never one generic "edited" state. |
+
+## Print Production terms (ratified August 2026)
+
+| Term | Verdict | Canon |
+| --- | --- | --- |
+| **Print Artifact** | **Ratified** | A Publication Artifact of format print-pdf: a deterministic print interior. |
+| **Print Profile** | **Ratified** | Immutable, versioned institutional production configuration (geometry, typography, pagination rules, Font Inputs). Never per-book, never an Edition. |
+| **Print Proof / Production** | **Ratified** | The two generation designations. A proof is an internal working document and is never releasable. |
+| **Production-Valid** | **Ratified** | The internal claim that house production rules hold. Never implies printer, distributor, or PDF/X conformance ("Externally Validated" is that future claim). |
+| **Font Input** | **Ratified** | An exact checksummed font file with embedding-license evidence. A production input, not a style preference. |
+| **Pagination Identity** | **Ratified** | Identical governed inputs yield identical pages — and identical bytes. |

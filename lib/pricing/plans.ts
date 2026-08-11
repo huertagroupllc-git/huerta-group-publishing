@@ -129,8 +129,10 @@ export const PRICING_FEATURES: readonly PricingFeature[] = [
   { key: "audioReview", group: "review", tiers: PRO_TEAM, status: "plan_limited" },
   // Export and publishing preparation
   { key: "standardExport", group: "export", tiers: ALL, status: "available" },
-  { key: "advancedExport", group: "export", tiers: PRO_TEAM, status: "in_development" },
-  { key: "publishingPrep", group: "export", tiers: PRO_TEAM, status: "in_development" },
+  { key: "advancedExport", group: "export", tiers: PRO_TEAM, status: "available" },
+  { key: "publishingPrep", group: "export", tiers: PRO_TEAM, status: "available" },
+  { key: "printInterior", group: "export", tiers: PRO_TEAM, status: "available" },
+  { key: "releaseRecord", group: "export", tiers: PRO_TEAM, status: "available" },
   // Team and administration
   { key: "multiAuthorWorkspaces", group: "team", tiers: TEAM, status: "in_development" },
   { key: "publisherAdmin", group: "team", tiers: TEAM, status: "in_development" },
