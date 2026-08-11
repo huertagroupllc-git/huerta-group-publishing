@@ -92,6 +92,26 @@ repair the ledger immediately and append an entry below.
   29/29 in exact local = remote agreement. **Reconciliation complete;
   no open discrepancy.** `supabase db push` is now the single
   application path.
+- **August 10, 2026 (fourth entry)** — Migration 33
+  (`20260813000000_print_production.sql`, Print Production) applied
+  via `supabase db push`. Re-verified: 33/33 in exact local = remote
+  agreement; the seeded HGP Trade 6×9 — Text v1 fingerprint matches
+  the TypeScript canon in production; four governed font inputs
+  present. Production verification with a disposable authenticated
+  fixture (created and removed through the sanctioned workflows):
+  local generation from production frozen data produced a 5-page
+  interior with byte-identical regeneration; production designation
+  refused before approval; proof generated under preparation
+  authority; **proof refused release even with the full authority
+  chain in place** (`proof_not_releasable`); production artifact
+  recorded with complete print provenance and a regeneration link to
+  the proof; divergent checksum refused
+  (`reproducibility_mismatch`); signed download byte-equal; anonymous
+  access denied; an image-bearing candidate failed closed with zero
+  artifacts; the production interior released through the existing
+  one-artifact Release model. Profile and font registries survive
+  fixture deletion. No retailer or OpenAI call occurred. No
+  discrepancy.
 - **August 10, 2026 (third entry)** — Migration 32
   (`20260812000000_publication_releases.sql`, the Release Record)
   applied via `supabase db push`. Re-verified: 32/32 in exact local =
