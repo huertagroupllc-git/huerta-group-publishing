@@ -11,6 +11,15 @@ import {
 } from "@/lib/action-messages";
 import { getBookStudy } from "@/lib/books/queries";
 import { getPublicationDesk } from "@/lib/publication/queries";
+import { getExportHistory } from "@/lib/publication/export-queries";
+import {
+  downloadArtifact,
+  generateEpubArtifact,
+} from "@/lib/publication/export-actions";
+import {
+  SERIALIZER_ID,
+  SERIALIZER_VERSION,
+} from "@/lib/publication/serializer";
 import { shortFingerprint } from "@/lib/publication/types";
 import {
   approveCandidate,
@@ -67,6 +76,10 @@ export default async function PublicationDeskPage({
   const message = actionMessageFromQuery(sp);
   const notice = actionNoticeFromQuery(sp);
   const current = desk.current;
+  const exportHistory = current
+    ? await getExportHistory(current.record.id)
+    : { artifacts: [], attempts: [] };
+  const exportEligible = Boolean(current?.approval && current?.authorization);
 
   return (
     <WorkspaceFrame
@@ -346,6 +359,104 @@ export default async function PublicationDeskPage({
               )}
             </div>
           </div>
+
+          {/* ---- Deterministic Export — artifacts are derivatives ---- */}
+          <section aria-labelledby="export-heading" className="rule mt-8 pt-5">
+            <h3
+              id="export-heading"
+              className="font-display text-lg tracking-tight"
+            >
+              {t("export.heading")}
+            </h3>
+            <p className="mt-1 font-sans text-xs text-ink-faint">
+              {t("export.serializerLine", {
+                serializer: SERIALIZER_ID,
+                version: SERIALIZER_VERSION,
+              })}
+            </p>
+            {exportEligible ? (
+              <form action={generateEpubArtifact} className="mt-4">
+                <input
+                  type="hidden"
+                  name="candidate_id"
+                  value={current.record.id}
+                />
+                <input type="hidden" name="desk_path" value={deskPath} />
+                <p className="mb-3 max-w-prose text-sm text-ink-soft">
+                  {t("export.lede")}
+                </p>
+                <PrimaryButton>
+                  {exportHistory.artifacts.length
+                    ? t("export.regenerateAction")
+                    : t("export.generateAction")}
+                </PrimaryButton>
+              </form>
+            ) : (
+              <p className="mt-3 max-w-prose text-sm italic text-ink-soft">
+                {current.approval
+                  ? t("export.needsAuthorization")
+                  : t("export.needsApproval")}
+              </p>
+            )}
+
+            {exportHistory.artifacts.length > 0 ? (
+              <ul className="mt-6 max-w-prose space-y-4 text-sm">
+                {exportHistory.artifacts.map((a) => (
+                  <li key={a.id}>
+                    <div className="flex flex-wrap items-baseline gap-x-3">
+                      <span>
+                        {t("export.artifactEntry", {
+                          number: a.artifact_number,
+                        })}
+                      </span>
+                      <span className="text-ink-faint">
+                        {date(a.generated_at)}
+                      </span>
+                      <span className="text-ink-faint">
+                        {t("export.bytes", {
+                          size: format.number(a.byte_size),
+                        })}
+                      </span>
+                      {a.regenerates_artifact_id ? (
+                        <span className="text-ink-faint italic">
+                          {t("export.regenerated")}
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="mt-1 break-all font-mono text-[10px] text-ink-faint">
+                      sha256 {a.checksum}
+                    </p>
+                    <form action={downloadArtifact} className="mt-1">
+                      <input type="hidden" name="artifact_id" value={a.id} />
+                      <input type="hidden" name="desk_path" value={deskPath} />
+                      <QuietButton>{t("export.downloadAction")}</QuietButton>
+                    </form>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+
+            {exportHistory.attempts.some((a) => a.status === "failed") ? (
+              <div className="mt-5">
+                <p className="eyebrow">{t("export.attemptsHeading")}</p>
+                <ul className="mt-2 max-w-prose space-y-1 font-sans text-xs text-ink-soft">
+                  {exportHistory.attempts
+                    .filter((a) => a.status === "failed")
+                    .map((a) => (
+                      <li key={a.id}>
+                        {t("export.failedAttempt", {
+                          number: a.attempt_number,
+                          code: a.failure_code ?? "unknown",
+                        })}{" "}
+                        <span className="text-ink-faint">
+                          {date(a.requested_at)}
+                        </span>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            ) : null}
+          </section>
 
           {/* Withdraw the candidate */}
           <form action={withdrawCandidate} className="rule mt-8 max-w-md pt-5">

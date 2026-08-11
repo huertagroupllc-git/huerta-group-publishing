@@ -32,7 +32,7 @@ touch Supabase and works even if these are unset; `/signin`,
 
 ## 2. Apply the database migrations
 
-**30 migrations**, applied strictly in filename order. The hosted
+**31 migrations**, applied strictly in filename order. The hosted
 database's applied state is reconciled against this list in
 [docs/operations/production-migration-baseline.md](operations/production-migration-baseline.md)
 — consult and update that record whenever migrations are applied.
@@ -118,6 +118,12 @@ database's applied state is reconciled against this list in
     approval delegations, author approvals and imprint authorizations
     (author-first by trigger), the pbc-v1 fingerprint functions, RLS,
     and grants.
+31. `20260811000000_publication_artifacts.sql` — Production Bridge
+    Phase 3: publication_artifacts (immutable, success-only) and the
+    append-only publication_export_attempts, database-enforced export
+    eligibility (open approval + authorization) and reproducibility,
+    the private `publication-artifacts` storage bucket (no delete for
+    anyone), RLS, and grants.
 
 Storage buckets and cron jobs are created by the migrations themselves;
 there is no separate manual step beyond confirming pg_cron is enabled.

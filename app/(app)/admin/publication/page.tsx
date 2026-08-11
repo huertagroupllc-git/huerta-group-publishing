@@ -39,7 +39,7 @@ export default async function AdminPublicationPage({
   const date = (iso: string) =>
     format.dateTime(new Date(iso), { dateStyle: "medium" });
 
-  const [candidatesResult, delegationsResult, authorsResult] =
+  const [candidatesResult, delegationsResult, authorsResult, artifactsResult] =
     await Promise.all([
       supabase
         .from("publication_candidates")
@@ -59,11 +59,25 @@ export default async function AdminPublicationPage({
         .from("authors")
         .select("id, full_name, slug")
         .order("full_name"),
+      supabase
+        .from("publication_artifacts")
+        .select(
+          "id, candidate_number, artifact_number, format, serializer, serializer_version, generated_at, checksum, byte_size, validator, validator_version, regenerates_artifact_id, books(title)",
+        )
+        .order("generated_at", { ascending: false })
+        .limit(50),
     ]);
 
   const candidates = candidatesResult.data ?? [];
   const delegations = delegationsResult.data ?? [];
   const authors = authorsResult.data ?? [];
+  const artifacts = artifactsResult.data ?? [];
+  const { data: failedAttempts } = await supabase
+    .from("publication_export_attempts")
+    .select("id, attempt_number, failure_code, failure_stage, requested_at, books(title)")
+    .eq("status", "failed")
+    .order("requested_at", { ascending: false })
+    .limit(25);
   const message = actionMessageFromQuery(sp);
   const notice = actionNoticeFromQuery(sp);
 
@@ -155,6 +169,59 @@ export default async function AdminPublicationPage({
             })}
           </ul>
         )}
+      </section>
+
+      <section aria-labelledby="admin-artifacts" className="mt-12">
+        <h3 id="admin-artifacts" className="eyebrow">
+          {t("artifactsHeading")}
+        </h3>
+        {artifacts.length === 0 ? (
+          <p className="mt-3 max-w-prose text-sm italic text-ink-soft">
+            {t("artifactsEmpty")}
+          </p>
+        ) : (
+          <ul className="mt-4 space-y-3 text-sm">
+            {artifacts.map((a) => {
+              const book = a.books as unknown as { title: string } | null;
+              return (
+                <li key={a.id} className="rule pt-3">
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <span>
+                      {book?.title} — {t("candidateNo", { number: a.candidate_number })}
+                    </span>
+                    <span className="text-ink-faint">
+                      {a.format} · {a.serializer} {a.serializer_version} · #{a.artifact_number}
+                    </span>
+                    <span className="text-ink-faint">{date(a.generated_at)}</span>
+                    <span className="text-ink-faint">
+                      {a.validator} {a.validator_version}
+                    </span>
+                  </div>
+                  <p className="mt-1 break-all font-mono text-[10px] text-ink-faint">
+                    sha256 {a.checksum} · {a.byte_size} B
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        {(failedAttempts ?? []).length > 0 ? (
+          <div className="mt-5">
+            <p className="eyebrow">{t("failedAttemptsHeading")}</p>
+            <ul className="mt-2 max-w-prose space-y-1 font-sans text-xs text-ink-soft">
+              {(failedAttempts ?? []).map((a) => {
+                const book = a.books as unknown as { title: string } | null;
+                return (
+                  <li key={a.id}>
+                    {book?.title} · #{a.attempt_number} · {a.failure_code} ({a.failure_stage})
+                    {" "}
+                    <span className="text-ink-faint">{date(a.requested_at)}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ) : null}
       </section>
 
       <section aria-labelledby="admin-delegations" className="mt-12">

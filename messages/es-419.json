@@ -2265,7 +2265,10 @@
       "authorLabel": "Autor",
       "basisLabel": "Base de autoridad",
       "reasonLabel": "Nota",
-      "createAction": "Registrar la delegación"
+      "createAction": "Registrar la delegación",
+      "artifactsHeading": "Artefactos de publicación",
+      "artifactsEmpty": "No se han generado artefactos.",
+      "failedAttemptsHeading": "Intentos de exportación fallidos"
     },
     "errors": {
       "manuscriptLocked": "La composición está bloqueada; desbloquéela antes de cambiar la forma del manuscrito.",
@@ -2290,7 +2293,15 @@
       "withdrawActFailed": "El retiro no pudo registrarse.",
       "delegationBasisRequired": "Una delegación requiere su base de autoridad registrada.",
       "delegationCreateFailed": "La delegación no pudo registrarse.",
-      "delegationRevokeFailed": "La delegación no pudo revocarse."
+      "delegationRevokeFailed": "La delegación no pudo revocarse.",
+      "authorizationRequired": "Exportar requiere la autorización registrada del sello.",
+      "exportMigrationMissing": "El esquema de exportación aún no se ha aplicado (migración 20260811000000_publication_artifacts.sql).",
+      "exportFailed": "El EPUB no pudo generarse. El intento queda registrado.",
+      "exportValidationFailed": "El EPUB generado no superó la validación estructural. No se registró ningún artefacto.",
+      "exportStorageFailed": "El EPUB no pudo preservarse. El intento queda registrado.",
+      "reproducibilityMismatch": "La regeneración no reprodujo exactamente el artefacto registrado. No se registró nada — requiere atención del sello.",
+      "artifactNotFound": "Ese artefacto no está disponible.",
+      "downloadFailed": "La descarga no pudo prepararse."
     },
     "notices": {
       "candidatePresented": "El candidato fue presentado y su composición quedó congelada.",
@@ -2302,7 +2313,23 @@
       "candidateAuthorized": "La autorización quedó registrada.",
       "authorizationWithdrawn": "La autorización fue retirada. El acto original permanece en el registro.",
       "delegationCreated": "La delegación quedó registrada.",
-      "delegationRevoked": "La delegación quedó revocada."
+      "delegationRevoked": "La delegación quedó revocada.",
+      "exportSucceeded": "El EPUB fue generado, validado y preservado."
+    },
+    "export": {
+      "heading": "Exportación Determinista — EPUB",
+      "serializerLine": "Serializador {serializer} · versión {version}",
+      "lede": "La generación compone la composición congelada de este candidato — nunca el manuscrito vivo — en un EPUB, valida su estructura, registra su identidad y lo preserva en privado. El mismo candidato y la misma versión del serializador producen siempre los mismos bytes.",
+      "generateAction": "Generar el EPUB",
+      "regenerateAction": "Regenerar el EPUB",
+      "needsApproval": "Exportar requiere la aprobación registrada del autor y la autorización del sello. La aprobación no está registrada.",
+      "needsAuthorization": "Exportar requiere la autorización del sello; la aprobación del autor está registrada.",
+      "artifactEntry": "Artefacto N.º {number}",
+      "bytes": "{size} bytes",
+      "regenerated": "regeneración",
+      "downloadAction": "Descargar el EPUB",
+      "attemptsHeading": "Intentos fallidos",
+      "failedAttempt": "El intento {number} falló ({code})."
     }
   }
 }

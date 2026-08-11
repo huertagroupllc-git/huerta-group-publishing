@@ -70,12 +70,13 @@ author's own linked record, enforced by Row Level Security end to end.
 
 Deliberate exclusions, not omissions:
 
-- **Publication production and distribution** — export, EPUB, print-ready
-  PDF, covers, ISBN, metadata, rights, editions, retailers. The
-  Production Bridge program is building this territory in phases: the
-  Candidate Foundation (immutable publication candidates, manuscript
-  lock, author approval, imprint authorization) is live; deterministic
-  export is Phase 3 and does not exist yet.
+- **Publication production and distribution** — print-ready PDF,
+  covers, ISBN, metadata, rights, editions, retailers, release
+  management. The Production Bridge has shipped its first two
+  operational layers: the Candidate Foundation and deterministic EPUB
+  export (immutable, validated, reproducible artifacts). Everything
+  beyond EPUB remains future territory, each piece behind its own
+  blueprint.
 - **Billing** — pricing is a published template; no payment is collected
   and no billing SDK exists.
 - **Outbound email** — retention milestones are planned and recorded, but
@@ -125,7 +126,7 @@ Supabase as the permanent data layer; GitHub as the only path to
 production. Nine runtime dependencies; OpenAI is called by plain `fetch`
 in exactly two places (editorial readings, hosted TTS).
 
-- **Schema** — parallel domain models across 33 tables (author memory,
+- **Schema** — parallel domain models across 35 tables (author memory,
   book memory, manuscript, findings/reviews/deliberation, settings,
   membership/support/retention, import, publication), all RLS-enabled, integrity
   enforced by triggers, partial unique indexes, and composite
@@ -193,10 +194,11 @@ production build on every push to `main` and every pull request.
 
 **The Production Bridge** — the publishing half of the lifecycle,
 in phases. Complete: WP-00 (CI, assembly invariant tests, migration
-baseline), the Phase 1 blueprint (approved with Revision 2), and
-Phase 2 — the Candidate Foundation: immutable Publication Candidates
-with deterministic fingerprints, the Manuscript Lock, the Readiness
-Report, Author Approval, and Imprint Authorization
-([as-built record](docs/operations/publication-candidates.md)).
-Next: Phase 3 — Deterministic Export — which begins only under its own
-authorization.
+baseline), the Phase 1 blueprint (approved with Revision 2), Phase 2 —
+the Candidate Foundation ([as-built](docs/operations/publication-candidates.md)),
+and Phase 3 — Deterministic Export: an authorized candidate renders to
+a validated, reproducible EPUB through the hgp-epub serializer, with
+immutable artifact identity and private preservation
+([as-built](docs/operations/deterministic-export.md)). Later phases
+(print PDF, covers, metadata/ISBN, editions, distribution, release)
+each begin under their own authorization.

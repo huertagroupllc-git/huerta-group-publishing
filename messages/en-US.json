@@ -2265,7 +2265,10 @@
       "authorLabel": "Author",
       "basisLabel": "Basis of authority",
       "reasonLabel": "Note",
-      "createAction": "Record the delegation"
+      "createAction": "Record the delegation",
+      "artifactsHeading": "Publication artifacts",
+      "artifactsEmpty": "No artifacts have been generated.",
+      "failedAttemptsHeading": "Failed export attempts"
     },
     "errors": {
       "manuscriptLocked": "The composition is locked; unlock it before changing the manuscript's shape.",
@@ -2290,7 +2293,15 @@
       "withdrawActFailed": "The withdrawal could not be recorded.",
       "delegationBasisRequired": "A delegation requires its recorded basis of authority.",
       "delegationCreateFailed": "The delegation could not be recorded.",
-      "delegationRevokeFailed": "The delegation could not be revoked."
+      "delegationRevokeFailed": "The delegation could not be revoked.",
+      "authorizationRequired": "Export requires the imprint's recorded authorization.",
+      "exportMigrationMissing": "The export schema has not been applied yet (migration 20260811000000_publication_artifacts.sql).",
+      "exportFailed": "The EPUB could not be generated. The attempt is on record.",
+      "exportValidationFailed": "The generated EPUB did not pass structural validation. Nothing was recorded as an artifact.",
+      "exportStorageFailed": "The EPUB could not be preserved. The attempt is on record.",
+      "reproducibilityMismatch": "Regeneration did not reproduce the recorded artifact exactly. Nothing was recorded — this requires imprint attention.",
+      "artifactNotFound": "That artifact is not available.",
+      "downloadFailed": "The download could not be prepared."
     },
     "notices": {
       "candidatePresented": "The candidate has been presented and its composition is frozen.",
@@ -2302,7 +2313,23 @@
       "candidateAuthorized": "The authorization has been recorded.",
       "authorizationWithdrawn": "The authorization has been withdrawn. The original act remains on record.",
       "delegationCreated": "The delegation has been recorded.",
-      "delegationRevoked": "The delegation has been revoked."
+      "delegationRevoked": "The delegation has been revoked.",
+      "exportSucceeded": "The EPUB was generated, validated, and preserved."
+    },
+    "export": {
+      "heading": "Deterministic Export — EPUB",
+      "serializerLine": "Serializer {serializer} · version {version}",
+      "lede": "Generation renders this candidate's frozen composition — never the live manuscript — into an EPUB, validates its structure, records its identity, and preserves it privately. The same candidate and serializer version always produce the same bytes.",
+      "generateAction": "Generate the EPUB",
+      "regenerateAction": "Regenerate the EPUB",
+      "needsApproval": "Export requires the author's recorded approval and the imprint's authorization. The approval has not been recorded.",
+      "needsAuthorization": "Export requires the imprint's authorization; the author's approval is on record.",
+      "artifactEntry": "Artifact No. {number}",
+      "bytes": "{size} bytes",
+      "regenerated": "regeneration",
+      "downloadAction": "Download the EPUB",
+      "attemptsHeading": "Failed attempts",
+      "failedAttempt": "Attempt {number} failed ({code})."
     }
   }
 }
