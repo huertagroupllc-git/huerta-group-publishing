@@ -92,6 +92,21 @@ repair the ledger immediately and append an entry below.
   29/29 in exact local = remote agreement. **Reconciliation complete;
   no open discrepancy.** `supabase db push` is now the single
   application path.
+- **August 10, 2026 (second entry)** — Migration 31
+  (`20260811000000_publication_artifacts.sql`, Production Bridge
+  Phase 3) applied via `supabase db push`. Re-verified: 31/31 in exact
+  local = remote agreement. Production verification executed with a
+  disposable authenticated fixture identity (created and removed with
+  the fixture book through the sanctioned workflows): eligibility
+  denials before approval and authorization, authorized export through
+  the real RPCs, storage upload under the real policies, signed
+  download byte-equality, public/anonymous access denial, artifact
+  immutability and no-delete, regeneration byte-identity with a linked
+  new record, database-refused checksum divergence
+  (reproducibility_mismatch), append-only attempt history. Two fixture
+  .epub objects remain in the `publication-artifacts` bucket by design
+  (no delete path exists); no OpenAI operation occurred. No
+  discrepancy.
 - **August 10, 2026** — Migration 30
   (`20260810000000_publication_candidates.sql`, Production Bridge
   Phase 2) applied via `supabase db push`. Re-verified: 30/30 in exact
