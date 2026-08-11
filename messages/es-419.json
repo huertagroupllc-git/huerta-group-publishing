@@ -2268,7 +2268,24 @@
       "createAction": "Registrar la delegación",
       "artifactsHeading": "Artefactos de publicación",
       "artifactsEmpty": "No se han generado artefactos.",
-      "failedAttemptsHeading": "Intentos de exportación fallidos"
+      "failedAttemptsHeading": "Intentos de exportación fallidos",
+      "releasesHeading": "Lanzamientos",
+      "releasesEmpty": "No se han declarado lanzamientos.",
+      "noChannels": "aún sin canales",
+      "releaseDisposition": {
+        "active": "vigente",
+        "withdrawn": "retirado",
+        "superseded": "reemplazado"
+      },
+      "channelState": {
+        "intended": "Previsto",
+        "submitted": "Enviado",
+        "accepted": "Aceptado",
+        "available": "Disponible",
+        "rejected": "Rechazado",
+        "removed": "Retirado del canal",
+        "withdrawn": "Retirado"
+      }
     },
     "errors": {
       "manuscriptLocked": "La composición está bloqueada; desbloquéela antes de cambiar la forma del manuscrito.",
@@ -2301,7 +2318,18 @@
       "exportStorageFailed": "El EPUB no pudo preservarse. El intento queda registrado.",
       "reproducibilityMismatch": "La regeneración no reprodujo exactamente el artefacto registrado. No se registró nada — requiere atención del sello.",
       "artifactNotFound": "Ese artefacto no está disponible.",
-      "downloadFailed": "La descarga no pudo prepararse."
+      "downloadFailed": "La descarga no pudo prepararse.",
+      "releaseMigrationMissing": "El esquema de lanzamientos aún no se ha aplicado (migración 20260812000000_publication_releases.sql).",
+      "releaseAlreadyActive": "Ya existe un lanzamiento vigente para este artefacto.",
+      "releaseNotActive": "Este lanzamiento ya no está vigente.",
+      "evidenceRequired": "La aceptación y la disponibilidad requieren evidencia registrada. No se registró nada.",
+      "declareFailed": "El lanzamiento no pudo declararse.",
+      "channelAddFailed": "El canal no pudo agregarse.",
+      "eventRecordFailed": "El hecho no pudo registrarse.",
+      "eventInvalid": "Esa entrada no se reconoce.",
+      "noteRequired": "Esta entrada requiere una nota.",
+      "withdrawReleaseFailed": "El lanzamiento no pudo retirarse.",
+      "supersedeFailed": "El reemplazo no pudo registrarse."
     },
     "notices": {
       "candidatePresented": "El candidato fue presentado y su composición quedó congelada.",
@@ -2314,7 +2342,12 @@
       "authorizationWithdrawn": "La autorización fue retirada. El acto original permanece en el registro.",
       "delegationCreated": "La delegación quedó registrada.",
       "delegationRevoked": "La delegación quedó revocada.",
-      "exportSucceeded": "El EPUB fue generado, validado y preservado."
+      "exportSucceeded": "El EPUB fue generado, validado y preservado.",
+      "releaseDeclared": "El lanzamiento quedó declarado y su procedencia congelada.",
+      "channelAdded": "El canal previsto quedó agregado.",
+      "eventRecorded": "El hecho quedó registrado.",
+      "releaseWithdrawn": "El lanzamiento fue retirado. Su registro permanece.",
+      "releaseSuperseded": "El reemplazo quedó registrado. Ambos lanzamientos permanecen."
     },
     "export": {
       "heading": "Exportación Determinista — EPUB",
@@ -2330,6 +2363,108 @@
       "downloadAction": "Descargar el EPUB",
       "attemptsHeading": "Intentos fallidos",
       "failedAttempt": "El intento {number} falló ({code})."
+    },
+    "releaseRecord": {
+      "heading": "El Registro de Lanzamiento",
+      "empty": "No se ha declarado ningún lanzamiento para este libro.",
+      "observations": {
+        "publishedEvidenceBacked": "El libro declara Publicado y el registro de lanzamiento lleva disponibilidad con evidencia. El hecho declarado está respaldado por evidencia.",
+        "publishedWithoutRelease": "El libro declara Publicado, pero no se ha declarado ningún lanzamiento. El hecho declarado no tiene evidencia de lanzamiento.",
+        "publishedNoAvailability": "El libro declara Publicado, pero ningún canal tiene disponibilidad pública con evidencia todavía.",
+        "releaseWhileNotPublished": "Hay un lanzamiento vigente mientras el libro aún no declara Publicado. El Registro del Libro se edita en su página; nada lo cambia automáticamente.",
+        "withdrawnReleaseHistorical": "Un lanzamiento retirado permanece en el registro como historia."
+      },
+      "declare": {
+        "heading": "Declarar el lanzamiento del Artefacto N.º {number}",
+        "lede": "Declarar registra el acto de publicación permanente del sello para este artefacto exacto — su candidato, huella, suma de verificación y serializador quedan congelados en el registro. La aprobación del autor y la autorización del sello deben estar vigentes; nada más se exige.",
+        "channelsLegend": "Canales previstos",
+        "reasonLabel": "Nota para el registro",
+        "action": "Declarar el lanzamiento"
+      },
+      "entry": {
+        "heading": "Lanzamiento declarado el {date}",
+        "provenance": "Candidato N.º {candidate} · Artefacto N.º {artifact} · {serializer}",
+        "withdrawnLine": "Retirado el {date}.",
+        "effective": "efectivo el {date} ·",
+        "recorded": "registrado el {date}",
+        "corrects": "(corrige una entrada anterior)"
+      },
+      "disposition": {
+        "active": "vigente",
+        "withdrawn": "retirado",
+        "superseded": "reemplazado"
+      },
+      "channelState": {
+        "intended": "Previsto",
+        "submitted": "Enviado",
+        "accepted": "Aceptado",
+        "available": "Disponible",
+        "rejected": "Rechazado",
+        "removed": "Retirado del canal",
+        "withdrawn": "Retirado"
+      },
+      "evidenceClass": {
+        "asserted": "afirmado",
+        "evidenced": "con evidencia"
+      },
+      "gaps": {
+        "externalStateWithoutSubmission": "Hay un estado externo registrado sin un envío registrado — se registró retroactivamente.",
+        "availabilityWithoutAcceptance": "Hay disponibilidad registrada sin una aceptación registrada."
+      },
+      "channelEvent": {
+        "submission": "Envío",
+        "acceptance": "Aceptación",
+        "availability": "Disponibilidad pública",
+        "rejection": "Rechazo",
+        "removal": "Retiro del canal",
+        "amendment": "Enmienda",
+        "correction": "Corrección"
+      },
+      "releaseEvent": {
+        "withdrawal": "Lanzamiento retirado",
+        "supersession": "Reemplazado por un lanzamiento posterior",
+        "amendment": "Enmienda",
+        "correction": "Corrección"
+      },
+      "event": {
+        "typeLabel": "Registrar un hecho del canal",
+        "correctsLabel": "Corrige una entrada anterior",
+        "correctsNone": "— ninguna —",
+        "effectiveDateLabel": "Fecha efectiva",
+        "effectiveTimeLabel": "Hora",
+        "effectiveTimeHint": "Déjela vacía cuando solo se conozca la fecha; no se inventará una hora.",
+        "noteLabel": "Nota",
+        "evidenceKindLabel": "Evidencia",
+        "evidenceNone": "— ninguna —",
+        "evidenceValueLabel": "Valor de la evidencia",
+        "evidenceSourceLabel": "Fuente de la evidencia",
+        "recordAction": "Registrar el hecho"
+      },
+      "addChannel": {
+        "label": "Agregar un canal previsto",
+        "noteLabel": "Nota del canal",
+        "action": "Agregar el canal"
+      },
+      "noteEvent": {
+        "typeLabel": "Entrada del lanzamiento",
+        "noteLabel": "Nota",
+        "action": "Registrar la entrada"
+      },
+      "withdraw": {
+        "reasonLabel": "Motivo del retiro",
+        "action": "Retirar el lanzamiento"
+      },
+      "supersede": {
+        "successorLabel": "Reemplazado por",
+        "reasonLabel": "Motivo",
+        "action": "Registrar el reemplazo"
+      },
+      "evidenceKind": {
+        "url": "URL",
+        "external_identifier": "Identificador externo",
+        "reference_number": "Número de referencia",
+        "note": "Nota"
+      }
     }
   }
 }

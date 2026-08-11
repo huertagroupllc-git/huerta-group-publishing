@@ -12,6 +12,7 @@ import {
   revokeDelegation,
 } from "@/lib/publication/admin-actions";
 import { shortFingerprint } from "@/lib/publication/types";
+import { deriveChannelState } from "@/lib/publication/release-state";
 import { createClient } from "@/lib/supabase/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -72,6 +73,13 @@ export default async function AdminPublicationPage({
   const delegations = delegationsResult.data ?? [];
   const authors = authorsResult.data ?? [];
   const artifacts = artifactsResult.data ?? [];
+  const { data: releases } = await supabase
+    .from("publication_releases")
+    .select(
+      "id, declared_at, disposition, candidate_number, artifact_number, serializer_version, books(title, authors(full_name)), release_channel_participations(id, release_channels(display_name), release_channel_events(id, event_type, recorded_at, corrects_event_id, release_evidence(id)))",
+    )
+    .order("declared_at", { ascending: false })
+    .limit(50);
   const { data: failedAttempts } = await supabase
     .from("publication_export_attempts")
     .select("id, attempt_number, failure_code, failure_stage, requested_at, books(title)")
@@ -222,6 +230,64 @@ export default async function AdminPublicationPage({
             </ul>
           </div>
         ) : null}
+      </section>
+
+      <section aria-labelledby="admin-releases" className="mt-12">
+        <h3 id="admin-releases" className="eyebrow">
+          {t("releasesHeading")}
+        </h3>
+        {(releases ?? []).length === 0 ? (
+          <p className="mt-3 max-w-prose text-sm italic text-ink-soft">
+            {t("releasesEmpty")}
+          </p>
+        ) : (
+          <ul className="mt-4 space-y-3 text-sm">
+            {(releases ?? []).map((r) => {
+              const book = r.books as unknown as {
+                title: string;
+                authors: { full_name: string };
+              } | null;
+              return (
+                <li key={r.id} className="rule pt-3">
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <span>
+                      {book?.title} — {t("candidateNo", { number: r.candidate_number })}
+                    </span>
+                    <span className="text-ink-faint">{book?.authors.full_name}</span>
+                    <span className="text-ink-faint">
+                      #{r.artifact_number} · {r.serializer_version}
+                    </span>
+                    <span className="text-ink-faint">{date(r.declared_at)}</span>
+                    <span className={r.disposition === "active" ? "text-ink" : "italic text-ink-faint"}>
+                      {t(`releaseDisposition.${r.disposition}`)}
+                    </span>
+                  </div>
+                  <p className="mt-1 font-sans text-xs text-ink-soft">
+                    {(r.release_channel_participations ?? [])
+                      .map((p) => {
+                        const channel = p.release_channels as unknown as {
+                          display_name: string;
+                        } | null;
+                        const events = (p.release_channel_events ?? []).map((e) => ({
+                          id: e.id as string,
+                          event_type: e.event_type as never,
+                          recorded_at: e.recorded_at as string,
+                          corrects_event_id: e.corrects_event_id as string | null,
+                          hasEvidence: (e.release_evidence ?? []).length > 0,
+                        }));
+                        const derived = deriveChannelState(
+                          events,
+                          r.disposition as never,
+                        );
+                        return `${channel?.display_name}: ${t(`channelState.${derived.state}`)}`;
+                      })
+                      .join(" · ") || t("noChannels")}
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
 
       <section aria-labelledby="admin-delegations" className="mt-12">

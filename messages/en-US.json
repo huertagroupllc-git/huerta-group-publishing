@@ -2268,7 +2268,24 @@
       "createAction": "Record the delegation",
       "artifactsHeading": "Publication artifacts",
       "artifactsEmpty": "No artifacts have been generated.",
-      "failedAttemptsHeading": "Failed export attempts"
+      "failedAttemptsHeading": "Failed export attempts",
+      "releasesHeading": "Releases",
+      "releasesEmpty": "No releases have been declared.",
+      "noChannels": "no channels yet",
+      "releaseDisposition": {
+        "active": "active",
+        "withdrawn": "withdrawn",
+        "superseded": "superseded"
+      },
+      "channelState": {
+        "intended": "Intended",
+        "submitted": "Submitted",
+        "accepted": "Accepted",
+        "available": "Available",
+        "rejected": "Rejected",
+        "removed": "Removed",
+        "withdrawn": "Withdrawn"
+      }
     },
     "errors": {
       "manuscriptLocked": "The composition is locked; unlock it before changing the manuscript's shape.",
@@ -2301,7 +2318,18 @@
       "exportStorageFailed": "The EPUB could not be preserved. The attempt is on record.",
       "reproducibilityMismatch": "Regeneration did not reproduce the recorded artifact exactly. Nothing was recorded — this requires imprint attention.",
       "artifactNotFound": "That artifact is not available.",
-      "downloadFailed": "The download could not be prepared."
+      "downloadFailed": "The download could not be prepared.",
+      "releaseMigrationMissing": "The release schema has not been applied yet (migration 20260812000000_publication_releases.sql).",
+      "releaseAlreadyActive": "An active release already exists for this artifact.",
+      "releaseNotActive": "This release is no longer active.",
+      "evidenceRequired": "Acceptance and availability require recorded evidence. Nothing was recorded.",
+      "declareFailed": "The release could not be declared.",
+      "channelAddFailed": "The channel could not be added.",
+      "eventRecordFailed": "The fact could not be recorded.",
+      "eventInvalid": "That entry is not recognized.",
+      "noteRequired": "A note is required for this entry.",
+      "withdrawReleaseFailed": "The release could not be withdrawn.",
+      "supersedeFailed": "The supersession could not be recorded."
     },
     "notices": {
       "candidatePresented": "The candidate has been presented and its composition is frozen.",
@@ -2314,7 +2342,12 @@
       "authorizationWithdrawn": "The authorization has been withdrawn. The original act remains on record.",
       "delegationCreated": "The delegation has been recorded.",
       "delegationRevoked": "The delegation has been revoked.",
-      "exportSucceeded": "The EPUB was generated, validated, and preserved."
+      "exportSucceeded": "The EPUB was generated, validated, and preserved.",
+      "releaseDeclared": "The release has been declared and its provenance is frozen.",
+      "channelAdded": "The intended channel has been added.",
+      "eventRecorded": "The fact has been recorded.",
+      "releaseWithdrawn": "The release has been withdrawn. Its record remains.",
+      "releaseSuperseded": "The supersession has been recorded. Both releases remain."
     },
     "export": {
       "heading": "Deterministic Export — EPUB",
@@ -2330,6 +2363,108 @@
       "downloadAction": "Download the EPUB",
       "attemptsHeading": "Failed attempts",
       "failedAttempt": "Attempt {number} failed ({code})."
+    },
+    "releaseRecord": {
+      "heading": "The Release Record",
+      "empty": "No release has been declared for this book.",
+      "observations": {
+        "publishedEvidenceBacked": "The book states Published, and the release record carries evidenced availability. The stated fact is evidence-backed.",
+        "publishedWithoutRelease": "The book states Published, but no release has been declared. The stated fact has no release evidence behind it.",
+        "publishedNoAvailability": "The book states Published, but no channel has evidenced public availability yet.",
+        "releaseWhileNotPublished": "A release is active while the book does not yet state Published. The Book Record is edited on the book's page; nothing changes it automatically.",
+        "withdrawnReleaseHistorical": "A withdrawn release remains on record as history."
+      },
+      "declare": {
+        "heading": "Declare the release of Artifact No. {number}",
+        "lede": "Declaring records the imprint's permanent publication act for this exact artifact — its candidate, fingerprint, checksum, and serializer are frozen into the record. The author's approval and the imprint's authorization must be open; nothing else is asked.",
+        "channelsLegend": "Intended channels",
+        "reasonLabel": "Note for the record",
+        "action": "Declare the release"
+      },
+      "entry": {
+        "heading": "Release declared {date}",
+        "provenance": "Candidate No. {candidate} · Artifact No. {artifact} · {serializer}",
+        "withdrawnLine": "Withdrawn {date}.",
+        "effective": "effective {date} ·",
+        "recorded": "recorded {date}",
+        "corrects": "(corrects an earlier entry)"
+      },
+      "disposition": {
+        "active": "active",
+        "withdrawn": "withdrawn",
+        "superseded": "superseded"
+      },
+      "channelState": {
+        "intended": "Intended",
+        "submitted": "Submitted",
+        "accepted": "Accepted",
+        "available": "Available",
+        "rejected": "Rejected",
+        "removed": "Removed",
+        "withdrawn": "Withdrawn"
+      },
+      "evidenceClass": {
+        "asserted": "asserted",
+        "evidenced": "evidence-backed"
+      },
+      "gaps": {
+        "externalStateWithoutSubmission": "An external state is recorded without a recorded submission — recorded retroactively.",
+        "availabilityWithoutAcceptance": "Availability is recorded without a recorded acceptance."
+      },
+      "channelEvent": {
+        "submission": "Submission",
+        "acceptance": "Acceptance",
+        "availability": "Public availability",
+        "rejection": "Rejection",
+        "removal": "Removal",
+        "amendment": "Amendment",
+        "correction": "Correction"
+      },
+      "releaseEvent": {
+        "withdrawal": "Release withdrawn",
+        "supersession": "Superseded by a later release",
+        "amendment": "Amendment",
+        "correction": "Correction"
+      },
+      "event": {
+        "typeLabel": "Record a channel fact",
+        "correctsLabel": "Corrects an earlier entry",
+        "correctsNone": "— none —",
+        "effectiveDateLabel": "Effective date",
+        "effectiveTimeLabel": "Time",
+        "effectiveTimeHint": "Leave empty when only the date is known; no clock time will be invented.",
+        "noteLabel": "Note",
+        "evidenceKindLabel": "Evidence",
+        "evidenceNone": "— none —",
+        "evidenceValueLabel": "Evidence value",
+        "evidenceSourceLabel": "Evidence source",
+        "recordAction": "Record the fact"
+      },
+      "addChannel": {
+        "label": "Add an intended channel",
+        "noteLabel": "Channel note",
+        "action": "Add the channel"
+      },
+      "noteEvent": {
+        "typeLabel": "Release-level entry",
+        "noteLabel": "Note",
+        "action": "Record the entry"
+      },
+      "withdraw": {
+        "reasonLabel": "Reason for withdrawal",
+        "action": "Withdraw the release"
+      },
+      "supersede": {
+        "successorLabel": "Superseded by",
+        "reasonLabel": "Reason",
+        "action": "Record the supersession"
+      },
+      "evidenceKind": {
+        "url": "URL",
+        "external_identifier": "External identifier",
+        "reference_number": "Reference number",
+        "note": "Note"
+      }
     }
   }
 }

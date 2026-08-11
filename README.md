@@ -126,7 +126,7 @@ Supabase as the permanent data layer; GitHub as the only path to
 production. Nine runtime dependencies; OpenAI is called by plain `fetch`
 in exactly two places (editorial readings, hosted TTS).
 
-- **Schema** — parallel domain models across 35 tables (author memory,
+- **Schema** — parallel domain models across 41 tables (author memory,
   book memory, manuscript, findings/reviews/deliberation, settings,
   membership/support/retention, import, publication), all RLS-enabled, integrity
   enforced by triggers, partial unique indexes, and composite
@@ -196,9 +196,10 @@ production build on every push to `main` and every pull request.
 in phases. Complete: WP-00 (CI, assembly invariant tests, migration
 baseline), the Phase 1 blueprint (approved with Revision 2), Phase 2 —
 the Candidate Foundation ([as-built](docs/operations/publication-candidates.md)),
-and Phase 3 — Deterministic Export: an authorized candidate renders to
-a validated, reproducible EPUB through the hgp-epub serializer, with
-immutable artifact identity and private preservation
-([as-built](docs/operations/deterministic-export.md)). Later phases
-(print PDF, covers, metadata/ISBN, editions, distribution, release)
-each begin under their own authorization.
+Phase 3 — Deterministic Export
+([as-built](docs/operations/deterministic-export.md)), and the Release
+Record: the imprint's permanent declared publication act with channel
+participations, evidence-backed derived states, and forward-only
+post-release history ([as-built](docs/operations/release-record.md)).
+Later phases (print PDF, covers, metadata/ISBN, editions, automated
+distribution) each begin under their own authorization.

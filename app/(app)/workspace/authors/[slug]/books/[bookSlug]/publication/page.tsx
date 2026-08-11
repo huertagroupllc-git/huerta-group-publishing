@@ -12,6 +12,8 @@ import {
 import { getBookStudy } from "@/lib/books/queries";
 import { getPublicationDesk } from "@/lib/publication/queries";
 import { getExportHistory } from "@/lib/publication/export-queries";
+import { getReleaseDesk } from "@/lib/publication/release-queries";
+import { ReleaseRecord } from "@/components/release-record";
 import {
   downloadArtifact,
   generateEpubArtifact,
@@ -80,6 +82,17 @@ export default async function PublicationDeskPage({
     ? await getExportHistory(current.record.id)
     : { artifacts: [], attempts: [] };
   const exportEligible = Boolean(current?.approval && current?.authorization);
+  const releaseDesk = await getReleaseDesk(book.id, book.status);
+  const latestArtifact = exportHistory.artifacts[0] ?? null;
+  const declareArtifact =
+    exportEligible &&
+    latestArtifact &&
+    !releaseDesk.releases.some(
+      (r) =>
+        r.artifact_id === latestArtifact.id && r.disposition === "active",
+    )
+      ? { id: latestArtifact.id, artifactNumber: latestArtifact.artifact_number }
+      : null;
 
   return (
     <WorkspaceFrame
@@ -510,6 +523,15 @@ export default async function PublicationDeskPage({
           )}
         </section>
       )}
+
+      {/* ---- The Release Record — the permanent publication record ---- */}
+      <ReleaseRecord
+        bookId={book.id}
+        deskPath={deskPath}
+        isStaff={isStaff}
+        desk={releaseDesk}
+        declareArtifact={declareArtifact}
+      />
 
       {/* ---- Candidate history — nothing is ever deleted ---- */}
       <section aria-labelledby="history-heading" className="rule mt-10 pt-6">
