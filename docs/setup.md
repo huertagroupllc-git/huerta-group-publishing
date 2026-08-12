@@ -32,7 +32,7 @@ touch Supabase and works even if these are unset; `/signin`,
 
 ## 2. Apply the database migrations
 
-**40 migrations**, applied strictly in filename order. The hosted
+**42 migrations**, applied strictly in filename order. The hosted
 database's applied state is reconciled against this list in
 [docs/operations/production-migration-baseline.md](operations/production-migration-baseline.md)
 — consult and update that record whenever migrations are applied.
@@ -191,6 +191,14 @@ database's applied state is reconciled against this list in
     reviewed referential unlinks), the assignment-aware consumption
     eligibility (isbn_consumable_for_artifact), workflow functions,
     RLS, and grants.
+41. `20260821000000_assigned_isbn_visibility.sql` — registry
+    visibility follows assignment: authors read registrations (and
+    evidence) currently assigned to their own books
+    (production-verification fix; superseded by 42).
+42. `20260822000000_assigned_isbn_visibility_fix.sql` — recreates
+    migration 41's policies with the outer-row references qualified
+    (unqualified columns were captured by the subquery — one policy
+    never matched, the other was overbroad).
 
 Storage buckets and cron jobs are created by the migrations themselves;
 there is no separate manual step beyond confirming pg_cron is enabled.

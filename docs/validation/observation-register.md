@@ -14,6 +14,4 @@ Identifier convention: `FVO-<cycle>-<seq>` per the
 
 | ID | Recorded | Cycle | Classification | Theme | Evidence Strength | Disposition | Title |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-
-*No observations recorded yet. Founder Validation Cycle 001 is open;
-the first observation will be `FVO-001-001`.*
+| [FVO-001-001](observations/FVO-001-001.md) | 2026-08-11 | 001 | Implementation Defect | unassigned | Single Occurrence | Closed | Assigned identifiers were invisible to the book's author |

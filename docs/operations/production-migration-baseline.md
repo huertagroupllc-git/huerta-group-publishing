@@ -155,6 +155,57 @@ repair the ledger immediately and append an entry below.
   enforcement, supersession, author-first authorization ordering,
   immutability and no-delete probes, RLS invisibility to strangers,
   no-implicit-proxy, delegated approval. No discrepancy.
+- **August 11, 2026 (eighth entry)** — Migrations 40
+  (`20260820000000_edition_architecture.sql`, Edition Architecture
+  Phase 2), 41 (`20260821000000_assigned_isbn_visibility.sql`), and
+  42 (`20260822000000_assigned_isbn_visibility_fix.sql`, both defect
+  fixes found by this verification) applied via `supabase db push`.
+  Re-verified: **42/42 in exact local = remote agreement.** Production
+  verification with disposable TEST-labeled fixtures carried through
+  the full sanctioned chain (metadata V1 active; three registrations —
+  two imprint allocations, one externally evidenced; candidate
+  approved + authorized; production EPUB, print interior, proof
+  interior, and cover artifacts): 33 probes all passed — authors
+  cannot declare; empty Distinction Statement refused; declaration
+  with founding metadata snapshot and auto-current-into-emptiness;
+  edition identity immutable; second edition leaves the pointer
+  untouched; the Current pointer moves forward and back with no
+  history mutation; authors cannot move it; ebook ⇐ EPUB and
+  paperback ⇐ interior + cover associations; EPUB-into-paperback,
+  proof-artifact, and duplicate-association refusals; forward-only
+  association correction then truthful re-association; artifact
+  identity untouched; institutional assignment to Edition + paperback
+  with exact snapshots; double assignment refused
+  (`isbn_already_assigned`); kind/externally-assigned agreement
+  enforced both ways; unsupported manifestation refused; occupied
+  manifestation slot refused; authors cannot assign; RLS — author
+  reads own editions, stranger reads none; assignment correction
+  preserves the original with back-pointer and **never restores
+  availability**; the consumption eligibility matrix (assigned
+  paperback identifier consumable for print-pdf/cover-pdf, refused
+  for epub; unassigned allocation refused; external path unchanged);
+  an assigned identifier consumed end to end into a consuming print
+  artifact and refused for a mismatched class; supersession
+  (forward-only, successor named, pointer repointed); closed edition
+  refuses acts; withdrawal clears the pointer and preserves
+  associations and assignments; **the whole-book cascade erased
+  editions and associations while both assignments SURVIVED with
+  edition/book referentially unlinked and snapshots intact — and the
+  identifier remained unassignable from a fresh book
+  (`isbn_already_assigned`): the no-reuse law outlives the book.**
+  Two defects found and fixed forward: (41) registry visibility did
+  not follow assignment, so authors could not see or consume
+  identifiers assigned to their own books; (42) migration 41's
+  policies suffered column capture (unqualified outer references) —
+  one never matched, one was overbroad; both re-verified post-fix.
+  One batch-structure artifact (insert-then-book-delete in a single
+  transaction trips the deferred companion constraint at commit) was
+  identified as verification-harness behavior, not a product defect —
+  fail-closed and correct. Founder Validation observation
+  **FVO-001-001** recorded (Implementation Defect, Closed). Zero
+  fixture residue (baseline restored exactly: 1 book, 1 author, 10
+  review runs; all publication and edition tables 0); no storage
+  objects; no OpenAI call. No discrepancy.
 - **August 11, 2026 (seventh entry)** — Migrations 38
   (`20260818000000_cover_production.sql`, Cover Production Phase 2)
   and 39 (`20260819000000_cover_asset_cascade_unlink.sql`, a defect

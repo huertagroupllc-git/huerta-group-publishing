@@ -134,6 +134,30 @@ export default async function PublicationDeskPage({
       r.externally_assigned &&
       r.evidence_count > 0,
   );
+  // Institutionally assigned identifiers (Edition blueprint §10) are
+  // consumable for artifacts of their manifestation's format class.
+  const { data: assignedRows } = await supabase
+    .from("isbn_assignments")
+    .select(
+      "registration_id, manifestation, disposition, isbn_registrations(id, isbn_as_entered, disposition)",
+    )
+    .eq("book_id", book.id)
+    .eq("disposition", "assigned");
+  const assignedFor = (cls: "ebook" | "paperback") =>
+    (assignedRows ?? [])
+      .filter((a) => a.manifestation === cls)
+      .map(
+        (a) =>
+          a.isbn_registrations as unknown as {
+            id: string;
+            isbn_as_entered: string;
+            disposition: string;
+          } | null,
+      )
+      .filter(
+        (r): r is { id: string; isbn_as_entered: string; disposition: string } =>
+          r !== null && r.disposition === "recorded",
+      );
   const recordedOnlyIsbns = metadataDesk.isbns.filter(
     (r) => r.disposition === "recorded" && !r.externally_assigned,
   );
@@ -156,7 +180,12 @@ export default async function PublicationDeskPage({
   });
   const selectClasses =
     "mt-1 w-full border-b border-rule bg-transparent py-2 font-sans text-sm focus:outline-none";
-  const consumptionFields = (idPrefix: string) => (
+  const consumptionFields = (
+    idPrefix: string,
+    manifestationClass: "ebook" | "paperback" = idPrefix.startsWith("epub")
+      ? "ebook"
+      : "paperback",
+  ) => (
     <div className="mt-3 grid max-w-md gap-3">
       <div>
         <label
@@ -196,7 +225,7 @@ export default async function PublicationDeskPage({
         optional
         hint={t("consumption.reasonHint")}
       />
-      {eligibleIsbns.length ? (
+      {eligibleIsbns.length || assignedFor(manifestationClass).length ? (
         <div>
           <label className="eyebrow block" htmlFor={`${idPrefix}-isbn`}>
             {t("consumption.isbnLabel")}
@@ -208,6 +237,14 @@ export default async function PublicationDeskPage({
             defaultValue=""
           >
             <option value="">{t("consumption.isbnNone")}</option>
+            {assignedFor(manifestationClass)
+              .filter((a) => !eligibleIsbns.some((r) => r.id === a.id))
+              .map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.isbn_as_entered} —{" "}
+                  {t(`edition.manifestation.${manifestationClass}`)}
+                </option>
+              ))}
             {eligibleIsbns.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.isbn_as_entered}
