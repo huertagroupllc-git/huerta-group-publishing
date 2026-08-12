@@ -83,7 +83,11 @@ Per-artifact restatement of an externally evidenced fact, never
 assignment: eligibility requires a current (`recorded`) registration
 of this book with `externally_assigned = true` and at least one
 evidence row — enforced in the resolver and again by the database
-(`isbn_not_eligible`). The companion snapshots the normalized and
+(`isbn_not_eligible`). A requested identifier that cannot be resolved
+under the caller's RLS is refused, never silently dropped (migration
+`20260817000000`, a production-verification defect fix: the original
+recording functions' LEFT JOIN resolved an invisible registration to
+NULL and recorded without it). The companion snapshots the normalized and
 as-entered identifier, the disposition, and the verbatim external
 format wording at consumption, so later corrections never re-read
 history. Recorded-only registrations are intentionally non-consumable;

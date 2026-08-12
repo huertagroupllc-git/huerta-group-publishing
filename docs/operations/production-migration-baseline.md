@@ -155,6 +155,42 @@ repair the ledger immediately and append an entry below.
   enforcement, supersession, author-first authorization ordering,
   immutability and no-delete probes, RLS invisibility to strangers,
   no-implicit-proxy, delegated approval. No discrepancy.
+- **August 11, 2026 (sixth entry)** — Migrations 36
+  (`20260816000000_metadata_consumption.sql`, Publication Metadata
+  Consumption Phase 2) and 37
+  (`20260817000000_isbn_consumption_visibility.sql`, a defect fix
+  found by this verification) applied via `supabase db push`.
+  Re-verified: **37/37 in exact local = remote agreement.** Production
+  verification with disposable TEST-labeled fixtures (three auth
+  users, two authors, one book with a finalized chapter, carried
+  through the sanctioned chain: lock → present → approve → authorize;
+  Bibliographic Record V1 finalized + activated through the governed
+  RPCs; one externally evidenced and one recorded-only registration):
+  20 SQL probes all passed — **SQL bmv-v1 fingerprint equals the
+  TypeScript fingerprint for identical content** (the dual-computation
+  law, cross-checked live); consuming artifact recorded atomically
+  with its Metadata Pin and exact identifier snapshots (basis,
+  normalized + as-entered ISBN, disposition, verbatim wording, actor);
+  wrong fingerprint refused (`metadata_fingerprint_mismatch`); draft
+  version structurally unconsumable; non-active version refused under
+  the active basis; historical selection without a reason refused;
+  same consumed identity with a divergent checksum refused
+  (`reproducibility_mismatch`); byte-identical regeneration recorded
+  as a new artifact; a different pinned version yielded a distinct
+  artifact under the widened key; 1.0.0 artifacts still record
+  without a companion and still refuse divergent checksums (the old
+  law intact); companion immutable and undeletable; a lying
+  identifier snapshot refused on direct insert; RLS — the author
+  reads their own pins, a stranger reads none. Defect found and fixed
+  forward: the recording functions resolved a requested identifier
+  with a LEFT JOIN under invoker RLS, so an invisible or ineligible
+  registration was silently dropped instead of refused — migration 37
+  refuses (`isbn_not_eligible`); re-probed for both the
+  author-invisible and the staff-visible-but-ineligible cases. Zero
+  fixture residue (counts returned exactly to baseline: 1 book, 1
+  author, 10 review runs; candidates/artifacts/attempts/companions/
+  registrations/releases all 0); no storage objects were created; no
+  OpenAI call occurred. No discrepancy.
 - **August 11, 2026 (fifth entry)** — Migrations 34
   (`20260814000000_publication_metadata.sql`, Publication Metadata &
   ISBN Phase 2) and 35
