@@ -21,7 +21,7 @@ import {
 import { generatePrintArtifact } from "@/lib/publication/print-actions";
 import {
   PRINT_SERIALIZER_ID,
-  PRINT_SERIALIZER_VERSION,
+  PRINT_SERIALIZER_VERSION_METADATA,
 } from "@/lib/publication/print-serializer";
 import {
   HGP_TRADE_6X9_TEXT_V1,
@@ -29,8 +29,10 @@ import {
 } from "@/lib/publication/print-profile";
 import {
   SERIALIZER_ID,
-  SERIALIZER_VERSION,
+  SERIALIZER_VERSION_METADATA,
 } from "@/lib/publication/serializer";
+import { getMetadataDesk } from "@/lib/publication/metadata-queries";
+import { consumptionReadiness } from "@/lib/publication/consumption-readiness";
 import { shortFingerprint } from "@/lib/publication/types";
 import {
   approveCandidate,
@@ -92,6 +94,110 @@ export default async function PublicationDeskPage({
     : { artifacts: [], attempts: [] };
   const exportEligible = Boolean(current?.approval && current?.authorization);
   const releaseDesk = await getReleaseDesk(book.id, book.status);
+
+  // Metadata consumption (Consumption blueprint §24–§26): the active
+  // finalized Bibliographic Record flows into generation by default;
+  // historical selection and identifier consumption are deliberate
+  // human choices made here.
+  const metadataDesk = await getMetadataDesk(book.id, book, author);
+  const finalVersions = metadataDesk.versions.filter(
+    (v) => v.status === "final",
+  );
+  const activeVersion = metadataDesk.active;
+  const eligibleIsbns = metadataDesk.isbns.filter(
+    (r) =>
+      r.disposition === "recorded" &&
+      r.externally_assigned &&
+      r.evidence_count > 0,
+  );
+  const recordedOnlyIsbns = metadataDesk.isbns.filter(
+    (r) => r.disposition === "recorded" && !r.externally_assigned,
+  );
+  const candidateIdentityMismatch =
+    current && activeVersion
+      ? current.record.frozen_title !== activeVersion.derived_title ||
+        (current.record.frozen_subtitle ?? null) !==
+          (activeVersion.derived_subtitle ?? null) ||
+        current.record.frozen_author_name !==
+          activeVersion.derived_author_display ||
+        current.record.frozen_language !== activeVersion.derived_language
+      : null;
+  const consumptionItems = consumptionReadiness({
+    activeFinalExists: Boolean(activeVersion),
+    activeVersionNumber: activeVersion?.version_number ?? null,
+    bookDivergence: metadataDesk.divergence,
+    candidateIdentityMismatch,
+    eligibleIsbnCount: eligibleIsbns.length,
+    recordedOnlyIsbnCount: recordedOnlyIsbns.length,
+  });
+  const selectClasses =
+    "mt-1 w-full border-b border-rule bg-transparent py-2 font-sans text-sm focus:outline-none";
+  const consumptionFields = (idPrefix: string) => (
+    <div className="mt-3 grid max-w-md gap-3">
+      <div>
+        <label
+          className="eyebrow block"
+          htmlFor={`${idPrefix}-metadata-version`}
+        >
+          {t("consumption.versionLabel")}
+        </label>
+        <select
+          id={`${idPrefix}-metadata-version`}
+          name="metadata_version_id"
+          className={selectClasses}
+          defaultValue=""
+        >
+          <option value="">
+            {activeVersion
+              ? t("consumption.activeOption", {
+                  number: activeVersion.version_number,
+                })
+              : t("consumption.noActiveOption")}
+          </option>
+          {finalVersions
+            .filter((v) => v.id !== activeVersion?.id)
+            .map((v) => (
+              <option key={v.id} value={v.id}>
+                {t("consumption.historicalOption", {
+                  number: v.version_number,
+                })}
+              </option>
+            ))}
+        </select>
+      </div>
+      <Field
+        id={`${idPrefix}-metadata-reason`}
+        name="metadata_reason"
+        label={t("consumption.reasonLabel")}
+        optional
+        hint={t("consumption.reasonHint")}
+      />
+      {eligibleIsbns.length ? (
+        <div>
+          <label className="eyebrow block" htmlFor={`${idPrefix}-isbn`}>
+            {t("consumption.isbnLabel")}
+          </label>
+          <select
+            id={`${idPrefix}-isbn`}
+            name="isbn_registration_id"
+            className={selectClasses}
+            defaultValue=""
+          >
+            <option value="">{t("consumption.isbnNone")}</option>
+            {eligibleIsbns.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.isbn_as_entered}
+                {r.external_format_wording
+                  ? ` — ${r.external_format_wording}`
+                  : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
+    </div>
+  );
+
   const latestArtifact =
     exportHistory.artifacts.find((a) => a.designation === "production") ??
     null;
@@ -395,9 +501,37 @@ export default async function PublicationDeskPage({
             <p className="mt-1 font-sans text-xs text-ink-faint">
               {t("export.serializerLine", {
                 serializer: SERIALIZER_ID,
-                version: SERIALIZER_VERSION,
+                version: SERIALIZER_VERSION_METADATA,
               })}
             </p>
+
+            {/* Metadata consumption — facts first, then the choice */}
+            <div className="mt-4">
+              <p className="eyebrow">{t("consumption.heading")}</p>
+              <p className="mt-1 max-w-prose font-sans text-xs text-ink-soft">
+                {t("consumption.lede")}
+              </p>
+              <ul className="mt-2 max-w-prose space-y-1 font-sans text-xs">
+                {consumptionItems.map((item, i) => (
+                  <li
+                    key={`${item.code}-${i}`}
+                    className={
+                      item.state === "attention"
+                        ? "text-oxblood"
+                        : "text-ink-soft"
+                    }
+                  >
+                    {item.code === "metadataDiverged"
+                      ? t(`metadata.divergence.${item.params?.cause}`)
+                      : t(
+                          `consumption.readiness.${item.code}`,
+                          item.params as Record<string, string> | undefined,
+                        )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             {exportEligible ? (
               <form action={generateEpubArtifact} className="mt-4">
                 <input
@@ -409,11 +543,14 @@ export default async function PublicationDeskPage({
                 <p className="mb-3 max-w-prose text-sm text-ink-soft">
                   {t("export.lede")}
                 </p>
-                <PrimaryButton>
-                  {exportHistory.artifacts.length
-                    ? t("export.regenerateAction")
-                    : t("export.generateAction")}
-                </PrimaryButton>
+                {consumptionFields("epub")}
+                <div className="mt-3">
+                  <PrimaryButton>
+                    {exportHistory.artifacts.length
+                      ? t("export.regenerateAction")
+                      : t("export.generateAction")}
+                  </PrimaryButton>
+                </div>
               </form>
             ) : (
               <p className="mt-3 max-w-prose text-sm italic text-ink-soft">
@@ -461,6 +598,23 @@ export default async function PublicationDeskPage({
                     <p className="mt-1 break-all font-mono text-[10px] text-ink-faint">
                       sha256 {a.checksum}
                     </p>
+                    {a.metadata ? (
+                      <p className="mt-0.5 font-sans text-xs text-ink-faint">
+                        {t("consumption.artifactLine", {
+                          number: a.metadata.bibliographic_version_number,
+                        })}
+                        {a.metadata.selection_basis === "historical"
+                          ? ` · ${t("consumption.historicalMark")}`
+                          : ""}
+                        {a.metadata.isbn_as_entered_consumed
+                          ? ` · ISBN ${a.metadata.isbn_as_entered_consumed}`
+                          : ""}
+                        {" · "}
+                        <span className="font-mono">
+                          {shortFingerprint(a.metadata.metadata_fingerprint)}
+                        </span>
+                      </p>
+                    ) : null}
                     <form action={downloadArtifact} className="mt-1">
                       <input type="hidden" name="artifact_id" value={a.id} />
                       <input type="hidden" name="desk_path" value={deskPath} />
@@ -509,7 +663,7 @@ export default async function PublicationDeskPage({
               · {shortFingerprint(profileFingerprint(HGP_TRADE_6X9_TEXT_V1))} ·{" "}
               {t("print.serializerLine", {
                 serializer: PRINT_SERIALIZER_ID,
-                version: PRINT_SERIALIZER_VERSION,
+                version: PRINT_SERIALIZER_VERSION_METADATA,
               })}
             </p>
             <p className="mt-1 font-sans text-xs text-ink-faint">
@@ -518,7 +672,7 @@ export default async function PublicationDeskPage({
             <p className="mt-3 max-w-prose text-sm text-ink-soft">
               {t("print.lede")}
             </p>
-            <div className="mt-4 flex flex-wrap gap-4">
+            <div className="mt-4 flex flex-wrap gap-8">
               <form action={generatePrintArtifact}>
                 <input
                   type="hidden"
@@ -527,7 +681,10 @@ export default async function PublicationDeskPage({
                 />
                 <input type="hidden" name="desk_path" value={deskPath} />
                 <input type="hidden" name="designation" value="proof" />
-                <QuietButton>{t("print.proofAction")}</QuietButton>
+                {consumptionFields("print-proof")}
+                <div className="mt-3">
+                  <QuietButton>{t("print.proofAction")}</QuietButton>
+                </div>
               </form>
               {exportEligible ? (
                 <form action={generatePrintArtifact}>
@@ -538,7 +695,10 @@ export default async function PublicationDeskPage({
                   />
                   <input type="hidden" name="desk_path" value={deskPath} />
                   <input type="hidden" name="designation" value="production" />
-                  <PrimaryButton>{t("print.productionAction")}</PrimaryButton>
+                  {consumptionFields("print-production")}
+                  <div className="mt-3">
+                    <PrimaryButton>{t("print.productionAction")}</PrimaryButton>
+                  </div>
                 </form>
               ) : (
                 <p className="max-w-prose self-center font-sans text-xs italic text-ink-soft">

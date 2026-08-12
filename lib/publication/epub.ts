@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { buildDeterministicZip, type ZipEntryInput } from "@/lib/publication/zip";
+import type { ConsumedMetadata } from "@/lib/publication/metadata-fingerprint";
 import type {
   PublicationRepresentation,
   RepresentationChapter,
@@ -82,7 +83,51 @@ export interface GeneratedEpub {
   fileNames: string[];
 }
 
-export function generateEpub(rep: PublicationRepresentation): GeneratedEpub {
+/** MARC relator terms for the ten governed contributor roles — every
+ *  role maps cleanly (the vocabulary was chosen mappable), so no role
+ *  ships as a stretched code. */
+const MARC_RELATORS: Record<string, string> = {
+  author: "aut",
+  "co-author": "aut",
+  editor: "edt",
+  translator: "trl",
+  illustrator: "ill",
+  photographer: "pht",
+  foreword: "aui",
+  introduction: "aui",
+  afterword: "aft",
+  contributor: "ctb",
+};
+
+/**
+ * Package-metadata additions of hgp-epub 2.0.0 (Consumption blueprint
+ * §13–§14): the unique identifier remains the institutional urn:uuid
+ * in every case; a consumed ISBN is an additional identifier; the
+ * consumed version supplies only what the candidate cannot know.
+ * When `consumed` is absent, generation is exactly hgp-epub 1.0.0.
+ */
+function metadataElements(consumed: ConsumedMetadata): string {
+  let out = "";
+  if (consumed.isbn13) {
+    out += `<dc:identifier>urn:isbn:${esc(consumed.isbn13)}</dc:identifier>\n`;
+  }
+  consumed.contributors.forEach((c, i) => {
+    const id = `contrib-${i + 1}`;
+    out +=
+      `<dc:contributor id="${id}">${esc(c.name)}</dc:contributor>\n` +
+      `<meta refines="#${id}" property="role" scheme="marc:relators">${MARC_RELATORS[c.role] ?? "ctb"}</meta>\n`;
+  });
+  out += `<dc:publisher>${esc(consumed.imprint)}</dc:publisher>\n`;
+  if (consumed.description) {
+    out += `<dc:description>${esc(consumed.description)}</dc:description>\n`;
+  }
+  return out;
+}
+
+export function generateEpub(
+  rep: PublicationRepresentation,
+  consumed?: ConsumedMetadata,
+): GeneratedEpub {
   const lbl = labels(rep.language);
 
   const contentFiles: { name: string; id: string; content: string }[] = [];
@@ -174,6 +219,7 @@ export function generateEpub(rep: PublicationRepresentation): GeneratedEpub {
     `<dc:title>${esc(rep.title)}</dc:title>\n` +
     `<dc:creator>${esc(rep.authorName)}</dc:creator>\n` +
     `<dc:language>${esc(rep.language)}</dc:language>\n` +
+    (consumed ? metadataElements(consumed) : "") +
     `<meta property="dcterms:modified">${esc(rep.modified)}</meta>\n` +
     `</metadata>\n` +
     `<manifest>\n${manifestItems.join("\n")}\n</manifest>\n` +

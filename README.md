@@ -212,6 +212,12 @@ Publication Metadata & ISBN: the versioned Bibliographic Record
 (derived Book facts with divergence detection, authored commercial
 metadata, version-frozen contributors) and the provenance-first ISBN
 Registry — recording and forward-only correction only, no assignment
-path ([as-built](docs/operations/publication-metadata.md)).
+path ([as-built](docs/operations/publication-metadata.md)), and
+Publication Metadata Consumption: hgp-epub/hgp-print 2.0.0 consume
+one pinned finalized Bibliographic Record version per artifact
+(immutable Metadata Pin + Identifier Consumption provenance, bmv-v1
+dual-computed fingerprint, deterministic print copyright page, EPUB
+package metadata; 1.0.0 behavior byte-frozen)
+([as-built](docs/operations/metadata-consumption.md)).
 Later phases (covers, editions, ISBN assignment, ONIX, automated
 distribution) each begin under their own authorization.

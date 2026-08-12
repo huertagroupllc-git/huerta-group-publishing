@@ -7,9 +7,13 @@ import { createClient } from "@/lib/supabase/server";
 import {
   buildPublicationRepresentation,
   SERIALIZER_ID,
-  SERIALIZER_VERSION,
+  SERIALIZER_VERSION_METADATA,
 } from "@/lib/publication/serializer";
 import { generateEpub } from "@/lib/publication/epub";
+import {
+  candidateIdentityMatches,
+  resolveConsumption,
+} from "@/lib/publication/consumption";
 import {
   validateEpub,
   VALIDATOR_ID,
@@ -41,6 +45,12 @@ const KNOWN = new Set([
   "authorization_required",
   "reproducibility_mismatch",
   "not_authorized",
+  "metadata_version_required",
+  "metadata_reason_required",
+  "metadata_identity_mismatch",
+  "metadata_fingerprint_mismatch",
+  "metadata_consumption_required",
+  "isbn_not_eligible",
 ]);
 
 function mapCode(error: { code?: string; message?: string }, fallback: string) {
@@ -64,6 +74,11 @@ function mapCode(error: { code?: string; message?: string }, fallback: string) {
 export async function generateEpubArtifact(formData: FormData) {
   const candidateId = String(formData.get("candidate_id") ?? "");
   const deskPath = String(formData.get("desk_path") ?? "/workspace");
+  const consumptionInput = {
+    metadataVersionId: String(formData.get("metadata_version_id") ?? ""),
+    metadataReason: String(formData.get("metadata_reason") ?? ""),
+    isbnRegistrationId: String(formData.get("isbn_registration_id") ?? ""),
+  };
 
   const { supabase } = await requireEntitledUser();
 
@@ -73,7 +88,7 @@ export async function generateEpubArtifact(formData: FormData) {
     p_candidate_id: candidateId,
     p_format: "epub",
     p_serializer: SERIALIZER_ID,
-    p_serializer_version: SERIALIZER_VERSION,
+    p_serializer_version: SERIALIZER_VERSION_METADATA,
   });
   if (begin.error) {
     console.error("[publication] beginExport failed", begin.error);
@@ -126,6 +141,32 @@ export async function generateEpubArtifact(formData: FormData) {
     (versions ?? []).map((v) => [v.id as string, v.content as string]),
   );
 
+  // The Metadata Pin (Consumption blueprint §6): a finalized version,
+  // active by default, historical only with a recorded reason — and
+  // the §6 coherence gate: an official EPUB must not state two
+  // identities for one work.
+  const resolution = await resolveConsumption(
+    supabase,
+    record!.book_id,
+    consumptionInput,
+  );
+  if (!resolution.ok) {
+    await failAttempt(
+      resolution.code,
+      "metadata",
+      mapCode({ message: resolution.code }, "exportFailed"),
+    );
+  }
+  const selection = (resolution as Extract<typeof resolution, { ok: true }>)
+    .selection;
+  if (!candidateIdentityMatches(record!, selection.derived)) {
+    await failAttempt(
+      "metadata_identity_mismatch",
+      "metadata",
+      "metadataIdentityMismatch",
+    );
+  }
+
   let generated;
   try {
     const representation = buildPublicationRepresentation(
@@ -133,7 +174,7 @@ export async function generateEpubArtifact(formData: FormData) {
       composition,
       contents,
     );
-    generated = generateEpub(representation);
+    generated = generateEpub(representation, selection.consumed);
   } catch (error) {
     console.error("[publication] epub generation failed", error);
     await failAttempt("generation_failed", "serialize", "exportFailed");
@@ -148,21 +189,32 @@ export async function generateEpubArtifact(formData: FormData) {
     await failAttempt("validation_failed", "validate", "exportValidationFailed");
   }
 
-  // Reproducibility: an earlier artifact for the same serializer version
-  // fixes the checksum forever (the database enforces this again).
-  const { data: prior } = await supabase
-    .from("publication_artifacts")
-    .select("checksum")
-    .eq("candidate_id", candidateId)
-    .eq("format", "epub")
-    .eq("serializer_version", SERIALIZER_VERSION)
-    .order("artifact_number", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (prior && prior.checksum !== generated!.checksum) {
+  // Widened reproducibility (Consumption blueprint §17): the same
+  // candidate + serializer version + consumed metadata identity fixes
+  // the checksum forever (the database enforces this again).
+  const { data: priorRows } = await supabase
+    .from("artifact_metadata_provenance")
+    .select(
+      "isbn13_consumed, bibliographic_version_id, publication_artifacts!inner(candidate_id, format, serializer_version, checksum)",
+    )
+    .eq("bibliographic_version_id", selection.versionId)
+    .eq("publication_artifacts.candidate_id", candidateId)
+    .eq("publication_artifacts.format", "epub")
+    .eq("publication_artifacts.serializer_version", SERIALIZER_VERSION_METADATA);
+  const prior = (priorRows ?? [])
+    .filter(
+      (p) =>
+        (p.isbn13_consumed ?? "") === (selection.consumed.isbn13 ?? ""),
+    )
+    .map(
+      (p) =>
+        (p.publication_artifacts as unknown as { checksum: string }).checksum,
+    )
+    .find(Boolean);
+  if (prior && prior !== generated!.checksum) {
     console.error("[publication] reproducibility mismatch", {
       candidateId,
-      expected: prior.checksum,
+      expected: prior,
       produced: generated!.checksum,
     });
     await failAttempt(
@@ -172,7 +224,7 @@ export async function generateEpubArtifact(formData: FormData) {
     );
   }
 
-  const storagePath = `${record!.book_id}/${candidateId}/${SERIALIZER_VERSION}/attempt-${attemptId}.epub`;
+  const storagePath = `${record!.book_id}/${candidateId}/${SERIALIZER_VERSION_METADATA}/attempt-${attemptId}.epub`;
   const upload = await supabase.storage
     .from("publication-artifacts")
     .upload(storagePath, generated!.bytes, {
@@ -184,13 +236,18 @@ export async function generateEpubArtifact(formData: FormData) {
     await failAttempt("storage_failed", "store", "exportStorageFailed");
   }
 
-  const success = await supabase.rpc("record_export_success", {
+  const success = await supabase.rpc("record_export_success_with_metadata", {
     p_attempt_id: attemptId,
     p_checksum: generated!.checksum,
     p_byte_size: generated!.byteSize,
     p_storage_path: storagePath,
     p_validator: VALIDATOR_ID,
     p_validator_version: VALIDATOR_VERSION,
+    p_bibliographic_version_id: selection.versionId,
+    p_metadata_fingerprint: selection.fingerprint,
+    p_selection_basis: selection.selectionBasis,
+    p_selection_reason: selection.selectionReason,
+    p_isbn_registration_id: selection.isbnRegistrationId,
   });
   if (success.error) {
     console.error("[publication] recordExportSuccess failed", success.error);

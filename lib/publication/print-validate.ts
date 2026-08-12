@@ -13,7 +13,9 @@ import { FONT_INPUTS } from "@/lib/publication/print-fonts/registry";
 export const PDF_STRUCTURAL_VALIDATOR_ID = "hgp-pdf-structural";
 export const PDF_STRUCTURAL_VALIDATOR_VERSION = "1.0.0";
 export const PRINT_PRODUCTION_VALIDATOR_ID = "hgp-print-production";
-export const PRINT_PRODUCTION_VALIDATOR_VERSION = "1.0.0";
+// 1.1.0: the copyright page joins the folio/running-head-suppressed
+// opening kinds (metadata consumption). All 1.0.0 checks unchanged.
+export const PRINT_PRODUCTION_VALIDATOR_VERSION = "1.1.0";
 
 export interface PrintCheck {
   code: string;
@@ -173,7 +175,7 @@ export function validatePrintProduction(
     "openingSuppression",
     model.pages.every(
       (p) =>
-        !["title", "chapter-opening", "part-opening", "blank"].includes(
+        !["title", "copyright", "chapter-opening", "part-opening", "blank"].includes(
           p.kind,
         ) || (!p.folioVisible && p.runningHead === null),
     ),

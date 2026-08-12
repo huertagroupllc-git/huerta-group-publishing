@@ -1,11 +1,13 @@
 import { createHash } from "node:crypto";
 import type { LoadedFont } from "@/lib/publication/print-font-loader";
+import type { ConsumedMetadata } from "@/lib/publication/metadata-fingerprint";
 import type { PrintProfile } from "@/lib/publication/print-profile";
-import type {
-  PrintBlock,
-  PrintRepresentation,
-  Run,
-  RunStyle,
+import {
+  UnsupportedContentError,
+  type PrintBlock,
+  type PrintRepresentation,
+  type Run,
+  type RunStyle,
 } from "@/lib/publication/print-representation";
 
 /**
@@ -24,6 +26,12 @@ import type {
 
 export const RENDERER_ID = "hgp-layout";
 export const RENDERER_VERSION = "1.0.0";
+/** hgp-layout 2.0.0 — the metadata-consuming generation: the title
+ *  page gains the imprint line and the title verso becomes the
+ *  deterministic copyright page (Consumption blueprint §15–§16).
+ *  Without a consumed metadata input the 1.0.0 layout is reproduced
+ *  exactly, forever. */
+export const RENDERER_VERSION_METADATA = "2.0.0";
 
 export interface LineSegment {
   fontKey: string;
@@ -40,6 +48,7 @@ export interface PlacedLine {
 
 export type PageKind =
   | "title"
+  | "copyright"
   | "blank"
   | "part-opening"
   | "chapter-opening"
@@ -266,6 +275,7 @@ export function paginate(
   rep: PrintRepresentation,
   profile: PrintProfile,
   fonts: Fonts,
+  consumed?: ConsumedMetadata,
 ): PageModel {
   const pages: PrintPage[] = [];
   const contentLeft = (pageNumber: number) =>
@@ -334,8 +344,97 @@ export function paginate(
         },
       ],
     });
+    if (consumed) {
+      lines.push({
+        slot: 34,
+        xMpt: 0,
+        align: "center",
+        segments: [
+          {
+            fontKey: profile.bodyFont,
+            sizeMpt: profile.bodySize,
+            text: consumed.imprint,
+          },
+        ],
+      });
+    }
     push({
       kind: "title",
+      intentionalBlank: false,
+      folioVisible: false,
+      runningHead: null,
+      chapterSeq: null,
+      chapterTitle: null,
+      lines,
+    });
+  }
+
+  // --- Copyright page (page 2, the title verso) — hgp-layout 2.0.0
+  // (Consumption blueprint §16): governed facts only, fixed order,
+  // absent facts produce absent lines, nothing fabricated. Occupies
+  // the slot the 1.0.0 layout leaves structurally blank, so body
+  // pagination and page count are unchanged.
+  if (consumed) {
+    const es = rep.language.toLowerCase().startsWith("es");
+    const measure =
+      profile.pageWidth - profile.marginInside - profile.marginOutside;
+    const entries: { runs: Run[]; gapBefore: boolean }[] = [];
+    const entry = (text: string, style: RunStyle, gapBefore: boolean) =>
+      entries.push({ runs: [{ style, text }], gapBefore });
+
+    entry(rep.title, "regular", false);
+    if (rep.subtitle) entry(rep.subtitle, "italic", false);
+    const copyrightLine =
+      consumed.copyrightLine ??
+      (consumed.copyrightYear !== null
+        ? `© ${consumed.copyrightYear} ${consumed.authorDisplay}`
+        : null);
+    if (copyrightLine) entry(copyrightLine, "regular", true);
+    entry(
+      es
+        ? `Publicado por ${consumed.imprint}`
+        : `Published by ${consumed.imprint}`,
+      "regular",
+      true,
+    );
+    entry(
+      es
+        ? `Un sello de ${consumed.legalEntity}`
+        : `An imprint of ${consumed.legalEntity}`,
+      "regular",
+      false,
+    );
+    if (consumed.isbnAsEntered) {
+      entry(`ISBN ${consumed.isbnAsEntered}`, "regular", true);
+    }
+    if (consumed.publicationNotes) {
+      entry(consumed.publicationNotes, "regular", true);
+    }
+
+    const lines: PlacedLine[] = [];
+    let slot = 22;
+    for (const e of entries) {
+      if (e.gapBefore && lines.length) slot += 1;
+      const broken = breakLines(
+        wordsOf(e.runs, fonts),
+        fonts,
+        profile.bodySize,
+        measure,
+        0,
+      );
+      for (const line of broken) {
+        lines.push({ slot, xMpt: 0, segments: line.segments });
+        slot += 1;
+      }
+    }
+    if (slot > profile.linesPerPage) {
+      throw new UnsupportedContentError(
+        "unsupported_content",
+        "copyright_page_overflow",
+      );
+    }
+    push({
+      kind: "copyright",
       intentionalBlank: false,
       folioVisible: false,
       runningHead: null,

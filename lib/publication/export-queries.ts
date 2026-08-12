@@ -18,6 +18,12 @@ export interface ArtifactRecord {
     profile_key: string;
     profile_version: number;
   } | null;
+  metadata?: {
+    bibliographic_version_number: number;
+    metadata_fingerprint: string;
+    selection_basis: "active" | "historical";
+    isbn_as_entered_consumed: string | null;
+  } | null;
   serializer: string;
   serializer_version: string;
   artifact_number: number;
@@ -48,7 +54,7 @@ export const getExportHistory = cache(async function getExportHistory(
     supabase
       .from("publication_artifacts")
       .select(
-        "id, candidate_id, candidate_number, candidate_fingerprint, format, designation, serializer, serializer_version, artifact_number, generated_at, checksum, byte_size, validator, validator_version, regenerates_artifact_id, print_artifact_provenance(page_count, profile_key, profile_version)",
+        "id, candidate_id, candidate_number, candidate_fingerprint, format, designation, serializer, serializer_version, artifact_number, generated_at, checksum, byte_size, validator, validator_version, regenerates_artifact_id, print_artifact_provenance(page_count, profile_key, profile_version), artifact_metadata_provenance(bibliographic_version_number, metadata_fingerprint, selection_basis, isbn_as_entered_consumed)",
       )
       .eq("candidate_id", candidateId)
       .order("artifact_number", { ascending: false }),
@@ -65,11 +71,16 @@ export const getExportHistory = cache(async function getExportHistory(
       print_artifact_provenance?:
         | ArtifactRecord["print"]
         | NonNullable<ArtifactRecord["print"]>[];
+      artifact_metadata_provenance?:
+        | ArtifactRecord["metadata"]
+        | NonNullable<ArtifactRecord["metadata"]>[];
     };
     const embedded = a.print_artifact_provenance;
+    const meta = a.artifact_metadata_provenance;
     return {
       ...a,
       print: Array.isArray(embedded) ? (embedded[0] ?? null) : (embedded ?? null),
+      metadata: Array.isArray(meta) ? (meta[0] ?? null) : (meta ?? null),
     };
   });
   return {

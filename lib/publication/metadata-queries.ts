@@ -54,6 +54,7 @@ export interface IsbnRegistrationView {
   external_format_wording: string | null;
   external_registrant: string | null;
   recorded_at: string;
+  evidence_count: number;
 }
 
 export interface MetadataDesk {
@@ -85,7 +86,7 @@ export const getMetadataDesk = cache(async function getMetadataDesk(
     supabase
       .from("isbn_registrations")
       .select(
-        "id, isbn13, isbn_as_entered, source, disposition, externally_assigned, external_title, external_format_wording, external_registrant, recorded_at",
+        "id, isbn13, isbn_as_entered, source, disposition, externally_assigned, external_title, external_format_wording, external_registrant, recorded_at, isbn_evidence(id)",
       )
       .eq("book_id", bookId)
       .order("recorded_at", { ascending: false }),
@@ -130,6 +131,11 @@ export const getMetadataDesk = cache(async function getMetadataDesk(
     draft,
     active,
     divergence,
-    isbns: (isbnResult.data ?? []) as IsbnRegistrationView[],
+    isbns: (isbnResult.data ?? []).map((raw) => {
+      const r = raw as unknown as IsbnRegistrationView & {
+        isbn_evidence?: { id: string }[];
+      };
+      return { ...r, evidence_count: (r.isbn_evidence ?? []).length };
+    }),
   };
 });

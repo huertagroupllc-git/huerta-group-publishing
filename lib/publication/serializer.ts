@@ -20,6 +20,10 @@ import type {
 export const SERIALIZER_ID = "hgp-epub";
 export const SERIALIZER_NAME = "Huerta Group Publishing EPUB Serializer";
 export const SERIALIZER_VERSION = "1.0.0";
+/** hgp-epub 2.0.0 — the metadata-consuming generation (Consumption
+ *  blueprint §13, §18). 1.0.0 behavior is frozen: generation without a
+ *  consumed metadata input reproduces 1.0.0 bytes exactly, forever. */
+export const SERIALIZER_VERSION_METADATA = "2.0.0";
 
 export interface RepresentationChapter {
   /** Global canonical sequence, 1-based — the stable identifier seed. */

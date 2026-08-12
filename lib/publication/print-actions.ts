@@ -6,10 +6,14 @@ import { requireEntitledUser } from "@/lib/membership/entitlement";
 import {
   generatePrintPdf,
   PRINT_SERIALIZER_ID,
-  PRINT_SERIALIZER_VERSION,
+  PRINT_SERIALIZER_VERSION_METADATA,
   RENDERER_ID,
-  RENDERER_VERSION,
+  RENDERER_VERSION_METADATA,
 } from "@/lib/publication/print-serializer";
+import {
+  candidateIdentityMatches,
+  resolveConsumption,
+} from "@/lib/publication/consumption";
 import {
   validatePdfStructure,
   validatePrintProduction,
@@ -45,6 +49,12 @@ const KNOWN = new Set([
   "reproducibility_mismatch",
   "not_authorized",
   "profile_invalid",
+  "metadata_version_required",
+  "metadata_reason_required",
+  "metadata_identity_mismatch",
+  "metadata_fingerprint_mismatch",
+  "metadata_consumption_required",
+  "isbn_not_eligible",
 ]);
 
 function mapCode(error: { code?: string; message?: string }, fallback: string) {
@@ -82,6 +92,11 @@ export async function generatePrintArtifact(formData: FormData) {
     String(formData.get("designation") ?? "") === "proof"
       ? "proof"
       : "production";
+  const consumptionInput = {
+    metadataVersionId: String(formData.get("metadata_version_id") ?? ""),
+    metadataReason: String(formData.get("metadata_reason") ?? ""),
+    isbnRegistrationId: String(formData.get("isbn_registration_id") ?? ""),
+  };
 
   const { supabase } = await requireEntitledUser();
 
@@ -89,7 +104,7 @@ export async function generatePrintArtifact(formData: FormData) {
     p_candidate_id: candidateId,
     p_format: "print-pdf",
     p_serializer: PRINT_SERIALIZER_ID,
-    p_serializer_version: PRINT_SERIALIZER_VERSION,
+    p_serializer_version: PRINT_SERIALIZER_VERSION_METADATA,
     p_designation: designation,
   });
   if (begin.error) {
@@ -143,9 +158,44 @@ export async function generatePrintArtifact(formData: FormData) {
     (versions ?? []).map((v) => [v.id as string, v.content as string]),
   );
 
+  // The Metadata Pin. The §6 coherence gate fails a releasable
+  // (production) generation closed on identity disagreement; a proof
+  // is an internal working document and proceeds with the fact
+  // reported by readiness.
+  const resolution = await resolveConsumption(
+    supabase,
+    record!.book_id,
+    consumptionInput,
+  );
+  if (!resolution.ok) {
+    await failAttempt(
+      resolution.code,
+      "metadata",
+      mapCode({ message: resolution.code }, "generatePrintFailed"),
+    );
+  }
+  const selection = (resolution as Extract<typeof resolution, { ok: true }>)
+    .selection;
+  if (
+    designation === "production" &&
+    !candidateIdentityMatches(record!, selection.derived)
+  ) {
+    await failAttempt(
+      "metadata_identity_mismatch",
+      "metadata",
+      "metadataIdentityMismatch",
+    );
+  }
+
   let generated;
   try {
-    generated = await generatePrintPdf(record!, composition, contents);
+    generated = await generatePrintPdf(
+      record!,
+      composition,
+      contents,
+      undefined,
+      selection.consumed,
+    );
   } catch (error) {
     console.error("[print] generation failed", error);
     const message = error instanceof Error ? error.message : "";
@@ -195,19 +245,32 @@ export async function generatePrintArtifact(formData: FormData) {
     );
   }
 
-  const { data: prior } = await supabase
-    .from("publication_artifacts")
-    .select("checksum")
-    .eq("candidate_id", candidateId)
-    .eq("format", "print-pdf")
-    .eq("serializer_version", PRINT_SERIALIZER_VERSION)
-    .order("artifact_number", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (prior && prior.checksum !== generated!.checksum) {
+  const { data: priorRows } = await supabase
+    .from("artifact_metadata_provenance")
+    .select(
+      "isbn13_consumed, publication_artifacts!inner(candidate_id, format, serializer_version, checksum)",
+    )
+    .eq("bibliographic_version_id", selection.versionId)
+    .eq("publication_artifacts.candidate_id", candidateId)
+    .eq("publication_artifacts.format", "print-pdf")
+    .eq(
+      "publication_artifacts.serializer_version",
+      PRINT_SERIALIZER_VERSION_METADATA,
+    );
+  const prior = (priorRows ?? [])
+    .filter(
+      (p) =>
+        (p.isbn13_consumed ?? "") === (selection.consumed.isbn13 ?? ""),
+    )
+    .map(
+      (p) =>
+        (p.publication_artifacts as unknown as { checksum: string }).checksum,
+    )
+    .find(Boolean);
+  if (prior && prior !== generated!.checksum) {
     console.error("[print] reproducibility mismatch", {
       candidateId,
-      expected: prior.checksum,
+      expected: prior,
       produced: generated!.checksum,
     });
     await failAttempt(
@@ -217,7 +280,7 @@ export async function generatePrintArtifact(formData: FormData) {
     );
   }
 
-  const storagePath = `${record!.book_id}/${candidateId}/print/${PRINT_SERIALIZER_VERSION}/attempt-${attemptId}.pdf`;
+  const storagePath = `${record!.book_id}/${candidateId}/print/${PRINT_SERIALIZER_VERSION_METADATA}/attempt-${attemptId}.pdf`;
   const upload = await supabase.storage
     .from("publication-artifacts")
     .upload(storagePath, generated!.bytes, {
@@ -229,7 +292,7 @@ export async function generatePrintArtifact(formData: FormData) {
     await failAttempt("storage_failure", "store", "exportStorageFailed");
   }
 
-  const success = await supabase.rpc("record_print_export_success", {
+  const success = await supabase.rpc("record_print_export_success_with_metadata", {
     p_attempt_id: attemptId,
     p_checksum: generated!.checksum,
     p_byte_size: generated!.byteSize,
@@ -242,13 +305,18 @@ export async function generatePrintArtifact(formData: FormData) {
     p_profile_version: generated!.profile.version,
     p_profile_fingerprint: generated!.profileFingerprint,
     p_renderer: RENDERER_ID,
-    p_renderer_version: RENDERER_VERSION,
+    p_renderer_version: RENDERER_VERSION_METADATA,
     p_font_inputs: generated!.fontInputs,
     p_page_count: generated!.pageCount,
     p_page_width_mpt: generated!.profile.pageWidth,
     p_page_height_mpt: generated!.profile.pageHeight,
     p_pagination_fingerprint: generated!.paginationFingerprint,
     p_pdf_version: "1.7",
+    p_bibliographic_version_id: selection.versionId,
+    p_metadata_fingerprint: selection.fingerprint,
+    p_selection_basis: selection.selectionBasis,
+    p_selection_reason: selection.selectionReason,
+    p_isbn_registration_id: selection.isbnRegistrationId,
   });
   if (success.error) {
     console.error("[print] recordPrintExportSuccess failed", success.error);

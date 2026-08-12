@@ -2391,7 +2391,13 @@
       "isbnRecordFailed": "The ISBN could not be recorded.",
       "registrationNotCurrent": "Only the current registration can be corrected.",
       "reasonRequired": "A reason is required.",
-      "evidenceRequiredIsbn": "An external assignment requires evidence. Nothing was recorded."
+      "evidenceRequiredIsbn": "An external assignment requires evidence. Nothing was recorded.",
+      "metadataVersionRequired": "Generation now consumes the Bibliographic Record: finalize and activate a metadata version first. Nothing was generated.",
+      "metadataReasonRequired": "Consuming a historical metadata version requires a recorded reason. Nothing was generated.",
+      "metadataIdentityMismatch": "The selected metadata version and the candidate describe different work identities (title, subtitle, author, or language). Nothing was generated — reconcile the records first.",
+      "metadataFingerprintMismatch": "The metadata fingerprint did not verify. Nothing was recorded.",
+      "metadataConsumptionRequired": "This serializer version records the consumed metadata version with the artifact. Nothing was recorded.",
+      "isbnNotEligible": "That ISBN is not eligible for consumption: only a current, externally evidenced registration of this book can be embedded. Nothing was generated."
     },
     "notices": {
       "candidatePresented": "The candidate has been presented and its composition is frozen.",
@@ -2418,6 +2424,28 @@
       "draftDiscarded": "The draft has been discarded. Finalized versions are untouched.",
       "isbnRecorded": "The ISBN has been recorded with its provenance.",
       "isbnCorrected": "The correction has been recorded. The original registration remains, marked."
+    },
+    "consumption": {
+      "heading": "Metadata consumption",
+      "lede": "Generation consumes one finalized Bibliographic Record version — the active version by default — and pins it to the artifact forever. An ISBN is embedded only when you deliberately choose an eligible, externally evidenced registration.",
+      "readiness": {
+        "metadataMissing": "No finalized Bibliographic Record exists. Finalize and activate one on the Metadata page before generating.",
+        "metadataActive": "Bibliographic Record Version {number} is active and will be consumed by default.",
+        "candidateIdentityMismatch": "The active metadata version and the candidate describe different work identities — a releasable generation will be refused.",
+        "isbnEligible": "{count, plural, one {# externally evidenced ISBN is eligible for consumption} other {# externally evidenced ISBNs are eligible for consumption}} — none is embedded unless chosen.",
+        "isbnAbsent": "No ISBN is on record for this book. Absence is valid; nothing is invented.",
+        "isbnRecordedOnly": "{count, plural, one {# registration is recorded without an external assignment} other {# registrations are recorded without an external assignment}} — recording is not assignment; not consumable."
+      },
+      "versionLabel": "Metadata version",
+      "activeOption": "Active — Version {number}",
+      "noActiveOption": "No finalized record — generation will be refused",
+      "historicalOption": "Version {number} (historical)",
+      "reasonLabel": "Reason for a historical version",
+      "reasonHint": "Required only when consuming a version other than the active one.",
+      "isbnLabel": "ISBN to embed",
+      "isbnNone": "No ISBN — absence is valid",
+      "artifactLine": "Metadata Version {number}",
+      "historicalMark": "historical selection"
     },
     "export": {
       "heading": "Deterministic Export — EPUB",

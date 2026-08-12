@@ -13,8 +13,14 @@ import {
   paginate,
   RENDERER_ID,
   RENDERER_VERSION,
+  RENDERER_VERSION_METADATA,
   type PageModel,
 } from "@/lib/publication/print-paginate";
+import { firstUnsupportedCodePoint } from "@/lib/publication/winansi";
+import {
+  UnsupportedContentError,
+} from "@/lib/publication/print-representation";
+import type { ConsumedMetadata } from "@/lib/publication/metadata-fingerprint";
 import { writePrintPdf } from "@/lib/publication/print-pdf-writer";
 import { FONT_INPUTS } from "@/lib/publication/print-fonts/registry";
 import type {
@@ -34,7 +40,13 @@ import type {
 
 export const PRINT_SERIALIZER_ID = "hgp-print";
 export const PRINT_SERIALIZER_VERSION = "1.0.0";
+/** hgp-print 2.0.0 — the metadata-consuming generation (Consumption
+ *  blueprint §15, §18): title-page imprint line + deterministic
+ *  copyright page. 1.0.0 behavior is frozen: generation without a
+ *  consumed metadata input reproduces 1.0.0 bytes exactly, forever. */
+export const PRINT_SERIALIZER_VERSION_METADATA = "2.0.0";
 export { RENDERER_ID, RENDERER_VERSION };
+export { RENDERER_VERSION_METADATA } from "@/lib/publication/print-paginate";
 
 export interface GeneratedPrintPdf {
   bytes: Buffer;
@@ -70,11 +82,34 @@ export async function loadProfileFonts(
   };
 }
 
+/** The governed repertoire applies to consumed metadata exactly as it
+ *  applies to manuscript text — out-of-set characters fail closed. */
+function assertConsumedRepertoire(consumed: ConsumedMetadata): void {
+  const texts = [
+    consumed.imprint,
+    consumed.legalEntity,
+    consumed.copyrightLine,
+    consumed.publicationNotes,
+    consumed.authorDisplay,
+    consumed.isbnAsEntered,
+  ].filter((t): t is string => t !== null);
+  for (const text of texts) {
+    const cp = firstUnsupportedCodePoint(text);
+    if (cp !== null) {
+      throw new UnsupportedContentError(
+        "missing_glyph",
+        `metadata:U+${cp.toString(16).toUpperCase()}`,
+      );
+    }
+  }
+}
+
 export async function generatePrintPdf(
   record: CandidateRecord,
   composition: CandidateChapterRow[],
   contentsByVersionId: ReadonlyMap<string, string>,
   profile: PrintProfile = HGP_TRADE_6X9_TEXT_V1,
+  consumed?: ConsumedMetadata,
 ): Promise<GeneratedPrintPdf> {
   const fonts = await loadProfileFonts(profile);
   const representation = buildPrintRepresentation(
@@ -82,12 +117,15 @@ export async function generatePrintPdf(
     composition,
     contentsByVersionId,
   );
-  const model = paginate(representation, profile, fonts);
+  if (consumed) assertConsumedRepertoire(consumed);
+  const model = paginate(representation, profile, fonts, consumed);
   const bytes = writePrintPdf(representation, model, profile, fonts, {
     serializer: PRINT_SERIALIZER_ID,
-    serializerVersion: PRINT_SERIALIZER_VERSION,
+    serializerVersion: consumed
+      ? PRINT_SERIALIZER_VERSION_METADATA
+      : PRINT_SERIALIZER_VERSION,
     renderer: RENDERER_ID,
-    rendererVersion: RENDERER_VERSION,
+    rendererVersion: consumed ? RENDERER_VERSION_METADATA : RENDERER_VERSION,
   });
   return {
     bytes,

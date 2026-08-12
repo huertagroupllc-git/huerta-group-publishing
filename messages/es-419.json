@@ -2391,7 +2391,13 @@
       "isbnRecordFailed": "El ISBN no pudo registrarse.",
       "registrationNotCurrent": "Solo el registro vigente puede corregirse.",
       "reasonRequired": "Se requiere un motivo.",
-      "evidenceRequiredIsbn": "Una asignación externa requiere evidencia. No se registró nada."
+      "evidenceRequiredIsbn": "Una asignación externa requiere evidencia. No se registró nada.",
+      "metadataVersionRequired": "La generación ahora consume el Registro Bibliográfico: finalice y active una versión de metadatos primero. No se generó nada.",
+      "metadataReasonRequired": "Consumir una versión histórica de metadatos requiere un motivo registrado. No se generó nada.",
+      "metadataIdentityMismatch": "La versión de metadatos seleccionada y el candidato describen identidades distintas de la obra (título, subtítulo, autor o idioma). No se generó nada — concilie los registros primero.",
+      "metadataFingerprintMismatch": "La huella de los metadatos no se verificó. No se registró nada.",
+      "metadataConsumptionRequired": "Esta versión del serializador registra la versión de metadatos consumida junto con el artefacto. No se registró nada.",
+      "isbnNotEligible": "Ese ISBN no es elegible para consumo: solo puede incorporarse un registro vigente de este libro con asignación externa evidenciada. No se generó nada."
     },
     "notices": {
       "candidatePresented": "El candidato fue presentado y su composición quedó congelada.",
@@ -2418,6 +2424,28 @@
       "draftDiscarded": "El borrador fue descartado. Las versiones finalizadas quedan intactas.",
       "isbnRecorded": "El ISBN quedó registrado con su procedencia.",
       "isbnCorrected": "La corrección quedó registrada. El registro original permanece, marcado."
+    },
+    "consumption": {
+      "heading": "Consumo de metadatos",
+      "lede": "La generación consume una versión finalizada del Registro Bibliográfico — la versión activa por defecto — y la fija al artefacto para siempre. Un ISBN se incorpora solo cuando usted elige deliberadamente un registro elegible con asignación externa evidenciada.",
+      "readiness": {
+        "metadataMissing": "No existe un Registro Bibliográfico finalizado. Finalice y active uno en la página de Metadatos antes de generar.",
+        "metadataActive": "La Versión {number} del Registro Bibliográfico está activa y se consumirá por defecto.",
+        "candidateIdentityMismatch": "La versión activa de metadatos y el candidato describen identidades distintas de la obra — una generación publicable será rechazada.",
+        "isbnEligible": "{count, plural, one {# ISBN con asignación externa evidenciada es elegible para consumo} other {# ISBN con asignación externa evidenciada son elegibles para consumo}} — ninguno se incorpora sin elegirlo.",
+        "isbnAbsent": "No hay ISBN registrado para este libro. La ausencia es válida; nada se inventa.",
+        "isbnRecordedOnly": "{count, plural, one {# registro consta sin asignación externa} other {# registros constan sin asignación externa}} — registrar no es asignar; no consumible."
+      },
+      "versionLabel": "Versión de metadatos",
+      "activeOption": "Activa — Versión {number}",
+      "noActiveOption": "Sin registro finalizado — la generación será rechazada",
+      "historicalOption": "Versión {number} (histórica)",
+      "reasonLabel": "Motivo para una versión histórica",
+      "reasonHint": "Requerido solo al consumir una versión distinta de la activa.",
+      "isbnLabel": "ISBN a incorporar",
+      "isbnNone": "Sin ISBN — la ausencia es válida",
+      "artifactLine": "Versión de metadatos {number}",
+      "historicalMark": "selección histórica"
     },
     "export": {
       "heading": "Exportación Determinista — EPUB",

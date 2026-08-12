@@ -32,7 +32,7 @@ touch Supabase and works even if these are unset; `/signin`,
 
 ## 2. Apply the database migrations
 
-**35 migrations**, applied strictly in filename order. The hosted
+**36 migrations**, applied strictly in filename order. The hosted
 database's applied state is reconciled against this list in
 [docs/operations/production-migration-baseline.md](operations/production-migration-baseline.md)
 — consult and update that record whenever migrations are applied.
@@ -151,6 +151,14 @@ database's applied state is reconciled against this list in
     ISBN immutability trigger to admit the whole-book cascade's
     referential `SET NULL` on `book_id` (the registry outlives books);
     every hand-written unlink or riding-along change remains refused.
+36. `20260816000000_metadata_consumption.sql` — Publication Metadata
+    Consumption: the immutable artifact_metadata_provenance companion
+    (Metadata Pin + Identifier Consumption snapshots), the bmv-v1 SQL
+    fingerprint with refuse-on-mismatch, the widened reproducibility
+    law for consuming serializer versions (metadata identity joins the
+    one-checksum key; a consuming artifact requires its companion at
+    commit via deferred constraint), eligibility enforcement for ISBN
+    consumption, the atomic recording functions, RLS, and grants.
 
 Storage buckets and cron jobs are created by the migrations themselves;
 there is no separate manual step beyond confirming pg_cron is enabled.
