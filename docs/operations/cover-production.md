@@ -46,7 +46,11 @@ inputs in the font-input discipline: exact checksummed bytes (JPEG in
 this profile generation; identity parsed deterministically from SOF),
 pixel dimensions, **required rights evidence**, optional book scope
 (null = house asset), staff-only recording with actor enforcement,
-immutable rows. The platform records artwork; it never creates,
+immutable rows — with exactly one admitted transition: the whole-book
+cascade's referential `SET NULL` on `book_id` when the book is
+actually gone (migration `20260819000000`, a production-verification
+fix repeating the ISBN registry's migration-35 lesson; manual unlinks
+remain refused). The platform records artwork; it never creates,
 edits, or transforms it. **Zero assets is valid — the typographic
 cover is the house default.** Assets embed as exact bytes
 (DCTDecode passthrough): no decoding, no resampling, no color

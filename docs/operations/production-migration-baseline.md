@@ -155,6 +155,40 @@ repair the ledger immediately and append an entry below.
   enforcement, supersession, author-first authorization ordering,
   immutability and no-delete probes, RLS invisibility to strangers,
   no-implicit-proxy, delegated approval. No discrepancy.
+- **August 11, 2026 (seventh entry)** — Migrations 38
+  (`20260818000000_cover_production.sql`, Cover Production Phase 2)
+  and 39 (`20260819000000_cover_asset_cascade_unlink.sql`, a defect
+  fix found by this verification) applied via `supabase db push`.
+  Re-verified: **39/39 in exact local = remote agreement**; the
+  seeded HGP Trade 6×9 — Cover v1 fingerprint matches the TypeScript
+  canon. Production verification with disposable TEST-labeled
+  fixtures carried through the full sanctioned chain (bibliographic
+  V1 active, evidenced ISBN, lock → present → approve → authorize,
+  production + proof interiors at hgp-print 1.0.0): 16 probes all
+  passed — production cover recorded atomically with wrapped-interior
+  snapshots (page count 200, spine 32432 mpt), computed geometry,
+  ordered asset snapshot, Metadata Pin and consumed ISBN; production
+  cover refuses a proof interior
+  (`wrapped_artifact_not_production`); wrapping a non-print artifact
+  refused; wrong profile fingerprint refused (`profile_invalid`);
+  lying asset snapshot refused (`asset_invalid`); same full cover
+  inputs with a divergent checksum refused
+  (`reproducibility_mismatch`); byte-identical regeneration recorded;
+  a different wrapped artifact yielded a distinct cover (the widened
+  key); cover companion immutable and undeletable; RLS — author reads
+  own cover provenance, stranger reads none; authors cannot record
+  cover assets (imprint inputs); **proof cover refused at the release
+  guard** (`proof_not_releasable`); **production cover released
+  through the existing model**; a cover-pdf artifact without its
+  companion **refused at commit** (`cover_provenance_required`).
+  Defect found and fixed forward: the blanket immutability trigger on
+  cover_assets refused the FK's `ON DELETE SET NULL` and broke the
+  whole-book cascade for book-scoped assets — migration 39 admits
+  exactly the referential unlink (the migration-35 pattern); manual
+  unlinks remain refused (re-probed). Zero fixture residue (counts
+  returned exactly to baseline: 1 book, 1 author, 10 review runs;
+  the seeded cover profile registry intact at 1); no storage objects
+  created; no OpenAI call occurred. No discrepancy.
 - **August 11, 2026 (sixth entry)** — Migrations 36
   (`20260816000000_metadata_consumption.sql`, Publication Metadata
   Consumption Phase 2) and 37

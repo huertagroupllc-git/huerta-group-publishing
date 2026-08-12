@@ -32,7 +32,7 @@ touch Supabase and works even if these are unset; `/signin`,
 
 ## 2. Apply the database migrations
 
-**38 migrations**, applied strictly in filename order. The hosted
+**39 migrations**, applied strictly in filename order. The hosted
 database's applied state is reconciled against this list in
 [docs/operations/production-migration-baseline.md](operations/production-migration-baseline.md)
 — consult and update that record whenever migrations are applied.
@@ -172,6 +172,11 @@ database's applied state is reconciled against this list in
     wrap geometry, asset snapshots) with the cover-widened
     one-checksum law and companion-required deferred constraint,
     record_cover_export_success, RLS, and grants.
+39. `20260819000000_cover_asset_cascade_unlink.sql` — admits the
+    whole-book cascade's referential `SET NULL` on
+    `cover_assets.book_id` (assets outlive books); every hand-written
+    unlink or riding-along change remains refused
+    (production-verification fix, the migration-35 pattern).
 
 Storage buckets and cron jobs are created by the migrations themselves;
 there is no separate manual step beyond confirming pg_cron is enabled.
