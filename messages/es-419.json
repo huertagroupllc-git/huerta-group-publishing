@@ -548,7 +548,8 @@
         "importCleanup": "Limpieza de importaciones",
         "publication": "Publicación",
         "isbn": "Registro de ISBN",
-        "covers": "Producción de Portadas"
+        "covers": "Producción de Portadas",
+        "editions": "Ediciones"
       }
     },
     "overview": {
@@ -2411,7 +2412,19 @@
       "assetRightsRequired": "Se requiere evidencia de derechos — quién los posee y con qué base. No se registró nada.",
       "assetUploadFailed": "Los bytes del recurso no pudieron almacenarse.",
       "assetRecordFailed": "El recurso no pudo registrarse.",
-      "assetDuplicate": "Ya consta un recurso con esa clave o esa huella."
+      "assetDuplicate": "Ya consta un recurso con esa clave o esa huella.",
+      "editionMigrationMissing": "El esquema de ediciones aún no se ha aplicado (migración 20260820000000_edition_architecture.sql).",
+      "editionActFailed": "El acto de edición no pudo registrarse.",
+      "distinctionRequired": "Una edición requiere su Declaración de Distinción — por qué el mercado debe ver esta manifestación como distinta.",
+      "editionRequired": "La asignación requiere una edición existente.",
+      "editionNotOpen": "Solo una edición abierta puede recibir este acto.",
+      "supersessionInvalid": "La sucesión nombra otra edición abierta del mismo libro.",
+      "associationIneligible": "Ese artefacto no puede servir a esa manifestación: el EPUB sirve al ebook; el interior impreso y la portada sirven al paperback; solo artefactos de producción.",
+      "associationNotCurrent": "Solo una asociación vigente puede corregirse.",
+      "isbnNotAssignable": "Ese ISBN no puede asignarse: debe ser un registro vigente y evidenciado cuyo tipo coincida con el acto — institucional para identificadores que el sello controla, adopción para los asignados externamente.",
+      "isbnAlreadyAssigned": "Ese ISBN ya está asignado. Un identificador nunca se asigna dos veces, nunca se reutiliza, nunca se transfiere.",
+      "assignmentNotCurrent": "Solo la asignación vigente puede corregirse.",
+      "assignmentEvidenceRequired": "La asignación requiere evidencia de la autoridad del sello sobre el identificador. No se registró nada."
     },
     "notices": {
       "candidatePresented": "El candidato fue presentado y su composición quedó congelada.",
@@ -2440,7 +2453,14 @@
       "isbnCorrected": "La corrección quedó registrada. El registro original permanece, marcado.",
       "coverProofGenerated": "La envoltura de prueba fue generada, validada y preservada. Las pruebas nunca pueden lanzarse.",
       "coverProductionGenerated": "La envoltura de producción fue generada, validada como Válida para Producción y preservada.",
-      "assetRecorded": "El recurso de portada fue registrado con su evidencia de derechos."
+      "assetRecorded": "El recurso de portada fue registrado con su evidencia de derechos.",
+      "editionDeclared": "La edición fue declarada con su Declaración de Distinción.",
+      "currentEditionSet": "El puntero de edición vigente fue movido. Nada histórico cambió.",
+      "editionSuperseded": "La edición fue sucedida. Ambas ediciones permanecen.",
+      "editionWithdrawn": "La edición fue retirada. Su registro y su historia permanecen.",
+      "artifactAssociated": "El artefacto ahora pertenece a la manifestación de la edición.",
+      "associationCorrected": "La asociación fue corregida. El registro original permanece, marcado.",
+      "isbnAssigned": "El ISBN fue asignado a la manifestación — de forma permanente."
     },
     "cover": {
       "heading": "Producción de Portadas — la envoltura",
@@ -2482,6 +2502,85 @@
         "bookHint": "Déjelo vacío para un recurso de la casa disponible para todos los libros.",
         "recordSubmit": "Registrar el recurso"
       }
+    },
+    "edition": {
+      "heading": "Ediciones",
+      "lede": "Una edición es el libro tal como lo encuentra el mercado — una manifestación declarada deliberadamente que agrupa sus metadatos, identificadores, formatos y lanzamientos. Declararla es un juicio bibliográfico, nunca una consecuencia automática de nada.",
+      "empty": "No se ha declarado ninguna edición. Los registros del libro están completos sin ella; declare una edición cuando el mercado deba conocerla.",
+      "entry": "Edición {number}",
+      "currentMark": "vigente",
+      "foundingLine": "fundada sobre la Versión {number} de metadatos",
+      "disposition": {
+        "open": "abierta",
+        "superseded": "sucedida",
+        "withdrawn": "retirada"
+      },
+      "manifestation": {
+        "ebook": "Ebook",
+        "paperback": "Rústica"
+      },
+      "associationLine": "{format} N.º {number}",
+      "noArtifacts": "sin artefactos asociados",
+      "noIsbn": "sin ISBN",
+      "externalAdoption": "adopción externa",
+      "readiness": {
+        "editionSuperseded": "Esta edición fue sucedida; su registro es histórico.",
+        "editionWithdrawn": "Esta edición fue retirada; su registro permanece.",
+        "editionCurrent": "Esta es la edición vigente del libro.",
+        "editionNotCurrent": "Esta edición no es la vigente.",
+        "metadataMissing": "No hay una versión finalizada activa del Registro Bibliográfico.",
+        "metadataMovedSinceFounding": "La versión activa de metadatos es más nueva que la base fundacional de esta edición — información, no un error.",
+        "isbnAssigned": "{manifestation}: hay un ISBN asignado.",
+        "isbnUnassigned": "{manifestation}: no hay ISBN asignado. La ausencia es válida.",
+        "ebookComplete": "Ebook: el EPUB está asociado.",
+        "ebookMissingEpub": "Ebook: aún no hay EPUB asociado.",
+        "paperbackComplete": "Rústica: interior y portada están asociados.",
+        "paperbackMissingCover": "Rústica: el interior está asociado; la portada no.",
+        "paperbackMissingInterior": "Rústica: la portada está asociada; el interior no.",
+        "paperbackMissingArtifacts": "Rústica: aún no hay artefactos asociados.",
+        "manifestationReleased": "{manifestation}: existe un lanzamiento.",
+        "associationsCorrected": "{count} asociación(es) fueron corregidas; las marcas permanecen en el registro."
+      },
+      "eventKind": {
+        "correction": "Corrección",
+        "amendment": "Enmienda",
+        "note": "Nota"
+      },
+      "makeCurrent": "Hacer esta la edición vigente",
+      "associateLabel": "Asociar artefacto",
+      "associationLabel": "Asociación",
+      "manifestationLabel": "Manifestación",
+      "associateAction": "Asociar",
+      "assignLabel": "Asignar ISBN",
+      "kindLabel": "Tipo",
+      "kindInstitutional": "Asignación institucional",
+      "kindExternal": "Adopción externa",
+      "evidenceLabel": "Evidencia de autoridad",
+      "assignAction": "Asignar a la manifestación",
+      "supersedeLabel": "Sucesora",
+      "supersedeAction": "Suceder",
+      "withdrawAction": "Retirar la edición",
+      "correctAssociationAction": "Corregir una asociación",
+      "correctionReasonLabel": "Motivo",
+      "correctSubmit": "Registrar la corrección",
+      "distinctionLabel": "Declaración de Distinción",
+      "distinctionHint": "¿Por qué el mercado debe ver esta manifestación como distinta? Obligatoria; declarada, nunca inferida.",
+      "declareAction": "Declarar una edición"
+    },
+    "editionAdmin": {
+      "metaTitle": "Ediciones — Administración",
+      "heading": "Ediciones",
+      "lede": "El registro de manifestaciones de todo el sello: cada edición declarada con su distinción, sus agrupaciones y sus asignaciones permanentes de ISBN.",
+      "ledgerHeading": "Registro de ediciones",
+      "ledgerEmpty": "No se han declarado ediciones.",
+      "entry": "Edición {number}",
+      "currentMark": "vigente",
+      "disposition": {
+        "open": "abierta",
+        "superseded": "sucedida",
+        "withdrawn": "retirada"
+      },
+      "noAssociations": "sin artefactos asociados"
     },
     "consumption": {
       "heading": "Consumo de metadatos",

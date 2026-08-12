@@ -42,6 +42,20 @@ import {
 } from "@/lib/publication/serializer";
 import { getMetadataDesk } from "@/lib/publication/metadata-queries";
 import { consumptionReadiness } from "@/lib/publication/consumption-readiness";
+import { getEditionDesk } from "@/lib/publication/edition-queries";
+import {
+  editionReadiness,
+  MANIFESTATION_CLASSES,
+} from "@/lib/publication/edition";
+import {
+  assignIsbnToEdition,
+  associateEditionArtifact,
+  correctEditionAssociation,
+  declareEdition,
+  setCurrentEdition,
+  supersedeEdition,
+  withdrawEdition,
+} from "@/lib/publication/edition-actions";
 import { shortFingerprint } from "@/lib/publication/types";
 import {
   approveCandidate,
@@ -103,6 +117,7 @@ export default async function PublicationDeskPage({
     : { artifacts: [], attempts: [] };
   const exportEligible = Boolean(current?.approval && current?.authorization);
   const releaseDesk = await getReleaseDesk(book.id, book.status);
+  const editionDesk = await getEditionDesk(book.id);
 
   // Metadata consumption (Consumption blueprint §24–§26): the active
   // finalized Bibliographic Record flows into generation by default;
@@ -867,6 +882,519 @@ export default async function PublicationDeskPage({
                 )}
               </div>
             )}
+          </section>
+
+          {/* ---- Editions — the bibliographic manifestations ---- */}
+          <section aria-labelledby="editions-heading" className="rule mt-8 pt-5">
+            <h3
+              id="editions-heading"
+              className="font-display text-lg tracking-tight"
+            >
+              {t("edition.heading")}
+            </h3>
+            <p className="mt-3 max-w-prose text-sm text-ink-soft">
+              {t("edition.lede")}
+            </p>
+
+            {editionDesk.editions.length === 0 ? (
+              <p className="mt-3 max-w-prose text-sm italic text-ink-soft">
+                {t("edition.empty")}
+              </p>
+            ) : (
+              <ul className="mt-5 space-y-6">
+                {editionDesk.editions.map((e) => {
+                  const currentAssociations = e.associations.filter(
+                    (a) => a.disposition === "recorded",
+                  );
+                  const byClass = (cls: string) =>
+                    currentAssociations.filter((a) => a.manifestation === cls);
+                  const readiness = editionReadiness({
+                    disposition: e.disposition,
+                    isCurrent: e.id === editionDesk.currentEditionId,
+                    activeMetadataExists: Boolean(activeVersion),
+                    foundingBaselineIsActive:
+                      e.founding_metadata_version_number === null
+                        ? null
+                        : e.founding_metadata_version_number ===
+                          (activeVersion?.version_number ?? -1),
+                    assignedIsbn: {
+                      ebook: e.assignments.some(
+                        (a) =>
+                          a.disposition === "assigned" &&
+                          a.manifestation === "ebook",
+                      ),
+                      paperback: e.assignments.some(
+                        (a) =>
+                          a.disposition === "assigned" &&
+                          a.manifestation === "paperback",
+                      ),
+                    },
+                    ebookEpubAssociated: byClass("ebook").some(
+                      (a) => a.artifact?.format === "epub",
+                    ),
+                    paperbackInteriorAssociated: byClass("paperback").some(
+                      (a) => a.artifact?.format === "print-pdf",
+                    ),
+                    paperbackCoverAssociated: byClass("paperback").some(
+                      (a) => a.artifact?.format === "cover-pdf",
+                    ),
+                    released: {
+                      ebook: releaseDesk.releases.some(
+                        (r) =>
+                          r.disposition === "active" &&
+                          byClass("ebook").some(
+                            (a) => a.artifact_id === r.artifact_id,
+                          ),
+                      ),
+                      paperback: releaseDesk.releases.some(
+                        (r) =>
+                          r.disposition === "active" &&
+                          byClass("paperback").some(
+                            (a) => a.artifact_id === r.artifact_id,
+                          ),
+                      ),
+                    },
+                    uncorrectedAssociationCount: e.associations.filter(
+                      (a) => a.disposition === "corrected",
+                    ).length,
+                  });
+                  return (
+                    <li key={e.id} className="rule pt-4">
+                      <div className="flex flex-wrap items-baseline gap-x-3">
+                        <span className="font-display">
+                          {t("edition.entry", { number: e.edition_number })}
+                        </span>
+                        <span
+                          className={
+                            e.disposition === "open"
+                              ? "text-ink"
+                              : "italic text-ink-faint"
+                          }
+                        >
+                          {t(`edition.disposition.${e.disposition}`)}
+                        </span>
+                        {e.id === editionDesk.currentEditionId ? (
+                          <span className="text-ink">
+                            {t("edition.currentMark")}
+                          </span>
+                        ) : null}
+                        <span className="text-ink-faint">
+                          {date(e.created_at)}
+                        </span>
+                        {e.founding_metadata_version_number !== null ? (
+                          <span className="font-sans text-xs text-ink-faint">
+                            {t("edition.foundingLine", {
+                              number: e.founding_metadata_version_number,
+                            })}
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="mt-1 max-w-prose text-sm text-ink-soft">
+                        {e.distinction_statement}
+                      </p>
+
+                      {MANIFESTATION_CLASSES.map((cls) => {
+                        const rows = byClass(cls);
+                        const assignment = e.assignments.find(
+                          (a) =>
+                            a.disposition === "assigned" &&
+                            a.manifestation === cls,
+                        );
+                        return (
+                          <div key={cls} className="mt-3">
+                            <p className="eyebrow">
+                              {t(`edition.manifestation.${cls}`)}
+                            </p>
+                            <p className="mt-1 font-sans text-xs text-ink-soft">
+                              {rows.length
+                                ? rows
+                                    .map((a) =>
+                                      t("edition.associationLine", {
+                                        format:
+                                          a.artifact?.format ?? "?",
+                                        number:
+                                          a.artifact?.artifact_number ?? 0,
+                                      }),
+                                    )
+                                    .join(" · ")
+                                : t("edition.noArtifacts")}
+                              {assignment
+                                ? ` · ISBN ${assignment.isbn13}${
+                                    assignment.kind === "external_adoption"
+                                      ? ` (${t("edition.externalAdoption")})`
+                                      : ""
+                                  }`
+                                : ` · ${t("edition.noIsbn")}`}
+                            </p>
+                          </div>
+                        );
+                      })}
+
+                      <ul className="mt-3 max-w-prose space-y-1 font-sans text-xs">
+                        {readiness.map((item, i) => (
+                          <li
+                            key={`${item.code}-${i}`}
+                            className={
+                              item.state === "attention"
+                                ? "text-oxblood"
+                                : "text-ink-soft"
+                            }
+                          >
+                            {t(
+                              `edition.readiness.${item.code}`,
+                              item.params as
+                                | Record<string, string>
+                                | undefined,
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+
+                      {e.events.length ? (
+                        <ul className="mt-2 max-w-prose space-y-0.5 font-sans text-xs text-ink-faint">
+                          {e.events.map((ev) => (
+                            <li key={ev.id}>
+                              {t(`edition.eventKind.${ev.kind}`)}: {ev.note} ·{" "}
+                              {date(ev.recorded_at)}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+
+                      {isStaff && e.disposition === "open" ? (
+                        <div className="mt-4 flex flex-wrap gap-6">
+                          {e.id !== editionDesk.currentEditionId ? (
+                            <form action={setCurrentEdition}>
+                              <input
+                                type="hidden"
+                                name="book_id"
+                                value={book.id}
+                              />
+                              <input
+                                type="hidden"
+                                name="edition_id"
+                                value={e.id}
+                              />
+                              <input
+                                type="hidden"
+                                name="desk_path"
+                                value={deskPath}
+                              />
+                              <QuietButton>
+                                {t("edition.makeCurrent")}
+                              </QuietButton>
+                            </form>
+                          ) : null}
+
+                          <form
+                            action={associateEditionArtifact}
+                            className="flex flex-wrap items-end gap-3"
+                          >
+                            <input
+                              type="hidden"
+                              name="edition_id"
+                              value={e.id}
+                            />
+                            <input
+                              type="hidden"
+                              name="desk_path"
+                              value={deskPath}
+                            />
+                            <div>
+                              <label
+                                className="eyebrow block"
+                                htmlFor={`assoc-artifact-${e.id}`}
+                              >
+                                {t("edition.associateLabel")}
+                              </label>
+                              <select
+                                id={`assoc-artifact-${e.id}`}
+                                name="artifact_id"
+                                className={selectClasses}
+                                defaultValue=""
+                              >
+                                <option value="">—</option>
+                                {exportHistory.artifacts
+                                  .filter(
+                                    (a) =>
+                                      a.designation === "production" &&
+                                      !editionDesk.editions.some((ed) =>
+                                        ed.associations.some(
+                                          (as) =>
+                                            as.artifact_id === a.id &&
+                                            as.disposition === "recorded",
+                                        ),
+                                      ),
+                                  )
+                                  .map((a) => (
+                                    <option key={a.id} value={a.id}>
+                                      {a.format} № {a.artifact_number}
+                                    </option>
+                                  ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label
+                                className="eyebrow block"
+                                htmlFor={`assoc-class-${e.id}`}
+                              >
+                                {t("edition.manifestationLabel")}
+                              </label>
+                              <select
+                                id={`assoc-class-${e.id}`}
+                                name="manifestation"
+                                className={selectClasses}
+                                defaultValue="paperback"
+                              >
+                                {MANIFESTATION_CLASSES.map((cls) => (
+                                  <option key={cls} value={cls}>
+                                    {t(`edition.manifestation.${cls}`)}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <QuietButton>
+                              {t("edition.associateAction")}
+                            </QuietButton>
+                          </form>
+
+                          <form
+                            action={assignIsbnToEdition}
+                            className="flex flex-wrap items-end gap-3"
+                          >
+                            <input
+                              type="hidden"
+                              name="edition_id"
+                              value={e.id}
+                            />
+                            <input
+                              type="hidden"
+                              name="desk_path"
+                              value={deskPath}
+                            />
+                            <div>
+                              <label
+                                className="eyebrow block"
+                                htmlFor={`assign-reg-${e.id}`}
+                              >
+                                {t("edition.assignLabel")}
+                              </label>
+                              <select
+                                id={`assign-reg-${e.id}`}
+                                name="registration_id"
+                                className={selectClasses}
+                                defaultValue=""
+                              >
+                                <option value="">—</option>
+                                {metadataDesk.isbns
+                                  .filter((r) => r.disposition === "recorded")
+                                  .map((r) => (
+                                    <option key={r.id} value={r.id}>
+                                      {r.isbn_as_entered}
+                                      {r.externally_assigned
+                                        ? ` — ${t("edition.externalAdoption")}`
+                                        : ""}
+                                    </option>
+                                  ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label
+                                className="eyebrow block"
+                                htmlFor={`assign-class-${e.id}`}
+                              >
+                                {t("edition.manifestationLabel")}
+                              </label>
+                              <select
+                                id={`assign-class-${e.id}`}
+                                name="manifestation"
+                                className={selectClasses}
+                                defaultValue="paperback"
+                              >
+                                {MANIFESTATION_CLASSES.map((cls) => (
+                                  <option key={cls} value={cls}>
+                                    {t(`edition.manifestation.${cls}`)}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label
+                                className="eyebrow block"
+                                htmlFor={`assign-kind-${e.id}`}
+                              >
+                                {t("edition.kindLabel")}
+                              </label>
+                              <select
+                                id={`assign-kind-${e.id}`}
+                                name="kind"
+                                className={selectClasses}
+                                defaultValue="institutional"
+                              >
+                                <option value="institutional">
+                                  {t("edition.kindInstitutional")}
+                                </option>
+                                <option value="external_adoption">
+                                  {t("edition.kindExternal")}
+                                </option>
+                              </select>
+                            </div>
+                            <Field
+                              id={`assign-evidence-${e.id}`}
+                              name="authority_evidence"
+                              label={t("edition.evidenceLabel")}
+                              required
+                            />
+                            <QuietButton>
+                              {t("edition.assignAction")}
+                            </QuietButton>
+                          </form>
+
+                          {editionDesk.editions.some(
+                            (o) =>
+                              o.id !== e.id && o.disposition === "open",
+                          ) ? (
+                            <form
+                              action={supersedeEdition}
+                              className="flex flex-wrap items-end gap-3"
+                            >
+                              <input
+                                type="hidden"
+                                name="edition_id"
+                                value={e.id}
+                              />
+                              <input
+                                type="hidden"
+                                name="desk_path"
+                                value={deskPath}
+                              />
+                              <div>
+                                <label
+                                  className="eyebrow block"
+                                  htmlFor={`supersede-${e.id}`}
+                                >
+                                  {t("edition.supersedeLabel")}
+                                </label>
+                                <select
+                                  id={`supersede-${e.id}`}
+                                  name="successor_id"
+                                  className={selectClasses}
+                                  defaultValue=""
+                                >
+                                  <option value="">—</option>
+                                  {editionDesk.editions
+                                    .filter(
+                                      (o) =>
+                                        o.id !== e.id &&
+                                        o.disposition === "open",
+                                    )
+                                    .map((o) => (
+                                      <option key={o.id} value={o.id}>
+                                        {t("edition.entry", {
+                                          number: o.edition_number,
+                                        })}
+                                      </option>
+                                    ))}
+                                </select>
+                              </div>
+                              <QuietButton>
+                                {t("edition.supersedeAction")}
+                              </QuietButton>
+                            </form>
+                          ) : null}
+
+                          <form action={withdrawEdition}>
+                            <input
+                              type="hidden"
+                              name="edition_id"
+                              value={e.id}
+                            />
+                            <input
+                              type="hidden"
+                              name="desk_path"
+                              value={deskPath}
+                            />
+                            <input type="hidden" name="reason" value="" />
+                            <QuietButton>
+                              {t("edition.withdrawAction")}
+                            </QuietButton>
+                          </form>
+                        </div>
+                      ) : null}
+                      {isStaff &&
+                      currentAssociations.length &&
+                      e.disposition === "open" ? (
+                        <details className="mt-3 max-w-md">
+                          <summary className="cursor-pointer font-sans text-xs text-ink-faint">
+                            {t("edition.correctAssociationAction")}
+                          </summary>
+                          <form
+                            action={correctEditionAssociation}
+                            className="mt-2 flex flex-wrap items-end gap-3"
+                          >
+                            <input
+                              type="hidden"
+                              name="desk_path"
+                              value={deskPath}
+                            />
+                            <div>
+                              <label
+                                className="eyebrow block"
+                                htmlFor={`correct-assoc-${e.id}`}
+                              >
+                                {t("edition.associationLabel")}
+                              </label>
+                              <select
+                                id={`correct-assoc-${e.id}`}
+                                name="association_id"
+                                className={selectClasses}
+                                defaultValue=""
+                              >
+                                {currentAssociations.map((a) => (
+                                  <option key={a.id} value={a.id}>
+                                    {a.artifact?.format} №{" "}
+                                    {a.artifact?.artifact_number} —{" "}
+                                    {t(
+                                      `edition.manifestation.${a.manifestation}`,
+                                    )}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <Field
+                              id={`correct-reason-${e.id}`}
+                              name="reason"
+                              label={t("edition.correctionReasonLabel")}
+                              required
+                            />
+                            <QuietButton>
+                              {t("edition.correctSubmit")}
+                            </QuietButton>
+                          </form>
+                        </details>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+
+            {isStaff ? (
+              <form action={declareEdition} className="mt-6 max-w-md">
+                <input type="hidden" name="book_id" value={book.id} />
+                <input type="hidden" name="desk_path" value={deskPath} />
+                <Field
+                  id="distinction-statement"
+                  name="distinction_statement"
+                  label={t("edition.distinctionLabel")}
+                  required
+                  hint={t("edition.distinctionHint")}
+                />
+                <div className="mt-3">
+                  <QuietButton>{t("edition.declareAction")}</QuietButton>
+                </div>
+              </form>
+            ) : null}
           </section>
 
           {/* Withdraw the candidate */}

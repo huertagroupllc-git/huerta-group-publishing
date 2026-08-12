@@ -166,6 +166,7 @@ export async function generatePrintArtifact(formData: FormData) {
     supabase,
     record!.book_id,
     consumptionInput,
+    "print-pdf",
   );
   if (!resolution.ok) {
     await failAttempt(

@@ -15,6 +15,7 @@ export const ADMIN_SECTIONS: { href: string; key: string }[] = [
   { href: "/admin/publication", key: "publication" },
   { href: "/admin/isbn", key: "isbn" },
   { href: "/admin/covers", key: "covers" },
+  { href: "/admin/editions", key: "editions" },
   { href: "/admin/support", key: "support" },
   { href: "/admin/import-cleanup", key: "importCleanup" },
   { href: "/admin/ai-usage", key: "aiUsage" },

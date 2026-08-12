@@ -32,7 +32,7 @@ touch Supabase and works even if these are unset; `/signin`,
 
 ## 2. Apply the database migrations
 
-**39 migrations**, applied strictly in filename order. The hosted
+**40 migrations**, applied strictly in filename order. The hosted
 database's applied state is reconciled against this list in
 [docs/operations/production-migration-baseline.md](operations/production-migration-baseline.md)
 — consult and update that record whenever migrations are applied.
@@ -177,6 +177,20 @@ database's applied state is reconciled against this list in
     `cover_assets.book_id` (assets outlive books); every hand-written
     unlink or riding-along change remains refused
     (production-verification fix, the migration-35 pattern).
+40. `20260820000000_edition_architecture.sql` — Edition Architecture:
+    the editions registry (monotone number per book, required
+    Distinction Statement, founding metadata baseline snapshot,
+    forward-only open → superseded | withdrawn), the reversible
+    books.current_edition_id pointer (open editions only, staff act),
+    append-only edition_events and edition_artifact_associations
+    (ebook ⇐ epub; paperback ⇐ print-pdf | cover-pdf; production
+    only; one current association per artifact; forward-only
+    correction), isbn_assignments (Edition + Manifestation target,
+    institutional vs external-adoption kinds, evidence required,
+    never reused/transferred, permanence outliving books via
+    reviewed referential unlinks), the assignment-aware consumption
+    eligibility (isbn_consumable_for_artifact), workflow functions,
+    RLS, and grants.
 
 Storage buckets and cron jobs are created by the migrations themselves;
 there is no separate manual step beyond confirming pg_cron is enabled.

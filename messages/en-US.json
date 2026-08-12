@@ -548,7 +548,8 @@
         "importCleanup": "Import cleanup",
         "publication": "Publication",
         "isbn": "ISBN Registry",
-        "covers": "Cover Production"
+        "covers": "Cover Production",
+        "editions": "Editions"
       }
     },
     "overview": {
@@ -2411,7 +2412,19 @@
       "assetRightsRequired": "Rights evidence is required — who holds the rights, on what basis. Nothing was recorded.",
       "assetUploadFailed": "The asset bytes could not be stored.",
       "assetRecordFailed": "The asset could not be recorded.",
-      "assetDuplicate": "An asset with that key or checksum is already on record."
+      "assetDuplicate": "An asset with that key or checksum is already on record.",
+      "editionMigrationMissing": "The edition schema has not been applied yet (migration 20260820000000_edition_architecture.sql).",
+      "editionActFailed": "The edition act could not be recorded.",
+      "distinctionRequired": "An edition requires its Distinction Statement — why the trade should see this manifestation as distinct.",
+      "editionRequired": "The assignment requires an existing edition.",
+      "editionNotOpen": "Only an open edition can receive this act.",
+      "supersessionInvalid": "Supersession names a different open edition of the same book.",
+      "associationIneligible": "That artifact cannot serve that manifestation: the EPUB serves the ebook; the print interior and cover serve the paperback; production artifacts only.",
+      "associationNotCurrent": "Only a current association can be corrected.",
+      "isbnNotAssignable": "That ISBN cannot be assigned: it must be a current, evidenced registration whose kind matches the act — institutional for identifiers the imprint controls, adoption for externally assigned ones.",
+      "isbnAlreadyAssigned": "That ISBN is already assigned. An identifier is never assigned twice, never reused, never transferred.",
+      "assignmentNotCurrent": "Only the current assignment can be corrected.",
+      "assignmentEvidenceRequired": "Assignment requires evidence of the imprint's authority over the identifier. Nothing was recorded."
     },
     "notices": {
       "candidatePresented": "The candidate has been presented and its composition is frozen.",
@@ -2440,7 +2453,14 @@
       "versionActivated": "The version is now active. Earlier versions remain.",
       "draftDiscarded": "The draft has been discarded. Finalized versions are untouched.",
       "isbnRecorded": "The ISBN has been recorded with its provenance.",
-      "isbnCorrected": "The correction has been recorded. The original registration remains, marked."
+      "isbnCorrected": "The correction has been recorded. The original registration remains, marked.",
+      "editionDeclared": "The edition has been declared with its Distinction Statement.",
+      "currentEditionSet": "The current edition pointer has been moved. Nothing historical changed.",
+      "editionSuperseded": "The edition has been superseded. Both editions remain.",
+      "editionWithdrawn": "The edition has been withdrawn. Its record and history remain.",
+      "artifactAssociated": "The artifact now belongs to the edition's manifestation.",
+      "associationCorrected": "The association has been corrected. The original record remains, marked.",
+      "isbnAssigned": "The ISBN has been assigned to the manifestation — permanently."
     },
     "cover": {
       "heading": "Cover Production — the wrap",
@@ -2482,6 +2502,85 @@
         "bookHint": "Leave empty for a house asset available to every book.",
         "recordSubmit": "Record the asset"
       }
+    },
+    "edition": {
+      "heading": "Editions",
+      "lede": "An edition is the book as the trade meets it — a deliberately declared manifestation grouping its metadata, identifiers, formats, and releases. Declaring one is a bibliographic judgment, never an automatic consequence of anything.",
+      "empty": "No edition has been declared. The book's records stand complete without one; declare an edition when the trade should meet it.",
+      "entry": "Edition {number}",
+      "currentMark": "current",
+      "foundingLine": "founded on Metadata Version {number}",
+      "disposition": {
+        "open": "open",
+        "superseded": "superseded",
+        "withdrawn": "withdrawn"
+      },
+      "manifestation": {
+        "ebook": "Ebook",
+        "paperback": "Paperback"
+      },
+      "associationLine": "{format} № {number}",
+      "noArtifacts": "no artifacts associated",
+      "noIsbn": "no ISBN",
+      "externalAdoption": "external adoption",
+      "readiness": {
+        "editionSuperseded": "This edition has been superseded; its record is historical.",
+        "editionWithdrawn": "This edition has been withdrawn; its record remains.",
+        "editionCurrent": "This is the book's current edition.",
+        "editionNotCurrent": "This edition is not the current edition.",
+        "metadataMissing": "No finalized Bibliographic Record is active for the book.",
+        "metadataMovedSinceFounding": "The active metadata version is newer than this edition's founding baseline — information, not an error.",
+        "isbnAssigned": "{manifestation}: an ISBN is assigned.",
+        "isbnUnassigned": "{manifestation}: no ISBN is assigned. Absence is valid.",
+        "ebookComplete": "Ebook: the EPUB is associated.",
+        "ebookMissingEpub": "Ebook: no EPUB is associated yet.",
+        "paperbackComplete": "Paperback: interior and cover are associated.",
+        "paperbackMissingCover": "Paperback: the interior is associated; the cover is not.",
+        "paperbackMissingInterior": "Paperback: the cover is associated; the interior is not.",
+        "paperbackMissingArtifacts": "Paperback: no artifacts are associated yet.",
+        "manifestationReleased": "{manifestation}: a release exists.",
+        "associationsCorrected": "{count} association(s) were corrected; the marks remain on record."
+      },
+      "eventKind": {
+        "correction": "Correction",
+        "amendment": "Amendment",
+        "note": "Note"
+      },
+      "makeCurrent": "Make this the current edition",
+      "associateLabel": "Associate artifact",
+      "associationLabel": "Association",
+      "manifestationLabel": "Manifestation",
+      "associateAction": "Associate",
+      "assignLabel": "Assign ISBN",
+      "kindLabel": "Kind",
+      "kindInstitutional": "Institutional assignment",
+      "kindExternal": "External adoption",
+      "evidenceLabel": "Authority evidence",
+      "assignAction": "Assign to the manifestation",
+      "supersedeLabel": "Successor",
+      "supersedeAction": "Supersede",
+      "withdrawAction": "Withdraw the edition",
+      "correctAssociationAction": "Correct an association",
+      "correctionReasonLabel": "Reason",
+      "correctSubmit": "Record the correction",
+      "distinctionLabel": "Distinction Statement",
+      "distinctionHint": "Why should the trade see this manifestation as distinct? Required; declared, never inferred.",
+      "declareAction": "Declare an edition"
+    },
+    "editionAdmin": {
+      "metaTitle": "Editions — Administration",
+      "heading": "Editions",
+      "lede": "The imprint-wide manifestation ledger: every declared edition with its distinction, groupings, and permanent ISBN assignments.",
+      "ledgerHeading": "Edition ledger",
+      "ledgerEmpty": "No editions have been declared.",
+      "entry": "Edition {number}",
+      "currentMark": "current",
+      "disposition": {
+        "open": "open",
+        "superseded": "superseded",
+        "withdrawn": "withdrawn"
+      },
+      "noAssociations": "no artifacts associated"
     },
     "consumption": {
       "heading": "Metadata consumption",

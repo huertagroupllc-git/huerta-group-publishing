@@ -71,8 +71,8 @@ author's own linked record, enforced by Row Level Security end to end.
 Deliberate exclusions, not omissions:
 
 - **Publication production and distribution** — barcode graphics,
-  Editions, new institutional ISBN assignment, rights, retailers,
-  automated distribution, ONIX export. The publication chain shipped
+  rights, retailers, automated distribution, ONIX export,
+  manufacturing. The publication chain shipped
   so far: the Candidate Foundation, deterministic EPUB export and 6×9
   print interiors, evidence-gated Releases, and the Bibliographic
   Record with the ISBN Registry (recording externally governed
@@ -222,6 +222,12 @@ package metadata; 1.0.0 behavior byte-frozen)
 Production: deterministic proof/production wraps through hgp-cover —
 the governed Cover Profile with the paper-rule spine, recorded
 rights-evidenced Cover Assets, the ISBN text block, and full wrap
-provenance ([as-built](docs/operations/cover-production.md)).
-Later phases (editions, ISBN assignment, barcode graphics, ONIX,
-automated distribution) each begin under their own authorization.
+provenance ([as-built](docs/operations/cover-production.md)), and
+Edition Architecture: the human-declared bibliographic manifestation
+layer — Distinction Statements, the reversible Current pointer,
+ebook/paperback manifestations grouping artifacts and releases, and
+permanent institutional ISBN assignment at Edition + Manifestation
+([as-built](docs/operations/edition-architecture.md)).
+Later phases (barcode graphics, ONIX, automated distribution,
+manufacturing, audiobook, translations) each begin under their own
+authorization.

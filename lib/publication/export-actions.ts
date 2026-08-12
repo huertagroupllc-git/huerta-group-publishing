@@ -149,6 +149,7 @@ export async function generateEpubArtifact(formData: FormData) {
     supabase,
     record!.book_id,
     consumptionInput,
+    "epub",
   );
   if (!resolution.ok) {
     await failAttempt(

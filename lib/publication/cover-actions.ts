@@ -170,6 +170,7 @@ export async function generateCoverArtifact(formData: FormData) {
     supabase,
     record!.book_id,
     consumptionInput,
+    "cover-pdf",
   );
   if (!resolution.ok) {
     await failAttempt(

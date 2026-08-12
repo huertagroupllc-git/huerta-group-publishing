@@ -184,3 +184,14 @@ shows the labels, not the word.
 | **Cover Asset** | **Ratified** | A recorded artwork input: exact checksummed bytes with required rights evidence. Recorded, never created or transformed. Zero assets is valid — the typographic cover is the house default. |
 | **Spine Rule** | **Ratified** | The profile's deterministic function from the wrapped interior's recorded page count to spine width (paper pages-per-inch with integer rounding). The interior determines; the cover consumes — one-way, always. |
 | **Wrapped Interior** | **Ratified** | The print artifact a cover serves, snapshotted (id, page count, checksum) in cover provenance. A production cover wraps a production interior. |
+
+## Edition terms (ratified August 2026)
+
+| Term | Verdict | Canon |
+| --- | --- | --- |
+| **Edition** | **Ratified** | The durable bibliographic manifestation of a Book — a thin, human-declared grouping of metadata, identifiers, artifacts, and releases. Never a manuscript, candidate, artifact, release, format, or metadata version. |
+| **Distinction Statement** | **Ratified** | The required human rationale for why the trade should see a manifestation as distinct. Declared, never inferred; no diff engine may write it. |
+| **Manifestation** | **Ratified** | Edition + manifestation class (exactly ebook, paperback) — the locus of ISBN assignment and future channel listing. A derived intersection, never a record family. |
+| **Current Edition** | **Ratified** | The Book's one operative Edition, held by a reversible pointer. Never a lifecycle state; moving it rewrites nothing. |
+| **Edition Association** | **Ratified** | The append-only human-declared fact that a production artifact belongs to an Edition's manifestation. Corrected forward-only; never an input to the artifact. |
+| **ISBN Assignment** | **Ratified** | The imprint's act binding one recorded, evidenced registration to one Manifestation, forever — never reused, never transferred; corrections preserve originals. **External Adoption** restates an externally evidenced assignment and is never an imprint assignment act. |

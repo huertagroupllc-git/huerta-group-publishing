@@ -11,6 +11,9 @@ import {
   PUBLISHER_LEGAL_ENTITY,
 } from "@/lib/publication/publisher";
 import type { ContributorRole } from "@/lib/publication/metadata-derive";
+import {
+  manifestationForFormat,
+} from "@/lib/publication/edition";
 import type { CandidateRecord } from "@/lib/publication/types";
 
 /**
@@ -78,6 +81,10 @@ export async function resolveConsumption(
     metadataReason: string;
     isbnRegistrationId: string;
   },
+  /** The generating artifact's format — identifier eligibility now
+   *  admits current Edition/Manifestation assignments whose class
+   *  matches (Edition blueprint §10); passing it enables that path. */
+  artifactFormat?: string,
 ): Promise<
   | { ok: true; selection: ResolvedConsumption }
   | { ok: false; code: ConsumptionFailure }
@@ -122,22 +129,35 @@ export async function resolveConsumption(
     const { data: registration } = await supabase
       .from("isbn_registrations")
       .select(
-        "id, isbn13, isbn_as_entered, disposition, externally_assigned, book_id, isbn_evidence(id)",
+        "id, isbn13, isbn_as_entered, disposition, externally_assigned, book_id, isbn_evidence(id), isbn_assignments(disposition, book_id, manifestation)",
       )
       .eq("id", requestedIsbn)
       .maybeSingle();
-    if (
-      !registration ||
-      registration.disposition !== "recorded" ||
-      !registration.externally_assigned ||
-      registration.book_id !== bookId ||
-      (registration.isbn_evidence ?? []).length === 0
-    ) {
+    const externallyEligible =
+      registration &&
+      registration.disposition === "recorded" &&
+      registration.externally_assigned &&
+      registration.book_id === bookId &&
+      (registration.isbn_evidence ?? []).length > 0;
+    const manifestation = artifactFormat
+      ? manifestationForFormat(artifactFormat)
+      : null;
+    const assignmentEligible =
+      registration &&
+      registration.disposition === "recorded" &&
+      manifestation !== null &&
+      (registration.isbn_assignments ?? []).some(
+        (a: { disposition: string; book_id: string | null; manifestation: string }) =>
+          a.disposition === "assigned" &&
+          a.book_id === bookId &&
+          a.manifestation === manifestation,
+      );
+    if (!externallyEligible && !assignmentEligible) {
       return { ok: false, code: "isbn_not_eligible" };
     }
-    isbnRegistrationId = registration.id;
-    isbn13 = registration.isbn13;
-    isbnAsEntered = registration.isbn_as_entered;
+    isbnRegistrationId = registration!.id;
+    isbn13 = registration!.isbn13;
+    isbnAsEntered = registration!.isbn_as_entered;
   }
 
   return {
