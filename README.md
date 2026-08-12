@@ -70,7 +70,7 @@ author's own linked record, enforced by Row Level Security end to end.
 
 Deliberate exclusions, not omissions:
 
-- **Publication production and distribution** — covers, barcodes,
+- **Publication production and distribution** — barcode graphics,
   Editions, new institutional ISBN assignment, rights, retailers,
   automated distribution, ONIX export. The publication chain shipped
   so far: the Candidate Foundation, deterministic EPUB export and 6×9
@@ -218,6 +218,10 @@ one pinned finalized Bibliographic Record version per artifact
 (immutable Metadata Pin + Identifier Consumption provenance, bmv-v1
 dual-computed fingerprint, deterministic print copyright page, EPUB
 package metadata; 1.0.0 behavior byte-frozen)
-([as-built](docs/operations/metadata-consumption.md)).
-Later phases (covers, editions, ISBN assignment, ONIX, automated
-distribution) each begin under their own authorization.
+([as-built](docs/operations/metadata-consumption.md)), and Cover
+Production: deterministic proof/production wraps through hgp-cover —
+the governed Cover Profile with the paper-rule spine, recorded
+rights-evidenced Cover Assets, the ISBN text block, and full wrap
+provenance ([as-built](docs/operations/cover-production.md)).
+Later phases (editions, ISBN assignment, barcode graphics, ONIX,
+automated distribution) each begin under their own authorization.

@@ -547,7 +547,8 @@
         "support": "Support",
         "importCleanup": "Import cleanup",
         "publication": "Publication",
-        "isbn": "ISBN Registry"
+        "isbn": "ISBN Registry",
+        "covers": "Cover Production"
       }
     },
     "overview": {
@@ -2397,7 +2398,20 @@
       "metadataIdentityMismatch": "The selected metadata version and the candidate describe different work identities (title, subtitle, author, or language). Nothing was generated — reconcile the records first.",
       "metadataFingerprintMismatch": "The metadata fingerprint did not verify. Nothing was recorded.",
       "metadataConsumptionRequired": "This serializer version records the consumed metadata version with the artifact. Nothing was recorded.",
-      "isbnNotEligible": "That ISBN is not eligible for consumption: only a current, externally evidenced registration of this book can be embedded. Nothing was generated."
+      "isbnNotEligible": "That ISBN is not eligible for consumption: only a current, externally evidenced registration of this book can be embedded. Nothing was generated.",
+      "coverMigrationMissing": "The cover schema has not been applied yet (migration 20260818000000_cover_production.sql).",
+      "generateCoverFailed": "The cover could not be generated. The attempt was recorded.",
+      "coverValidationFailed": "The generated wrap did not pass cover production validation. Nothing was recorded as an artifact.",
+      "wrappedArtifactInvalid": "A cover wraps one print interior of this candidate. Choose the interior artifact to wrap.",
+      "wrappedArtifactNotProduction": "A production cover must wrap a production interior. Nothing was generated.",
+      "pageCountOutOfRange": "The interior's page count is outside the cover profile's validity range. Nothing was generated.",
+      "assetInvalid": "The cover asset could not be used: it must be a recorded JPEG whose bytes match its registered checksum.",
+      "assetFileRequired": "An asset file is required.",
+      "assetIdentityRequired": "An asset key and display name are required.",
+      "assetRightsRequired": "Rights evidence is required — who holds the rights, on what basis. Nothing was recorded.",
+      "assetUploadFailed": "The asset bytes could not be stored.",
+      "assetRecordFailed": "The asset could not be recorded.",
+      "assetDuplicate": "An asset with that key or checksum is already on record."
     },
     "notices": {
       "candidatePresented": "The candidate has been presented and its composition is frozen.",
@@ -2418,12 +2432,56 @@
       "releaseSuperseded": "The supersession has been recorded. Both releases remain.",
       "printProofGenerated": "The proof interior was generated, validated, and preserved. Proofs can never be released.",
       "printProductionGenerated": "The production interior was generated, validated as Production-Valid, and preserved.",
+      "coverProofGenerated": "The proof wrap was generated, validated, and preserved. Proofs can never be released.",
+      "coverProductionGenerated": "The production wrap was generated, validated as Production-Valid, and preserved.",
+      "assetRecorded": "The cover asset has been recorded with its rights evidence.",
       "draftOpened": "The draft is open, with the derived facts in place.",
       "draftSaved": "The draft has been saved.",
       "versionActivated": "The version is now active. Earlier versions remain.",
       "draftDiscarded": "The draft has been discarded. Finalized versions are untouched.",
       "isbnRecorded": "The ISBN has been recorded with its provenance.",
       "isbnCorrected": "The correction has been recorded. The original registration remains, marked."
+    },
+    "cover": {
+      "heading": "Cover Production — the wrap",
+      "formatLabel": "Cover (wrap PDF)",
+      "profileLine": "Profile {name} · v{version}",
+      "serializerLine": "Serializer {serializer} · version {version}",
+      "lede": "The wrap — back cover, spine, front cover — renders deterministically from governed facts: the pinned Bibliographic Record, the interior's recorded page count, the governed fonts, and at most one recorded artwork asset. The spine derives from the interior; the cover never influences the interior.",
+      "needsInterior": "A cover wraps a print interior. Generate the interior first.",
+      "productionNeedsInterior": "A production cover requires the full authority chain and a production interior on record.",
+      "wrappedLabel": "Interior to wrap",
+      "wrappedOption": "Artifact № {number} · {pages} pages",
+      "assetLabel": "Front artwork (recorded asset)",
+      "assetNone": "None — typographic cover",
+      "proofAction": "Generate proof wrap",
+      "productionAction": "Generate production wrap",
+      "wrapLine": "wraps {pages} pages · spine {spine} in"
+    },
+    "coverAdmin": {
+      "metaTitle": "Cover Production — Administration",
+      "heading": "Cover Production",
+      "lede": "The governed cover inputs: the immutable wrap profile and the Cover Asset ledger. The platform records artwork with rights evidence — it never creates, edits, or transforms it.",
+      "profileHeading": "House Cover Profile",
+      "profileLine": "{name} · v{version} · wraps {interior}",
+      "paperLine": "paper rule {ppi} pages/inch",
+      "assetsHeading": "Cover Assets",
+      "assetsEmpty": "No cover assets are on record. The typographic cover needs none.",
+      "houseAsset": "House asset",
+      "rightsLine": "Rights: {evidence}",
+      "recordHeading": "Record a cover asset",
+      "recordLede": "Exact bytes, checksummed at recording. JPEG only in this profile generation. Rights evidence is required.",
+      "form": {
+        "fileLabel": "Asset file (JPEG)",
+        "keyLabel": "Asset key",
+        "keyHint": "Lowercase slug, permanent — e.g. hour-front-art.",
+        "nameLabel": "Display name",
+        "rightsLabel": "Rights evidence",
+        "rightsHint": "Who holds the rights and on what basis — commission record, license, own work.",
+        "bookLabel": "Book id",
+        "bookHint": "Leave empty for a house asset available to every book.",
+        "recordSubmit": "Record the asset"
+      }
     },
     "consumption": {
       "heading": "Metadata consumption",

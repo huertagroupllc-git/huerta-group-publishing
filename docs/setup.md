@@ -32,7 +32,7 @@ touch Supabase and works even if these are unset; `/signin`,
 
 ## 2. Apply the database migrations
 
-**37 migrations**, applied strictly in filename order. The hosted
+**38 migrations**, applied strictly in filename order. The hosted
 database's applied state is reconciled against this list in
 [docs/operations/production-migration-baseline.md](operations/production-migration-baseline.md)
 — consult and update that record whenever migrations are applied.
@@ -163,6 +163,15 @@ database's applied state is reconciled against this list in
     functions refuse (`isbn_not_eligible`) whenever a requested
     identifier cannot be resolved under the caller's RLS, instead of
     silently recording without it (production-verification fix).
+38. `20260818000000_cover_production.sql` — Cover Production: the
+    immutable cover_profiles registry (seeded with HGP Trade 6×9 —
+    Cover v1), governed cover_assets with required rights evidence
+    (+ private cover-assets bucket), the cover-pdf format, the
+    serializer-aware consumption law, the immutable
+    cover_artifact_provenance companion (wrapped-interior snapshots,
+    wrap geometry, asset snapshots) with the cover-widened
+    one-checksum law and companion-required deferred constraint,
+    record_cover_export_success, RLS, and grants.
 
 Storage buckets and cron jobs are created by the migrations themselves;
 there is no separate manual step beyond confirming pg_cron is enabled.

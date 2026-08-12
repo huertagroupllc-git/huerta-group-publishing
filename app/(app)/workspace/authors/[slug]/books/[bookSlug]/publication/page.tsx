@@ -19,6 +19,15 @@ import {
   generateEpubArtifact,
 } from "@/lib/publication/export-actions";
 import { generatePrintArtifact } from "@/lib/publication/print-actions";
+import { generateCoverArtifact } from "@/lib/publication/cover-actions";
+import {
+  COVER_SERIALIZER_ID,
+  COVER_SERIALIZER_VERSION,
+} from "@/lib/publication/cover-serializer";
+import {
+  HGP_TRADE_6X9_COVER_V1,
+  coverProfileFingerprint,
+} from "@/lib/publication/cover-profile";
 import {
   PRINT_SERIALIZER_ID,
   PRINT_SERIALIZER_VERSION_METADATA,
@@ -195,6 +204,77 @@ export default async function PublicationDeskPage({
           </select>
         </div>
       ) : null}
+    </div>
+  );
+
+  // Cover generation inputs: the wrappable interiors of this candidate
+  // and the governed assets available to this book.
+  const printArtifacts = exportHistory.artifacts.filter(
+    (a) => a.format === "print-pdf" && a.print,
+  );
+  const { data: coverAssetRows } = current
+    ? await supabase
+        .from("cover_assets")
+        .select("id, asset_key, display_name, book_id")
+        .or(`book_id.is.null,book_id.eq.${book.id}`)
+        .order("recorded_at", { ascending: false })
+    : { data: [] };
+  const coverAssets = coverAssetRows ?? [];
+  const coverFields = (idPrefix: string, proof: boolean) => (
+    <div>
+      <div className="grid max-w-md gap-3">
+        <div>
+          <label className="eyebrow block" htmlFor={`${idPrefix}-wrapped`}>
+            {t("cover.wrappedLabel")}
+          </label>
+          <select
+            id={`${idPrefix}-wrapped`}
+            name="wrapped_artifact_id"
+            className={selectClasses}
+            defaultValue={
+              (proof
+                ? printArtifacts[0]
+                : printArtifacts.find((a) => a.designation === "production")
+              )?.id ?? ""
+            }
+          >
+            {printArtifacts
+              .filter((a) => proof || a.designation === "production")
+              .map((a) => (
+                <option key={a.id} value={a.id}>
+                  {t("cover.wrappedOption", {
+                    number: a.artifact_number,
+                    pages: a.print!.page_count,
+                  })}
+                  {a.designation === "proof"
+                    ? ` — ${t("print.designationProof")}`
+                    : ""}
+                </option>
+              ))}
+          </select>
+        </div>
+        {coverAssets.length ? (
+          <div>
+            <label className="eyebrow block" htmlFor={`${idPrefix}-asset`}>
+              {t("cover.assetLabel")}
+            </label>
+            <select
+              id={`${idPrefix}-asset`}
+              name="cover_asset_id"
+              className={selectClasses}
+              defaultValue=""
+            >
+              <option value="">{t("cover.assetNone")}</option>
+              {coverAssets.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.display_name} ({a.asset_key})
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
+      </div>
+      {consumptionFields(idPrefix)}
     </div>
   );
 
@@ -573,12 +653,20 @@ export default async function PublicationDeskPage({
                       <span className="text-ink-faint">
                         {a.format === "print-pdf"
                           ? t("print.formatLabel")
-                          : "EPUB"}
+                          : a.format === "cover-pdf"
+                            ? t("cover.formatLabel")
+                            : "EPUB"}
                         {a.designation === "proof"
                           ? ` · ${t("print.designationProof")}`
                           : ""}
                         {a.print
                           ? ` · ${t("print.pages", { count: a.print.page_count })}`
+                          : ""}
+                        {a.cover
+                          ? ` · ${t("cover.wrapLine", {
+                              pages: a.cover.wrapped_page_count,
+                              spine: (a.cover.spine_width_mpt / 72000).toFixed(3),
+                            })}`
                           : ""}
                       </span>
                       <span className="text-ink-faint">
@@ -706,6 +794,79 @@ export default async function PublicationDeskPage({
                 </p>
               )}
             </div>
+          </section>
+
+          {/* ---- Cover Production — the deterministic wrap ---- */}
+          <section aria-labelledby="cover-heading" className="rule mt-8 pt-5">
+            <h3
+              id="cover-heading"
+              className="font-display text-lg tracking-tight"
+            >
+              {t("cover.heading")}
+            </h3>
+            <p className="mt-1 font-sans text-xs text-ink-faint">
+              {t("cover.profileLine", {
+                name: HGP_TRADE_6X9_COVER_V1.displayName,
+                version: HGP_TRADE_6X9_COVER_V1.version,
+              })}{" "}
+              ·{" "}
+              {shortFingerprint(coverProfileFingerprint(HGP_TRADE_6X9_COVER_V1))}{" "}
+              ·{" "}
+              {t("cover.serializerLine", {
+                serializer: COVER_SERIALIZER_ID,
+                version: COVER_SERIALIZER_VERSION,
+              })}
+            </p>
+            <p className="mt-3 max-w-prose text-sm text-ink-soft">
+              {t("cover.lede")}
+            </p>
+            {printArtifacts.length === 0 ? (
+              <p className="mt-3 max-w-prose text-sm italic text-ink-soft">
+                {t("cover.needsInterior")}
+              </p>
+            ) : (
+              <div className="mt-4 flex flex-wrap gap-8">
+                <form action={generateCoverArtifact}>
+                  <input
+                    type="hidden"
+                    name="candidate_id"
+                    value={current.record.id}
+                  />
+                  <input type="hidden" name="desk_path" value={deskPath} />
+                  <input type="hidden" name="designation" value="proof" />
+                  {coverFields("cover-proof", true)}
+                  <div className="mt-3">
+                    <QuietButton>{t("cover.proofAction")}</QuietButton>
+                  </div>
+                </form>
+                {exportEligible &&
+                printArtifacts.some((a) => a.designation === "production") ? (
+                  <form action={generateCoverArtifact}>
+                    <input
+                      type="hidden"
+                      name="candidate_id"
+                      value={current.record.id}
+                    />
+                    <input type="hidden" name="desk_path" value={deskPath} />
+                    <input
+                      type="hidden"
+                      name="designation"
+                      value="production"
+                    />
+                    {coverFields("cover-production", false)}
+                    <div className="mt-3">
+                      <PrimaryButton>
+                        {t("cover.productionAction")}
+                      </PrimaryButton>
+                    </div>
+                  </form>
+                ) : (
+                  <p className="max-w-prose self-center font-sans text-xs italic text-ink-soft">
+                    {t("cover.productionNeedsInterior")}
+                  </p>
+                )}
+              </div>
+            )}
           </section>
 
           {/* Withdraw the candidate */}

@@ -174,3 +174,13 @@ shows the labels, not the word.
 | **Identifier Consumption** | **Ratified** | The recorded fact that one eligible, externally evidenced ISBN was embedded in an artifact, with identifier and evidence state snapshotted at that moment. |
 | **Metadata Readiness** | **Ratified** | The deterministic facts about whether and how governed metadata can enter a target output. Facts, never a verdict. |
 | **Artifact Metadata Provenance** | **Ratified** | The immutable companion record holding an artifact's Metadata Pin and Identifier Consumption. Absence means the serializer version predates consumption. |
+
+## Cover Production terms (ratified August 2026)
+
+| Term | Verdict | Canon |
+| --- | --- | --- |
+| **Cover / Wrap** | **Ratified** | A Publication Artifact of format cover-pdf: one deterministic single-page wrap (back cover, spine, front cover). Part of the publication, never the manuscript. |
+| **Cover Profile** | **Ratified** | Immutable, versioned institutional wrap configuration — bleed, safe areas, the Spine Rule, typography, the ISBN block, asset frames. Values, never serializer behavior. |
+| **Cover Asset** | **Ratified** | A recorded artwork input: exact checksummed bytes with required rights evidence. Recorded, never created or transformed. Zero assets is valid — the typographic cover is the house default. |
+| **Spine Rule** | **Ratified** | The profile's deterministic function from the wrapped interior's recorded page count to spine width (paper pages-per-inch with integer rounding). The interior determines; the cover consumes — one-way, always. |
+| **Wrapped Interior** | **Ratified** | The print artifact a cover serves, snapshotted (id, page count, checksum) in cover provenance. A production cover wraps a production interior. |

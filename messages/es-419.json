@@ -547,7 +547,8 @@
         "support": "Soporte",
         "importCleanup": "Limpieza de importaciones",
         "publication": "Publicación",
-        "isbn": "Registro de ISBN"
+        "isbn": "Registro de ISBN",
+        "covers": "Producción de Portadas"
       }
     },
     "overview": {
@@ -2397,7 +2398,20 @@
       "metadataIdentityMismatch": "La versión de metadatos seleccionada y el candidato describen identidades distintas de la obra (título, subtítulo, autor o idioma). No se generó nada — concilie los registros primero.",
       "metadataFingerprintMismatch": "La huella de los metadatos no se verificó. No se registró nada.",
       "metadataConsumptionRequired": "Esta versión del serializador registra la versión de metadatos consumida junto con el artefacto. No se registró nada.",
-      "isbnNotEligible": "Ese ISBN no es elegible para consumo: solo puede incorporarse un registro vigente de este libro con asignación externa evidenciada. No se generó nada."
+      "isbnNotEligible": "Ese ISBN no es elegible para consumo: solo puede incorporarse un registro vigente de este libro con asignación externa evidenciada. No se generó nada.",
+      "coverMigrationMissing": "El esquema de portadas aún no se ha aplicado (migración 20260818000000_cover_production.sql).",
+      "generateCoverFailed": "La portada no pudo generarse. El intento quedó registrado.",
+      "coverValidationFailed": "La envoltura generada no pasó la validación de producción de portadas. Nada se registró como artefacto.",
+      "wrappedArtifactInvalid": "Una portada envuelve un interior impreso de este candidato. Elija el artefacto interior a envolver.",
+      "wrappedArtifactNotProduction": "Una portada de producción debe envolver un interior de producción. No se generó nada.",
+      "pageCountOutOfRange": "El número de páginas del interior está fuera del rango de validez del perfil de portada. No se generó nada.",
+      "assetInvalid": "El recurso de portada no pudo usarse: debe ser un JPEG registrado cuyos bytes coincidan con su huella registrada.",
+      "assetFileRequired": "Se requiere un archivo de recurso.",
+      "assetIdentityRequired": "Se requieren la clave y el nombre del recurso.",
+      "assetRightsRequired": "Se requiere evidencia de derechos — quién los posee y con qué base. No se registró nada.",
+      "assetUploadFailed": "Los bytes del recurso no pudieron almacenarse.",
+      "assetRecordFailed": "El recurso no pudo registrarse.",
+      "assetDuplicate": "Ya consta un recurso con esa clave o esa huella."
     },
     "notices": {
       "candidatePresented": "El candidato fue presentado y su composición quedó congelada.",
@@ -2423,7 +2437,51 @@
       "versionActivated": "La versión ahora está activa. Las versiones anteriores permanecen.",
       "draftDiscarded": "El borrador fue descartado. Las versiones finalizadas quedan intactas.",
       "isbnRecorded": "El ISBN quedó registrado con su procedencia.",
-      "isbnCorrected": "La corrección quedó registrada. El registro original permanece, marcado."
+      "isbnCorrected": "La corrección quedó registrada. El registro original permanece, marcado.",
+      "coverProofGenerated": "La envoltura de prueba fue generada, validada y preservada. Las pruebas nunca pueden lanzarse.",
+      "coverProductionGenerated": "La envoltura de producción fue generada, validada como Válida para Producción y preservada.",
+      "assetRecorded": "El recurso de portada fue registrado con su evidencia de derechos."
+    },
+    "cover": {
+      "heading": "Producción de Portadas — la envoltura",
+      "formatLabel": "Portada (PDF de envoltura)",
+      "profileLine": "Perfil {name} · v{version}",
+      "serializerLine": "Serializador {serializer} · versión {version}",
+      "lede": "La envoltura — contraportada, lomo y portada — se compone de forma determinista a partir de hechos gobernados: el Registro Bibliográfico fijado, el número de páginas registrado del interior, las fuentes gobernadas y, a lo sumo, un recurso de arte registrado. El lomo deriva del interior; la portada nunca influye en el interior.",
+      "needsInterior": "Una portada envuelve un interior impreso. Genere primero el interior.",
+      "productionNeedsInterior": "Una portada de producción requiere la cadena completa de autoridad y un interior de producción registrado.",
+      "wrappedLabel": "Interior a envolver",
+      "wrappedOption": "Artefacto N.º {number} · {pages} páginas",
+      "assetLabel": "Arte frontal (recurso registrado)",
+      "assetNone": "Ninguno — portada tipográfica",
+      "proofAction": "Generar envoltura de prueba",
+      "productionAction": "Generar envoltura de producción",
+      "wrapLine": "envuelve {pages} páginas · lomo {spine} in"
+    },
+    "coverAdmin": {
+      "metaTitle": "Producción de Portadas — Administración",
+      "heading": "Producción de Portadas",
+      "lede": "Los insumos gobernados de portada: el perfil de envoltura inmutable y el registro de Recursos de Portada. La plataforma registra el arte con evidencia de derechos — nunca lo crea, edita ni transforma.",
+      "profileHeading": "Perfil de Portada de la casa",
+      "profileLine": "{name} · v{version} · envuelve {interior}",
+      "paperLine": "regla de papel {ppi} páginas/pulgada",
+      "assetsHeading": "Recursos de Portada",
+      "assetsEmpty": "No hay recursos de portada registrados. La portada tipográfica no necesita ninguno.",
+      "houseAsset": "Recurso de la casa",
+      "rightsLine": "Derechos: {evidence}",
+      "recordHeading": "Registrar un recurso de portada",
+      "recordLede": "Bytes exactos, con huella al registrarse. Solo JPEG en esta generación del perfil. La evidencia de derechos es obligatoria.",
+      "form": {
+        "fileLabel": "Archivo del recurso (JPEG)",
+        "keyLabel": "Clave del recurso",
+        "keyHint": "Slug en minúsculas, permanente — p. ej. hour-front-art.",
+        "nameLabel": "Nombre para mostrar",
+        "rightsLabel": "Evidencia de derechos",
+        "rightsHint": "Quién posee los derechos y con qué base — encargo, licencia, obra propia.",
+        "bookLabel": "Id del libro",
+        "bookHint": "Déjelo vacío para un recurso de la casa disponible para todos los libros.",
+        "recordSubmit": "Registrar el recurso"
+      }
     },
     "consumption": {
       "heading": "Consumo de metadatos",
