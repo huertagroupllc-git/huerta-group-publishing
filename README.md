@@ -190,6 +190,10 @@ production build on every push to `main` and every pull request.
   look at home printed in the front matter of a well-made book?*
 - Do not weaken RLS, and never introduce `service_role` into the app.
 - Follow the terminology canon in UI copy, code, and schema alike.
+- Evidence from real use is recorded under the Founder Validation
+  Program ([docs/validation/](docs/validation/README.md)) —
+  observations are evidence about the institution, never
+  institutional law by assertion.
 
 ## What's next
 
