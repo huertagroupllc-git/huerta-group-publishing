@@ -133,6 +133,9 @@ export async function resolveFinding(formData: FormData) {
   const findingId = String(formData.get("finding_id") ?? "");
   const chapterId = String(formData.get("chapter_id") ?? "");
   const findingsPath = String(formData.get("findings_path") ?? "/workspace");
+  // A failure stays where the act was attempted (the memo, the brief);
+  // only success travels to findings_path.
+  const errorPath = String(formData.get("error_path") ?? "") || findingsPath;
   const nextAnchor = String(formData.get("next_anchor") ?? "");
   const note = String(formData.get("note") ?? "").trim();
 
@@ -170,7 +173,7 @@ export async function resolveFinding(formData: FormData) {
 
   if (error || !data?.length) {
     console.error("[findings] resolveFinding failed", error);
-    fail(findingsPath, "resolveFailed");
+    fail(errorPath, "resolveFailed");
   }
 
   landAfterDisposition(
@@ -188,6 +191,7 @@ export async function resolveFinding(formData: FormData) {
 export async function setAsideFinding(formData: FormData) {
   const findingId = String(formData.get("finding_id") ?? "");
   const findingsPath = String(formData.get("findings_path") ?? "/workspace");
+  const errorPath = String(formData.get("error_path") ?? "") || findingsPath;
   const nextAnchor = String(formData.get("next_anchor") ?? "");
   const note = String(formData.get("note") ?? "").trim();
 
@@ -204,7 +208,7 @@ export async function setAsideFinding(formData: FormData) {
 
   if (error || !data?.length) {
     console.error("[findings] setAsideFinding failed", error);
-    fail(findingsPath, "setAsideFailed");
+    fail(errorPath, "setAsideFailed");
   }
 
   landAfterDisposition(

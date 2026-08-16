@@ -230,6 +230,11 @@ export default async function FindingsPage({
           params={notice?.params}
           namespace="findings.notices"
         />
+        <ActionNotice
+          code={notice?.code}
+          params={notice?.params}
+          namespace="manuscript.notices"
+        />
       </div>
 
       <div className="rule mt-10 pt-5">

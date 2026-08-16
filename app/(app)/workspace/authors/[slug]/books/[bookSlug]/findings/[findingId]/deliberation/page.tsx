@@ -197,6 +197,11 @@ export default async function DeliberationPageRoute({
           params={notice?.params}
           namespace="findings.notices"
         />
+        <ActionNotice
+          code={notice?.code}
+          params={notice?.params}
+          namespace="manuscript.notices"
+        />
       </div>
 
       {/* The prompt: the originating finding, immutable, quoted. */}
@@ -415,7 +420,17 @@ export default async function DeliberationPageRoute({
                 name="chapter_id"
                 value={finding.chapterId ?? ""}
               />
-              <input type="hidden" name="findings_path" value={pagePath} />
+              {/* A terminal disposition ends the task: success returns to
+                  the desk in the author's view, landing on the entry that
+                  followed (the finding itself has left the Open view);
+                  failure stays here with its message. */}
+              <input
+                type="hidden"
+                name="findings_path"
+                value={`${findingsPath}${continuityQuery({ status: ctx.status })}`}
+              />
+              <input type="hidden" name="next_anchor" value={nextOpen?.id ?? ""} />
+              <input type="hidden" name="error_path" value={pagePath} />
               <div className="min-w-56 flex-1">
                 <label htmlFor="disposition-note" className="eyebrow block">
                   {tContinue("dispositionHeading")} ·{" "}

@@ -86,6 +86,15 @@ export function appendQuery(
   return s ? `${base}?${s}` : base;
 }
 
+/** Separate a path's fragment so query helpers (which split on "?")
+ *  can work on the base and the anchor can be re-attached last. */
+export function splitFragment(path: string): { base: string; fragment: string } {
+  const at = path.indexOf("#");
+  return at < 0
+    ? { base: path, fragment: "" }
+    : { base: path.slice(0, at), fragment: path.slice(at) };
+}
+
 /** The desk's per-finding anchor — the same string everywhere. */
 export function findingAnchor(findingId: string): string {
   return `finding-${findingId}`;
@@ -198,4 +207,45 @@ export function primaryReturn(paths: ReturnPaths): string {
   if (paths.primary === "deliberation") return paths.deliberation;
   if (paths.primary === "chapter" && paths.room) return paths.room;
   return paths.findings;
+}
+
+// ---------------------------------------------------------------------------
+// After "Make this the active version"
+// ---------------------------------------------------------------------------
+
+/**
+ * Where activation lands when the revision began from a Finding.
+ *
+ * Only a carried ORIGIN (`from` = findings | deliberation) sends the
+ * author back up: to the finding's memo when a deliberation exists
+ * (Mark implemented and disposition live there), otherwise to the desk
+ * anchored on the finding. A finding chosen inside the room (no origin)
+ * keeps the room, brief in hand. An invalid or unverifiable finding
+ * drops the context entirely — ordinary chapter behavior.
+ */
+export function postActivationPath(input: {
+  bookPath: string;
+  roomPath: string;
+  findingId: string | null;
+  from: ContinuityOrigin | null;
+  status: FindingStatus | null;
+  /** The finding exists under the reader's own view, in this chapter's
+   *  book (and, if chapter-anchored, in this chapter). */
+  findingValid: boolean;
+  hasDeliberation: boolean;
+}): string {
+  const { bookPath, roomPath, findingId, from, status, findingValid } = input;
+  if (!findingId || !findingValid) return roomPath;
+  if (from !== "findings" && from !== "deliberation") {
+    return `${roomPath}${continuityQuery({ findingId, from, status })}`;
+  }
+  const paths = returnPaths({
+    bookPath,
+    findingId,
+    from,
+    status,
+    chapterSlug: null,
+    here: "chapter",
+  });
+  return input.hasDeliberation ? paths.deliberation : paths.findings;
 }

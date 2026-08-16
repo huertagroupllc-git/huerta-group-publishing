@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   appendQuery,
   continuityQuery,
+  postActivationPath,
+  splitFragment,
   deskOrder,
   findingAnchor,
   followingEntry,
@@ -163,5 +165,62 @@ describe("returnPaths", () => {
       bookPath, findingId: A, from: "chapter", status: null, chapterSlug: null, here: "deliberation",
     });
     expect(p.primary).toBe("findings");
+  });
+});
+
+describe("postActivationPath — Make Active from a Finding-originated revision", () => {
+  const bookPath = "/workspace/authors/x/books/y";
+  const roomPath = `${bookPath}/chapters/ch-3`;
+  const base = { bookPath, roomPath, findingId: A, status: null as null };
+
+  it("returns to the finding's memo when the revision began from the deliberation", () => {
+    expect(
+      postActivationPath({ ...base, from: "deliberation", findingValid: true, hasDeliberation: true }),
+    ).toBe(`${bookPath}/findings/${A}/deliberation?from=chapter`);
+  });
+  it("returns to the memo from the desk too when a deliberation exists (Mark implemented and disposition live there)", () => {
+    expect(
+      postActivationPath({ ...base, from: "findings", findingValid: true, hasDeliberation: true, status: "open" }),
+    ).toBe(`${bookPath}/findings/${A}/deliberation?from=chapter`);
+  });
+  it("returns to the desk anchored on the finding, in the author's view, when no deliberation exists", () => {
+    expect(
+      postActivationPath({ ...base, from: "findings", findingValid: true, hasDeliberation: false, status: "dismissed" }),
+    ).toBe(`${bookPath}/findings?status=dismissed#finding-${A}`);
+  });
+  it("keeps the room, brief in hand, when the finding was chosen inside the room (no origin)", () => {
+    expect(
+      postActivationPath({ ...base, from: null, findingValid: true, hasDeliberation: true }),
+    ).toBe(`${roomPath}?finding=${A}`);
+    expect(
+      postActivationPath({ ...base, from: "chapter", findingValid: true, hasDeliberation: false }),
+    ).toBe(`${roomPath}?finding=${A}&from=chapter`);
+  });
+  it("is ordinary chapter behavior without a finding", () => {
+    expect(
+      postActivationPath({ ...base, findingId: null, from: "findings", findingValid: false, hasDeliberation: false }),
+    ).toBe(roomPath);
+  });
+  it("drops forged or stale finding context (other book, deleted, unreadable) — ordinary chapter behavior", () => {
+    expect(
+      postActivationPath({ ...base, from: "deliberation", findingValid: false, hasDeliberation: true }),
+    ).toBe(roomPath);
+    expect(
+      postActivationPath({ ...base, from: "findings", findingValid: false, hasDeliberation: false }),
+    ).toBe(roomPath);
+  });
+});
+
+describe("splitFragment", () => {
+  it("separates the anchor so query helpers can work on the base", () => {
+    expect(splitFragment("/f?status=open#finding-1")).toEqual({
+      base: "/f?status=open",
+      fragment: "#finding-1",
+    });
+    expect(splitFragment("/f")).toEqual({ base: "/f", fragment: "" });
+    const { base, fragment } = splitFragment(`/f#finding-${A}`);
+    expect(`${appendQuery(base, { notice: "versionActivated" })}${fragment}`).toBe(
+      `/f?notice=versionActivated#finding-${A}`,
+    );
   });
 });

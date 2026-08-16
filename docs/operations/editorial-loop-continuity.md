@@ -78,6 +78,25 @@ Findings — N open remain* instead of inventing a priority.
   *Next open finding in this chapter* → the desk's next → the remaining
   count.
 
+## Return-path refinement (August 2026, second bounded authorization)
+
+Two behaviors added on the same layer, from new Cycle 001 evidence:
+
+- **Make this the active version, when the revision began from a
+  Finding** (`from=findings|deliberation` carried into the room), lands
+  back at the originating finding — its memo when a deliberation exists
+  (Mark implemented and disposition live there), otherwise the desk
+  anchored on the finding in the author's view — with the "Version M is
+  now the active version" notice stated there. The action re-validates
+  the carried finding under the reader's own RLS view (same book; same
+  chapter when chapter-anchored) before honoring it; a finding chosen
+  inside the room (no origin) keeps the room; anything stale or forged
+  is ordinary chapter behavior (`postActivationPath`, tested).
+- **Resolve / Set aside from the memo** return to the desk in the
+  author's view (the finding has left the Open working set), landing on
+  the entry that followed it and confirming with the finding's name;
+  a failure stays on the memo with its message (`error_path`).
+
 ## Governance preserved
 
 - Disposition uses `resolveFinding` / `setAsideFinding` /

@@ -10,7 +10,12 @@ import {
   appendQuery,
   isContinuityOrigin,
   isFindingStatus,
+  postActivationPath,
+  splitFragment,
+  type ContinuityOrigin,
 } from "@/lib/findings/continuity";
+import type { FindingStatus } from "@/lib/findings/types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /** Failures redirect with STABLE MESSAGE CODES from the
  *  manuscript.errors catalog namespace (the Phase 3B pattern) — never
@@ -63,6 +68,78 @@ function briefContinuity(formData: FormData): {
     from: isContinuityOrigin(from) ? from : null,
     status: isFindingStatus(status) && status !== "open" ? status : null,
   };
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Where "Make this the active version" lands when the revision began
+ * from a Finding (continuity.ts › postActivationPath). The carried
+ * finding is honored only if the reader's own RLS view finds it in the
+ * activated version's book — and, when chapter-anchored, in that
+ * chapter. Anything else is ordinary chapter behavior. Never throws:
+ * a lookup hiccup means "no context", not a failed activation.
+ */
+async function activationLanding(
+  supabase: SupabaseClient,
+  versionId: string,
+  roomPath: string,
+  ctx: { finding: string | null; from: string | null; status: string | null },
+): Promise<string> {
+  const from = isContinuityOrigin(ctx.from ?? undefined) ? (ctx.from as ContinuityOrigin) : null;
+  const status = isFindingStatus(ctx.status ?? undefined) ? (ctx.status as FindingStatus) : null;
+  const findingId = ctx.finding && UUID.test(ctx.finding) ? ctx.finding : null;
+  const bookPath = roomPath.replace(/\/chapters\/[^/]+$/, "");
+  const decide = (findingValid: boolean, hasDeliberation: boolean) =>
+    postActivationPath({
+      bookPath,
+      roomPath,
+      findingId,
+      from,
+      status,
+      findingValid,
+      hasDeliberation,
+    });
+  if (!findingId) return decide(false, false);
+  try {
+    const [{ data: version }, { data: finding }] = await Promise.all([
+      supabase
+        .from("chapter_versions")
+        .select("chapter_id")
+        .eq("id", versionId)
+        .maybeSingle(),
+      supabase
+        .from("editorial_findings")
+        .select("id, book_id, chapter_id")
+        .eq("id", findingId)
+        .maybeSingle(),
+    ]);
+    if (!version?.chapter_id || !finding) return decide(false, false);
+    const { data: chapter } = await supabase
+      .from("chapters")
+      .select("id, manuscript_id")
+      .eq("id", version.chapter_id)
+      .maybeSingle();
+    if (!chapter) return decide(false, false);
+    const { data: manuscript } = await supabase
+      .from("manuscripts")
+      .select("book_id")
+      .eq("id", chapter.manuscript_id)
+      .maybeSingle();
+    const sameBook = manuscript?.book_id === finding.book_id;
+    const sameChapter =
+      finding.chapter_id === null || finding.chapter_id === chapter.id;
+    if (!sameBook || !sameChapter) return decide(false, false);
+    const { data: deliberation } = await supabase
+      .from("editorial_deliberations")
+      .select("id")
+      .eq("finding_id", findingId)
+      .maybeSingle();
+    return decide(true, Boolean(deliberation));
+  } catch (lookupError) {
+    console.error("[manuscript] activation landing lookup failed", lookupError);
+    return decide(false, false);
+  }
 }
 
 function chapterKind(input: string): ChapterKind {
@@ -339,21 +416,29 @@ export async function saveAndActivateChapterDraft(formData: FormData) {
     );
   }
 
-  // Orientation after the deliberate act: which version is now active.
+  // Orientation after the deliberate act: which version is now active —
+  // stated wherever the author lands: back at the originating finding's
+  // memo or desk entry when the revision began from a Finding, else here.
   const { data: activated } = await supabase
     .from("chapter_versions")
     .select("version_number")
     .eq("id", versionId)
     .maybeSingle();
-  const landing = appendQuery(roomPath, briefContinuity(formData));
-  redirect(
-    activated?.version_number
-      ? withActionNotice(landing, {
-          code: "versionActivated",
-          params: { number: String(activated.version_number) },
-        })
-      : landing,
+  const { base, fragment } = splitFragment(
+    await activationLanding(
+      supabase,
+      versionId,
+      roomPath,
+      briefContinuity(formData),
+    ),
   );
+  const landing = activated?.version_number
+    ? withActionNotice(base, {
+        code: "versionActivated",
+        params: { number: String(activated.version_number) },
+      })
+    : base;
+  redirect(`${landing}${fragment}`);
 }
 
 export async function activateChapterVersion(formData: FormData) {
