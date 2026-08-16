@@ -18,6 +18,7 @@ import {
 } from "@/components/editorial";
 import { ActionMessage, ActionNotice } from "@/components/action-message";
 import { SetupNotice } from "@/components/setup-notice";
+import { TermHelpRow } from "@/components/terminology/term-help";
 import { WorkspaceFrame } from "@/components/workspace-frame";
 import {
   activateChapterVersion,
@@ -29,6 +30,7 @@ import {
 import { assembleBookContext } from "@/lib/books/assemble";
 import { serializeChapterContext } from "@/lib/manuscript/assemble";
 import { markImplemented } from "@/lib/deliberations/actions";
+import { isCanonicalNoChange } from "@/lib/deliberations/no-change";
 import { adoptedJudgmentForFinding } from "@/lib/deliberations/queries";
 import { resolveFinding } from "@/lib/findings/actions";
 import {
@@ -357,6 +359,14 @@ export default async function ChapterRoomPage({
                   {adoptedJudgment.judgment}
                 </p>
               ) : null}
+              <TermHelpRow
+                terms={
+                  adoptedJudgment
+                    ? ["judgment", "manuscriptRevision"]
+                    : ["manuscriptRevision"]
+                }
+                className="mt-2"
+              />
               <p className="mt-2 font-sans text-xs text-ink-faint">
                 {t("raisedAgainstVersion", {
                   number: revisionBrief.anchoredVersionNumber ?? "—",
@@ -420,6 +430,7 @@ export default async function ChapterRoomPage({
                   return through the hierarchy to state that the revisions
                   carrying out the judgment are done. */}
               {adoptedJudgment?.status === "adopted" &&
+              !isCanonicalNoChange(adoptedJudgment.judgment) &&
               !viewingDraft &&
               !creating ? (
                 <form
@@ -640,6 +651,7 @@ export default async function ChapterRoomPage({
               roomPath={roomPath}
               linkQuery={briefAppend}
             />
+            <TermHelpRow terms={["version", "activeVersion"]} className="mt-3" />
           </div>
 
           <details className="group mt-8">

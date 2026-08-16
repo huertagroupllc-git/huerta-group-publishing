@@ -1,7 +1,13 @@
 import { getTranslations } from "next-intl/server";
 import { AuthMasthead } from "@/components/auth-masthead";
 import { AuthBreadcrumbs } from "@/components/auth-breadcrumbs";
+import { GlossaryDialog } from "@/components/terminology/glossary-dialog";
 import { sessionIsStaff } from "@/lib/auth/session";
+import {
+  resolveEditorialRelationships,
+  resolveEditorialTerms,
+  resolveGlossaryUi,
+} from "@/lib/terminology/resolve";
 
 interface Crumb {
   href: string;
@@ -25,6 +31,14 @@ export async function WorkspaceFrame({
 }) {
   const staff = await sessionIsStaff();
   const t = await getTranslations("common");
+  // The Workshop Glossary rides in the frame: one governed source, opened
+  // in place from anywhere in the workspace, closed back to where the
+  // author was.
+  const [glossaryTerms, glossaryRelationships, glossaryUi] = await Promise.all([
+    resolveEditorialTerms(),
+    resolveEditorialRelationships(),
+    resolveGlossaryUi(),
+  ]);
   return (
     <div
       className={`mx-auto flex min-h-screen ${wide ? "max-w-5xl" : "max-w-3xl"} flex-col px-6 py-10 sm:px-8`}
@@ -37,7 +51,16 @@ export async function WorkspaceFrame({
           mode="workspace"
           showModeSwitch={staff}
         />
-        <AuthBreadcrumbs crumbs={breadcrumbs} />
+        <div className="flex items-baseline justify-between gap-6">
+          <AuthBreadcrumbs crumbs={breadcrumbs} />
+          <div className="mt-4 shrink-0">
+            <GlossaryDialog
+              terms={glossaryTerms}
+              relationships={glossaryRelationships}
+              ui={glossaryUi}
+            />
+          </div>
+        </div>
       </header>
 
       <main className="flex-1 py-14">{children}</main>

@@ -50,3 +50,28 @@ export function decideNoChange(input: {
 /** The deliberation status a no-change conclusion records — the same
  *  governed act as any adoption; never "implemented" by inference. */
 export const NO_CHANGE_STATUS = "adopted" as const;
+
+/**
+ * The canonical no-change judgments — the exact sentences
+ * `concludeNoChange` records, per interface locale, mirrored from the
+ * message catalogs (`deliberation.noChange.judgment`) and pinned equal
+ * by test. Because the action writes exactly one of these strings, the
+ * sentence IS the structured identifier of the canonical outcome:
+ * identification is exact equality against this registry — never
+ * keyword matching, never fuzzy or free-form inference. A future change
+ * to a sentence appends here (records keep the words they were written
+ * with).
+ */
+export const NO_CHANGE_JUDGMENTS: Readonly<Record<string, string>> = {
+  "en-US": "No further manuscript change is required in response to this finding.",
+  "es-419": "No se requiere ningún cambio adicional en el manuscrito en respuesta a este hallazgo.",
+};
+
+/** True only for the canonical no-change judgment (exact match, any
+ *  registered locale). Free-form judgments — even ones that mention "no
+ *  change" — are never classified as the governed outcome. */
+export function isCanonicalNoChange(judgment: string | null | undefined): boolean {
+  if (!judgment) return false;
+  const text = judgment.trim();
+  return Object.values(NO_CHANGE_JUDGMENTS).includes(text);
+}

@@ -11,6 +11,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { ActionMessage, ActionNotice } from "@/components/action-message";
 import { PendingSubmit } from "@/components/pending-submit";
 import { SetupNotice } from "@/components/setup-notice";
+import { TermHelpRow } from "@/components/terminology/term-help";
 import { WorkspaceFrame, NoticeNote } from "@/components/workspace-frame";
 import {
   actionMessageFromQuery,
@@ -419,6 +420,7 @@ export default async function FindingsPage({
           {tChapter("raiseFinding")}
         </ActionLink>
       </div>
+      <TermHelpRow terms={["finding", "resolved", "setAside"]} className="mt-3" />
 
       {shown.length === 0 ? (
         <p className="mt-8 max-w-prose italic text-ink-soft">

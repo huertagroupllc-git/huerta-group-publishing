@@ -1,7 +1,11 @@
 # Official Platform Terminology — v1
 
-Status: proposed, awaiting approval. One concept, one word — identical in
-UI, code, schema, and docs. Deviating copy is a bug.
+Status: canon in force — each section records its ratification (July–
+August 2026); amended in place, never silently rewritten. One concept,
+one word — identical in UI, code, schema, and docs. Deviating copy is a
+bug. The Workshop's contextual definitions and Glossary derive from the
+*Editorial review terms* section below through `lib/terminology/`
+(pinned by test); no surface keeps its own semantic copy.
 
 ## Verdicts
 

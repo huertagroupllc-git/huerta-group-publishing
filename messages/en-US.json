@@ -1186,7 +1186,8 @@
     "noChange": {
       "action": "No change needed",
       "judgment": "No further manuscript change is required in response to this finding.",
-      "hint": "No change needed adopts that position as the judgment, with your reasoning; the finding’s own disposition — Resolve or Set aside — remains yours to make."
+      "hint": "No change needed adopts that position as the judgment, with your reasoning; the finding’s own disposition — Resolve or Set aside — remains yours to make.",
+      "standing": "No change needed — Adopted is this deliberation’s final standing; there is no implementation to record. The finding awaits its own disposition."
     }
   },
   "errors": {
@@ -2890,6 +2891,97 @@
         "recordSubmit": "Record the ISBN",
         "correctSubmit": "Record the correction"
       }
+    }
+  },
+  "terminology": {
+    "terms": {
+      "finding": {
+        "name": "Finding",
+        "contextual": "An observation from editorial review that identifies something in the Book worth considering.",
+        "glossary": "A Finding preserves what an editorial review observed about the Book at a particular point in its development and why that observation matters. A Finding is not automatically a defect or required correction. It gives the author something worth considering as the Book develops. The observation remains part of the Book's editorial history even after the author Resolves or Sets Aside the Finding."
+      },
+      "deliberation": {
+        "name": "Deliberation",
+        "contextual": "The author's consideration of a Finding and the reasoning behind what to do about it.",
+        "glossary": "A Deliberation records how the author considered a Finding, what editorial conclusion was reached, and why. The Finding preserves the observation. The Deliberation preserves the author's Judgment about that observation. A Finding does not require a Deliberation in every circumstance."
+      },
+      "judgment": {
+        "name": "Judgment",
+        "contextual": "The editorial decision about what the Book should do and why.",
+        "glossary": "A Judgment is the editorial position reached through Deliberation. It describes what the Book should do and why. It does not contain or prescribe the actual prose that will carry out the decision. Once Adopted, the Judgment and its reasoning are preserved as the record of the editorial decision."
+      },
+      "adopted": {
+        "name": "Adopted",
+        "contextual": "You've accepted this Judgment as the Book's editorial direction.",
+        "glossary": "Adopted means the author has accepted the Judgment as the Book's editorial position. Adoption records the decision that was made. It does not necessarily mean that manuscript or other implementation work has already been completed. When an adopted Judgment is the governed No change needed outcome, Adopted is terminal within the Deliberation lifecycle because there is no implementation work to perform. Adopted ≠ Implemented."
+      },
+      "implemented": {
+        "name": "Implemented",
+        "contextual": "You've recorded that the work required by the adopted Judgment has been completed.",
+        "glossary": "Implemented means the author has recorded that the work required to carry out an adopted Judgment has been completed. Implemented does not independently verify that the work was successful. It records the author's statement that the required implementation occurred. Implemented applies only when the adopted Judgment actually requires implementation work. For the governed No change needed outcome, Implemented does not apply. Implemented belongs to the Deliberation lifecycle and remains distinct from whether the originating Finding has been Resolved. Implemented ≠ Resolved."
+      },
+      "resolved": {
+        "name": "Resolve / Resolved",
+        "contextual": "Close the Finding because its concern has been addressed.",
+        "glossary": "Resolve means the author has determined that the Finding has been sufficiently addressed. A Resolved Finding remains in the Book's editorial history and may record how it was addressed and, where applicable, which manuscript Version provides forward provenance. Resolution is separate from Implemented because the two belong to different governed records and represent different acts. A Resolved Finding may later be reopened."
+      },
+      "setAside": {
+        "name": "Set Aside",
+        "contextual": "Close the Finding without treating it as something that needs to be addressed.",
+        "glossary": "Set Aside means the author chooses not to continue pursuing the Finding as active editorial work. The author may disagree with the Finding, decline its direction, or otherwise determine that it should not proceed toward resolution. Setting a Finding aside does not erase it. The Finding remains part of the Book's editorial history and may later be reopened. Resolve ≠ Set Aside: Resolve records that the concern was addressed. Set Aside records that the author chose not to continue pursuing it."
+      },
+      "version": {
+        "name": "Version",
+        "contextual": "A numbered saved state of manuscript content preserved in the Book's history.",
+        "glossary": "A Version is a numbered entry in the manuscript's development history. A draft can be edited before activation. Once finalized through activation, its text becomes immutable. Future editing creates another Version rather than overwriting finalized manuscript history. Superseded Versions remain preserved."
+      },
+      "activeVersion": {
+        "name": "Active Version",
+        "contextual": "The finalized Version currently used as the chapter's operative manuscript text.",
+        "glossary": "The Active Version is the finalized Version currently designated for a chapter. It is the Version the Workshop uses when assembling the current manuscript and Reading Copy. Making another Version active moves that designation. Earlier Versions remain preserved rather than being erased or renumbered."
+      },
+      "manuscriptRevision": {
+        "name": "Manuscript revision",
+        "contextual": "A change to manuscript content made while developing the Book.",
+        "glossary": "A manuscript revision is the act of changing the Book's manuscript during its development. A Judgment may call for a manuscript revision, but the two are different: Judgment — what the Book should do and why. Manuscript revision — the authorial change that may carry out that Judgment. The Workshop preserves the result of revision through its governed Version system."
+      }
+    },
+    "relationships": {
+      "adoptedImplemented": {
+        "name": "Adopted ≠ Implemented",
+        "meaning": "accepting the editorial decision is different from completing the work that decision requires."
+      },
+      "implementedResolved": {
+        "name": "Implemented ≠ Resolved",
+        "meaning": "Implemented records completion of required work on the Deliberation; Resolve dispositions the Finding. Different governed records, different acts."
+      },
+      "resolveSetAside": {
+        "name": "Resolve ≠ Set Aside",
+        "meaning": "Resolve records that the concern was addressed; Set Aside records that the author chose not to continue pursuing it."
+      },
+      "findingDeliberation": {
+        "name": "Finding ≠ Deliberation",
+        "meaning": "the Finding preserves the observation; the Deliberation preserves the Judgment and its reasoning."
+      },
+      "judgmentRevision": {
+        "name": "Judgment ≠ manuscript revision",
+        "meaning": "a Judgment is the editorial decision; a manuscript revision is an authorial act that may carry it out."
+      }
+    },
+    "ui": {
+      "glossaryTitle": "Workshop Glossary",
+      "glossaryIntro": "The governed words of the editorial desk, as ratified in the terminology canon. Definitions here are the same ones the Workshop shows in context.",
+      "open": "Glossary",
+      "openAria": "Open the Workshop Glossary",
+      "close": "Close",
+      "whatMeans": "What “{term}” means",
+      "contextualLabel": "In context",
+      "glossaryLabel": "In full",
+      "relationshipsHeading": "Held distinct",
+      "descriptiveNote": "Descriptive author-facing wording, not a governed record. The Workshop preserves the result of revision through its Version system.",
+      "sourceNote": "Source of authority: the terminology canon, Editorial review terms (ratified August 2026).",
+      "inGlossary": "Read in the Glossary",
+      "descriptiveLabel": "descriptive term"
     }
   }
 }

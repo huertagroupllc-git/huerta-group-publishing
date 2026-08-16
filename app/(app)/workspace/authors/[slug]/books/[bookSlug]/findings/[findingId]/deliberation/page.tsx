@@ -11,6 +11,7 @@ import {
 import { getLocale, getTranslations } from "next-intl/server";
 import { ActionMessage, ActionNotice } from "@/components/action-message";
 import { SetupNotice } from "@/components/setup-notice";
+import { TermHelp, TermHelpRow } from "@/components/terminology/term-help";
 import { WorkspaceFrame } from "@/components/workspace-frame";
 import {
   actionMessageFromQuery,
@@ -27,6 +28,7 @@ import {
   getDeliberationPage,
   type DeliberationPage,
 } from "@/lib/deliberations/queries";
+import { isCanonicalNoChange } from "@/lib/deliberations/no-change";
 import { resolveFinding, setAsideFinding } from "@/lib/findings/actions";
 import {
   continuityQuery,
@@ -244,6 +246,7 @@ export default async function DeliberationPageRoute({
             status: tStatus(`finding.${finding.status}`),
           })}
         </p>
+        <TermHelpRow terms={["finding", "deliberation"]} className="mt-3" />
       </div>
 
       {editable ? (
@@ -261,6 +264,8 @@ export default async function DeliberationPageRoute({
               required
               defaultValue={deliberation?.question ?? finding.title}
             />
+
+            <TermHelp term="judgment" />
 
             <TextareaField
               id="judgment"
@@ -377,8 +382,21 @@ export default async function DeliberationPageRoute({
               </dd>
             </div>
           </dl>
+          <TermHelpRow terms={["adopted", "implemented"]} className="mt-3" />
 
-          {deliberation.status === "adopted" ? (
+          {/* The canonical No change needed judgment (identified by exact
+              match against the governed registry, never by wording) has
+              no implementation to record: Adopted is its final standing,
+              so Mark implemented is not presented. */}
+          {deliberation.status === "adopted" &&
+          isCanonicalNoChange(deliberation.judgment) ? (
+            <p className="mt-6 max-w-prose font-sans text-xs text-ink-soft">
+              {tNoChange("standing")}
+            </p>
+          ) : null}
+
+          {deliberation.status === "adopted" &&
+          !isCanonicalNoChange(deliberation.judgment) ? (
             <form
               action={markImplemented}
               className="mt-8 flex max-w-md flex-wrap items-end gap-x-6 gap-y-3"
@@ -467,6 +485,9 @@ export default async function DeliberationPageRoute({
                 </QuietButton>
               </span>
             </form>
+          ) : null}
+          {finding.status === "open" ? (
+            <TermHelpRow terms={["resolved", "setAside"]} className="mt-3" />
           ) : null}
 
           <ul className="mt-5 space-y-2 font-sans text-xs">

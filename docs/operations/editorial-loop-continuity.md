@@ -115,6 +115,39 @@ same memo, which then return to the desk. `lib/deliberations/no-change.ts`
 holds the pure decision; `concludeNoChange` applies it through the same
 upsert as adoption after confirming the finding belongs to the book.
 
+## Terminology comprehension (August 2026, fourth bounded authorization)
+
+Semantic authority: `docs/constitution/terminology.md` → *Editorial
+review terms (ratified August 2026)*. One structured application
+representation — `lib/terminology/editorial-terms.ts` (ids, order, the
+descriptive flag for *Manuscript revision*, the five held-distinct
+relationships) with the words in the message catalogs under
+`terminology.*`; `lib/terminology/canon-source.ts` reads the canon so
+`editorial-terms.test.ts` pins the English copy to the ratified text
+(drift guard). Surfaces: `TermHelp` — a native disclosure ("What
+'Adopted' means") opening the contextual definition in place, keyboard/
+pointer/touch alike, no navigation or state, with a link into the
+Glossary — placed where authors act on the term: the memo (Finding ·
+Deliberation; Judgment on the draft form; Adopted · Implemented at the
+standing; Resolve · Set aside at the disposition), the desk's filter
+row, the writing room (Judgment · manuscript revision in the brief;
+Version · Active Version at the rail). The **Workshop Glossary** is a
+native `<dialog>` in the workspace frame ("Glossary" beside the
+breadcrumbs): all governed terms with contextual + glossary copy, the
+relationships, the descriptive note; opens in place (`showModal`),
+Escape/backdrop/Close dismiss, focus returns to the opener; forms and
+unsaved work are untouched.
+
+**Canonical No change needed identification.** `isCanonicalNoChange`
+is exact equality against `NO_CHANGE_JUDGMENTS` (the sentences
+`concludeNoChange` records, per locale, mirrored by the catalogs and
+pinned equal by test) — never keyword or fuzzy inference. When an
+adopted deliberation's judgment is canonical, the memo and the writing-
+room brief do not present *Mark implemented*; the memo states that
+Adopted is the deliberation's final standing and the finding awaits
+its own disposition. Nothing is written: no auto-Implemented, no
+auto-Resolve/Set aside, no new state.
+
 ## Governance preserved
 
 - Disposition uses `resolveFinding` / `setAsideFinding` /

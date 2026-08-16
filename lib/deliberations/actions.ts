@@ -5,8 +5,12 @@ import { withActionMessage, withActionNotice } from "@/lib/action-messages";
 import { createClient } from "@/lib/supabase/server";
 import { assertEditEntitlement } from "@/lib/membership/entitlement";
 import { appendQuery } from "@/lib/findings/continuity";
-import { getTranslations } from "next-intl/server";
-import { NO_CHANGE_STATUS, decideNoChange } from "@/lib/deliberations/no-change";
+import { getLocale, getTranslations } from "next-intl/server";
+import {
+  NO_CHANGE_JUDGMENTS,
+  NO_CHANGE_STATUS,
+  decideNoChange,
+} from "@/lib/deliberations/no-change";
 
 /** Failures redirect with STABLE MESSAGE CODES from the
  *  deliberation.errors namespace (the Phase 3B pattern); raw database
@@ -142,12 +146,17 @@ export async function concludeNoChange(formData: FormData) {
   const reasoning = String(formData.get("reasoning") ?? "");
   const affected = String(formData.get("affected_artifacts") ?? "").trim();
 
-  const t = await getTranslations("deliberation.noChange");
+  // The recorded sentence is the registry's (the structured identifier
+  // of the canonical outcome); the catalog mirrors it for display.
+  const [locale, t] = await Promise.all([
+    getLocale(),
+    getTranslations("deliberation.noChange"),
+  ]);
   const decision = decideNoChange({
     question,
     typedJudgment,
     reasoning,
-    canonicalJudgment: t("judgment"),
+    canonicalJudgment: NO_CHANGE_JUDGMENTS[locale] ?? t("judgment"),
   });
   if (!decision.ok) {
     fail(pagePath, decision.code);

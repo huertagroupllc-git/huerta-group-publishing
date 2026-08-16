@@ -1186,7 +1186,8 @@
     "noChange": {
       "action": "No requiere cambios",
       "judgment": "No se requiere ningún cambio adicional en el manuscrito en respuesta a este hallazgo.",
-      "hint": "No requiere cambios adopta esa posición como el juicio, con su razonamiento; la disposición del hallazgo — Resolver o Apartar — sigue siendo suya."
+      "hint": "No requiere cambios adopta esa posición como el juicio, con su razonamiento; la disposición del hallazgo — Resolver o Apartar — sigue siendo suya.",
+      "standing": "No requiere cambios — Adoptado es la vigencia final de esta deliberación; no hay implementación que registrar. El hallazgo espera su propia disposición."
     }
   },
   "errors": {
@@ -2890,6 +2891,97 @@
         "recordSubmit": "Registrar el ISBN",
         "correctSubmit": "Registrar la corrección"
       }
+    }
+  },
+  "terminology": {
+    "terms": {
+      "finding": {
+        "name": "Hallazgo",
+        "contextual": "Una observación de la revisión editorial que señala algo del Libro que vale la pena considerar.",
+        "glossary": "Un Hallazgo preserva lo que una revisión editorial observó sobre el Libro en un momento determinado de su desarrollo y por qué esa observación importa. Un Hallazgo no es automáticamente un defecto ni una corrección obligatoria. Le ofrece al autor algo que vale la pena considerar mientras el Libro se desarrolla. La observación sigue formando parte de la historia editorial del Libro incluso después de que el autor Resuelve o Aparta el Hallazgo."
+      },
+      "deliberation": {
+        "name": "Deliberación",
+        "contextual": "La consideración que el autor hace de un Hallazgo y el razonamiento sobre qué hacer al respecto.",
+        "glossary": "Una Deliberación registra cómo el autor consideró un Hallazgo, qué conclusión editorial alcanzó y por qué. El Hallazgo preserva la observación. La Deliberación preserva el Juicio del autor sobre esa observación. Un Hallazgo no requiere una Deliberación en todos los casos."
+      },
+      "judgment": {
+        "name": "Juicio",
+        "contextual": "La decisión editorial sobre qué debe hacer el Libro y por qué.",
+        "glossary": "Un Juicio es la posición editorial alcanzada mediante la Deliberación. Describe qué debe hacer el Libro y por qué. No contiene ni prescribe la prosa concreta que llevará a cabo la decisión. Una vez Adoptado, el Juicio y su razonamiento se preservan como el registro de la decisión editorial."
+      },
+      "adopted": {
+        "name": "Adoptado",
+        "contextual": "Ha aceptado este Juicio como la dirección editorial del Libro.",
+        "glossary": "Adoptado significa que el autor ha aceptado el Juicio como la posición editorial del Libro. La adopción registra la decisión tomada. No significa necesariamente que el trabajo de manuscrito u otra implementación ya se haya completado. Cuando un Juicio adoptado es el resultado gobernado No requiere cambios, Adoptado es terminal dentro del ciclo de la Deliberación porque no hay trabajo de implementación por realizar. Adoptado ≠ Implementado."
+      },
+      "implemented": {
+        "name": "Implementado",
+        "contextual": "Ha registrado que el trabajo requerido por el Juicio adoptado se ha completado.",
+        "glossary": "Implementado significa que el autor ha registrado que el trabajo necesario para llevar a cabo un Juicio adoptado se ha completado. Implementado no verifica de forma independiente que el trabajo haya sido exitoso. Registra la declaración del autor de que la implementación requerida ocurrió. Implementado aplica solo cuando el Juicio adoptado realmente requiere trabajo de implementación. Para el resultado gobernado No requiere cambios, Implementado no aplica. Implementado pertenece al ciclo de la Deliberación y sigue siendo distinto de si el Hallazgo de origen ha sido Resuelto. Implementado ≠ Resuelto."
+      },
+      "resolved": {
+        "name": "Resolver / Resuelto",
+        "contextual": "Cerrar el Hallazgo porque su inquietud ha sido atendida.",
+        "glossary": "Resolver significa que el autor ha determinado que el Hallazgo ha sido suficientemente atendido. Un Hallazgo Resuelto permanece en la historia editorial del Libro y puede registrar cómo se atendió y, cuando corresponda, qué Versión del manuscrito aporta la procedencia hacia adelante. La resolución es distinta de Implementado porque ambos pertenecen a registros gobernados distintos y representan actos distintos. Un Hallazgo Resuelto puede reabrirse más adelante."
+      },
+      "setAside": {
+        "name": "Apartar",
+        "contextual": "Cerrar el Hallazgo sin tratarlo como algo que deba atenderse.",
+        "glossary": "Apartar significa que el autor decide no seguir persiguiendo el Hallazgo como trabajo editorial activo. El autor puede estar en desacuerdo con el Hallazgo, declinar su dirección o determinar por otro motivo que no debe avanzar hacia su resolución. Apartar un Hallazgo no lo borra. El Hallazgo sigue formando parte de la historia editorial del Libro y puede reabrirse más adelante. Resolver ≠ Apartar: Resolver registra que la inquietud fue atendida. Apartar registra que el autor decidió no seguir persiguiéndola."
+      },
+      "version": {
+        "name": "Versión",
+        "contextual": "Un estado guardado y numerado del contenido del manuscrito, preservado en la historia del Libro.",
+        "glossary": "Una Versión es una entrada numerada en la historia de desarrollo del manuscrito. Un borrador puede editarse antes de la activación. Una vez finalizada mediante la activación, su texto se vuelve inmutable. La edición futura crea otra Versión en lugar de sobrescribir la historia finalizada del manuscrito. Las Versiones reemplazadas permanecen preservadas."
+      },
+      "activeVersion": {
+        "name": "Versión activa",
+        "contextual": "La Versión finalizada que se usa actualmente como texto operativo del capítulo.",
+        "glossary": "La Versión activa es la Versión finalizada actualmente designada para un capítulo. Es la Versión que el Estudio usa al ensamblar el manuscrito actual y la Copia de Lectura. Activar otra Versión mueve esa designación. Las Versiones anteriores permanecen preservadas, sin borrarse ni renumerarse."
+      },
+      "manuscriptRevision": {
+        "name": "Corrección del manuscrito",
+        "contextual": "Un cambio en el contenido del manuscrito realizado durante el desarrollo del Libro.",
+        "glossary": "Una corrección del manuscrito es el acto de cambiar el manuscrito del Libro durante su desarrollo. Un Juicio puede requerir una corrección del manuscrito, pero ambos son distintos: Juicio — qué debe hacer el Libro y por qué. Corrección del manuscrito — el cambio autoral que puede llevar a cabo ese Juicio. El Estudio preserva el resultado de la corrección mediante su sistema gobernado de Versiones."
+      }
+    },
+    "relationships": {
+      "adoptedImplemented": {
+        "name": "Adoptado ≠ Implementado",
+        "meaning": "aceptar la decisión editorial es distinto de completar el trabajo que esa decisión requiere."
+      },
+      "implementedResolved": {
+        "name": "Implementado ≠ Resuelto",
+        "meaning": "Implementado registra la finalización del trabajo requerido en la Deliberación; Resolver dispone del Hallazgo. Registros gobernados distintos, actos distintos."
+      },
+      "resolveSetAside": {
+        "name": "Resolver ≠ Apartar",
+        "meaning": "Resolver registra que la inquietud fue atendida; Apartar registra que el autor decidió no seguir persiguiéndola."
+      },
+      "findingDeliberation": {
+        "name": "Hallazgo ≠ Deliberación",
+        "meaning": "el Hallazgo preserva la observación; la Deliberación preserva el Juicio y su razonamiento."
+      },
+      "judgmentRevision": {
+        "name": "Juicio ≠ corrección del manuscrito",
+        "meaning": "un Juicio es la decisión editorial; una corrección del manuscrito es un acto autoral que puede llevarla a cabo."
+      }
+    },
+    "ui": {
+      "glossaryTitle": "Glosario del Estudio",
+      "glossaryIntro": "Las palabras gobernadas del escritorio editorial, tal como se ratificaron en el canon terminológico. Las definiciones aquí son las mismas que el Estudio muestra en contexto.",
+      "open": "Glosario",
+      "openAria": "Abrir el Glosario del Estudio",
+      "close": "Cerrar",
+      "whatMeans": "Qué significa «{term}»",
+      "contextualLabel": "En contexto",
+      "glossaryLabel": "Completo",
+      "relationshipsHeading": "Se mantienen distintos",
+      "descriptiveNote": "Expresión descriptiva de cara al autor, no un registro gobernado. El Estudio preserva el resultado de la corrección mediante su sistema de Versiones.",
+      "sourceNote": "Fuente de autoridad: el canon terminológico, Editorial review terms (ratificados en agosto de 2026). La traducción de estas definiciones espera su ratificación lingüística.",
+      "inGlossary": "Leer en el Glosario",
+      "descriptiveLabel": "término descriptivo"
     }
   }
 }
