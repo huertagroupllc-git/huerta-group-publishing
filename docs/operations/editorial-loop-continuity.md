@@ -97,6 +97,24 @@ Two behaviors added on the same layer, from new Cycle 001 evidence:
   the entry that followed it and confirming with the finding's name;
   a failure stays on the memo with its message (`error_path`).
 
+## "No change needed" (August 2026, third bounded authorization)
+
+A deliberation may conclude that no further manuscript change is
+required. On the governed model this is an **adopted judgment** whose
+content is the no-change position — the book's editorial position,
+frozen by adoption, reasoning required as for any adoption. The memo's
+draft form offers *No change needed* beside *Adopt the judgment*: it
+records the canonical sentence ("No further manuscript change is
+required in response to this finding.", in the author's interface
+language) as the judgment with the author's reasoning, never overwrites
+a substantive judgment the author typed (it asks them to adopt or clear
+it), and returns to the memo with a notice. Standing stays *Adopted*
+(Implemented is never inferred), no version is created or activated,
+and the Finding keeps its own disposition — Resolve / Set aside on the
+same memo, which then return to the desk. `lib/deliberations/no-change.ts`
+holds the pure decision; `concludeNoChange` applies it through the same
+upsert as adoption after confirming the finding belongs to the book.
+
 ## Governance preserved
 
 - Disposition uses `resolveFinding` / `setAsideFinding` /

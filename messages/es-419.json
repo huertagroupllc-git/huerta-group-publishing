@@ -1173,11 +1173,19 @@
       "adoptFailed": "No se pudo adoptar el juicio.",
       "implementFailed": "No se pudo marcar la deliberación como implementada.",
       "discardFailed": "No se pudo descartar el borrador.",
-      "deliberationMigrationMissing": "A la base de datos le falta la migración de la Deliberación Editorial — aplique supabase/migrations/20260713000000_editorial_deliberation.sql (docs/setup.md §2)."
+      "deliberationMigrationMissing": "A la base de datos le falta la migración de la Deliberación Editorial — aplique supabase/migrations/20260713000000_editorial_deliberation.sql (docs/setup.md §2).",
+      "noChangeRequiresReasoning": "No requiere cambios conserva su razonamiento: indique por qué no se requiere ningún cambio adicional.",
+      "noChangeConflictsWithJudgment": "Ha escrito un juicio. Adóptelo tal como está, o bórrelo para registrar que no requiere cambios."
     },
     "notices": {
       "judgmentAdopted": "Juicio adoptado — esta es ahora la posición editorial del libro sobre la cuestión.",
-      "markedImplemented": "Marcado como implementado — una declaración del autor, registrada con su fecha."
+      "markedImplemented": "Marcado como implementado — una declaración del autor, registrada con su fecha.",
+      "noChangeRecorded": "No requiere cambios — registrado como la posición editorial del libro sobre esta cuestión. El hallazgo espera su propia disposición."
+    },
+    "noChange": {
+      "action": "No requiere cambios",
+      "judgment": "No se requiere ningún cambio adicional en el manuscrito en respuesta a este hallazgo.",
+      "hint": "No requiere cambios adopta esa posición como el juicio, con su razonamiento; la disposición del hallazgo — Resolver o Apartar — sigue siendo suya."
     }
   },
   "errors": {

@@ -18,6 +18,7 @@ import {
 } from "@/lib/action-messages";
 import {
   adoptJudgment,
+  concludeNoChange,
   discardDeliberationDraft,
   markImplemented,
   saveDeliberationDraft,
@@ -139,6 +140,7 @@ export default async function DeliberationPageRoute({
   const locale = await getLocale();
   const t = await getTranslations("deliberation.page");
   const tForm = await getTranslations("deliberation.form");
+  const tNoChange = await getTranslations("deliberation.noChange");
   const tFindings = await getTranslations("findings");
   const tContinue = await getTranslations("findings.continue");
   const tList = await getTranslations("findings.list");
@@ -292,6 +294,11 @@ export default async function DeliberationPageRoute({
               <PrimaryButton formAction={adoptJudgment}>
                 {tForm("adopt")}
               </PrimaryButton>
+              {/* The other honest conclusion: the same governed act of
+                  adoption, with the no-change position as the judgment. */}
+              <QuietButton formAction={concludeNoChange}>
+                {tNoChange("action")}
+              </QuietButton>
               <Link href={primaryReturn(paths)} className={quietLink}>
                 {tCommon("cancel")}
               </Link>
@@ -299,6 +306,9 @@ export default async function DeliberationPageRoute({
           </form>
           <p className="mt-3 max-w-prose font-sans text-[0.6875rem] text-ink-faint">
             {t("adoptionNote")}
+          </p>
+          <p className="mt-1 max-w-prose font-sans text-[0.6875rem] text-ink-faint">
+            {tNoChange("hint")}
           </p>
           {deliberation ? (
             <form action={discardDeliberationDraft} className="mt-6">

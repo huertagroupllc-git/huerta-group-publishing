@@ -1173,11 +1173,19 @@
       "adoptFailed": "The judgment could not be adopted.",
       "implementFailed": "The deliberation could not be marked implemented.",
       "discardFailed": "The draft could not be discarded.",
-      "deliberationMigrationMissing": "The database is missing the Editorial Deliberation migration — apply supabase/migrations/20260713000000_editorial_deliberation.sql (docs/setup.md §2)."
+      "deliberationMigrationMissing": "The database is missing the Editorial Deliberation migration — apply supabase/migrations/20260713000000_editorial_deliberation.sql (docs/setup.md §2).",
+      "noChangeRequiresReasoning": "No change needed keeps your reasoning: say why no further change is required.",
+      "noChangeConflictsWithJudgment": "You have written a judgment. Adopt it as written, or clear it to record that no change is needed."
     },
     "notices": {
       "judgmentAdopted": "Judgment adopted — this is now the book’s editorial position on the question.",
-      "markedImplemented": "Marked implemented — a statement of the author, recorded with its date."
+      "markedImplemented": "Marked implemented — a statement of the author, recorded with its date.",
+      "noChangeRecorded": "No change needed — recorded as the book’s editorial position on this question. The finding awaits its own disposition."
+    },
+    "noChange": {
+      "action": "No change needed",
+      "judgment": "No further manuscript change is required in response to this finding.",
+      "hint": "No change needed adopts that position as the judgment, with your reasoning; the finding’s own disposition — Resolve or Set aside — remains yours to make."
     }
   },
   "errors": {
