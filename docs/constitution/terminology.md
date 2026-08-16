@@ -195,3 +195,156 @@ shows the labels, not the word.
 | **Current Edition** | **Ratified** | The Book's one operative Edition, held by a reversible pointer. Never a lifecycle state; moving it rewrites nothing. |
 | **Edition Association** | **Ratified** | The append-only human-declared fact that a production artifact belongs to an Edition's manifestation. Corrected forward-only; never an input to the artifact. |
 | **ISBN Assignment** | **Ratified** | The imprint's act binding one recorded, evidenced registration to one Manifestation, forever — never reused, never transferred; corrections preserve originals. **External Adoption** restates an externally evidenced assignment and is never an imprint assignment act. |
+
+## Editorial review terms (ratified August 2026)
+
+Ratified by Founder Office determination, delivered through HGP Author
+Experience & Publishing Methodology from Founder Validation Cycle 001
+(*The Conversational Mind*). This closes the ratification the Findings
+blueprint (Capability 4, Slice 2) and the Editorial Deliberation
+blueprint (§7, Slice 2) scheduled. Governing sources:
+[capability-4-editorial-findings.md](../blueprints/capability-4-editorial-findings.md)
+(with its July 2026 amendment — findings are revision prompts),
+[editorial-deliberation.md](../blueprints/editorial-deliberation.md),
+[capability-3-writing-workspace.md](../blueprints/capability-3-writing-workspace.md),
+and the as-built
+[editorial-loop-continuity.md](../operations/editorial-loop-continuity.md).
+The Spanish canon's *Editorial review* rows in
+[terminology-es-419.md](../globalization/terminology-es-419.md) remain
+the translation authority for these words.
+
+| Term | Verdict | Canon |
+| --- | --- | --- |
+| **Finding** | **Ratified** | What editorial review observed about the Book at a particular point in its development, and why that observation matters. A revision prompt — never automatically a defect or a required correction. The observation is preserved (immutable); the disposition (Open · Resolved · Set Aside) may change and is reversible. |
+| **Deliberation** | **Ratified** | The record of the Judgment reached concerning one Finding and the reasoning supporting it. Optional — a Finding does not require a Deliberation. Standing: Draft · Adopted · Implemented, forward-only. |
+| **Judgment** | **Ratified** | The editorial position reached through Deliberation: what the Book will do and why — never the manuscript wording that will carry it out. Frozen with its reasoning on adoption. |
+| **Adopted** | **Ratified** | The Judgment has become the Book's accepted editorial position; Judgment and reasoning are frozen. Adoption changes no Finding disposition and establishes no implementation. For the governed *No change needed* outcome, Adopted is terminal (see the rule below). |
+| **Implemented** | **Ratified** | The author's statement that the work required to carry out an adopted Judgment has been completed — a statement, never verification, never inferred. Applies only when the Judgment requires implementation work; does not apply to *No change needed*. Belongs to the Deliberation, not the Finding. |
+| **Resolve / Resolved** | **Ratified** | The author's disposition that the Finding has been addressed. May record a note and, where applicable, the manuscript Version that answered it (forward provenance). Not verification. Reversible: a Resolved Finding may be reopened. |
+| **Set Aside** | **Ratified** | The author's disposition that the Finding will not continue as active editorial work — disagreement, declining its direction, or otherwise choosing not to pursue it. No justification required. Nothing is erased; the Finding stays in history and may be reopened. Stored as `dismissed`; the UI never says "dismissed". |
+| **Version** (manuscript) | **Ratified** | A numbered entry in a chapter's manuscript history. A draft is editable; once finalized through activation its text is immutable. Later editing creates another Version; superseded Versions remain. (The Capability 2 row above states the same law for memory documents.) |
+| **Active Version** | **Ratified** | The finalized Version currently designated by the chapter's active pointer — the operative manuscript text the Workshop assembles into the current manuscript and Reading Copy. Making another Version active moves the designation; earlier Versions are neither erased nor renumbered. |
+| **Manuscript revision** | Descriptive only | Author-facing phrase for the act of changing the Book's manuscript during development. **Not** a first-class institutional object, lifecycle state, database entity, or governed record type; its result is preserved by the Version system. Not to be confused with the lifecycle stage **Revision** (above). |
+
+**Held distinct (ratified):**
+
+- **Adopted ≠ Implemented** — accepting the editorial decision is
+  different from completing the work that decision requires.
+- **Implemented ≠ Resolved** — Implemented records completion of
+  required work on the Deliberation; Resolve dispositions the Finding.
+  Different governed records, different acts.
+- **Resolve ≠ Set Aside** — Resolve records that the concern was
+  addressed; Set Aside records that the author chose not to continue
+  pursuing it.
+- **Finding ≠ Deliberation** — the Finding preserves the observation;
+  the Deliberation preserves the Judgment and its reasoning.
+- **Judgment ≠ manuscript revision** — a Judgment is the editorial
+  decision; a manuscript revision is an authorial act that may carry it
+  out.
+
+**The *No change needed* rule (Founder Office determination, August
+2026).** Canonical workflow: Finding → Deliberation → adopt the *No
+change needed* Judgment → Finding disposition (Resolve or Set Aside).
+Governing semantics: the Deliberation remains **Adopted**; Adopted is
+**terminal** for that Deliberation; **no Implemented step applies**; no
+additional Deliberation state exists or is created. Where the Workshop
+can reliably identify this canonical outcome, *Mark implemented* is not
+to be presented — a behavior change that belongs to its own subsequent
+bounded authorization; this section records the rule only. The current
+implementation (`lib/deliberations/no-change.ts`, as-built
+[editorial-loop-continuity.md](../operations/editorial-loop-continuity.md))
+records the outcome as an adopted Judgment whose text is the canonical
+no-change sentence, consistent with this rule.
+
+**Acts, in the house register:** *Raise a finding* · *Deliberate* ·
+*Adopt the judgment* · *No change needed* · *Mark implemented* ·
+*Resolve* · *Set aside* · *Reopen* · *Revise the chapter* ·
+*Mark resolved* (the writing room's Resolve).
+
+**Approved author-facing definitions.** Two registers per term — the
+*contextual* one-line meaning (where the word appears in the Workshop)
+and the *glossary* entry. Both are ratified copy and the only source
+for future Workshop contextual definitions and glossary text; no
+surface may keep an independent semantic copy that can drift.
+Building the derivation mechanism is not authorized by this section.
+
+- **Finding** — Contextual: *An observation from editorial review that
+  identifies something in the Book worth considering.* Glossary: *A
+  Finding preserves what an editorial review observed about the Book at
+  a particular point in its development and why that observation
+  matters. A Finding is not automatically a defect or required
+  correction. It gives the author something worth considering as the
+  Book develops. The observation remains part of the Book's editorial
+  history even after the author Resolves or Sets Aside the Finding.*
+- **Deliberation** — Contextual: *The author's consideration of a
+  Finding and the reasoning behind what to do about it.* Glossary: *A
+  Deliberation records how the author considered a Finding, what
+  editorial conclusion was reached, and why. The Finding preserves the
+  observation. The Deliberation preserves the author's Judgment about
+  that observation. A Finding does not require a Deliberation in every
+  circumstance.*
+- **Judgment** — Contextual: *The editorial decision about what the
+  Book should do and why.* Glossary: *A Judgment is the editorial
+  position reached through Deliberation. It describes what the Book
+  should do and why. It does not contain or prescribe the actual prose
+  that will carry out the decision. Once Adopted, the Judgment and its
+  reasoning are preserved as the record of the editorial decision.*
+- **Adopted** — Contextual: *You've accepted this Judgment as the
+  Book's editorial direction.* Glossary: *Adopted means the author has
+  accepted the Judgment as the Book's editorial position. Adoption
+  records the decision that was made. It does not necessarily mean that
+  manuscript or other implementation work has already been completed.
+  When an adopted Judgment is the governed No change needed outcome,
+  Adopted is terminal within the Deliberation lifecycle because there
+  is no implementation work to perform. Adopted ≠ Implemented.*
+- **Implemented** — Contextual: *You've recorded that the work
+  required by the adopted Judgment has been completed.* Glossary:
+  *Implemented means the author has recorded that the work required to
+  carry out an adopted Judgment has been completed. Implemented does
+  not independently verify that the work was successful. It records the
+  author's statement that the required implementation occurred.
+  Implemented applies only when the adopted Judgment actually requires
+  implementation work. For the governed No change needed outcome,
+  Implemented does not apply. Implemented belongs to the Deliberation
+  lifecycle and remains distinct from whether the originating Finding
+  has been Resolved. Implemented ≠ Resolved.*
+- **Resolve / Resolved** — Contextual: *Close the Finding because its
+  concern has been addressed.* Glossary: *Resolve means the author has
+  determined that the Finding has been sufficiently addressed. A
+  Resolved Finding remains in the Book's editorial history and may
+  record how it was addressed and, where applicable, which manuscript
+  Version provides forward provenance. Resolution is separate from
+  Implemented because the two belong to different governed records and
+  represent different acts. A Resolved Finding may later be reopened.*
+- **Set Aside** — Contextual: *Close the Finding without treating it as
+  something that needs to be addressed.* Glossary: *Set Aside means the
+  author chooses not to continue pursuing the Finding as active
+  editorial work. The author may disagree with the Finding, decline its
+  direction, or otherwise determine that it should not proceed toward
+  resolution. Setting a Finding aside does not erase it. The Finding
+  remains part of the Book's editorial history and may later be
+  reopened. Resolve ≠ Set Aside: Resolve records that the concern was
+  addressed. Set Aside records that the author chose not to continue
+  pursuing it.*
+- **Version** — Contextual: *A numbered saved state of manuscript
+  content preserved in the Book's history.* Glossary: *A Version is a
+  numbered entry in the manuscript's development history. A draft can
+  be edited before activation. Once finalized through activation, its
+  text becomes immutable. Future editing creates another Version rather
+  than overwriting finalized manuscript history. Superseded Versions
+  remain preserved.*
+- **Active Version** — Contextual: *The finalized Version currently
+  used as the chapter's operative manuscript text.* Glossary: *The
+  Active Version is the finalized Version currently designated for a
+  chapter. It is the Version the Workshop uses when assembling the
+  current manuscript and Reading Copy. Making another Version active
+  moves that designation. Earlier Versions remain preserved rather than
+  being erased or renumbered.*
+- **Manuscript revision** (descriptive) — Contextual: *A change to
+  manuscript content made while developing the Book.* Glossary: *A
+  manuscript revision is the act of changing the Book's manuscript
+  during its development. A Judgment may call for a manuscript
+  revision, but the two are different: Judgment — what the Book should
+  do and why. Manuscript revision — the authorial change that may carry
+  out that Judgment. The Workshop preserves the result of revision
+  through its governed Version system.*
