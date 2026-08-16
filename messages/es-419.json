@@ -1023,7 +1023,8 @@
       "continueReview": "Continuar la revisión",
       "continueWait": "El revisor lee mientras esta página espera — cuente con un minuto o dos antes de que vuelvan los Hallazgos.",
       "didNotFinish": "no terminó — los hallazgos levantados antes de la falla se conservan",
-      "earlierNote": "Arriba solo se cuentan los hallazgos de la revisión más reciente. Los hallazgos de lecturas anteriores permanecen abajo, cada uno marcado como «de una revisión anterior»."
+      "earlierNote": "Arriba solo se cuentan los hallazgos de la revisión más reciente. Los hallazgos de lecturas anteriores permanecen abajo, cada uno marcado como «de una revisión anterior».",
+      "continuing": "Leyendo…"
     },
     "list": {
       "raisedAgainst": "levantado contra la Versión {number}",

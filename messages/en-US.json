@@ -1023,7 +1023,8 @@
       "continueReview": "Continue the review",
       "continueWait": "The reviewer reads while this page waits — expect a minute or two before the Findings return.",
       "didNotFinish": "did not finish — findings raised before the failure are preserved",
-      "earlierNote": "Only the most recent review’s findings are counted above. Findings from earlier readings remain below, each marked “from an earlier review.”"
+      "earlierNote": "Only the most recent review’s findings are counted above. Findings from earlier readings remain below, each marked “from an earlier review.”",
+      "continuing": "Reading…"
     },
     "list": {
       "raisedAgainst": "raised against Version {number}",

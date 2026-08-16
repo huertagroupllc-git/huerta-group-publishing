@@ -9,6 +9,7 @@ import {
 } from "@/components/editorial";
 import { getLocale, getTranslations } from "next-intl/server";
 import { ActionMessage, ActionNotice } from "@/components/action-message";
+import { PendingSubmit } from "@/components/pending-submit";
 import { SetupNotice } from "@/components/setup-notice";
 import { WorkspaceFrame, NoticeNote } from "@/components/workspace-frame";
 import {
@@ -282,9 +283,14 @@ export default async function FindingsPage({
               <form action={continueConstitutionReview} className="mt-4">
                 <input type="hidden" name="author_slug" value={author.slug} />
                 <input type="hidden" name="book_slug" value={book.slug} />
-                <PrimaryButton className="px-4 py-2 text-xs">
-                  {tRun("continueReview")}
-                </PrimaryButton>
+                {/* Disabled and labelled "Reading…" while the continuation
+                    request is in flight — the reviewer reads while this page
+                    waits; the record's own guard refuses a second claim. */}
+                <PendingSubmit
+                  className="px-4 py-2 text-xs"
+                  label={tRun("continueReview")}
+                  pendingLabel={tRun("continuing")}
+                />
                 <p className="mt-2 font-sans text-[0.6875rem] text-ink-faint">
                   {tRun("continueWait")}
                 </p>
