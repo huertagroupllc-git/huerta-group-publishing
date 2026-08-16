@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ActionMessage } from "@/components/action-message";
-import { ActionLink, PrimaryButton } from "@/components/editorial";
+import { ActionLink } from "@/components/editorial";
+import { PendingSubmit } from "@/components/pending-submit";
 import { ReviewPreferences } from "@/components/review-preferences";
 import { SetupNotice } from "@/components/setup-notice";
 import { WorkspaceFrame } from "@/components/workspace-frame";
@@ -84,6 +85,8 @@ export default async function RequestReviewPage({
   const tProgress = await getTranslations("manuscript.progress");
   const tSummary = await getTranslations("settings.reviewSummary");
   const tCommon = await getTranslations("common");
+  // The house in-progress label shared with Continue the review.
+  const tRun = await getTranslations("findings.run");
   const tNav = await getTranslations("navigation");
   const bookPath = `/workspace/authors/${author.slug}/books/${book.slug}`;
   const findingsPath = `${bookPath}/findings`;
@@ -186,7 +189,14 @@ export default async function RequestReviewPage({
               <input type="hidden" name="author_slug" value={author.slug} />
               <input type="hidden" name="book_slug" value={book.slug} />
               <div className="flex items-baseline gap-8">
-                <PrimaryButton>{t("request")}</PrimaryButton>
+                {/* Disabled and labelled "Reading…" while the request is in
+                    flight — the same house pending pattern as Continue the
+                    review; the server's one-review-at-a-time guard remains
+                    the truth about a running review. */}
+                <PendingSubmit
+                  label={t("request")}
+                  pendingLabel={tRun("continuing")}
+                />
                 <Link
                   href={findingsPath}
                   className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"

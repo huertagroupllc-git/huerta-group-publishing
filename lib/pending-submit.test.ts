@@ -44,3 +44,16 @@ describe("pendingPresentation — Continue the review while its request is in fl
     expect(es.findings.run.continueReview).toBeTruthy();
   });
 });
+
+describe("Request the review shares the pending pattern", () => {
+  it("uses the same in-progress label as Continue the review, in both locales", () => {
+    const enView = pendingPresentation({ pending: true, label: en.findings.review.request, pendingLabel: en.findings.run.continuing });
+    const esView = pendingPresentation({ pending: true, label: es.findings.review.request, pendingLabel: es.findings.run.continuing });
+    expect(enView.text).toBe("Reading…");
+    expect(esView.text).toBe("Leyendo…");
+    expect(enView.disabled).toBe(true);
+    expect(pendingPresentation({ pending: false, label: en.findings.review.request, pendingLabel: en.findings.run.continuing }).text).toBe(
+      "Request the review",
+    );
+  });
+});
