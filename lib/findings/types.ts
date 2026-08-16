@@ -86,6 +86,10 @@ export interface FindingRecord {
 export interface FindingListEntry extends FindingRecord {
   chapterTitle: string | null;
   chapterSlug: string | null;
+  /** Reading-order rank of the anchoring chapter among the chapters
+   *  that carry findings (0-based); null for manuscript-wide findings.
+   *  Drives the desk's order and nothing else. */
+  chapterOrder: number | null;
   anchoredVersionNumber: number | null;
   currentVersionNumber: number | null;
   /** Forward provenance: the version that answered this finding. */

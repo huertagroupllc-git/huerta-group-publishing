@@ -16,7 +16,7 @@ import {
   QuietButton,
   TextButton,
 } from "@/components/editorial";
-import { ActionMessage } from "@/components/action-message";
+import { ActionMessage, ActionNotice } from "@/components/action-message";
 import { SetupNotice } from "@/components/setup-notice";
 import { WorkspaceFrame } from "@/components/workspace-frame";
 import {
@@ -28,14 +28,26 @@ import {
 } from "@/lib/manuscript/actions";
 import { assembleBookContext } from "@/lib/books/assemble";
 import { serializeChapterContext } from "@/lib/manuscript/assemble";
+import { markImplemented } from "@/lib/deliberations/actions";
 import { adoptedJudgmentForFinding } from "@/lib/deliberations/queries";
 import { resolveFinding } from "@/lib/findings/actions";
 import {
+  continuityQuery,
+  findingAnchor,
+  nextOpenFinding,
+  parseContinuity,
+  primaryReturn,
+  returnPaths,
+  type Continuity,
+} from "@/lib/findings/continuity";
+import {
+  getFindingsRoom,
   getRevisionBrief,
   openFindingsForChapter,
   type ChapterFindingLine,
   type RevisionBrief,
 } from "@/lib/findings/queries";
+import { actionNoticeFromQuery } from "@/lib/action-messages";
 import { severityLabel } from "@/lib/findings/types";
 import { getChapterRoom, type ChapterRoom } from "@/lib/manuscript/queries";
 import { resolveBookSettings } from "@/lib/settings/resolve";
@@ -67,7 +79,7 @@ export default async function ChapterRoomPage({
   searchParams,
 }: {
   params: Promise<{ slug: string; bookSlug: string; chapterSlug: string }>;
-  searchParams: Promise<RoomQuery>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const supabase = await createClient();
   const {
@@ -77,33 +89,77 @@ export default async function ChapterRoomPage({
 
   const { slug, bookSlug, chapterSlug } = await params;
 
-  const queryEarly = await searchParams;
+  const rawQuery = await searchParams;
+  const one = (v: string | string[] | undefined) =>
+    typeof v === "string" ? v : undefined;
+  const queryEarly: RoomQuery = {
+    v: one(rawQuery.v),
+    draft: one(rawQuery.draft),
+    new: one(rawQuery.new),
+    error: one(rawQuery.error),
+    saved: one(rawQuery.saved),
+    finding: one(rawQuery.finding),
+  };
+  // Transient continuity from the desk or the memo (allowlisted). The
+  // finding id is honored only if getRevisionBrief confirms it belongs
+  // to THIS chapter under the reader's own RLS view.
+  const ctx: Continuity = parseContinuity(rawQuery);
+  const notice = actionNoticeFromQuery(rawQuery);
   let room: ChapterRoom | null;
   let chapterContext: string;
   let chapterFindings: ChapterFindingLine[] = [];
   let revisionBrief: RevisionBrief | null = null;
-  let adoptedJudgment: string | null = null;
+  let adoptedJudgment: { id: string; judgment: string; status: string } | null =
+    null;
+  // Continuation after the finding is dispositioned: the desk's own
+  // order decides "next" — within this chapter first, then the desk.
+  let nextInChapter: { id: string; title: string } | null = null;
+  let nextOnDesk: { id: string; title: string; chapterTitle: string | null } | null =
+    null;
+  let openRemaining = 0;
   try {
     room = await getChapterRoom(slug, bookSlug, chapterSlug);
     if (room) {
       const r = room;
       try {
         chapterFindings = await openFindingsForChapter(r.chapter.id);
-        if (queryEarly.finding) {
-          revisionBrief = await getRevisionBrief(
-            queryEarly.finding,
-            r.chapter.id,
-          );
+        if (ctx.findingId) {
+          revisionBrief = await getRevisionBrief(ctx.findingId, r.chapter.id);
           if (revisionBrief) {
             try {
-              adoptedJudgment = (
-                await adoptedJudgmentForFinding(revisionBrief.id)
-              )?.judgment ?? null;
+              adoptedJudgment = await adoptedJudgmentForFinding(
+                revisionBrief.id,
+              );
             } catch (deliberationError) {
               console.error(
                 "[deliberations] judgment lookup failed",
                 deliberationError,
               );
+            }
+            if (revisionBrief.status !== "open") {
+              try {
+                const desk = await getFindingsRoom(slug, bookSlug);
+                if (desk) {
+                  openRemaining = desk.openCount;
+                  const inChapter = nextOpenFinding(
+                    desk.findings.filter((f) => f.chapter_id === r.chapter.id),
+                    revisionBrief.id,
+                  );
+                  nextInChapter = inChapter
+                    ? { id: inChapter.id, title: inChapter.title }
+                    : null;
+                  const onDesk = nextOpenFinding(desk.findings, revisionBrief.id);
+                  nextOnDesk = onDesk
+                    ? {
+                        id: onDesk.id,
+                        title: onDesk.title,
+                        chapterTitle: onDesk.chapterTitle,
+                      }
+                    : null;
+                }
+              } catch (deskError) {
+                console.error("[findings] continuation lookup failed", deskError);
+              }
             }
           }
         }
@@ -162,8 +218,36 @@ export default async function ChapterRoomPage({
   const tProgress = await getTranslations("manuscript.progress");
   const tCommon = await getTranslations("common");
   const tNav = await getTranslations("navigation");
-  const libraryPath = `/workspace/authors/${author.slug}/books/${book.slug}/chapters`;
+  const bookPath = `/workspace/authors/${author.slug}/books/${book.slug}`;
+  const libraryPath = `${bookPath}/chapters`;
   const roomPath = `${libraryPath}/${chapter.slug}`;
+  const findingsPath = `${bookPath}/findings`;
+  const tContinue = await getTranslations("findings.continue");
+  const tList = await getTranslations("findings.list");
+  const tDelib = await getTranslations("deliberation.page");
+  const tStatus = await getTranslations("status");
+  // The brief's continuity — carried by every form and link in the room
+  // while a finding is in hand, so the thread survives the draft cycle.
+  const briefCtx: Continuity = {
+    findingId: revisionBrief?.id ?? null,
+    from: ctx.from,
+    status: ctx.status,
+  };
+  const briefQuery = continuityQuery(briefCtx);
+  const briefAppend = continuityQuery(briefCtx, { append: true });
+  const briefPath = `${roomPath}${briefQuery}`;
+  const paths = revisionBrief
+    ? returnPaths({
+        bookPath,
+        findingId: revisionBrief.id,
+        from: ctx.from,
+        status: ctx.status,
+        chapterSlug: chapter.slug,
+        here: "chapter",
+      })
+    : null;
+  const quietLink =
+    "underline-offset-4 hover:text-oxblood hover:underline";
 
   // Effective manuscript display (system → author → book) so a book
   // override wins. The default triplet is a CSS no-op, so the room renders
@@ -224,13 +308,28 @@ export default async function ChapterRoomPage({
                 })}
           </p>
 
-          <div className="mt-4">
+          <div className="mt-4 space-y-3">
             <ActionMessage code={query.error} namespace="manuscript.errors" />
             {query.saved === "1" ? (
               <p className="font-sans text-sm text-ink-soft">
                 {tRoom("draftSaved")}
               </p>
             ) : null}
+            <ActionNotice
+              code={notice?.code}
+              params={notice?.params}
+              namespace="manuscript.notices"
+            />
+            <ActionNotice
+              code={notice?.code}
+              params={notice?.params}
+              namespace="findings.notices"
+            />
+            <ActionNotice
+              code={notice?.code}
+              params={notice?.params}
+              namespace="deliberation.notices"
+            />
           </div>
 
           {revisionBrief ? (
@@ -255,7 +354,7 @@ export default async function ChapterRoomPage({
                   <span className="font-sans text-[0.6875rem] uppercase tracking-[0.18em] text-ink-faint">
                     {t("judgmentLabel")} —{" "}
                   </span>
-                  {adoptedJudgment}
+                  {adoptedJudgment.judgment}
                 </p>
               ) : null}
               <p className="mt-2 font-sans text-xs text-ink-faint">
@@ -290,10 +389,12 @@ export default async function ChapterRoomPage({
                     value={revisionBrief.id}
                   />
                   <input type="hidden" name="chapter_id" value={chapter.id} />
+                  {/* Return to this brief — with the finding still in hand —
+                      so the resolution is confirmed where it was made. */}
                   <input
                     type="hidden"
                     name="findings_path"
-                    value={roomPath}
+                    value={briefPath}
                   />
                   <div className="min-w-48 flex-1">
                     <label
@@ -314,6 +415,97 @@ export default async function ChapterRoomPage({
                   <TextButton>{t("markResolved")}</TextButton>
                 </form>
               ) : null}
+              {/* The memo's own Mark implemented act, reachable at the desk:
+                  the same server action and invariants, so the loop need not
+                  return through the hierarchy to state that the revisions
+                  carrying out the judgment are done. */}
+              {adoptedJudgment?.status === "adopted" &&
+              !viewingDraft &&
+              !creating ? (
+                <form
+                  action={markImplemented}
+                  className="mt-3 flex max-w-md flex-wrap items-end gap-x-5 gap-y-2"
+                >
+                  <input
+                    type="hidden"
+                    name="deliberation_id"
+                    value={adoptedJudgment.id}
+                  />
+                  <input type="hidden" name="page_path" value={briefPath} />
+                  <div className="min-w-48 flex-1">
+                    <label
+                      htmlFor="implementation-note"
+                      className="eyebrow block"
+                    >
+                      {t("noteLabel")}{" "}
+                      <span className="normal-case">{t("noteOptional")}</span>
+                    </label>
+                    <input
+                      id="implementation-note"
+                      name="note"
+                      type="text"
+                      placeholder={tDelib("implementedNotePlaceholder")}
+                      className="w-full border-b border-rule bg-transparent py-1.5 font-serif text-base text-ink placeholder:text-ink-faint focus:border-oxblood focus:outline-none"
+                    />
+                  </div>
+                  <TextButton>{tDelib("markImplemented")}</TextButton>
+                </form>
+              ) : null}
+
+              {/* Return and continuation — where the thread leads. */}
+              {paths ? (
+                <p className="mt-4 flex flex-wrap gap-x-6 gap-y-1 font-sans text-xs text-ink-soft">
+                  <Link href={primaryReturn(paths)} className={quietLink}>
+                    {paths.primary === "deliberation"
+                      ? tContinue("returnDeliberation")
+                      : tContinue("returnFindings")}
+                  </Link>
+                  {paths.primary !== "findings" ? (
+                    <Link href={paths.findings} className={quietLink}>
+                      {tContinue("returnFindings")}
+                    </Link>
+                  ) : null}
+                  {adoptedJudgment && paths.primary !== "deliberation" ? (
+                    <Link href={paths.deliberation} className={quietLink}>
+                      {tList("deliberationLink", {
+                        status: tStatus(`deliberation.${adoptedJudgment.status}`),
+                      })}
+                    </Link>
+                  ) : null}
+                  {revisionBrief.status !== "open" ? (
+                    nextInChapter ? (
+                      <Link
+                        href={`${roomPath}${continuityQuery({ findingId: nextInChapter.id, from: ctx.from, status: ctx.status })}`}
+                        className={quietLink}
+                      >
+                        {tContinue("nextOpenInChapter", {
+                          title: nextInChapter.title,
+                        })}
+                      </Link>
+                    ) : nextOnDesk ? (
+                      <Link
+                        href={`${findingsPath}#${findingAnchor(nextOnDesk.id)}`}
+                        className={quietLink}
+                      >
+                        {nextOnDesk.chapterTitle
+                          ? tContinue("nextOpenChapter", {
+                              title: nextOnDesk.title,
+                              chapter: nextOnDesk.chapterTitle,
+                            })
+                          : tContinue("nextOpenManuscript", {
+                              title: nextOnDesk.title,
+                            })}
+                      </Link>
+                    ) : (
+                      <Link href={findingsPath} className={quietLink}>
+                        {tContinue("returnFindingsRemaining", {
+                          count: openRemaining,
+                        })}
+                      </Link>
+                    )
+                  ) : null}
+                </p>
+              ) : null}
             </aside>
           ) : null}
 
@@ -321,15 +513,16 @@ export default async function ChapterRoomPage({
             <ChapterDraftEditor
               draft={draft}
               roomPath={roomPath}
-              findingId={revisionBrief?.id ?? null}
+              continuity={briefCtx}
             />
           ) : creating ? (
             <NewChapterVersionForm
               chapterId={chapter.id}
               roomPath={roomPath}
+              cancelHref={briefPath}
               prefill={active?.content ?? ""}
               isFirst={versions.length === 0}
-              findingId={revisionBrief?.id ?? null}
+              continuity={briefCtx}
             />
           ) : reading ? (
             <ChapterReadingPane
@@ -337,6 +530,7 @@ export default async function ChapterRoomPage({
               isActive={reading.id === chapter.active_version_id}
               activeNumber={active?.version_number ?? null}
               roomPath={roomPath}
+              linkQuery={briefAppend}
               draftOpen={draft !== null}
               raiseFindingHref={`/workspace/authors/${author.slug}/books/${book.slug}/findings/new?chapter=${chapter.slug}&version=${reading.id}&return=chapter`}
             />
@@ -410,7 +604,7 @@ export default async function ChapterRoomPage({
                 {chapterFindings.map((finding) => (
                   <li key={finding.id} className="font-sans text-xs">
                     <Link
-                      href={`${roomPath}?finding=${finding.id}`}
+                      href={`${roomPath}${continuityQuery({ findingId: finding.id, from: ctx.from, status: ctx.status })}`}
                       className="group"
                     >
                       <span className="text-ink-faint">
@@ -440,6 +634,7 @@ export default async function ChapterRoomPage({
               versions={versions}
               activeVersionId={chapter.active_version_id}
               roomPath={roomPath}
+              linkQuery={briefAppend}
             />
           </div>
 
@@ -545,6 +740,7 @@ function ChapterReadingPane({
   isActive,
   activeNumber,
   roomPath,
+  linkQuery,
   draftOpen,
   raiseFindingHref,
 }: {
@@ -552,6 +748,8 @@ function ChapterReadingPane({
   isActive: boolean;
   activeNumber: number | null;
   roomPath: string;
+  /** Revision-brief continuity to carry on in-room links ("&k=v"). */
+  linkQuery: string;
   draftOpen: boolean;
   raiseFindingHref: string;
 }) {
@@ -565,6 +763,8 @@ function ChapterReadingPane({
   )
     ? tSource(version.import_source)
     : null;
+  // Restoring a version returns to the room with the brief still in hand.
+  const contextPath = linkQuery ? `${roomPath}?${linkQuery.slice(1)}` : roomPath;
 
   return (
     <article className="mt-8">
@@ -596,7 +796,7 @@ function ChapterReadingPane({
           </p>
           <form action={activateChapterVersion} className="mt-2">
             <input type="hidden" name="version_id" value={version.id} />
-            <input type="hidden" name="room_path" value={roomPath} />
+            <input type="hidden" name="room_path" value={contextPath} />
             <TextButton>{t("restore")}</TextButton>
           </form>
         </div>
@@ -605,7 +805,7 @@ function ChapterReadingPane({
           {tRoom.rich("draftOpenContinueWriting", {
             link: (chunks) => (
               <Link
-                href={`${roomPath}?draft=1`}
+                href={`${roomPath}?draft=1${linkQuery}`}
                 className="text-oxblood underline-offset-4 hover:underline"
               >
                 {chunks}
@@ -652,18 +852,38 @@ function UnwrittenState({
   );
 }
 
+/** Hidden inputs that carry the brief's continuity through a form —
+ *  the same finding, origin, and desk filter come back on redirect. */
+function ContinuityInputs({ continuity }: { continuity: Continuity }) {
+  return (
+    <>
+      {continuity.findingId ? (
+        <input type="hidden" name="finding_id" value={continuity.findingId} />
+      ) : null}
+      {continuity.from ? (
+        <input type="hidden" name="from" value={continuity.from} />
+      ) : null}
+      {continuity.status ? (
+        <input type="hidden" name="status" value={continuity.status} />
+      ) : null}
+    </>
+  );
+}
+
 function NewChapterVersionForm({
   chapterId,
   roomPath,
+  cancelHref,
   prefill,
   isFirst,
-  findingId,
+  continuity,
 }: {
   chapterId: string;
   roomPath: string;
+  cancelHref: string;
   prefill: string;
   isFirst: boolean;
-  findingId: string | null;
+  continuity: Continuity;
 }) {
   const t = useTranslations("memory.documentRoom");
   const tRoom = useTranslations("manuscript.writingRoom");
@@ -676,9 +896,7 @@ function NewChapterVersionForm({
       <form action={createChapterVersion} className="mt-8 space-y-8">
         <input type="hidden" name="document_id" value={chapterId} />
         <input type="hidden" name="room_path" value={roomPath} />
-        {findingId ? (
-          <input type="hidden" name="finding_id" value={findingId} />
-        ) : null}
+        <ContinuityInputs continuity={continuity} />
         <VersionFields
           content={prefill}
           changeSummary=""
@@ -689,7 +907,7 @@ function NewChapterVersionForm({
         <div className="flex items-baseline gap-8">
           <PrimaryButton>{t("saveDraft")}</PrimaryButton>
           <Link
-            href={roomPath}
+            href={cancelHref}
             className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
           >
             {tCommon("cancel")}
@@ -703,11 +921,11 @@ function NewChapterVersionForm({
 function ChapterDraftEditor({
   draft,
   roomPath,
-  findingId,
+  continuity,
 }: {
   draft: VersionRecord;
   roomPath: string;
-  findingId: string | null;
+  continuity: Continuity;
 }) {
   const t = useTranslations("memory.documentRoom");
   const tRoom = useTranslations("manuscript.writingRoom");
@@ -731,9 +949,7 @@ function ChapterDraftEditor({
       <form action={updateChapterDraft} className="mt-6 space-y-8">
         <input type="hidden" name="version_id" value={draft.id} />
         <input type="hidden" name="room_path" value={roomPath} />
-        {findingId ? (
-          <input type="hidden" name="finding_id" value={findingId} />
-        ) : null}
+        <ContinuityInputs continuity={continuity} />
         <VersionFields
           content={draft.content}
           changeSummary={draft.change_summary ?? ""}
@@ -753,6 +969,7 @@ function ChapterDraftEditor({
         <form action={discardChapterDraft}>
           <input type="hidden" name="version_id" value={draft.id} />
           <input type="hidden" name="room_path" value={roomPath} />
+          <ContinuityInputs continuity={continuity} />
           <button
             type="submit"
             className="font-sans text-xs text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"

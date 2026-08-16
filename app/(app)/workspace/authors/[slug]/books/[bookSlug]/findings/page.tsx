@@ -8,7 +8,7 @@ import {
   TextButton,
 } from "@/components/editorial";
 import { getLocale, getTranslations } from "next-intl/server";
-import { ActionMessage } from "@/components/action-message";
+import { ActionMessage, ActionNotice } from "@/components/action-message";
 import { SetupNotice } from "@/components/setup-notice";
 import { WorkspaceFrame, NoticeNote } from "@/components/workspace-frame";
 import {
@@ -22,6 +22,11 @@ import {
 } from "@/lib/findings/actions";
 import { deliberationStatesForBook } from "@/lib/deliberations/queries";
 import type { DeliberationStatus } from "@/lib/deliberations/types";
+import {
+  continuityQuery,
+  findingAnchor,
+  followingEntry,
+} from "@/lib/findings/continuity";
 import {
   getCurrentReviewRunId,
   getFindingsRoom,
@@ -126,7 +131,19 @@ export default async function FindingsPage({
   )
     ? (query.status as FindingStatus)
     : "open";
+  // `findings` arrives in desk order (continuity.ts): manuscript-wide
+  // first, then chapters in reading order, newest first within a group.
   const shown = findings.filter((f) => f.status === shownStatus);
+  // The continuity every link and form from this view carries: the
+  // author's current filter, so returns land back in it. Open is the
+  // default and travels as nothing.
+  const viewQuery = continuityQuery({ status: shownStatus });
+  const fromDesk = continuityQuery({ from: "findings", status: shownStatus });
+  const fromDeskAppend = continuityQuery(
+    { from: "findings", status: shownStatus },
+    { append: true },
+  );
+  const viewPath = `${findingsPath}${viewQuery}`;
 
   // The active editorial review is the book's CURRENT review when one has
   // been chosen (books.current_review_run_id), never inferred from the
@@ -158,23 +175,25 @@ export default async function FindingsPage({
     f.review_run_id !== activeRunId;
   const hasEarlierReviewFindings = findings.some(isFromEarlierReview);
 
-  // Book-level findings first (The Manuscript), then by chapter.
+  // Book-level findings first (The Manuscript), then by chapter — the
+  // groups follow the desk order already present in `shown`.
   const groups: { heading: string; entries: FindingListEntry[] }[] = [];
   const bookLevel = shown.filter((f) => !f.chapter_id);
   if (bookLevel.length) {
     groups.push({ heading: t("manuscriptGroup"), entries: bookLevel });
   }
-  const chapterTitles = [
+  const chapterIds = [
     ...new Set(
-      shown.filter((f) => f.chapter_id).map((f) => f.chapterTitle ?? ""),
+      shown.filter((f) => f.chapter_id).map((f) => f.chapter_id as string),
     ),
   ];
-  for (const title of chapterTitles) {
-    groups.push({
-      heading: title,
-      entries: shown.filter((f) => f.chapterTitle === title),
-    });
+  for (const chapterId of chapterIds) {
+    const entries = shown.filter((f) => f.chapter_id === chapterId);
+    groups.push({ heading: entries[0].chapterTitle ?? "", entries });
   }
+  // The flat, as-rendered sequence — what "the entry after this one"
+  // means when an entry leaves the view after a disposition.
+  const sequence = groups.flatMap((g) => g.entries);
 
   return (
     <WorkspaceFrame
@@ -206,6 +225,11 @@ export default async function FindingsPage({
             })}
           />
         ) : null}
+        <ActionNotice
+          code={notice?.code}
+          params={notice?.params}
+          namespace="findings.notices"
+        />
       </div>
 
       <div className="rule mt-10 pt-5">
@@ -399,7 +423,12 @@ export default async function FindingsPage({
             <p className="eyebrow mt-8">{group.heading}</p>
             <ul>
               {group.entries.map((finding) => (
-                <li key={finding.id} className="rule py-6 first:border-t-0">
+                <li
+                  key={finding.id}
+                  id={findingAnchor(finding.id)}
+                  tabIndex={-1}
+                  className="rule scroll-mt-6 py-6 first:border-t-0"
+                >
                   <p className="font-sans text-[0.6875rem] uppercase tracking-[0.18em] text-ink-faint">
                     {tStatus(`severity.${finding.severity}`)} ·{" "}
                     {tStatus(`category.${finding.category}`)}
@@ -455,7 +484,7 @@ export default async function FindingsPage({
                       <>
                         {" · "}
                         <Link
-                          href={`${findingsPath}/${finding.id}/deliberation`}
+                          href={`${findingsPath}/${finding.id}/deliberation${fromDesk}`}
                           className="underline-offset-4 hover:text-oxblood hover:underline"
                         >
                           {tList("deliberationLink", {
@@ -486,7 +515,12 @@ export default async function FindingsPage({
                       <input
                         type="hidden"
                         name="findings_path"
-                        value={findingsPath}
+                        value={viewPath}
+                      />
+                      <input
+                        type="hidden"
+                        name="next_anchor"
+                        value={followingEntry(sequence, finding.id)?.id ?? ""}
                       />
                       <div className="min-w-56 flex-1">
                         <label htmlFor={`note-${finding.id}`} className="eyebrow block">
@@ -514,14 +548,14 @@ export default async function FindingsPage({
                         </QuietButton>
                         {finding.chapterSlug ? (
                           <ActionLink
-                            href={`${bookPath}/chapters/${finding.chapterSlug}?finding=${finding.id}`}
+                            href={`${bookPath}/chapters/${finding.chapterSlug}?finding=${finding.id}${fromDeskAppend}`}
                           >
                             {tList("reviseChapter")}
                           </ActionLink>
                         ) : null}
                         {!deliberations.has(finding.id) ? (
                           <ActionLink
-                            href={`${findingsPath}/${finding.id}/deliberation`}
+                            href={`${findingsPath}/${finding.id}/deliberation${fromDesk}`}
                           >
                             {tList("deliberate")}
                           </ActionLink>
@@ -552,7 +586,12 @@ export default async function FindingsPage({
                         <input
                           type="hidden"
                           name="findings_path"
-                          value={findingsPath}
+                          value={viewPath}
+                        />
+                        <input
+                          type="hidden"
+                          name="next_anchor"
+                          value={followingEntry(sequence, finding.id)?.id ?? ""}
                         />
                         <TextButton>{tList("reopen")}</TextButton>
                       </form>

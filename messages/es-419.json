@@ -454,6 +454,9 @@
       "activateFailed": "No se pudo activar la versión.",
       "discardFailed": "No se pudo descartar el borrador.",
       "manuscriptMigrationMissing": "A la base de datos le falta la migración del manuscrito — aplique supabase/migrations/20260708000000_manuscript_foundation.sql (docs/setup.md §2)."
+    },
+    "notices": {
+      "versionActivated": "La Versión {number} es ahora la versión activa."
     }
   },
   "memory": {
@@ -1111,6 +1114,28 @@
       "previewUnavailable": "No se pudo leer la vista previa en este momento.",
       "setAsideReason": "Apartado cuando la {review} del {date} se convirtió en la revisión editorial actual.",
       "madeCurrentNotice": "Esta revisión es ahora la revisión editorial actual del libro. {count, plural, =0 {No se apartó ningún hallazgo anterior} one {Se apartó # hallazgo anterior} other {Se apartaron # hallazgos anteriores}}."
+    },
+    "notices": {
+      "findingResolved": "Resuelto — «{title}».",
+      "findingResolvedInVersion": "Resuelto en la Versión {number} — «{title}».",
+      "findingSetAside": "Apartado — «{title}».",
+      "findingReopened": "Reabierto — «{title}»."
+    },
+    "continue": {
+      "heading": "Continuar",
+      "findingStanding": "Hallazgo — {status}",
+      "nextOpenChapter": "Siguiente hallazgo abierto — «{title}» · {chapter}",
+      "nextOpenManuscript": "Siguiente hallazgo abierto — «{title}» · El Manuscrito",
+      "nextOpenInChapter": "Siguiente hallazgo abierto en este capítulo — «{title}»",
+      "returnFindings": "Volver a Los Hallazgos",
+      "returnFindingsRemaining": "Volver a Los Hallazgos — {count, plural, =0 {no quedan hallazgos abiertos} one {queda # hallazgo abierto} other {quedan # hallazgos abiertos}}",
+      "returnDeliberation": "Volver a la deliberación",
+      "returnChapter": "Volver al capítulo",
+      "reviseChapterNamed": "Corregir el capítulo — {chapter}",
+      "manuscriptWideDestinations": "Este hallazgo concierne al manuscrito en su conjunto — no se presupone ningún capítulo.",
+      "openReadingCopy": "Abrir la Copia de Lectura",
+      "openManuscript": "Abrir El Manuscrito",
+      "dispositionHeading": "El hallazgo"
     }
   },
   "deliberation": {
@@ -1149,6 +1174,10 @@
       "implementFailed": "No se pudo marcar la deliberación como implementada.",
       "discardFailed": "No se pudo descartar el borrador.",
       "deliberationMigrationMissing": "A la base de datos le falta la migración de la Deliberación Editorial — aplique supabase/migrations/20260713000000_editorial_deliberation.sql (docs/setup.md §2)."
+    },
+    "notices": {
+      "judgmentAdopted": "Juicio adoptado — esta es ahora la posición editorial del libro sobre la cuestión.",
+      "markedImplemented": "Marcado como implementado — una declaración del autor, registrada con su fecha."
     }
   },
   "errors": {

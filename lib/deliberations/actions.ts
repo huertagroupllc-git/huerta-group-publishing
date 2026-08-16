@@ -1,9 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { withActionMessage } from "@/lib/action-messages";
+import { withActionMessage, withActionNotice } from "@/lib/action-messages";
 import { createClient } from "@/lib/supabase/server";
 import { assertEditEntitlement } from "@/lib/membership/entitlement";
+import { appendQuery } from "@/lib/findings/continuity";
 
 /** Failures redirect with STABLE MESSAGE CODES from the
  *  deliberation.errors namespace (the Phase 3B pattern); raw database
@@ -73,7 +74,8 @@ export async function saveDeliberationDraft(formData: FormData) {
     );
   }
 
-  redirect(`${pagePath}?saved=1`);
+  // page_path may already carry continuity (finding, origin, filter).
+  redirect(appendQuery(pagePath, { saved: "1" }));
 }
 
 /** The deliberate act: adoption freezes the judgment. Works from a
@@ -118,7 +120,7 @@ export async function adoptJudgment(formData: FormData) {
     );
   }
 
-  redirect(pagePath);
+  redirect(withActionNotice(pagePath, { code: "judgmentAdopted" }));
 }
 
 /** A statement, never a verification. */
@@ -144,7 +146,7 @@ export async function markImplemented(formData: FormData) {
     fail(pagePath, "implementFailed");
   }
 
-  redirect(pagePath);
+  redirect(withActionNotice(pagePath, { code: "markedImplemented" }));
 }
 
 /** A draft was never the record. */

@@ -142,10 +142,14 @@ export function VersionRail({
   versions,
   activeVersionId,
   roomPath,
+  linkQuery = "",
 }: {
   versions: VersionRecord[];
   activeVersionId: string | null;
   roomPath: string;
+  /** Extra query to carry on every rail link (an "&k=v" string) — the
+   *  writing room's revision-brief continuity. Empty by default. */
+  linkQuery?: string;
 }) {
   const t = useTranslations("memory.documentRoom");
   const locale = useLocale();
@@ -166,8 +170,8 @@ export function VersionRail({
             const isActive = v.id === activeVersionId;
             const href =
               v.status === "draft"
-                ? `${roomPath}?draft=1`
-                : `${roomPath}?v=${v.version_number}`;
+                ? `${roomPath}?draft=1${linkQuery}`
+                : `${roomPath}?v=${v.version_number}${linkQuery}`;
             return (
               <li key={v.id} className="rule py-3 first:border-t-0">
                 <Link href={href} className="group block">
@@ -207,7 +211,9 @@ export function VersionRail({
 
       {draft === null && versions.length > 0 ? (
         <div className="rule mt-1 pt-4">
-          <ActionLink href={`${roomPath}?new=1`}>{t("newVersion")}</ActionLink>
+          <ActionLink href={`${roomPath}?new=1${linkQuery}`}>
+            {t("newVersion")}
+          </ActionLink>
         </div>
       ) : null}
     </>

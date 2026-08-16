@@ -20,6 +20,9 @@ export interface DeliberationPrompt {
   title: string;
   explanation: string;
   excerpt: string | null;
+  /** The anchoring chapter, when the finding is chapter-scoped; null for
+   *  manuscript-wide findings — never inferred. */
+  chapterId: string | null;
   chapterTitle: string | null;
   chapterSlug: string | null;
   anchoredVersionNumber: number | null;
@@ -114,6 +117,7 @@ export const getDeliberationPage = cache(async function getDeliberationPage(
       title: finding.title,
       explanation: finding.explanation,
       excerpt: finding.excerpt,
+      chapterId: finding.chapter_id ?? null,
       chapterTitle,
       chapterSlug,
       anchoredVersionNumber,
@@ -137,19 +141,21 @@ export async function deliberationStatesForBook(
   return new Map((data ?? []).map((d) => [d.finding_id, d.status]));
 }
 
-/** The adopted judgment for one finding, for the revision brief. */
+/** The adopted judgment for one finding, for the revision brief — with
+ *  the memo's id so the brief can offer the SAME Mark implemented act
+ *  the memo offers (never a second mechanism). */
 export async function adoptedJudgmentForFinding(
   findingId: string,
-): Promise<{ judgment: string; status: string } | null> {
+): Promise<{ id: string; judgment: string; status: string } | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("editorial_deliberations")
-    .select("judgment, status")
+    .select("id, judgment, status")
     .eq("finding_id", findingId)
     .in("status", ["adopted", "implemented"])
     .maybeSingle();
   if (error)
     throw new Error(`Could not load the deliberation: ${error.message}`);
   if (!data?.judgment) return null;
-  return { judgment: data.judgment, status: data.status };
+  return { id: data.id, judgment: data.judgment, status: data.status };
 }

@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { deskOrder } from "@/lib/findings/continuity";
 import type {
   FindingListEntry,
   FindingRecord,
@@ -116,6 +117,33 @@ export const getFindingsRoom = cache(async function getFindingsRoom(
     );
 
   const chapters = chaptersResult.data ?? [];
+
+  // Reading order for the desk's chapter groups: ungrouped chapters by
+  // position, then parts by position with chapters by position — the
+  // manuscript's own order (assemble-core), never the findings' recency.
+  const partIds = [
+    ...new Set(chapters.map((c) => c.part_id).filter(Boolean)),
+  ] as string[];
+  const { data: parts } = partIds.length
+    ? await supabase
+        .from("manuscript_parts")
+        .select("id, position")
+        .in("id", partIds)
+    : { data: [] };
+  const partPosition = new Map(
+    (parts ?? []).map((p) => [p.id as string, p.position as number]),
+  );
+  const chapterOrder = new Map<string, number>(
+    [...chapters]
+      .sort(
+        (a, b) =>
+          (a.part_id === null ? -1 : (partPosition.get(a.part_id) ?? 0)) -
+            (b.part_id === null ? -1 : (partPosition.get(b.part_id) ?? 0)) ||
+          a.position - b.position,
+      )
+      .map((c, i) => [c.id, i]),
+  );
+
   const activeIds = chapters
     .map((c) => c.active_version_id)
     .filter((id): id is string => Boolean(id) && !versionIds.includes(id!));
@@ -142,6 +170,7 @@ export const getFindingsRoom = cache(async function getFindingsRoom(
       ...f,
       chapterTitle: chapter?.title ?? null,
       chapterSlug: chapter?.slug ?? null,
+      chapterOrder: chapter ? (chapterOrder.get(chapter.id) ?? null) : null,
       anchoredVersionNumber: versionNumber(f.chapter_version_id),
       currentVersionNumber: versionNumber(chapter?.active_version_id ?? null),
       resolvedInVersionNumber: versionNumber(f.resolved_in_version_id),
@@ -187,7 +216,9 @@ export const getFindingsRoom = cache(async function getFindingsRoom(
   return {
     author,
     book,
-    findings: entries,
+    // Desk order — the one author-visible order (continuity.ts): the
+    // page renders it, and "next open finding" reads it.
+    findings: deskOrder(entries),
     openCount: entries.filter((f) => f.status === "open").length,
     latestReview,
   };

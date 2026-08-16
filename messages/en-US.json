@@ -454,6 +454,9 @@
       "activateFailed": "The version could not be activated.",
       "discardFailed": "The draft could not be discarded.",
       "manuscriptMigrationMissing": "The database is missing the manuscript migration — apply supabase/migrations/20260708000000_manuscript_foundation.sql (docs/setup.md §2)."
+    },
+    "notices": {
+      "versionActivated": "Version {number} is now the active version."
     }
   },
   "memory": {
@@ -1111,6 +1114,28 @@
       "previewUnavailable": "The preview could not be read right now.",
       "setAsideReason": "Set aside when the {review} of {date} became the current editorial review.",
       "madeCurrentNotice": "This review is now the book's current editorial review. {count, plural, =0 {No older findings were set aside} one {# older finding was set aside} other {# older findings were set aside}}."
+    },
+    "notices": {
+      "findingResolved": "Resolved — “{title}”.",
+      "findingResolvedInVersion": "Resolved in Version {number} — “{title}”.",
+      "findingSetAside": "Set aside — “{title}”.",
+      "findingReopened": "Reopened — “{title}”."
+    },
+    "continue": {
+      "heading": "Continue",
+      "findingStanding": "Finding — {status}",
+      "nextOpenChapter": "Next open finding — “{title}” · {chapter}",
+      "nextOpenManuscript": "Next open finding — “{title}” · The Manuscript",
+      "nextOpenInChapter": "Next open finding in this chapter — “{title}”",
+      "returnFindings": "Return to Findings",
+      "returnFindingsRemaining": "Return to Findings — {count, plural, =0 {no open findings remain} one {# open finding remains} other {# open findings remain}}",
+      "returnDeliberation": "Return to the deliberation",
+      "returnChapter": "Return to the chapter",
+      "reviseChapterNamed": "Revise the chapter — {chapter}",
+      "manuscriptWideDestinations": "This finding concerns the manuscript as a whole — no single chapter is implied.",
+      "openReadingCopy": "Open the Reading Copy",
+      "openManuscript": "Open The Manuscript",
+      "dispositionHeading": "The finding"
     }
   },
   "deliberation": {
@@ -1149,6 +1174,10 @@
       "implementFailed": "The deliberation could not be marked implemented.",
       "discardFailed": "The draft could not be discarded.",
       "deliberationMigrationMissing": "The database is missing the Editorial Deliberation migration — apply supabase/migrations/20260713000000_editorial_deliberation.sql (docs/setup.md §2)."
+    },
+    "notices": {
+      "judgmentAdopted": "Judgment adopted — this is now the book’s editorial position on the question.",
+      "markedImplemented": "Marked implemented — a statement of the author, recorded with its date."
     }
   },
   "errors": {

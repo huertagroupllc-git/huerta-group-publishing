@@ -1,9 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { withActionMessage } from "@/lib/action-messages";
+import { withActionMessage, withActionNotice } from "@/lib/action-messages";
 import { createClient } from "@/lib/supabase/server";
 import { assertEditEntitlement } from "@/lib/membership/entitlement";
+import { findingAnchor } from "@/lib/findings/continuity";
 import type {
   FindingCategory,
   FindingSeverity,
@@ -35,6 +36,24 @@ function fail(
   params?: Record<string, string>,
 ): never {
   redirect(withActionMessage(path, { code, params }));
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** After a disposition, land where the author was working: the notice
+ *  states what happened, and the desk scrolls to the entry that
+ *  followed the one just acted on (when the form named it). The anchor
+ *  is a bare fragment — nothing is looked up by it. */
+function landAfterDisposition(
+  path: string,
+  code: string,
+  params: Record<string, string>,
+  nextAnchor: string,
+): never {
+  const target = withActionNotice(path, { code, params });
+  redirect(
+    UUID.test(nextAnchor) ? `${target}#${findingAnchor(nextAnchor)}` : target,
+  );
 }
 
 function isMissingFunction(error: { code?: string; message?: string }) {
@@ -114,11 +133,13 @@ export async function resolveFinding(formData: FormData) {
   const findingId = String(formData.get("finding_id") ?? "");
   const chapterId = String(formData.get("chapter_id") ?? "");
   const findingsPath = String(formData.get("findings_path") ?? "/workspace");
+  const nextAnchor = String(formData.get("next_anchor") ?? "");
   const note = String(formData.get("note") ?? "").trim();
 
   const supabase = await requireUser();
 
   let resolvedInVersionId: string | null = null;
+  let resolvedInVersionNumber: number | null = null;
   if (chapterId) {
     const { data: chapter } = await supabase
       .from("chapters")
@@ -126,6 +147,14 @@ export async function resolveFinding(formData: FormData) {
       .eq("id", chapterId)
       .maybeSingle();
     resolvedInVersionId = chapter?.active_version_id ?? null;
+    if (resolvedInVersionId) {
+      const { data: version } = await supabase
+        .from("chapter_versions")
+        .select("version_number")
+        .eq("id", resolvedInVersionId)
+        .maybeSingle();
+      resolvedInVersionNumber = version?.version_number ?? null;
+    }
   }
 
   const { data, error } = await supabase
@@ -137,14 +166,21 @@ export async function resolveFinding(formData: FormData) {
       resolved_at: new Date().toISOString(),
     })
     .eq("id", findingId)
-    .select("id");
+    .select("id, title");
 
   if (error || !data?.length) {
     console.error("[findings] resolveFinding failed", error);
     fail(findingsPath, "resolveFailed");
   }
 
-  redirect(findingsPath);
+  landAfterDisposition(
+    findingsPath,
+    resolvedInVersionNumber ? "findingResolvedInVersion" : "findingResolved",
+    resolvedInVersionNumber
+      ? { title: data[0].title, number: String(resolvedInVersionNumber) }
+      : { title: data[0].title },
+    nextAnchor,
+  );
 }
 
 /** Setting aside requires no justification — author autonomy is
@@ -152,6 +188,7 @@ export async function resolveFinding(formData: FormData) {
 export async function setAsideFinding(formData: FormData) {
   const findingId = String(formData.get("finding_id") ?? "");
   const findingsPath = String(formData.get("findings_path") ?? "/workspace");
+  const nextAnchor = String(formData.get("next_anchor") ?? "");
   const note = String(formData.get("note") ?? "").trim();
 
   const supabase = await requireUser();
@@ -163,19 +200,25 @@ export async function setAsideFinding(formData: FormData) {
       resolved_at: new Date().toISOString(),
     })
     .eq("id", findingId)
-    .select("id");
+    .select("id, title");
 
   if (error || !data?.length) {
     console.error("[findings] setAsideFinding failed", error);
     fail(findingsPath, "setAsideFailed");
   }
 
-  redirect(findingsPath);
+  landAfterDisposition(
+    findingsPath,
+    "findingSetAside",
+    { title: data[0].title },
+    nextAnchor,
+  );
 }
 
 export async function reopenFinding(formData: FormData) {
   const findingId = String(formData.get("finding_id") ?? "");
   const findingsPath = String(formData.get("findings_path") ?? "/workspace");
+  const nextAnchor = String(formData.get("next_anchor") ?? "");
 
   const supabase = await requireUser();
   const { data, error } = await supabase
@@ -187,12 +230,17 @@ export async function reopenFinding(formData: FormData) {
       resolved_at: null,
     })
     .eq("id", findingId)
-    .select("id");
+    .select("id, title");
 
   if (error || !data?.length) {
     console.error("[findings] reopenFinding failed", error);
     fail(findingsPath, "reopenFailed");
   }
 
-  redirect(findingsPath);
+  landAfterDisposition(
+    findingsPath,
+    "findingReopened",
+    { title: data[0].title },
+    nextAnchor,
+  );
 }

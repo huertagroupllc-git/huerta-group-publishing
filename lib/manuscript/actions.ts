@@ -1,11 +1,16 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { withActionMessage } from "@/lib/action-messages";
+import { withActionMessage, withActionNotice } from "@/lib/action-messages";
 import { createClient } from "@/lib/supabase/server";
 import { assertEditEntitlement } from "@/lib/membership/entitlement";
 import { slugify } from "@/lib/memory/types";
 import type { ChapterKind } from "@/lib/manuscript/types";
+import {
+  appendQuery,
+  isContinuityOrigin,
+  isFindingStatus,
+} from "@/lib/findings/continuity";
 
 /** Failures redirect with STABLE MESSAGE CODES from the
  *  manuscript.errors catalog namespace (the Phase 3B pattern) — never
@@ -40,6 +45,24 @@ function isMissingFunction(error: { code?: string; message?: string }) {
     error.code === "42883" ||
     /function .+ does not exist|schema cache/i.test(error.message ?? "")
   );
+}
+
+/** The revision brief's continuity (finding, origin, desk filter) rides
+ *  through the draft cycle unchanged — allowlisted, never trusted for
+ *  anything but the redirect. */
+function briefContinuity(formData: FormData): {
+  finding: string | null;
+  from: string | null;
+  status: string | null;
+} {
+  const finding = String(formData.get("finding_id") ?? "");
+  const from = String(formData.get("from") ?? "");
+  const status = String(formData.get("status") ?? "");
+  return {
+    finding: finding || null,
+    from: isContinuityOrigin(from) ? from : null,
+    status: isFindingStatus(status) && status !== "open" ? status : null,
+  };
 }
 
 function chapterKind(input: string): ChapterKind {
@@ -228,8 +251,9 @@ export async function createChapterVersion(formData: FormData) {
     );
   }
 
-  const finding = String(formData.get("finding_id") ?? "");
-  redirect(`${roomPath}?draft=1${finding ? `&finding=${finding}` : ""}`);
+  redirect(
+    appendQuery(roomPath, { draft: "1", ...briefContinuity(formData) }),
+  );
 }
 
 export async function updateChapterDraft(formData: FormData) {
@@ -258,9 +282,12 @@ export async function updateChapterDraft(formData: FormData) {
     fail(`${roomPath}?draft=1`, "draftSaveFailed");
   }
 
-  const finding = String(formData.get("finding_id") ?? "");
   redirect(
-    `${roomPath}?draft=1&saved=1${finding ? `&finding=${finding}` : ""}`,
+    appendQuery(roomPath, {
+      draft: "1",
+      saved: "1",
+      ...briefContinuity(formData),
+    }),
   );
 }
 
@@ -312,8 +339,21 @@ export async function saveAndActivateChapterDraft(formData: FormData) {
     );
   }
 
-  const finding = String(formData.get("finding_id") ?? "");
-  redirect(`${roomPath}${finding ? `?finding=${finding}` : ""}`);
+  // Orientation after the deliberate act: which version is now active.
+  const { data: activated } = await supabase
+    .from("chapter_versions")
+    .select("version_number")
+    .eq("id", versionId)
+    .maybeSingle();
+  const landing = appendQuery(roomPath, briefContinuity(formData));
+  redirect(
+    activated?.version_number
+      ? withActionNotice(landing, {
+          code: "versionActivated",
+          params: { number: String(activated.version_number) },
+        })
+      : landing,
+  );
 }
 
 export async function activateChapterVersion(formData: FormData) {
@@ -333,7 +373,19 @@ export async function activateChapterVersion(formData: FormData) {
     );
   }
 
-  redirect(roomPath);
+  const { data: activated } = await supabase
+    .from("chapter_versions")
+    .select("version_number")
+    .eq("id", versionId)
+    .maybeSingle();
+  redirect(
+    activated?.version_number
+      ? withActionNotice(roomPath, {
+          code: "versionActivated",
+          params: { number: String(activated.version_number) },
+        })
+      : roomPath,
+  );
 }
 
 export async function discardChapterDraft(formData: FormData) {
@@ -352,5 +404,5 @@ export async function discardChapterDraft(formData: FormData) {
     fail(roomPath, "discardFailed");
   }
 
-  redirect(roomPath);
+  redirect(appendQuery(roomPath, briefContinuity(formData)));
 }

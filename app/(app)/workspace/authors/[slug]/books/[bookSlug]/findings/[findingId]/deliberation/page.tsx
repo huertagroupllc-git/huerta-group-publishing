@@ -2,16 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import {
+  ActionLink,
   Field,
   PrimaryButton,
   QuietButton,
   TextareaField,
 } from "@/components/editorial";
 import { getLocale, getTranslations } from "next-intl/server";
-import { ActionMessage } from "@/components/action-message";
+import { ActionMessage, ActionNotice } from "@/components/action-message";
 import { SetupNotice } from "@/components/setup-notice";
 import { WorkspaceFrame } from "@/components/workspace-frame";
-import { actionMessageFromQuery } from "@/lib/action-messages";
+import {
+  actionMessageFromQuery,
+  actionNoticeFromQuery,
+} from "@/lib/action-messages";
 import {
   adoptJudgment,
   discardDeliberationDraft,
@@ -22,6 +26,16 @@ import {
   getDeliberationPage,
   type DeliberationPage,
 } from "@/lib/deliberations/queries";
+import { resolveFinding, setAsideFinding } from "@/lib/findings/actions";
+import {
+  continuityQuery,
+  findingAnchor,
+  nextOpenFinding,
+  parseContinuity,
+  primaryReturn,
+  returnPaths,
+} from "@/lib/findings/continuity";
+import { getFindingsRoom } from "@/lib/findings/queries";
 import { formatDate } from "@/lib/memory/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -58,6 +72,10 @@ export default async function DeliberationPageRoute({
   const { slug, bookSlug, findingId } = await params;
   const query = await searchParams;
   const message = actionMessageFromQuery(query);
+  const notice = actionNoticeFromQuery(query);
+  // Transient continuity: where the author came from and which desk
+  // view they were in. Allowlisted; anything else falls back to the desk.
+  const ctx = parseContinuity(query);
 
   let page: DeliberationPage | null;
   try {
@@ -78,18 +96,67 @@ export default async function DeliberationPageRoute({
   const { author, book, finding, deliberation } = page;
   const bookPath = `/workspace/authors/${author.slug}/books/${book.slug}`;
   const findingsPath = `${bookPath}/findings`;
-  const pagePath = `${findingsPath}/${finding.id}/deliberation`;
+  const memoPath = `${findingsPath}/${finding.id}/deliberation`;
+  // Forms return here with the same continuity, so nothing is lost by
+  // saving, adopting, implementing, or dispositioning.
+  const pagePath = `${memoPath}${continuityQuery({ from: ctx.from, status: ctx.status })}`;
+  const paths = returnPaths({
+    bookPath,
+    findingId: finding.id,
+    from: ctx.from,
+    status: ctx.status,
+    chapterSlug: finding.chapterSlug,
+    here: "deliberation",
+  });
 
   const editable = !deliberation || deliberation.status === "draft";
+  const settled =
+    deliberation !== null &&
+    (deliberation.status === "adopted" ||
+      deliberation.status === "implemented");
+
+  // Continuation reads the desk's own order — the same list the Findings
+  // page renders — so "next" is exactly what the author would reach by
+  // reading down the Open view. Nothing here is prioritized.
+  let nextOpen: { id: string; title: string; chapterTitle: string | null } | null =
+    null;
+  let openRemaining = 0;
+  if (settled) {
+    try {
+      const room = await getFindingsRoom(author.slug, book.slug);
+      if (room) {
+        openRemaining = room.openCount;
+        const next = nextOpenFinding(room.findings, finding.id);
+        nextOpen = next
+          ? { id: next.id, title: next.title, chapterTitle: next.chapterTitle }
+          : null;
+      }
+    } catch (roomError) {
+      console.error("[deliberations] continuation lookup failed", roomError);
+    }
+  }
+
   const locale = await getLocale();
   const t = await getTranslations("deliberation.page");
   const tForm = await getTranslations("deliberation.form");
   const tFindings = await getTranslations("findings");
+  const tContinue = await getTranslations("findings.continue");
+  const tList = await getTranslations("findings.list");
   const tRoom = await getTranslations("memory.documentRoom");
   const tWriting = await getTranslations("manuscript.writingRoom");
   const tStatus = await getTranslations("status");
   const tCommon = await getTranslations("common");
   const tNav = await getTranslations("navigation");
+
+  const quietLink =
+    "font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline";
+  // Disposition acts done from this memo fail with findings.errors codes;
+  // everything else here speaks deliberation.errors. One note, one namespace.
+  const tFindingsErrors = await getTranslations("findings.errors");
+  const messageNamespace =
+    message && tFindingsErrors.has(message.code)
+      ? "findings.errors"
+      : "deliberation.errors";
 
   return (
     <WorkspaceFrame
@@ -98,7 +165,7 @@ export default async function DeliberationPageRoute({
         { href: "/workspace", label: tNav("workspace") },
         { href: `/workspace/authors/${author.slug}`, label: author.full_name },
         { href: bookPath, label: book.title },
-        { href: findingsPath, label: tFindings("page.title") },
+        { href: paths.findings, label: tFindings("page.title") },
       ]}
     >
       <p className="eyebrow">{book.title}</p>
@@ -109,17 +176,27 @@ export default async function DeliberationPageRoute({
         {t("intro")}
       </p>
 
-      <div className="mt-4">
+      <div className="mt-4 space-y-3">
         <ActionMessage
           code={message?.code}
           params={message?.params}
-          namespace="deliberation.errors"
+          namespace={messageNamespace}
         />
         {query.saved === "1" ? (
           <p className="font-sans text-sm text-ink-soft">
             {tRoom("draftSaved")}
           </p>
         ) : null}
+        <ActionNotice
+          code={notice?.code}
+          params={notice?.params}
+          namespace="deliberation.notices"
+        />
+        <ActionNotice
+          code={notice?.code}
+          params={notice?.params}
+          namespace="findings.notices"
+        />
       </div>
 
       {/* The prompt: the originating finding, immutable, quoted. */}
@@ -140,10 +217,10 @@ export default async function DeliberationPageRoute({
           {finding.explanation}
         </p>
         <p className="mt-3 font-sans text-xs text-ink-faint">
-          {finding.chapterTitle && finding.chapterSlug ? (
+          {finding.chapterTitle && paths.room ? (
             <>
               <Link
-                href={`${bookPath}/chapters/${finding.chapterSlug}?finding=${finding.id}`}
+                href={paths.room}
                 className="underline-offset-4 hover:text-oxblood hover:underline"
               >
                 {finding.chapterTitle}
@@ -155,6 +232,10 @@ export default async function DeliberationPageRoute({
           ) : (
             tFindings("form.wholeManuscript")
           )}
+          {" · "}
+          {tContinue("findingStanding", {
+            status: tStatus(`finding.${finding.status}`),
+          })}
         </p>
       </div>
 
@@ -206,10 +287,7 @@ export default async function DeliberationPageRoute({
               <PrimaryButton formAction={adoptJudgment}>
                 {tForm("adopt")}
               </PrimaryButton>
-              <Link
-                href={findingsPath}
-                className="font-sans text-xs text-ink-soft underline-offset-4 hover:text-oxblood hover:underline"
-              >
+              <Link href={primaryReturn(paths)} className={quietLink}>
                 {tCommon("cancel")}
               </Link>
             </div>
@@ -224,7 +302,7 @@ export default async function DeliberationPageRoute({
                 name="deliberation_id"
                 value={deliberation.id}
               />
-              <input type="hidden" name="return_path" value={findingsPath} />
+              <input type="hidden" name="return_path" value={paths.findings} />
               <button
                 type="submit"
                 className="font-sans text-xs text-ink-faint underline-offset-4 hover:text-oxblood hover:underline"
@@ -317,6 +395,110 @@ export default async function DeliberationPageRoute({
             </form>
           ) : null}
         </article>
+      ) : null}
+
+      {/* Continuation — after the judgment stands: where the loop goes
+          next. Every line is a link to an existing surface or the same
+          governed act the desk offers; nothing here is required. */}
+      {settled ? (
+        <section className="rule mt-12 max-w-prose pt-5">
+          <h2 className="eyebrow">{tContinue("heading")}</h2>
+
+          {finding.status === "open" ? (
+            <form
+              action={resolveFinding}
+              className="mt-5 flex max-w-md flex-wrap items-end gap-x-6 gap-y-3"
+            >
+              <input type="hidden" name="finding_id" value={finding.id} />
+              <input
+                type="hidden"
+                name="chapter_id"
+                value={finding.chapterId ?? ""}
+              />
+              <input type="hidden" name="findings_path" value={pagePath} />
+              <div className="min-w-56 flex-1">
+                <label htmlFor="disposition-note" className="eyebrow block">
+                  {tContinue("dispositionHeading")} ·{" "}
+                  <span className="normal-case">
+                    {tWriting("noteLabel")} {tWriting("noteOptional")}
+                  </span>
+                </label>
+                <input
+                  id="disposition-note"
+                  name="note"
+                  type="text"
+                  className="w-full border-b border-rule bg-transparent py-1.5 font-serif text-base text-ink placeholder:text-ink-faint focus:border-oxblood focus:outline-none"
+                />
+              </div>
+              <span className="flex items-baseline gap-5">
+                <PrimaryButton className="px-4 py-2 text-xs">
+                  {tList("resolve")}
+                </PrimaryButton>
+                <QuietButton
+                  formAction={setAsideFinding}
+                  className="px-4 py-2 text-xs"
+                >
+                  {tStatus("finding.dismissed")}
+                </QuietButton>
+              </span>
+            </form>
+          ) : null}
+
+          <ul className="mt-5 space-y-2 font-sans text-xs">
+            {paths.room && finding.chapterTitle ? (
+              <li>
+                <ActionLink href={paths.room}>
+                  {tContinue("reviseChapterNamed", {
+                    chapter: finding.chapterTitle,
+                  })}
+                </ActionLink>
+              </li>
+            ) : (
+              <li className="text-ink-soft">
+                <p>{tContinue("manuscriptWideDestinations")}</p>
+                <p className="mt-1.5 flex flex-wrap gap-x-6">
+                  <ActionLink href={`${bookPath}/manuscript`}>
+                    {tContinue("openReadingCopy")}
+                  </ActionLink>
+                  <ActionLink href={`${bookPath}/chapters`}>
+                    {tContinue("openManuscript")}
+                  </ActionLink>
+                </p>
+              </li>
+            )}
+            {paths.primary === "chapter" && paths.room ? (
+              <li>
+                <Link href={paths.room} className={quietLink}>
+                  {tContinue("returnChapter")}
+                </Link>
+              </li>
+            ) : null}
+            <li>
+              <Link href={paths.findings} className={quietLink}>
+                {tContinue("returnFindings")}
+              </Link>
+            </li>
+            <li>
+              {nextOpen ? (
+                <Link
+                  href={`${findingsPath}#${findingAnchor(nextOpen.id)}`}
+                  className={quietLink}
+                >
+                  {nextOpen.chapterTitle
+                    ? tContinue("nextOpenChapter", {
+                        title: nextOpen.title,
+                        chapter: nextOpen.chapterTitle,
+                      })
+                    : tContinue("nextOpenManuscript", { title: nextOpen.title })}
+                </Link>
+              ) : (
+                <Link href={findingsPath} className={quietLink}>
+                  {tContinue("returnFindingsRemaining", { count: openRemaining })}
+                </Link>
+              )}
+            </li>
+          </ul>
+        </section>
       ) : null}
     </WorkspaceFrame>
   );
