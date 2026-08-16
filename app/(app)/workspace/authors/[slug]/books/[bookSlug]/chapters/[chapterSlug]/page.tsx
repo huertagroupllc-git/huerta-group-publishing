@@ -452,15 +452,19 @@ export default async function ChapterRoomPage({
                 </form>
               ) : null}
 
-              {/* Return and continuation — where the thread leads. */}
+              {/* Return and continuation — where the thread leads. When the
+                  working set is exhausted, the remaining-count return IS the
+                  return to Findings, so the plain one steps aside. */}
               {paths ? (
                 <p className="mt-4 flex flex-wrap gap-x-6 gap-y-1 font-sans text-xs text-ink-soft">
-                  <Link href={primaryReturn(paths)} className={quietLink}>
-                    {paths.primary === "deliberation"
-                      ? tContinue("returnDeliberation")
-                      : tContinue("returnFindings")}
-                  </Link>
-                  {paths.primary !== "findings" ? (
+                  {paths.primary === "deliberation" ? (
+                    <Link href={primaryReturn(paths)} className={quietLink}>
+                      {tContinue("returnDeliberation")}
+                    </Link>
+                  ) : null}
+                  {revisionBrief.status === "open" ||
+                  nextInChapter ||
+                  nextOnDesk ? (
                     <Link href={paths.findings} className={quietLink}>
                       {tContinue("returnFindings")}
                     </Link>
@@ -497,7 +501,7 @@ export default async function ChapterRoomPage({
                             })}
                       </Link>
                     ) : (
-                      <Link href={findingsPath} className={quietLink}>
+                      <Link href={paths.findings} className={quietLink}>
                         {tContinue("returnFindingsRemaining", {
                           count: openRemaining,
                         })}

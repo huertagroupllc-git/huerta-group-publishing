@@ -473,30 +473,38 @@ export default async function DeliberationPageRoute({
                 </Link>
               </li>
             ) : null}
-            <li>
-              <Link href={paths.findings} className={quietLink}>
-                {tContinue("returnFindings")}
-              </Link>
-            </li>
-            <li>
-              {nextOpen ? (
-                <Link
-                  href={`${findingsPath}#${findingAnchor(nextOpen.id)}`}
-                  className={quietLink}
-                >
-                  {nextOpen.chapterTitle
-                    ? tContinue("nextOpenChapter", {
-                        title: nextOpen.title,
-                        chapter: nextOpen.chapterTitle,
-                      })
-                    : tContinue("nextOpenManuscript", { title: nextOpen.title })}
-                </Link>
-              ) : (
-                <Link href={findingsPath} className={quietLink}>
+            {/* At the end of the working set the remaining-count return
+                IS the return to Findings — one line, not two. */}
+            {nextOpen ? (
+              <>
+                <li>
+                  <Link href={paths.findings} className={quietLink}>
+                    {tContinue("returnFindings")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href={`${findingsPath}#${findingAnchor(nextOpen.id)}`}
+                    className={quietLink}
+                  >
+                    {nextOpen.chapterTitle
+                      ? tContinue("nextOpenChapter", {
+                          title: nextOpen.title,
+                          chapter: nextOpen.chapterTitle,
+                        })
+                      : tContinue("nextOpenManuscript", {
+                          title: nextOpen.title,
+                        })}
+                  </Link>
+                </li>
+              </>
+            ) : (
+              <li>
+                <Link href={paths.findings} className={quietLink}>
                   {tContinue("returnFindingsRemaining", { count: openRemaining })}
                 </Link>
-              )}
-            </li>
+              </li>
+            )}
           </ul>
         </section>
       ) : null}
