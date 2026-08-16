@@ -36,22 +36,46 @@ export function GlossaryDialog({
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  // Whoever opened the Glossary gets focus back when it closes — stated
+  // explicitly, not left to browsers that don't focus buttons on click.
+  const openerRef = useRef<HTMLElement | null>(null);
 
-  const open = useCallback((term?: EditorialTermId | null) => {
-    const dialog = dialogRef.current;
-    if (!dialog || dialog.open) {
-      if (dialog && term) focusEntry(term);
-      return;
-    }
-    dialog.showModal();
-    if (term) focusEntry(term);
-    else titleRef.current?.focus();
+  const open = useCallback(
+    (term?: EditorialTermId | null, opener?: HTMLElement | null) => {
+      const dialog = dialogRef.current;
+      if (!dialog || dialog.open) {
+        if (dialog && term) focusEntry(term);
+        return;
+      }
+      openerRef.current =
+        opener ??
+        (document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null) ??
+        triggerRef.current;
+      dialog.showModal();
+      if (term) focusEntry(term);
+      else titleRef.current?.focus();
+    },
+    [],
+  );
+
+  const restoreFocus = useCallback(() => {
+    const target =
+      openerRef.current && openerRef.current.isConnected
+        ? openerRef.current
+        : triggerRef.current;
+    target?.focus();
+    openerRef.current = null;
   }, []);
 
   useEffect(() => {
     const onOpen = (e: Event) => {
-      const detail = (e as CustomEvent<{ term?: EditorialTermId }>).detail;
-      open(detail?.term ?? null);
+      const detail = (
+        e as CustomEvent<{ term?: EditorialTermId; opener?: HTMLElement }>
+      ).detail;
+      open(detail?.term ?? null, detail?.opener ?? null);
     };
     window.addEventListener(OPEN_GLOSSARY_EVENT, onOpen);
     return () => window.removeEventListener(OPEN_GLOSSARY_EVENT, onOpen);
@@ -60,8 +84,9 @@ export function GlossaryDialog({
   return (
     <>
       <button
+        ref={triggerRef}
         type="button"
-        onClick={() => open(null)}
+        onClick={(e) => open(null, e.currentTarget)}
         aria-haspopup="dialog"
         aria-controls={GLOSSARY_DIALOG_ID}
         aria-label={ui.openAria}
@@ -75,6 +100,7 @@ export function GlossaryDialog({
         ref={dialogRef}
         aria-labelledby={`${GLOSSARY_DIALOG_ID}-title`}
         className="m-auto w-[calc(100vw-2rem)] max-w-2xl bg-paper p-0 text-ink shadow-none backdrop:bg-ink/40"
+        onClose={restoreFocus}
         onClick={(e) => {
           // Light dismiss: a click on the backdrop (the dialog element
           // itself, outside its content box) closes it.
@@ -188,9 +214,11 @@ export function GlossaryLink({
       type="button"
       aria-haspopup="dialog"
       aria-controls={GLOSSARY_DIALOG_ID}
-      onClick={() =>
+      onClick={(e) =>
         window.dispatchEvent(
-          new CustomEvent(OPEN_GLOSSARY_EVENT, { detail: { term } }),
+          new CustomEvent(OPEN_GLOSSARY_EVENT, {
+            detail: { term, opener: e.currentTarget },
+          }),
         )
       }
       className="font-sans text-xs text-oxblood underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
