@@ -15,6 +15,7 @@ import {
   manifestationForFormat,
 } from "@/lib/publication/edition";
 import type { CandidateRecord } from "@/lib/publication/types";
+import { BIBLIOGRAPHIC_VERSIONS_OF_RECORD } from "@/lib/publication/metadata-desk";
 
 /**
  * Consumption selection (Consumption blueprint §6, §10–§11, §25):
@@ -70,6 +71,7 @@ export interface ResolvedConsumption {
 
 export type ConsumptionFailure =
   | "metadata_version_required"
+  | "metadata_read_failed"
   | "metadata_reason_required"
   | "isbn_not_eligible";
 
@@ -89,13 +91,21 @@ export async function resolveConsumption(
   | { ok: true; selection: ResolvedConsumption }
   | { ok: false; code: ConsumptionFailure }
 > {
-  const { data: record } = await supabase
+  // The versions of the record, embedded through the one disambiguated
+  // path (two relationships exist between the tables; see metadata-desk).
+  const { data: record, error } = await supabase
     .from("bibliographic_records")
     .select(
-      "id, active_version_id, bibliographic_versions(id, record_id, version_number, status, derived_title, derived_subtitle, derived_author_display, derived_language, publication_description, short_description, marketing_description, keywords, categories, copyright_year, copyright_line, publication_notes, bibliographic_contributors(position, display_name, role, derived))",
+      `id, active_version_id, ${BIBLIOGRAPHIC_VERSIONS_OF_RECORD}(id, record_id, version_number, status, derived_title, derived_subtitle, derived_author_display, derived_language, publication_description, short_description, marketing_description, keywords, categories, copyright_year, copyright_line, publication_notes, bibliographic_contributors(position, display_name, role, derived))`,
     )
     .eq("book_id", bookId)
     .maybeSingle();
+  // A failed read is recorded as its own failure — never mistaken for
+  // "no finalized version exists".
+  if (error) {
+    console.error("[publication] bibliographic record read failed", error);
+    return { ok: false, code: "metadata_read_failed" };
+  }
   if (!record) return { ok: false, code: "metadata_version_required" };
 
   const versions = (record.bibliographic_versions ?? []) as VersionRow[];

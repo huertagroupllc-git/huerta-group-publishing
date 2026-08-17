@@ -146,6 +146,22 @@ normalized, disposition, external facts, evidence, missing-evidence
 flag) with the record form and forward-only correction. Both locales
 carry the full surface with exact key parity.
 
+## Read path (production-verification defect fix, August 2026)
+
+`bibliographic_records` and `bibliographic_versions` are related twice
+(versions belong to a record; a record points at its active version), so
+an unhinted `bibliographic_versions(...)` embed from the record is
+ambiguous and PostgREST refuses it (PGRST201). The Metadata page's read
+swallowed that refusal and rendered "No bibliographic record exists yet"
+beside a truthful `draft_already_open` while The Conversational Mind's
+governed Version 1 draft stood in the database. Every read of a record's
+versions now goes through one pinned path,
+`bibliographic_versions!bibliographic_versions_record_id_fkey`
+(`lib/publication/metadata-desk.ts`, shared by the desk read model and
+consumption selection), a failed read surfaces instead of passing as an
+empty record, and the read model is pure and tested
+(`metadata-desk.test.ts`). No schema, lifecycle, or authority change.
+
 ## Intentional limitations
 
 - Contributor entry is bounded to three authored rows per save in the
