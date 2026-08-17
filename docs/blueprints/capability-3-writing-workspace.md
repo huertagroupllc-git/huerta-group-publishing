@@ -2,7 +2,7 @@
 
 Huerta Group Publishing · Author Operating System
 Status: **complete** — implemented and accepted July 2026 (v0.3.0).
-Amendments 1–7 are incorporated and marked below; a retrospective
+Amendments 1–8 are incorporated and marked below; a retrospective
 closes the document.
 
 Governing canon: all four constitutions (including Principles XIV and
@@ -274,6 +274,12 @@ author set like a title page, then Parts as section breaks and chapters
 in sequence, all `.doc-prose`, one continuous scroll. Unwritten
 chapters simply do not appear; a fully unwritten manuscript shows the
 title page and a single teaching line. No edit affordances of any kind.
+*(Amendment 8, August 2026 — Founder Validation Cycle 001: the Reading
+Copy is read one chapter at a time — Contents, previous/next chapter,
+chapter-level progress, a browser-local place, three bounded text
+sizes — still assembled read-only from active versions with no state
+of its own; see `docs/operations/reading-copy.md`. Desktop page
+simulation is deliberately not part of it.)*
 
 **Empty states** — the Library with no chapters teaches: "The
 manuscript begins with its first chapter. Your Master Outline already

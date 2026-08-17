@@ -427,7 +427,23 @@
     },
     "readingCopy": {
       "title": "Copia de Lectura",
-      "emptyManuscript": "El manuscrito comienza con su primer capítulo."
+      "emptyManuscript": "El manuscrito comienza con su primer capítulo.",
+      "contents": "Índice",
+      "contentsAria": "Abrir el índice del libro",
+      "contentsTitle": "Índice",
+      "close": "Cerrar",
+      "current": "estás aquí",
+      "textSize": "Tamaño del texto",
+      "textSmaller": "Más pequeño",
+      "textDefault": "Predeterminado",
+      "textLarger": "Más grande",
+      "returnToWorkshop": "Volver al Taller",
+      "readingControls": "Controles de lectura",
+      "chapterNavigation": "Navegación por capítulos",
+      "previousChapter": "Capítulo anterior",
+      "nextChapter": "Capítulo siguiente",
+      "endOfManuscript": "Aquí termina el manuscrito tal como está.",
+      "progress": "{position} de {total}"
     },
     "progress": {
       "chapters": "{count, plural, one {# capítulo} other {# capítulos}}",

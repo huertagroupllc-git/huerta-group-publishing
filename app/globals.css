@@ -241,4 +241,70 @@
     overflow-x: auto;
     margin: 1.25rem 0;
   }
+
+  /* --- Reading Copy (chapter-bounded reading, Founder Validation 001) ---
+     Sustained-reading typography layered over .doc-prose: a slightly
+     larger, more open setting at a book measure, quiet section breaks,
+     and paragraphs with room to breathe. Three bounded text sizes are
+     applied as a data attribute on the reading frame; the default step
+     is the rule below. Web reading only — print pagination and EPUB
+     typesetting are governed elsewhere and never by these rules. */
+  .reading-prose {
+    font-size: 1.125rem;
+    line-height: 1.7;
+    max-width: 68ch;
+    text-wrap: pretty;
+  }
+  @media (min-width: 640px) {
+    .reading-prose {
+      font-size: 1.1875rem;
+      line-height: 1.72;
+    }
+  }
+  .reading-prose p {
+    margin-top: 0;
+    margin-bottom: 1.05em;
+  }
+  .reading-prose h2,
+  .reading-prose h3,
+  .reading-prose h4 {
+    margin-top: 2.25em;
+    margin-bottom: 0.9em;
+    text-wrap: balance;
+  }
+  .reading-prose blockquote {
+    margin: 1.5em 0 1.5em 0.5em;
+  }
+  /* A section break is a typographic pause, not a rule across the page. */
+  .reading-prose hr {
+    border: 0;
+    border-top: 0;
+    width: auto;
+    margin: 2.25em 0;
+    text-align: center;
+    height: auto;
+  }
+  .reading-prose hr::after {
+    content: "·  ·  ·";
+    letter-spacing: 0.35em;
+    color: var(--color-ink-faint);
+    font-family: var(--font-serif);
+  }
+  [data-reading-scale="s"] .reading-prose {
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+  [data-reading-scale="l"] .reading-prose {
+    font-size: 1.3125rem;
+    line-height: 1.75;
+    max-width: 66ch;
+  }
+  @media (min-width: 640px) {
+    [data-reading-scale="s"] .reading-prose {
+      font-size: 1.0625rem;
+    }
+    [data-reading-scale="l"] .reading-prose {
+      font-size: 1.375rem;
+    }
+  }
 }

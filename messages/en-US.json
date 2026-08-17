@@ -427,7 +427,23 @@
     },
     "readingCopy": {
       "title": "Reading Copy",
-      "emptyManuscript": "The manuscript begins with its first chapter."
+      "emptyManuscript": "The manuscript begins with its first chapter.",
+      "contents": "Contents",
+      "contentsAria": "Open the contents of the book",
+      "contentsTitle": "Contents",
+      "close": "Close",
+      "current": "you are here",
+      "textSize": "Text size",
+      "textSmaller": "Smaller",
+      "textDefault": "Default",
+      "textLarger": "Larger",
+      "returnToWorkshop": "Return to the Workshop",
+      "readingControls": "Reading controls",
+      "chapterNavigation": "Chapter navigation",
+      "previousChapter": "Previous chapter",
+      "nextChapter": "Next chapter",
+      "endOfManuscript": "This is the end of the manuscript as it stands.",
+      "progress": "{position} of {total}"
     },
     "progress": {
       "chapters": "{count, plural, one {# chapter} other {# chapters}}",
