@@ -250,10 +250,17 @@
      is the rule below. Web reading only — print pagination and EPUB
      typesetting are governed elsewhere and never by these rules. */
   .reading-prose {
+    /* The reading face is named directly (the next/font variable on
+       <body>): the theme aliases --font-serif/--font-sans are inline
+       tokens and do not exist at runtime for hand-written rules. */
+    font-family: var(--font-newsreader), Georgia, serif;
     font-size: 1.125rem;
     line-height: 1.7;
     max-width: 68ch;
     text-wrap: pretty;
+  }
+  [data-manuscript-font="sans"] .reading-prose {
+    font-family: var(--font-inter), system-ui, sans-serif;
   }
   @media (min-width: 640px) {
     .reading-prose {
@@ -288,7 +295,7 @@
     content: "·  ·  ·";
     letter-spacing: 0.35em;
     color: var(--color-ink-faint);
-    font-family: var(--font-serif);
+    font-family: var(--font-newsreader), Georgia, serif;
   }
   [data-reading-scale="s"] .reading-prose {
     font-size: 1rem;

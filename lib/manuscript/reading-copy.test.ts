@@ -179,6 +179,13 @@ describe("text size — three bounded steps, local only", () => {
     expect(css).toMatch(/\[data-reading-scale="l"\] \.reading-prose/);
     expect(css).not.toMatch(/column-count|column-width|scroll-snap-type/);
   });
+
+  it("names the reading face by its runtime font variable (the theme aliases are inline-only)", () => {
+    const css = readFileSync(new URL("../../app/globals.css", import.meta.url), "utf8");
+    const rule = css.match(/\.reading-prose \{[^}]*\}/)?.[0] ?? "";
+    expect(rule).toMatch(/font-family:\s*var\(--font-newsreader\)/);
+    expect(css).toMatch(/\[data-manuscript-font="sans"\] \.reading-prose \{[^}]*var\(--font-inter\)/);
+  });
 });
 
 describe("Reading Copy copy — both catalogs, book language", () => {

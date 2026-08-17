@@ -289,7 +289,7 @@ export default async function ReadingCopyPage({
             <p className="mt-10 text-center">
               <Link
                 href={`${bookPath}/findings/new?chapter=${chapter.slug}&version=${chapter.versionId}`}
-                className="font-sans text-[0.6875rem] text-ink-faint underline-offset-4 hover:text-oxblood hover:underline focus-visible:text-oxblood focus-visible:underline focus-visible:outline-none"
+                className="inline-flex min-h-10 items-center font-sans text-[0.6875rem] text-ink-faint underline-offset-4 hover:text-oxblood hover:underline focus-visible:text-oxblood focus-visible:underline focus-visible:outline-none"
               >
                 {tChapter("raiseFinding")}
               </Link>

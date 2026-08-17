@@ -34,7 +34,14 @@ Preview (a candidate's frozen composition) is a different route.
   (1.125 rem on small screens) at a 68 ch measure, spaced paragraphs,
   balanced headings, section breaks as a typographic pause ("· · ·").
   The author's manuscript-display settings still apply (font, writing
-  measure), as before.
+  measure), as before. The face is named by its runtime variable
+  (`--font-newsreader`; `--font-inter` under the sans setting) because
+  the theme aliases `--font-serif` / `--font-sans` / `--font-display`
+  are `@theme inline` tokens that do not exist as custom properties at
+  runtime — a pre-existing repository-wide defect (hand-written rules
+  such as `body`, `.eyebrow`, `.doc-prose` fall back to the system
+  sans) that is corrected here only for the Reading Copy and reported
+  for its own authorization.
 - **Chapter close**: progress again, then "Previous chapter" / "Next
   chapter" with the neighbouring titles (absent at the ends; the last
   chapter says the manuscript ends here as it stands), then the existing
